@@ -1,5 +1,7 @@
 package com.podcrash.api.permissions;
 
+import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.bukkit.permissions.Permissible;
 
 import java.util.Arrays;
@@ -31,7 +33,9 @@ public enum Perm {
     public boolean has(Permissible p) {
         return p.hasPermission(this.getPermName());
     }
-
+    public boolean has(CommandSender s) {
+        return s.hasPermission(this.getPermName());
+    }
 
     public static Perm getBy(String name) {
         for(Perm perm : Perm.values())

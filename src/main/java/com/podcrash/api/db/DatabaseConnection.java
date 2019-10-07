@@ -7,14 +7,18 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class DatabaseConnection {
-    private static final String HOST = System.getenv("PSQL_HOST");
-    private static final String USER = System.getenv("PSQL_USER");
-    private static final String PASSWORD = System.getenv("PSQL_PASS");
-    private static final String DATABASE = System.getenv("PSQL_DBNAME");
-    private static final int PORT = Integer.parseInt(System.getenv("PSQL_PORT"));
-
-    private static final HikariDataSource source;
+    private static HikariDataSource source = null;
     static {
+        setUp();
+    }
+
+    private static void setUp() {
+        final String HOST = System.getenv("PSQL_HOST");
+        final String USER = System.getenv("PSQL_USER");
+        final String PASSWORD = System.getenv("PSQL_PASS");
+        final String DATABASE = System.getenv("PSQL_DBNAME");
+        final int PORT = Integer.parseInt(System.getenv("PSQL_PORT"));
+
         try {
             Class.forName("org.postgresql.Driver");
             Class.forName("org.postgresql.ds.PGSimpleDataSource");
@@ -37,9 +41,14 @@ public class DatabaseConnection {
         source = new HikariDataSource(config);
     }
     public static Connection makeConnection() throws SQLException {
+        if(source == null) setUp();
         return source.getConnection();
     }
 
+    public static void close() {
+        source.close();
+        source = null;
+    }
     private DatabaseConnection() {
 
     }

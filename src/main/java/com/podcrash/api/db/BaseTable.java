@@ -15,6 +15,7 @@ import static org.jooq.impl.DSL.using;
 
 public abstract class BaseTable implements ITable {
     private String name;
+    protected boolean test;
     private static Map<String, BaseTable> map = new HashMap<>();
     private Connection connection;
 
@@ -28,6 +29,7 @@ public abstract class BaseTable implements ITable {
         return map.values();
     }
     public BaseTable(String tableName, boolean test) {
+        this.test = test;
         this.name = test ? tableName + "TEST" : tableName;
         System.out.println("Creating the SQLTable: " + name);
 

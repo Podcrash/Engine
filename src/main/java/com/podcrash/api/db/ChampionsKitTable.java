@@ -12,17 +12,15 @@ import org.jooq.impl.SQLDataType;
 import java.util.UUID;
 
 public class ChampionsKitTable extends BaseTable implements IPlayerDB {
-    private PlayerTable players;
     private final Kits KITS;
     public ChampionsKitTable(boolean test) {
         super("kits", test);
         this.KITS = Tables.KITS.rename(getName());
-        this.players = TableOrganizer.getTable(DataTableType.PLAYERS, test);
     }
 
     @Override
     public PlayerTable getPlayerTable() {
-        return players;
+        return TableOrganizer.getTable(DataTableType.PLAYERS, test);
     }
 
     @Override
@@ -44,7 +42,7 @@ public class ChampionsKitTable extends BaseTable implements IPlayerDB {
         step.constraints(
             DSL.constraint(getConstraintPrefix() + "foreign_player_id")
                 .foreignKey("player_id")
-                .references(players.getName(), "_id"),
+                .references(getPlayerTable().getName(), "_id"),
             DSL.constraint(getConstraintPrefix() + "player_primary").primaryKey("player_id", "class", "build_id"),
             DSL.constraint(getConstraintPrefix() + "limit_build_id").check(KITS.BUILD_ID.lt(5)));
         step.execute();

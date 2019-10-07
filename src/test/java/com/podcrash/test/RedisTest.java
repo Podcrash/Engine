@@ -16,8 +16,8 @@ public class RedisTest {
 
         Assertions.assertNotNull(Communicator.getCode(), "The lobby code is null! Expected not!");
 
-        Communicator.getMap().put("TEST", "TEST123");
-        Assertions.assertEquals("TEST123", Communicator.getMap().get("TEST"), "redis failed");
+        Communicator.getLobbyMap().put("TEST", "TEST123");
+        Assertions.assertEquals("TEST123", Communicator.getLobbyMap().get("TEST"), "redis failed");
 
         Communicator.shutdown();
     }

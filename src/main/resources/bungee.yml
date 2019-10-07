@@ -1,0 +1,4 @@
+name: PodcrashAPI
+main: com.podcrash.api.plugin.PodcrashBungee
+version: 1.0
+author: RainDance

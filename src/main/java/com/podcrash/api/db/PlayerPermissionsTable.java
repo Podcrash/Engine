@@ -14,17 +14,15 @@ import java.util.List;
 import java.util.UUID;
 
 public class PlayerPermissionsTable extends BaseTable implements IPlayerDB {
-    private PlayerTable players;
     private Permissions PERMISSIONS;
     public PlayerPermissionsTable(boolean test) {
         super("permissions", test);
         this.PERMISSIONS = Tables.PERMISSIONS.rename(getName());
-        this.players = TableOrganizer.getTable(DataTableType.PLAYERS, test);
     }
 
     @Override
     public PlayerTable getPlayerTable() {
-        return players;
+        return TableOrganizer.getTable(DataTableType.PLAYERS, test);
     }
 
     @Override
@@ -37,7 +35,7 @@ public class PlayerPermissionsTable extends BaseTable implements IPlayerDB {
                 DSL.constraint(getConstraintPrefix() + "unique").unique("player_id", "permission_id"),
                 DSL.constraint(getConstraintPrefix() + "foreign_player_id")
                     .foreignKey("player_id")
-                    .references(players.getName(), "_id"))
+                    .references(getPlayerTable().getName(), "_id"))
             .execute();
 
         getContext().createIndexIfNotExists(getConstraintPrefix() + "player_id_index").on(getName(), "player_id")
@@ -59,13 +57,14 @@ public class PlayerPermissionsTable extends BaseTable implements IPlayerDB {
     }
 
     public boolean hasRole(UUID uuid, Perm role) {
+        int roleID = role.getDbId();
         Cursor<Record1<Integer>> cursor = getContext().select(PERMISSIONS.PERMISSION_ID)
                 .from(PERMISSIONS)
                 .where(PERMISSIONS.PLAYER_ID.eq(getID(uuid)))
                 .fetchLazy();
         while(cursor.hasNext()) {
             Record id = cursor.fetchNext();
-            if(Perm.getBy(id.into(Integer.class)) == role) {
+            if(id.into(Integer.class) == roleID) {
                 cursor.close();
                 return true;
             }
