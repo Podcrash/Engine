@@ -37,7 +37,7 @@ shadowJar {
 dependencies {
     compileOnly fileTree('../libs')
 
-    implementation 'com.comphenix.protocol:ProtocolLib:4.4.0'
+    //implementation 'com.comphenix.protocol:ProtocolLib:4.4.0'
 
     implementation('com.zaxxer:HikariCP:3.3.1')
     implementation('org.jooq:jooq:3.12.1')

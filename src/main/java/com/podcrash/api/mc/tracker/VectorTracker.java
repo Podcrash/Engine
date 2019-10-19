@@ -21,10 +21,29 @@ public final class VectorTracker implements IPlayerTrack<VectorCoordinate> {
     private JavaPlugin plugin;
     private PacketListener packetListener;
     private Map<String, List<VectorCoordinate>> lastVectors = new HashMap<>();
+
+    private List<VectorCoordinate> getCoordinates(Player player) {
+        return lastVectors.get(player.getName());
+    }
+
     @Override
     public VectorCoordinate get(Player player) {
-        List<VectorCoordinate> vectors = lastVectors.get(player.getName());
-        return vectors == null || vectors.size() == 0 ? new VectorCoordinate(player.getVelocity()) : vectors.get(vectors.size() - 1);
+        List<VectorCoordinate> vectors = getCoordinates(player);
+        return vectors == null || vectors.size() == 0 ? VectorCoordinate.zero() : vectors.get(vectors.size() - 1);
+    }
+
+    public VectorCoordinate getBefore(Player player, int time) {
+        long timeInMS = System.currentTimeMillis() - time;
+        List<VectorCoordinate> vectors = getCoordinates(player);
+
+        for(int i = vectors.size() - 1; i >= 0; i--) {
+            VectorCoordinate coordinate = vectors.get(i);
+            long currentTime = coordinate.getTime();
+            if(timeInMS > currentTime)
+                return coordinate;
+            if(timeInMS - 500L >= currentTime) break;
+        }
+        return null;
     }
 
     @Override
