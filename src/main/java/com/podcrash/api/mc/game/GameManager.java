@@ -241,7 +241,7 @@ public class GameManager {
         return game.getGameResources();
     }
     public static Scoreboard getScoreboard(Game game) {
-        return game.getGameScoreboard().getBukkitBoard();
+        return game.getGameScoreboard().getBoard();
     }
 
     private GameManager() {

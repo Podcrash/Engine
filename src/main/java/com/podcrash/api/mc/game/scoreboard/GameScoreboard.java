@@ -1,83 +1,98 @@
 package com.podcrash.api.mc.game.scoreboard;
 
 import com.podcrash.api.mc.game.GameType;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.ScoreboardManager;
+import com.podcrash.api.mc.scoreboard.CustomScoreboard;
 
-public abstract class GameScoreboard {
-    private final ScoreboardManager scoreboardManager;
-    private Scoreboard board;
-    private Objective objective;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * The Game Scoreboard.
+ *
+ * @author RainDance
+ * (edited by JJCunningCreeper)
+ */
+
+public abstract class GameScoreboard extends CustomScoreboard {
+
     private int gameId;
 
+    /**
+     * Constructor for the Game Scoreboard.
+     * @param gameId The Game ID.
+     * @param gtype The Game Type (Idk what this is).
+     */
     public GameScoreboard(int gameId, GameType gtype) {
         this.gameId = gameId;
-        scoreboardManager = Bukkit.getScoreboardManager();
     }
 
     /**
-     * Create a new bukkit board as well assign an objective.
-     * @return Bukkit scoreboard
+     * Create a game scoreboard with a name & mode string, as well as the following lines.
+     * Maximum 15 lines total (following_lines can only be of max 11 lines).
+     * @param name The game name (with formatting).
+     * @param mode The game mode (with formatting).
+     * @param lines List of lines to follow (Maximum 11).
      */
-    public Scoreboard createBoard() {
-        board = scoreboardManager.getNewScoreboard();
-        makeObjective();
-        return board;
+    public void createGameScoreboard(String name, String mode, List<String> lines) {
+        // Determine the size of the board by the number of lines. Maximum 15 lines total.
+        int size = 4 + lines.size();
+        if (size > 15) {
+            size = 15;
+        }
+        // Create the board.
+        createBoard(size);
+        // Create the final set of lines for the scoreboard.
+        List<String> result = createGameLines(name, mode, lines);
+        // Convert lines to scoreboard.
+        convertScoreboard(result);
     }
 
     /**
-     * Make a new objective
+     * Create a game scoreboard with a name & mode string, as well as the following lines.
+     * Maximum 15 lines total (following_lines can only be of max 11 lines).
+     * @param board_size The total size of the board (name + mode + following_lines). Minimum 4. Maximum 15.
+     * @param name The game name (with formatting).
+     * @param mode The game mode (with formatting).
+     * @param lines List of lines to follow (Maximum 11).
      */
-    public void makeObjective() {
-        Objective obj;
-        if((obj = board.getObjective(Integer.toString(gameId))) != null) obj.unregister();
-        objective = board.registerNewObjective(Integer.toString(gameId), "dummy");
-        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-        objective.setDisplayName(ChatColor.LIGHT_PURPLE + "Champions");
+    public void createGameScoreboard(int board_size, String name, String mode, List<String> lines) {
+        // Check the board size.
+        if (board_size < 4 || board_size > 15) {
+            board_size = 15;
+        }
+        createBoard(board_size);
+        // Create the final set of lines for the scoreboard.
+        List<String> result = createGameLines(name, mode, lines);
+        // Convert lines to scoreboard.
+        convertScoreboard(result);
     }
-
-    /**
-     * First time a scoreboard is created.
-     */
-    public abstract void setupScoreboard();
-
-    /**
-     * Used to turn the strings into a scoreboarda
-     * @param strings
-     */
-    public abstract void convertScoreboard(String[] strings);
 
     /**
      * If there are values to be changed, update them.
      */
     public abstract void update();
 
-    public Scoreboard getBoard() {
-        return board;
-    }
-
-    public void setScoreBoard(Player p) {
-        p.setScoreboard(this.board);
-    }
-
-    public ScoreboardManager getScoreboardManager() {
-        return scoreboardManager;
-    }
-
-    public Scoreboard getBukkitBoard() {
-        return board;
-    }
-
-    public Objective getObjective() {
-        return objective;
-    }
-
+    /**
+     * @return The Game ID.
+     */
     public int getGameId() {
         return this.gameId;
+    }
+
+    /**
+     * Given a name, mode and lines, create the final list of lines for the game scoreboard.
+     * @param name The game name.
+     * @param mode The game mode.
+     * @param lines The list of lines to follow.
+     * @return The final lines of the game scoreboard.
+     */
+    private List<String> createGameLines(String name, String mode, List<String> lines) {
+        List<String> result = new ArrayList<String>();
+        result.add("");
+        result.add(name);
+        result.add(mode);
+        result.add("");
+        result.addAll(lines);
+        return result;
     }
 }
