@@ -4,6 +4,8 @@ import com.podcrash.api.mc.game.scoreboard.GameScoreboard;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
+
 public class ScoreboardRepeater extends GameResource {
     private GameScoreboard scoreboard;
     private ScoreboardRepeater(int gameID, int ticks, int delayTicks) {
@@ -20,7 +22,7 @@ public class ScoreboardRepeater extends GameResource {
      * Remake the scoreboard and show it to the players
      */
     private void update() {
-        scoreboard.convertScoreboard(null);
+        scoreboard.convertScoreboard(new ArrayList<>());
         for (Player player : getGame().getPlayers()){
             player.setScoreboard(scoreboard.getBoard());
         }

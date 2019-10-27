@@ -8,6 +8,7 @@ import com.podcrash.api.mc.game.objects.objectives.CapturePoint;
 import org.bukkit.ChatColor;
 import org.bukkit.scoreboard.Score;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -68,7 +69,7 @@ public class DomScoreboard extends GameScoreboard {
 
     @Override
     public void setupScoreboard() {
-        convertScoreboard(null);
+        convertScoreboard(new ArrayList<String>());
     }
 
     /**
