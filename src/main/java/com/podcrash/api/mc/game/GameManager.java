@@ -48,8 +48,8 @@ public class GameManager {
         if(currentGame != null) throw new RuntimeException("Making more than 1 game is ill-advised");
         Validate.isTrue(game.getId() == gameID);
         gameID++;
-        game.create();
         currentGame = game;
+        game.create();
 
     }
     public static void setGameMap(String worldName) {
