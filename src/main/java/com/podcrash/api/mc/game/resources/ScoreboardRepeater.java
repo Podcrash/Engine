@@ -22,7 +22,6 @@ public class ScoreboardRepeater extends GameResource {
      * Remake the scoreboard and show it to the players
      */
     private void update() {
-        scoreboard.convertScoreboard(new ArrayList<>());
         for (Player player : getGame().getPlayers()){
             player.setScoreboard(scoreboard.getBoard());
         }

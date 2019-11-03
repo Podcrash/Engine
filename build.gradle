@@ -26,7 +26,7 @@ shadowJar {
         include (dependency("javax.cache:cache-api:1.0.0"))
         */
         exclude "spigot.jar"
-        exclude(dependency("com.comphenix.protocol:ProtocolLib:4.4.0"))
+        //exclude(dependency("com.comphenix.protocol:ProtocolLib:4.4.0"))
 
     }
 

@@ -5,6 +5,7 @@ import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.redis.Communicator;
 import org.redisson.api.RedissonClient;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
 public interface PodcrashPlugin {
@@ -28,6 +29,13 @@ public interface PodcrashPlugin {
     default void closeDBs() {
         Communicator.shutdown();
         DatabaseConnection.close();
+    }
+
+    default CompletableFuture<Void> enableWrap() {
+        return CompletableFuture.allOf(
+            Communicator.setup(getExecutorService(), this::redis),
+            CompletableFuture.runAsync(() -> TableOrganizer.createTables(false))
+        );
     }
 
 }

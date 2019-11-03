@@ -8,6 +8,7 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -125,6 +126,30 @@ public class CustomScoreboard {
         if (this.objective != null) {
             this.objective.unregister();
         }
+    }
+
+    /**
+     * Get all the lines from the scoreboard
+     * @see #getLine(int)
+     * @return the display lines as seen from the client
+     */
+    public List<String> getLines() {
+        List<String> entries = new ArrayList<>();
+        for(int i = 0; i < size; i++) {
+            entries.add(getLine(i));
+        }
+        return entries;
+    }
+
+    /**
+     * Get the prefix + suffix of a line on a scoreboard
+     * @param i team id
+     * @return the display line as seen from the client
+     */
+    public String getLine(int i) {
+        Team team = scoreboard.getTeam(Integer.toString(i));
+        String prefix = team.getPrefix();
+        return prefix + team.getSuffix();
     }
 
     /**

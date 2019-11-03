@@ -1,5 +1,7 @@
 package com.podcrash.api.mc.game.scoreboard;
 
+import com.podcrash.api.mc.game.Game;
+import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.GameType;
 import com.podcrash.api.mc.scoreboard.CustomScoreboard;
 
@@ -94,5 +96,9 @@ public abstract class GameScoreboard extends CustomScoreboard {
         result.add("");
         result.addAll(lines);
         return result;
+    }
+
+    protected Game getGame() {
+        return GameManager.getGame();
     }
 }

@@ -14,14 +14,15 @@ public final class SoundWrapper {
     public String getSoundName() {
         return soundName;
     }
-
     public float getVolume() {
         return volume;
     }
-
     public int getPitch() {
         return pitch;
     }
 
+    public boolean isValid() {
+        return !soundName.isEmpty();
+    }
 
 }

@@ -1,15 +1,14 @@
 package com.podcrash.api.mc.listeners;
 
 import com.abstractpackets.packetwrapper.WrapperPlayServerEntityStatus;
-import me.raindance.champions.Main;
-import me.raindance.champions.damage.DamageQueue;
-import me.raindance.champions.events.ApplyKitEvent;
-import me.raindance.champions.events.DamageApplyEvent;
-import me.raindance.champions.listeners.ListenerBase;
-import me.raindance.champions.listeners.PlayerJoinEventTest;
+import com.podcrash.api.mc.damage.DamageQueue;
+import com.podcrash.api.mc.events.DamageApplyEvent;
 import com.podcrash.api.mc.sound.SoundPlayer;
 import com.podcrash.api.mc.util.PacketUtil;
 import com.podcrash.api.mc.world.WorldManager;
+import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashPlugin;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -37,6 +36,7 @@ import java.util.List;
  * Prevent dumb things from happening
  */
 public class MapMaintainListener extends ListenerBase {
+    private final JavaPlugin plugin = Pluginizer.getSpigotPlugin();
     public MapMaintainListener(JavaPlugin plugin) {
         super(plugin);
     }
@@ -184,7 +184,7 @@ public class MapMaintainListener extends ListenerBase {
     public void die(PlayerDeathEvent event) {
         event.setDeathMessage(null);
         event.getDrops().clear();
-        Main.getInstance().getLogger().info("from MapMaintainListener#92: If you ever see this message, it's a bug");
+        Pluginizer.getSpigotPlugin().getLogger().info("from MapMaintainListener#184: If you ever see this message, it's a bug");
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -213,13 +213,6 @@ public class MapMaintainListener extends ListenerBase {
             event.setCancelled(true);
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void kit(ApplyKitEvent e) {
-        if(e.getChampionsPlayer().getPlayer().getWorld().getName().equals("world")) {
-            e.setKeepInventory(true);
-            e.getChampionsPlayer().getInventory().setItem(35, PlayerJoinEventTest.beacon);
-        }
-    }
     private boolean evaluate(World world) {
         return WorldManager.getInstance().getWorlds().contains(world.getName());
     }

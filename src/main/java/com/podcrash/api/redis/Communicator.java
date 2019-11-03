@@ -20,21 +20,26 @@ public class Communicator {
     }
     public static CompletableFuture<Void> setup(Executor executor, Consumer<RedissonClient> consumer) {
         return CompletableFuture.supplyAsync(() -> {
-            System.out.println("[Redis] Starting!");
-            Config config = new Config();
-            String[] creds = getCredentials();
-            System.out.println("[Redis] Credentials: " + creds[0] + " " + creds[1].replaceAll(".", "*"));
-            config.useSingleServer()
-                    .setAddress(creds[0])
-                    .setPassword(creds[1])
-                    .setConnectionMinimumIdleSize(1)
-                    .setConnectionPoolSize(2);
+            try {
+                System.out.println("[Redis] Starting!");
+                Config config = new Config();
+                String[] creds = getCredentials();
+                System.out.println("[Redis] Credentials: " + creds[0] + " " + creds[1].replaceAll(".", "*"));
+                config.useSingleServer()
+                        .setAddress(creds[0])
+                        .setPassword(creds[1])
+                        .setConnectionMinimumIdleSize(1)
+                        .setConnectionPoolSize(2);
 
-            client = Redisson.create(config);
+                client = Redisson.create(config);
 
-            controllerMessages = client.getTopic("controller-messages");
-
-            listeners();
+                controllerMessages = client.getTopic("controller-messages");
+                System.out.println("[Redis] Setting Controller Messages!");
+                listeners();
+            }catch(Exception e) {
+                e.printStackTrace();
+            }
+            System.out.println("[Redis] Ready!");
             return client;
         }, executor).thenAcceptAsync(consumer, executor);
     }
@@ -46,6 +51,7 @@ public class Communicator {
     }
 
     private static void listeners() {
+        System.out.println("[Redis] Setting Listeners!");
 
     }
 

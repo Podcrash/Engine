@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 import java.util.Collections;
 import java.util.List;
 
-public class SoundPlayer {
+public final class SoundPlayer {
     //TODO: this needs to get refactored a bit
 
     /**
