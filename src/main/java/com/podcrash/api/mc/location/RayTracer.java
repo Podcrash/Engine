@@ -24,9 +24,9 @@ public class RayTracer {
      */
     public boolean intersectsBoundingBoxEstimate(BoundingBox box, double distance, double accuracy, double soft) {
         assert soft >= 0 && soft < 1;
-        Vector mid = box.midPoint();
+        Coordinate mid = box.midPoint();
         Vector originDirection = direction.clone();
-        Vector dirToMid = mid.subtract(origin).normalize();
+        Vector dirToMid = mid.subtract(origin).toVector().normalize();
         direction.add(dirToMid.multiply(soft)).normalize();
         boolean value = intersectsBoundingBox(box, distance, accuracy);
         direction = originDirection;
@@ -57,8 +57,8 @@ public class RayTracer {
         Vector originDirection = direction.clone();
 
         if(soft > 0) {
-            Vector mid = box.midPoint();
-            Vector dirToMid = mid.subtract(origin).normalize();
+            Coordinate mid = box.midPoint();
+            Vector dirToMid = mid.subtract(origin).toVector().normalize();
             originDirection.add(dirToMid.multiply(soft)).normalize();
         }
         for(double i = 0; i <= maxDist; i += add) {
@@ -90,13 +90,13 @@ public class RayTracer {
         double y = vector.getY();
         double z = vector.getZ();
 
-        double minX = box.min.getX();
-        double minY = box.min.getY();
-        double minZ = box.min.getZ();
+        double minX = box.getA().getX();
+        double minY = box.getA().getY();
+        double minZ = box.getA().getZ();
 
-        double maxX = box.max.getX();
-        double maxY = box.max.getY();
-        double maxZ = box.max.getZ();
+        double maxX = box.getB().getX();
+        double maxY = box.getB().getY();
+        double maxZ = box.getB().getZ();
 
         if(compare(minX, x, maxX)) {
             if(compare(minY, y, maxY)) {

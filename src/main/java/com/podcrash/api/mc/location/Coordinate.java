@@ -3,9 +3,11 @@ package com.podcrash.api.mc.location;
 import com.podcrash.api.plugin.Pluginizer;
 import net.jafama.FastMath;
 import net.minecraft.server.v1_8_R3.EntityLiving;
+import net.minecraft.server.v1_8_R3.EntityPlayer;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
@@ -28,6 +30,12 @@ public class Coordinate {
     public static Coordinate fromEntity(Entity entity) {
         if(!(entity instanceof Player)) return fromLocation(entity.getLocation());
         return Pluginizer.getSpigotPlugin().getCoordinateTracker().get((Player) entity, 1);
+    }
+    public static <K> Coordinate from(K inst) {
+        if(inst instanceof Location) return fromLocation((Location) inst);
+        else if(inst instanceof Vector) return fromVector((Vector) inst);
+        else if(inst instanceof Entity) return fromEntity((Entity) inst);
+        throw new IllegalArgumentException("inst must be either a Location, Vector, or Entity! Was a "+ inst.getClass());
     }
 
     public Coordinate(double x, double y, double z, double yaw, double pitch, boolean onGround) {
@@ -92,7 +100,20 @@ public class Coordinate {
     public Coordinate multiply(double multiplier) {
         return new Coordinate(x * multiplier, y * multiplier, z * multiplier, yaw, pitch);
     }
+    public double dot(Coordinate coordinate) {
+        return x * coordinate.x +
+               y * coordinate.y +
+               z * coordinate.z;
+    }
 
+    public double length() {
+        return FastMath.sqrt(lengthSquared());
+    }
+    public double lengthSquared() {
+        return x * x +
+               y * y +
+               z * z;
+    }
     public Vector toVector() {
         return new Vector(x, y, z);
     }
@@ -100,6 +121,21 @@ public class Coordinate {
         return new Location(world, x, y, z, (float) yaw, (float) pitch);
     }
 
+    public Coordinate crossProduct(Coordinate coordinate) {
+        double nx = y * coordinate.z - coordinate.y * z;
+        double nz = y * coordinate.x - coordinate.y * x;
+        double ny = x * coordinate.z - coordinate.x * z;
+
+        return new Coordinate(nx, ny, nz);
+    }
+    public double distanceSquared(Coordinate coordinate) {
+        double deltaX = coordinate.x - x;
+        double deltaY = coordinate.y - y;
+        double deltaZ = coordinate.z - z;
+        return deltaX * deltaX +
+               deltaY * deltaY +
+               deltaZ * deltaZ;
+    }
     public double distanceSquared() {
         return x * x + y * y + z * z;
     }
@@ -116,13 +152,27 @@ public class Coordinate {
      * @return
      */
     public Vector getDirection() {
+        double pitchToRadians = Math.toRadians(pitch);
+        double yawToRadians = Math.toRadians(yaw);
+
         Vector vector = new Vector();
-        vector.setY(-Math.sin(Math.toRadians(pitch)));
-        double xz = Math.cos(Math.toRadians(pitch));
-        vector.setX(-xz * Math.sin(Math.toRadians(yaw)));
-        vector.setZ(xz * Math.cos(Math.toRadians(yaw)));
+        vector.setY(-Math.sin(pitchToRadians));
+        double xz = Math.cos(pitchToRadians);
+        vector.setX(-xz * Math.sin(yawToRadians));
+        vector.setZ(xz * Math.cos(yawToRadians));
 
         return vector;
+    }
+    public Coordinate getDirectionFast() {
+        double pitchToRadians = FastMath.toRadians(pitch);
+        double yawToRadians = FastMath.toRadians(yaw);
+
+        double y = -FastMath.sin(pitchToRadians);
+        double xz = FastMath.cos(yawToRadians);
+
+        double x = -xz * FastMath.sin(yawToRadians);
+        double z = xz * FastMath.cos(yawToRadians);
+        return new Coordinate(x, y, z);
     }
 
     /**
@@ -163,7 +213,8 @@ public class Coordinate {
                 ", z=" + z +
                 ", yaw=" + yaw +
                 ", pitch=" + pitch +
-                '}';
+                '}' +
+                '\n';
     }
 
     /**
