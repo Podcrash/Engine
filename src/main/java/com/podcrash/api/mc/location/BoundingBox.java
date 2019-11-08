@@ -103,7 +103,7 @@ public class BoundingBox {
             normals.add(normal);
             Coordinate PQ = getBox()[plane[0]].subtract(p);
             double dist = Math.abs(PQ.dot(normal))/normal.length();
-            if(dist < smallest) smallest = dist;
+            if(1 < dist && dist < smallest) smallest = dist;
         }
 
         return smallest;

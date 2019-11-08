@@ -36,7 +36,7 @@ public class DatabaseConnection {
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-        config.setDriverClassName("org.postgresql.Driver");
+        config.setDriverClassName(org.postgresql.Driver.class.getName());
 
         source = new HikariDataSource(config);
     }

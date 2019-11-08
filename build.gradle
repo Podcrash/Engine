@@ -31,7 +31,7 @@ shadowJar {
     }
 
     relocate("io.netty", "org.redisson.netty")
-    //minimize()
+    minimize()
 }
 
 dependencies {
