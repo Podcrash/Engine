@@ -7,15 +7,18 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 public class RootedStatus extends CustomStatus {
+    private final float walkSpeed;
     private final PotionEffect jump = new PotionEffect(PotionEffectType.JUMP, 5, 128, true);
 
     public RootedStatus(Player player) {
         super(player, Status.ROOTED);
+        this.walkSpeed = getPlayer().getWalkSpeed();
+        getPlayer().setFoodLevel(3);
+        getPlayer().setWalkSpeed(0);
     }
 
     @Override
     protected void doWhileAffected() {
-        getPlayer().setFoodLevel(3);
         new TimeResource() {
             @Override
             public void task() {
@@ -44,5 +47,6 @@ public class RootedStatus extends CustomStatus {
         getApplier().removeRoot();
         getApplier().removeStatus(Status.JUMP_BOOST);
         getPlayer().setFoodLevel(20);
+        getPlayer().setWalkSpeed(walkSpeed);
     }
 }

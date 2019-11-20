@@ -210,29 +210,18 @@ public final class DamageQueue implements Runnable {
      * @param damageEvent the event
      */
     private void damage(LivingEntity entity, double damage, int armorValue, DamageApplyEvent damageEvent) {
-        double orig = damage;
-        /*
-        if(entity instanceof Player) {
-            ChampionsPlayer victim = ChampionsPlayerManager.getInstance().getChampionsPlayer((Player) entity);
-            if(victim instanceof Brute && damage >= 3.5) {
-                damage += 8D;
-            }
-        }
-        */
         double damageFormula = damage * (1D - 0.04D * armorValue);
         //Bukkit.broadcastMessage("AV: " + armorValue  + " " + damage + " --> " + damageFormula);
         if(damageEntity(entity, damageFormula)) return;
-        if(damageEvent.isDoKnockback()) {
-            Cause cause = damageEvent.getCause();
-            LivingEntity victim = damageEvent.getVictim();
-            LivingEntity attacker = damageEvent.getAttacker();
-            double[] modifiers = findVectorModifiers(damageEvent.getVelocityModifiers(), cause, orig, attacker);
-            /*if (attacker instanceof Player && (ChampionsPlayerManager.getInstance().getChampionsPlayer((Player) attacker) instanceof Assassin && cause == Cause.MELEE))
-                return;
+        if(!damageEvent.isDoKnockback()) return;
+        //if rooted don't deal the kb
+        if(entity instanceof Player && StatusApplier.getOrNew((Player) entity).isRooted()) return;
+        Cause cause = damageEvent.getCause();
+        LivingEntity victim = damageEvent.getVictim();
+        LivingEntity attacker = damageEvent.getAttacker();
+        double[] modifiers = findVectorModifiers(damageEvent.getVelocityModifiers(), cause, damage, attacker);
 
-             */
-            applyKnockback(victim, attacker, modifiers);
-        }
+        applyKnockback(victim, attacker, modifiers);
     }
 
     /**
