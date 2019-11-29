@@ -11,11 +11,12 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Consumer;
 
+/**
+ * To make this class better, there has to be less structure here
+ */
 public class StatusApplier {
     private Player player;
     private static Map<String, StatusApplier> appliers = new HashMap<>();
@@ -24,8 +25,9 @@ public class StatusApplier {
     private static HashMap<String, Long> silenceMap = new HashMap<>();
     private static HashMap<String, Long> shockMap = new HashMap<>();
     private static HashMap<String, Long> rootMap = new HashMap<>();
-    private static HashMap<String, Long> noJumpMap = new HashMap<>();
+    private static HashMap<String, Long> groundMap = new HashMap<>();
     private static HashMap<String, Long> ineptMap = new HashMap<>();
+    private static HashMap<String, Long> bleedMap = new HashMap<>();
 
     private StatusApplier(Player p) {
         this.player = p;
@@ -196,6 +198,12 @@ public class StatusApplier {
             case INEPTITUDE:
                 removeInept();
                 break;
+            case GROUND:
+                removeGround();
+                break;
+            case BLEED:
+                removeBleed();
+                break;
         }
     }
 
@@ -223,11 +231,14 @@ public class StatusApplier {
             case ROOTED:
                 applyRoot(duration);
                 break;
-            case NOJUMP:
-                applyNoJump(duration);
+            case GROUND:
+                applyGround(duration);
                 break;
             case INEPTITUDE:
                 applyInept(duration);
+                break;
+            case BLEED:
+                applyBleed(duration);
                 break;
         }
     }
@@ -274,17 +285,22 @@ public class StatusApplier {
         TimeHandler.repeatedTime(1, 1, new RootedStatus(player));
     }
 
-    private void applyNoJump(int duration) {
-        if (isNoJump()) removeNoJump();
-        noJumpMap.put(player.getName(), System.currentTimeMillis() + duration);
-        TimeHandler.repeatedTime(1, 1, new NoJumpStatus(player));
+    private void applyGround(int duration) {
+        if (isGrounded()) removeGround();
+        groundMap.put(player.getName(), System.currentTimeMillis() + duration);
+        TimeHandler.repeatedTime(1, 1, new GroundStatus(player));
     }
 
     private void applyInept(int duration) {
         if (isInept()) removeInept();
         ineptMap.put(player.getName(), System.currentTimeMillis() + duration);
         TimeHandler.repeatedTime(1, 1, new IneptStatus(player));
+    }
 
+    private void applyBleed(int duration) {
+        if(isBleeding()) removeBleed();
+        bleedMap.put(player.getName(), System.currentTimeMillis() + duration);
+        TimeHandler.repeatedTime(1, 1, new BleedStatus(player));
     }
 
     public boolean isCloaked() {
@@ -307,12 +323,16 @@ public class StatusApplier {
         return rootMap.containsKey(this.player.getName());
     }
 
-    public boolean isNoJump() {
-        return noJumpMap.containsKey(player.getName());
+    public boolean isGrounded() {
+        return groundMap.containsKey(player.getName());
     }
 
     public boolean isInept() {
         return ineptMap.containsKey(player.getName());
+    }
+
+    public boolean isBleeding() {
+        return bleedMap.containsKey(player.getName());
     }
 
     public void removeCloak() {
@@ -354,14 +374,17 @@ public class StatusApplier {
         }
     }
 
-    public void removeNoJump() {
-        if (isNoJump()) noJumpMap.remove(player.getName());
+    public void removeGround() {
+        if (isGrounded()) groundMap.remove(player.getName());
     }
 
     public void removeInept() {
         if (isInept()) ineptMap.remove(player.getName());
     }
 
+    public void removeBleed() {
+        if (isBleeding()) bleedMap.remove(player.getName());
+    }
     /**
      * @param status the status in question
      * @return the duration of a custom effect
@@ -384,10 +407,14 @@ public class StatusApplier {
             case ROOTED:
                 if (isRooted()) map = rootMap;
                 break;
-            case NOJUMP:
-                if (isNoJump()) map = noJumpMap;
+            case GROUND:
+                if (isGrounded()) map = groundMap;
+                break;
             case INEPTITUDE:
                 if (isInept()) map = ineptMap;
+                break;
+            case BLEED:
+                if(isBleeding()) map = bleedMap;
                 break;
         }
         return (map != null) ? map.get(player.getName()) - System.currentTimeMillis() : 0;
@@ -412,10 +439,33 @@ public class StatusApplier {
         if (isSilenced()) statuses.add(Status.SILENCE);
         if (isRooted()) statuses.add(Status.ROOTED);
         if (isInept()) statuses.add(Status.INEPTITUDE);
+        if (isGrounded()) statuses.add(Status.GROUND);
+        if (isBleeding()) statuses.add(Status.BLEED);
         return statuses;
+    }
+
+    /**
+     * TODO: Rewrite the class so this is possible
+     * @param statusConsumer
+     */
+    public void getEffectGenerator(Consumer<Status> statusConsumer) {
+
     }
 
     public boolean has(Status status) {
         return getEffects().contains(status);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StatusApplier that = (StatusApplier) o;
+        return player.getName().equals(that.player.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(player.getName());
     }
 }

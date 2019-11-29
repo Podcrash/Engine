@@ -1,0 +1,21 @@
+diff a/src/main/java/com/podcrash/api/plugin/PodcrashSpigot.java b/src/main/java/com/podcrash/api/plugin/PodcrashSpigot.java	(rejected hunks)
+@@ -2,10 +2,7 @@ package com.podcrash.api.plugin;
+ 
+ import com.podcrash.api.commands.WorldCommand;
+ import com.podcrash.api.mc.damage.DamageQueue;
+-import com.podcrash.api.mc.listeners.GameDamagerConverterListener;
+-import com.podcrash.api.mc.listeners.GameListener;
+-import com.podcrash.api.mc.listeners.MapMaintainListener;
+-import com.podcrash.api.mc.listeners.SpigotJoinListener;
++import com.podcrash.api.mc.listeners.*;
+ import com.podcrash.api.mc.tracker.CoordinateTracker;
+ import com.podcrash.api.mc.tracker.Tracker;
+ import com.podcrash.api.mc.tracker.VectorTracker;
+@@ -143,6 +140,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
+             new GameDamagerConverterListener(this);
+             new MapMaintainListener(this);
+             new SpigotJoinListener(this);
++            new StatusListener(this);
+         });
+     }
+     private void registerCommands() {

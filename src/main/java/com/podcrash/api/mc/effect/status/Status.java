@@ -18,6 +18,7 @@ public enum Status {
     WEAKNESS("Weakness", PotionEffectType.WEAKNESS, true, true, 5),
     RESISTANCE("Resistance", PotionEffectType.DAMAGE_RESISTANCE, true, false, 11),
     REGENERATION("Regeneration", PotionEffectType.REGENERATION, true, false, 10),
+    ABSORPTION("Absorption", PotionEffectType.ABSORPTION, true, false, 22),
 
     FIRE("FIRE", null, false, true, 100),
     CLOAK("Cloak", null, false, false, 101),
@@ -25,8 +26,9 @@ public enum Status {
     SHOCK("Shock", null, false, true, 103),
     MARKED("Marked", null, false, true, 104),
     ROOTED("Rooted", null, false, true, 105),
-    NOJUMP("Crippled", null, false, true, 108),
-    INEPTITUDE("Ineptitude", null, false, false, 107);
+    INEPTITUDE("Ineptitude", null, false, false, 107),
+    GROUND("Crippled", null, false, true, 108),
+    BLEED("Bleed", null, false, true, 109);
 
     private String name;
     private PotionEffectType potionEffectType;

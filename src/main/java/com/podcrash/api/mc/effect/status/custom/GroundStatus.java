@@ -6,10 +6,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-public class NoJumpStatus extends CustomStatus {
+public class GroundStatus extends CustomStatus {
     private final PotionEffect jump = new PotionEffect(PotionEffectType.JUMP, 5, 128, true);
-    public NoJumpStatus(Player player) {
-        super(player, Status.NOJUMP);
+    public GroundStatus(Player player) {
+        super(player, Status.GROUND);
 
     }
 
@@ -35,11 +35,11 @@ public class NoJumpStatus extends CustomStatus {
 
     @Override
     protected boolean isInflicted() {
-        return getApplier().isNoJump();
+        return getApplier().isGrounded();
     }
 
     @Override
     protected void removeEffect() {
-        getApplier().removeNoJump();
+        getApplier().removeGround();
     }
 }

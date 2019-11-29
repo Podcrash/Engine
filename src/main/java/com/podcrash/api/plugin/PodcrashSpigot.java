@@ -1,16 +1,12 @@
 package com.podcrash.api.plugin;
 
 import com.podcrash.api.mc.damage.DamageQueue;
-import com.podcrash.api.mc.listeners.GameDamagerConverterListener;
-import com.podcrash.api.mc.listeners.GameListener;
-import com.podcrash.api.mc.listeners.MapMaintainListener;
-import com.podcrash.api.mc.listeners.SpigotJoinListener;
+import com.podcrash.api.mc.listeners.*;
 import com.podcrash.api.mc.tracker.CoordinateTracker;
 import com.podcrash.api.mc.tracker.Tracker;
 import com.podcrash.api.mc.tracker.VectorTracker;
 import com.podcrash.api.mc.world.WorldManager;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.redisson.api.RedissonClient;
 import org.spigotmc.SpigotConfig;
@@ -141,6 +137,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             new GameDamagerConverterListener(this);
             new MapMaintainListener(this);
             new SpigotJoinListener(this);
+            new StatusListener(this);
         });
     }
 }
