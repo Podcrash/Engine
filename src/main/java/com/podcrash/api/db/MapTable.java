@@ -1,0 +1,165 @@
+package com.podcrash.api.db;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.grinderwolf.swm.api.SlimePlugin;
+import com.grinderwolf.swm.api.exceptions.*;
+import com.grinderwolf.swm.api.world.SlimeWorld;
+import com.grinderwolf.swm.api.world.properties.SlimePropertyMap;
+import com.mongodb.async.SingleResultCallback;
+import com.mongodb.async.client.MongoCollection;
+import com.mongodb.client.model.Filters;
+import com.podcrash.api.mc.map.BaseGameMap;
+import com.podcrash.api.mc.map.IMap;
+import com.podcrash.api.mc.world.WorldManager;
+import com.podcrash.api.plugin.Pluginizer;
+import org.apache.commons.io.FileUtils;
+import org.bson.Document;
+import org.bukkit.Bukkit;
+
+import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+
+/**
+ * This should return GSONS
+ */
+public class MapTable extends MongoBaseTable {
+
+    public MapTable(boolean test) {
+        super("worldmaps", test);
+
+        //TODO: custom make a collection easily and be able to modify its settings maybe
+        //getDatabase().createCollection(getName());
+    }
+
+    @Override
+    public DataTableType getDataTableType() {
+        return DataTableType.MAPS;
+    }
+
+    /**
+     * Find the world metadata, uses a json string.
+     * This is needed since the child project don't have mongo as a dependency
+     * @param worldName
+     * @param callback - once the function is completed, it calls the callback
+     */
+    public void findWorld(@Nonnull String worldName, Consumer<JsonObject> callback) {
+        findWorld(worldName, (res, throwable) -> {
+            if(throwable != null) Pluginizer.getSpigotPlugin().getLogger().info(throwable.getLocalizedMessage());
+            JsonObject json = (res == null) ? null : new JsonParser().parse(res.toJson()).getAsJsonObject();
+            callback.accept(json);
+        });
+    }
+    /**
+     * Find the world metadata, uses document
+     * @param worldName
+     * @param callback - once the function is completed, it calls the callback
+     */
+    private void findWorld(@Nonnull String worldName, SingleResultCallback<Document> callback) {
+        getCollection("maps")
+        .find(Filters.eq("name", worldName.toUpperCase()))
+        .first(callback);
+    }
+
+
+    /**
+     * Download a world
+     * @param worldName
+     */
+    public void downloadWorld(@Nonnull String worldName) {
+        SlimePlugin slimePlugin = getSlimePlugin();
+
+        findWorld(worldName, ((result, t) -> {
+            if (t != null) t.printStackTrace();
+            SlimePropertyMap slimeMap;
+            if (result == null) {
+                System.out.println(worldName + " doesn't exist!");
+                return;
+            }
+            JsonObject json = new JsonParser().parse(result.toJson()).getAsJsonObject();
+            slimeMap = BaseGameMap.getSlimeProperties(json);
+            final SlimeWorld slimeWorld;
+            try {
+                slimeWorld = slimePlugin.loadWorld(slimePlugin.getLoader("mongodb"), worldName, false, slimeMap);
+            } catch (UnknownWorldException | IOException | CorruptedWorldException | NewerFormatException | WorldInUseException e) {
+                e.printStackTrace();
+                return;
+            }
+            System.out.println("Loading " + slimeWorld.getName());
+            Bukkit.getScheduler().runTaskLater(Pluginizer.getSpigotPlugin(), () -> {
+                slimePlugin.generateWorld(slimeWorld);
+                System.out.println("Generating " + slimeWorld.getName());
+            }, 5L);
+
+        }));
+
+    }
+
+    /**
+     * Upload a world to slimeworld system
+     * @param worldName
+     */
+    public CompletableFuture<Void> uploadWorld(@Nonnull String worldName) {
+        WorldManager.getInstance().unloadWorld(worldName);
+        return CompletableFuture.runAsync(() -> {
+            File folder = Bukkit.getWorldContainer().getAbsoluteFile();
+            File worldFolder = FileUtils.getFile(folder.getAbsoluteFile() + "\\" + worldName);
+            System.out.println(worldFolder.toString());
+            System.out.println(worldFolder.getAbsoluteFile());
+            SlimePlugin slimePlugin = getSlimePlugin();
+
+            try {
+                slimePlugin.importWorld(worldFolder, worldName, slimePlugin.getLoader("mongodb"));
+            } catch (WorldAlreadyExistsException | InvalidWorldException | WorldLoadedException | WorldTooBigException | IOException e) {
+                e.printStackTrace();
+            }
+        }, SERVICE);
+    }
+
+    /**
+     * Update mapdata
+     * @see {@link BaseGameMap#getJSON()}
+     *
+     * @param mapdata - json map of the map object
+     */
+    public void upsertMetaData(@Nonnull JsonObject mapdata) {
+        //TODO: instead of having null callbacks, make a general all purpose callback (esp for player permissions)
+        String name = mapdata.get("name").getAsString();
+        findWorld(name, (res, throwable) -> {
+            if(throwable != null) throwable.printStackTrace();
+            MongoCollection<Document> mapsCol = getCollection("maps");
+            Document mapDoc = Document.parse(mapdata.toString());
+            if(res == null) mapsCol.insertOne(mapDoc, new RegularCallback());
+            else {
+                mapsCol.replaceOne(
+                    Filters.eq("name", name),
+                    mapDoc,
+                    (res1, throwable1) -> {
+                        if(throwable1 != null) throwable1.printStackTrace();
+                    });
+            }
+        });
+    }
+
+    /**
+     * @see {@link #upsertMetaData(JsonObject)}
+     * @param mapdata
+     */
+    public void upsertMetaData(@Nonnull IMap mapdata) {
+        upsertMetaData(mapdata.getJSON());
+    }
+
+    private static class RegularCallback implements SingleResultCallback<Void> {
+        @Override
+        public void onResult(Void result, Throwable t) {
+            if(t != null) t.printStackTrace();
+        }
+    }
+
+    private SlimePlugin getSlimePlugin() {
+        return (SlimePlugin) Bukkit.getPluginManager().getPlugin("SlimeWorldManager");
+    }
+}

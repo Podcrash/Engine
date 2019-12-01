@@ -1,4 +1,4 @@
-package com.podcrash.api.db;
+package com.podcrash.api.db.connection;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -21,7 +21,6 @@ public class DatabaseConnection {
 
         try {
             Class.forName("org.postgresql.Driver");
-            Class.forName("org.postgresql.ds.PGSimpleDataSource");
         }catch (ClassNotFoundException e) {
             System.out.println("PG DRIVER = NOT FOUND!");
             e.printStackTrace();
@@ -29,8 +28,7 @@ public class DatabaseConnection {
         HikariConfig config = new HikariConfig();
         String url = String.format("jdbc:postgresql://%s:%d/%s?user=%s&password=%s",
                 HOST, PORT, DATABASE, USER, PASSWORD);
-        config.setJdbcUrl(url);
-        System.out.println(url);
+        config.setJdbcUrl(url);;
         config.setUsername(USER);
         config.setPassword(PASSWORD);
         config.addDataSourceProperty("cachePrepStmts", "true");

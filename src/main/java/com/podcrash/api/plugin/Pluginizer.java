@@ -2,7 +2,11 @@ package com.podcrash.api.plugin;
 
 import com.podcrash.api.mc.tracker.Tracker;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public final class Pluginizer {
+    private static final ExecutorService SERVICE = Executors.newCachedThreadPool();
     private static PodcrashPlugin plugin;
 
     public static void setInstance(PodcrashPlugin plugin1) {
@@ -32,5 +36,9 @@ public final class Pluginizer {
      */
     public static <T extends Tracker> T getTracker(Class<? extends T> clasz) {
         return ((PodcrashSpigot) plugin).getTracker(clasz);
-    } 
+    }
+
+    public static ExecutorService getService() {
+        return SERVICE;
+    }
 }

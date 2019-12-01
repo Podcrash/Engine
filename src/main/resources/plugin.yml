@@ -3,4 +3,8 @@ main: com.podcrash.api.plugin.PodcrashSpigot
 version: 1.0
 author: RainDance
 
-softdepend: [ProtocolLib]
+softdepend: [SlimeWorldManager, ProtocolLib]
+
+commands:
+  pworld:
+    description: use slime world

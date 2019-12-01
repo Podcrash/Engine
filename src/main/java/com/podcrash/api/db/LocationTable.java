@@ -16,6 +16,11 @@ public class LocationTable extends BaseTable {
     }
 
     @Override
+    public DataTableType getDataTableType() {
+        return DataTableType.LOCATIONS;
+    }
+
+    @Override
     public void createTable() {
         DSLContext create = getContext();
 

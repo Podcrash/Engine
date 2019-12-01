@@ -1,5 +1,6 @@
 package com.podcrash.api.plugin;
 
+import com.podcrash.api.commands.WorldCommand;
 import com.podcrash.api.mc.damage.DamageQueue;
 import com.podcrash.api.mc.listeners.*;
 import com.podcrash.api.mc.tracker.CoordinateTracker;
@@ -53,6 +54,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             setKnockback(),
             registerListeners()
         );
+        registerCommands();
         WorldManager.getInstance().loadWorlds();
         DamageQueue.active = true;
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, new DamageQueue(), 0, 0);
@@ -139,5 +141,8 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             new SpigotJoinListener(this);
             new StatusListener(this);
         });
+    }
+    private void registerCommands() {
+        getCommand("pworld").setExecutor(new WorldCommand());
     }
 }

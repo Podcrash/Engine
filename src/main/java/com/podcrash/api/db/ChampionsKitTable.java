@@ -19,6 +19,11 @@ public class ChampionsKitTable extends BaseTable implements IPlayerDB {
     }
 
     @Override
+    public DataTableType getDataTableType() {
+        return DataTableType.KITS;
+    }
+
+    @Override
     public PlayerTable getPlayerTable() {
         return TableOrganizer.getTable(DataTableType.PLAYERS, test);
     }
@@ -42,7 +47,8 @@ public class ChampionsKitTable extends BaseTable implements IPlayerDB {
         step.constraints(
             DSL.constraint(getConstraintPrefix() + "foreign_player_id")
                 .foreignKey("player_id")
-                .references(getPlayerTable().getName(), "_id"),
+                .references(getPlayerTable().getName(), "_id")
+                .onDeleteCascade(),
             DSL.constraint(getConstraintPrefix() + "player_primary").primaryKey("player_id", "class", "build_id"),
             DSL.constraint(getConstraintPrefix() + "limit_build_id").check(KITS.BUILD_ID.lt(5)));
         step.execute();

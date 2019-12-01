@@ -21,6 +21,11 @@ public class PlayerPermissionsTable extends BaseTable implements IPlayerDB {
     }
 
     @Override
+    public DataTableType getDataTableType() {
+        return DataTableType.PERMISSIONS;
+    }
+
+    @Override
     public PlayerTable getPlayerTable() {
         return TableOrganizer.getTable(DataTableType.PLAYERS, test);
     }
@@ -35,7 +40,8 @@ public class PlayerPermissionsTable extends BaseTable implements IPlayerDB {
                 DSL.constraint(getConstraintPrefix() + "unique").unique("player_id", "permission_id"),
                 DSL.constraint(getConstraintPrefix() + "foreign_player_id")
                     .foreignKey("player_id")
-                    .references(getPlayerTable().getName(), "_id"))
+                    .references(getPlayerTable().getName(), "_id")
+                    .onDeleteCascade())
             .execute();
 
         getContext().createIndexIfNotExists(getConstraintPrefix() + "player_id_index").on(getName(), "player_id")

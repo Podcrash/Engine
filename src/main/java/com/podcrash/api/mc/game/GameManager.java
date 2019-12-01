@@ -220,6 +220,7 @@ public class GameManager {
         GameStartEvent gamestart = new GameStartEvent(game);
         game.setOngoing(true);
         Pluginizer.getSpigotPlugin().getServer().getPluginManager().callEvent(gamestart);
+
     }
     public static void endGame(Game game) {
         Location spawnLoc = Bukkit.getWorld("world").getSpawnLocation();

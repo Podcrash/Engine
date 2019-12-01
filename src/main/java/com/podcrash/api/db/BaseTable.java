@@ -1,5 +1,6 @@
 package com.podcrash.api.db;
 
+import com.podcrash.api.db.connection.DatabaseConnection;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 
@@ -9,25 +10,17 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import static org.jooq.impl.DSL.*;
 import static org.jooq.impl.DSL.using;
 
 public abstract class BaseTable implements ITable {
+    protected ExecutorService EXECUTOR = Executors.newFixedThreadPool(5);
     private String name;
     protected boolean test;
-    private static Map<String, BaseTable> map = new HashMap<>();
     private Connection connection;
 
-    public static BaseTable getDatabase(String dbName) {
-        return map.getOrDefault(dbName, null);
-    }
-    public static String keys() {
-        return map.keySet().toString();
-    }
-    public static Collection<BaseTable> values() {
-        return map.values();
-    }
     public BaseTable(String tableName, boolean test) {
         this.test = test;
         this.name = test ? tableName + "TEST" : tableName;
@@ -38,7 +31,6 @@ public abstract class BaseTable implements ITable {
         }catch (SQLException ex) {
             ex.printStackTrace();
         }
-        map.put(name, this);
     }
     public BaseTable(String tableName) {
         this(tableName, false);

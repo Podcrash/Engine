@@ -4,10 +4,11 @@ public enum DataTableType {
     KITS(ChampionsKitTable.class),
     LOCATIONS(LocationTable.class),
     PLAYERS(PlayerTable.class),
-    PERMISSIONS(PlayerPermissionsTable.class);
+    PERMISSIONS(PlayerPermissionsTable.class),
+    MAPS(MapTable.class);
 
-    private Class<? extends BaseTable> table;
-    DataTableType(Class<? extends BaseTable> table) {
+    private Class<? extends ITable> table;
+    DataTableType(Class<? extends ITable> table) {
         this.table = table;
     }
 
@@ -15,7 +16,7 @@ public enum DataTableType {
         return name().toLowerCase();
     }
 
-    public Class<? extends BaseTable> getTable() {
+    public Class<? extends ITable> getTable() {
         return table;
     }
 }
