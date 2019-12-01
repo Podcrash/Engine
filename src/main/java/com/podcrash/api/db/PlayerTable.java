@@ -18,6 +18,11 @@ public class PlayerTable extends BaseTable {
     }
 
     @Override
+    public DataTableType getDataTableType() {
+        return DataTableType.PLAYERS;
+    }
+
+    @Override
     public void createTable() {
         DSLContext create = getContext();
 

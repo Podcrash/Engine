@@ -35,26 +35,28 @@ shadowJar {
 }
 
 dependencies {
-    compileOnly fileTree('../libs')
+    compileOnly fileTree("../libs")
+    implementation 'com.google.code.gson:gson:2.8.6'
 
-    //implementation 'com.comphenix.protocol:ProtocolLib:4.4.0'
-
-    implementation('com.zaxxer:HikariCP:3.3.1')
-    implementation('org.jooq:jooq:3.12.1')
-
-    implementation('postgresql:postgresql:9.4.1208-jdbc42-atlassian-hosted')
-
-    jooqRuntime('postgresql:postgresql:9.4.1208-jdbc42-atlassian-hosted')
-
-    implementation('org.redisson:redisson:3.11.3')
-
-    testImplementation('org.slf4j:slf4j-simple:1.7.21')
-    testImplementation('org.junit.jupiter:junit-jupiter:5.5.1')
+    testImplementation 'org.bukkit:bukkit:1.8.8-R0.1-SNAPSHOT'
+    testImplementation 'org.slf4j:slf4j-simple:1.7.21'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.5.1'
     testImplementation "org.junit.jupiter:junit-jupiter-params:5.5.1"
-    testImplementation('org.junit.jupiter:junit-jupiter-api:5.5.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.1'
 
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.5.1"
-    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.5.1')
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.1'
+    implementation 'com.grinderwolf:slimeworldmanager-api:2.1.1'
+    //implementation 'com.comphenix.protocol:ProtocolLib:4.4.0'
+
+    implementation 'com.zaxxer:HikariCP:3.3.1'
+    implementation 'org.jooq:jooq:3.12.1'
+
+    implementation 'postgresql:postgresql:9.4.1208-jdbc42-atlassian-hosted'
+    implementation 'org.mongodb:mongodb-driver-reactivestreams:1.6.0'
+
+    jooqRuntime('postgresql:postgresql:9.4.1208-jdbc42-atlassian-hosted')
+    implementation 'org.redisson:redisson:3.11.3'
 }
 
 test {

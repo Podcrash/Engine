@@ -220,7 +220,6 @@ public class Coordinate {
     /**
      * UTILITY METHODS
      */
-
     public void teleport(Entity entity, World world) {
         entity.teleport(new Location(world, x, y, z, (float) yaw, (float) pitch));
     }

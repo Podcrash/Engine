@@ -88,7 +88,7 @@ public class WorldManager {
      */
     public void loadWorlds() {
         try {
-            final List<String> ignoreList = Arrays.asList("logs", "plugins", "timings", "crash-reports");
+            final List<String> ignoreList = Arrays.asList("logs", "plugins", "timings", "crash-reports", "slime_worlds");
             for (File file : Bukkit.getWorldContainer().listFiles()) {
                 if (file.isDirectory() && !ignoreList.contains(file.getName())) {
                     World poss = Bukkit.getWorld(file.getName());

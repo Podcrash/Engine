@@ -319,7 +319,7 @@ public final class DamageQueue implements Runnable {
         LivingEntity attacker = damageWrapper.getAttacker();
         Cause cause = damageWrapper.getCause();
 
-        if(!(attacker instanceof Player) && !(victim instanceof Player)) return;
+        if(!(attacker instanceof Player) || !(victim instanceof Player)) return;
         if(hasDeath((Player) attacker) || hasDeath((Player) victim)) return; //if the attacker/victim is currently dead, don't process the damage at all
         if(victim instanceof Player && cause == Cause.MELEE && StatusApplier.getOrNew((Player) victim).isCloaked()) return;
 
