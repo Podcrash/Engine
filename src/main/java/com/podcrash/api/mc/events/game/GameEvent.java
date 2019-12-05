@@ -1,20 +1,22 @@
 package com.podcrash.api.mc.events.game;
 
+import com.podcrash.api.mc.game.GTeam;
 import com.podcrash.api.mc.game.Game;
+import com.podcrash.api.mc.game.TeamEnum;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 
 import java.util.List;
+import java.util.UUID;
 
+/**
+ * Game Event
+ * TODO: Change this to work with more than one team.
+ */
 public abstract class GameEvent extends Event {
 
     protected List<Player> players;
-    protected List<Player> redTeam;
-    protected List<Player> blueTeam;
-
-    protected List<Location> redSpawn;
-    protected List<Location> blueSpawn;
 
     protected Game game;
 
@@ -22,11 +24,7 @@ public abstract class GameEvent extends Event {
 
     public GameEvent(Game game, String message) {
         this.game = game;
-        this.players = game.getPlayers();
-        this.redTeam = game.getRedTeam();
-        this.blueTeam = game.getBlueTeam();
-        this.redSpawn = game.getRedSpawn();
-        this.blueSpawn = game.getBlueSpawn();
+        this.players = game.getBukkitPlayers();
         this.message = message;
     }
 
@@ -58,18 +56,12 @@ public abstract class GameEvent extends Event {
         return getPlayers().size();
     }
 
-    public List<Player> getTeam(String teamcolor) {
-        if (teamcolor.toLowerCase().equals("red")) return getRedTeam();
-        else if (teamcolor.toLowerCase().equals("blue")) return getBlueTeam();
-        throw new IllegalArgumentException("teamcolor must be red or blue, not " + teamcolor);
-    }
-
-    public List<Player> getBlueTeam() {
-        return blueTeam;
-    }
-
-    public List<Player> getRedTeam() {
-        return redTeam;
+    public List<UUID> getTeam(TeamEnum teamEnum) {
+        GTeam gteam = game.getTeam(teamEnum);
+        if (gteam == null) {
+            throw new IllegalArgumentException("teamcolor must be red or blue.");
+        }
+        return gteam.getPlayers();
     }
 
     public String getName() {
@@ -80,12 +72,11 @@ public abstract class GameEvent extends Event {
         return game.getMaxPlayers();
     }
 
-    public List<Location> getRedSpawn() {
-        return redSpawn;
+    public List<UUID> getTeamPlayers(int id) {
+        return game.getTeam(id).getPlayers();
     }
 
-    public List<Location> getBlueSpawn() {
-        return blueSpawn;
+    public List<Location> getTeamSpawns(int id) {
+        return game.getTeam(id).getSpawns();
     }
-
 }
