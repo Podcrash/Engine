@@ -115,7 +115,7 @@ public class CraftBlockUpdater implements Runnable {
             bulk.add(new PacketPlayOutMapChunk(((CraftChunk) world.getChunkAt(cc.x, cc.z)).getHandle(), false, 20));
         }
 
-        for(Player player : world.getPlayers()) {
+        for(Player player : world.getBukkitPlayers()) {
             EntityPlayer eplayer = ((CraftPlayer) player).getHandle();
 
             for(PacketPlayOutMapChunk b : bulk) {

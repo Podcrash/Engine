@@ -28,16 +28,12 @@ public class CustomScoreboard {
             Arrays.asList('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'k', 'l', 'm', 'n', 'o', 'r');
 
     /**
-     * Create or initialize/re-initialize the scoreboard and objective with 15 lines.
-     * @return The scoreboard.
+     * Constructor for the custom scoreboard.
+     * Create or initialize the scoreboard and objective with a size.
+     * @param size The size (number of lines) of the scoreboard (Between 1 and 15 inclusive).
      */
-    public Scoreboard createBoard() {
-        // Create the scoreboard.
-        this.scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-        this.size = 15;
-        makeObjective();
-        setupScoreboard();
-        return scoreboard;
+    public CustomScoreboard(int size) {
+        createBoard(size);
     }
 
     /**
@@ -45,7 +41,7 @@ public class CustomScoreboard {
      * @param size The size (number of lines) of the scoreboard (Between 1 and 15 inclusive).
      * @return The scoreboard.
      */
-    public Scoreboard createBoard(int size) {
+    private Scoreboard createBoard(int size) {
         // Create the scoreboard.
         this.scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
         // Check for a valid scoreboard size. If not, set size to 15.
@@ -59,18 +55,6 @@ public class CustomScoreboard {
     }
 
     /**
-     * Create or initialize/re-initialize the scoreboard and objective with a size.
-     * @param size The size (number of lines) of the scoreboard (Between 1 and 15 inclusive).
-     * @param lines The lines of the scoreboard.
-     * @return The scoreboard.
-     */
-    public Scoreboard createBoard(int size, List<String> lines) {
-        createBoard(size);
-        convertScoreboard(lines);
-        return scoreboard;
-    }
-
-    /**
      * Make a new objective.
      */
     public void makeObjective() {
@@ -78,14 +62,14 @@ public class CustomScoreboard {
         objective = scoreboard.registerNewObjective("dummy", "");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         objective.setDisplayName(ChatUtil.chat(""));
-        animateTitle("WHITEROSE", "&f&l", "&7&l");
+        animateTitle("JJsTest", "&f&l", "&7&l");
     }
 
     /**
      * The first time a scoreboard is created.
      * Create a scoreboard based off the size with empty lines.
      */
-    public void setupScoreboard() {
+    private void setupScoreboard() {
         for (int i = 1; i <= size; i++) {
             Team team = scoreboard.registerNewTeam(Integer.toString(i));
             team.addEntry(ChatUtil.chat("&" + codes.get(i - 1) + "&r"));
@@ -97,7 +81,7 @@ public class CustomScoreboard {
      * Convert/assign an array of strings to the scoreboard, starting from the top.
      * @param lines Array of lines to assign starting from the top of the scoreboard.
      */
-    public void convertScoreboard(String[] lines) {
+    public void setLines(String[] lines) {
         // Assign the lines starting from the top of the scoreboard.
         for (int i = 0; i < size && i < lines.length && lines[i] != null; i++) {
             setLine(size - i, lines[i]);
@@ -108,7 +92,7 @@ public class CustomScoreboard {
      * Convert/assign a list of strings to the scoreboard, starting from the top.
      * @param lines List of lines to assign starting from the top of the scoreboard.
      */
-    public void convertScoreboard(List<String> lines) {
+    public void setLines(List<String> lines) {
         // Assign the lines starting from the top of the scoreboard.
         for (int i = 0; i < size && i < lines.size(); i++) {
             setLine(size - i, lines.get(i));
@@ -242,6 +226,7 @@ public class CustomScoreboard {
         if (prefix.length() > 16) {
             return false;
         }
+        //Bukkit.broadcastMessage("Line: " + line + " ScoreboardTeam: " + scoreboard.getTeam(Integer.toString(line)) + " Prefix: " + prefix);
         scoreboard.getTeam(Integer.toString(line)).setPrefix(ChatUtil.chat(prefix));
         return true;
     }

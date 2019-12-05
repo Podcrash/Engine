@@ -153,7 +153,7 @@ public final class CapturePoint extends WinObjective {
             this.color = color;
             Location[] corners = getCornerWools();
             for(int i = 0; i < corners.length; i++){//TODO: FIREWORK?
-                BlockUtil.replaceBlock(corners[i], Material.WOOL, team.getWoolData(), false);
+                BlockUtil.replaceBlock(corners[i], Material.WOOL, team.getData(), false);
             }
         }
         else throw new IllegalArgumentException("color must be red, blue, or white~!");
@@ -239,8 +239,8 @@ public final class CapturePoint extends WinObjective {
             this.blocks[row][col] = team.getByteData();
         }
         //update world
-        World world = getWorld();
-        List<Player> players = game == null ? world.getPlayers() : game.getPlayers();
+        World world = getLocation().getWorld();
+        List<Player> players = game == null ? world.getPlayers() : game.getBukkitPlayers();
         sendWoolPackets(team, players);
 
         if(progress == 25){
@@ -266,8 +266,9 @@ public final class CapturePoint extends WinObjective {
         byte teamByte = team.getByteData();
         boolean check = false;
         boolean once = false;
+
         World world = getWorld();
-        List<Player> players = game == null ? world.getPlayers() : game.getPlayers();
+        List<Player> players = game == null ? world.getPlayers() : game.getBukkitPlayers();
 
         sendWoolPackets(team, players);
         for(int x = 0; x < this.blocks.length; x++){
@@ -311,8 +312,8 @@ public final class CapturePoint extends WinObjective {
      * @param wool
      */
     private void replaceBlock(TeamEnum team, Location wool){
-        if(!wool.getBlock().getType().equals(Material.BEACON)) BlockUtil.replaceBlock(wool, Material.WOOL, team.getWoolData(), false);
-        BlockUtil.replaceBlock(wool.add(0, 1, 0), Material.STAINED_GLASS, team.getGlassData(), false);
+        if(!wool.getBlock().getType().equals(Material.BEACON)) BlockUtil.replaceBlock(wool, Material.WOOL, team.getData(), false);
+        BlockUtil.replaceBlock(wool.add(0, 1, 0), Material.STAINED_GLASS, team.getData(), false);
     }
 
     /**

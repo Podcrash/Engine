@@ -18,7 +18,7 @@ public class IneptStatus extends CustomStatus {
 
     @Override
     protected void doWhileAffected() {
-        for(Player player : game.getPlayers()){
+        for(Player player : game.getBukkitPlayers()){
             if(player != getPlayer() && player.canSee(getPlayer())) player.hidePlayer(getPlayer());
         }
     }
@@ -31,7 +31,7 @@ public class IneptStatus extends CustomStatus {
     @Override
     protected void removeEffect() {
         getApplier().removeInept();
-        for(Player player : game.getPlayers()){
+        for(Player player : game.getBukkitPlayers()){
             if(player != getPlayer()) player.showPlayer(getPlayer());
         }
     }
