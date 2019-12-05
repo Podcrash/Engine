@@ -6,11 +6,16 @@ import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.util.Vector;
 
 public class Emerald extends ItemObjective {
     private static ObjectiveType otype = ObjectiveType.EMERALD;
-    public Emerald(Location spawnLocation){
-        super(Material.EMERALD, Material.EMERALD_BLOCK, spawnLocation);
+
+    public Emerald(Location location) {
+        this(location.toVector());
+    }
+    public Emerald(Vector spawnVector){
+        super(Material.EMERALD, Material.EMERALD_BLOCK, spawnVector);
         this.fireworkEffect = FireworkEffect.builder().withColor(Color.GREEN).with(FireworkEffect.Type.BALL_LARGE).build();
     }
     public ObjectiveType getObjectiveType(){
@@ -27,4 +32,6 @@ public class Emerald extends ItemObjective {
         super.spawnFirework();
         SoundPlayer.sendSound(getLocation(), "fireworks.launch", 1, 63);
     }
+
+
 }

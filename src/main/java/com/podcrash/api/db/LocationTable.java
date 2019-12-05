@@ -1,7 +1,7 @@
 package com.podcrash.api.db;
 
-import nu.studer.sample.Tables;
-import nu.studer.sample.tables.Locations;
+import com.podcrash.api.db.jooq.Tables;
+import com.podcrash.api.db.jooq.tables.Locations;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;

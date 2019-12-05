@@ -16,6 +16,26 @@ import java.util.List;
 
 public class ItemStackUtil {
 
+    public static ItemStack createItem(Material material, String displayName, List<String> lore) {
+        return createItem(material, 1, displayName, lore);
+    }
+    /**
+     * Creates an item with the following data
+     * @param material The material.
+     * @param amount The amount of items in the stack.
+     * @param displayName The display name of the item.
+     * @param lore The lore strings of the item.
+     * @return The final itemstack.
+     */
+    public static ItemStack createItem(Material material, int amount, String displayName, List<String> lore) {
+        ItemStack item = new ItemStack(material, amount);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(displayName);
+        if(lore != null) meta.setLore(lore);
+        item.setItemMeta(meta);
+        return item;
+    }
+
     /**
      * Creates an item stack.
      *

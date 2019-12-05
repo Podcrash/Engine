@@ -3,11 +3,14 @@ package com.podcrash.api.mc.events;
 import com.podcrash.api.mc.damage.Cause;
 
 import com.podcrash.api.mc.damage.DamageSource;
+import net.minecraft.server.v1_8_R3.ItemArmor;
+import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,6 +29,7 @@ public class DamageApplyEvent extends Event implements Cancellable {
 
     private double damage;
     private double changeXP;
+    private double armorValueVictim;
 
     private Cause cause;
     private Arrow arrow;
@@ -56,6 +60,7 @@ public class DamageApplyEvent extends Event implements Cancellable {
         this.sources = sources;
         this.doKnockback = applyKnockback;
         this.velocityModifier = new double[]{1, 1, 1};
+        this.armorValueVictim = armorValue(victim);
     }
 
     /**
@@ -120,6 +125,14 @@ public class DamageApplyEvent extends Event implements Cancellable {
         this.damage = this.changeXP = damage;
     }
 
+    public double getArmorValue() {
+        return armorValueVictim;
+    }
+
+    public void setArmorValue(double newArmorValue) {
+        this.armorValueVictim = newArmorValue;
+    }
+
     public Cause getCause() {
         return cause;
     }
@@ -166,6 +179,24 @@ public class DamageApplyEvent extends Event implements Cancellable {
     }
     public static HandlerList getHandlerList() {
         return handlers;
+    }
+
+
+    /**
+     * Calculate the armor value of the entity.
+     * Very important in finding how much damage an entity should recieve.
+     * @param entity the entity
+     * @return armor value of the entity
+     */
+    private int armorValue(LivingEntity entity) {
+        int i = 0;
+        for(ItemStack armor : entity.getEquipment().getArmorContents()) {
+            net.minecraft.server.v1_8_R3.ItemStack nmsArmor = CraftItemStack.asNMSCopy(armor);
+            if(nmsArmor != null && nmsArmor.getItem() instanceof ItemArmor) {
+                i += ((ItemArmor) nmsArmor.getItem()).c;
+            }
+        }
+        return i;
     }
 }
 

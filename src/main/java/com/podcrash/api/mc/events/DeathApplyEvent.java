@@ -7,6 +7,7 @@ import com.podcrash.api.mc.damage.DamageSource;
 import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.TeamEnum;
+import net.jafama.FastMath;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.LivingEntity;
@@ -39,7 +40,8 @@ public class DeathApplyEvent extends Event implements Cancellable {
      */
     public DeathApplyEvent(Damage lastDamage, Deque<Damage> damages) {
         this.player = (Player) lastDamage.getVictim();
-        this.attacker = lastDamage.getAttacker();
+        boolean combat12SecondsAgo = FastMath.abs(lastDamage.getTime() - damages.getLast().getTime()) > 12;
+        this.attacker = (combat12SecondsAgo) ? null : lastDamage.getAttacker();
         this.damage = lastDamage;
         this.history = damages;
     }
@@ -122,34 +124,46 @@ public class DeathApplyEvent extends Event implements Cancellable {
         builder.append(" was killed by ");
         builder.append(ChatColor.RESET);
 
-        String attackerName;
-        if(attacker instanceof Player) {
-            Player attackerCast = ((Player) attacker);
-            TeamEnum attackerT = TeamEnum.getByColor(game.getTeamColor(attackerCast));
-            builder.append(attackerT.getChatColor());
-            attackerName = attackerCast.getDisplayName();
-        }else attackerName = attacker.getName();
+        //TODO: This needs refactor and testing
+        if(attacker == null) {
+            builder.append(getCause().name());
+        }else {
+            String attackerName;
+            if (attacker instanceof Player) {
+                Player attackerCast = ((Player) attacker);
+                TeamEnum attackerT = TeamEnum.getByColor(game.getTeamColor(attackerCast));
+                builder.append(attackerT.getChatColor());
+                attackerName = attackerCast.getDisplayName();
+            } else attackerName = attacker.getName();
 
-        builder.append(attackerName);
+            builder.append(attackerName);
 
-        int i = 0;
-        if(history != null) {
-            for (Damage last : history) {
-                if (System.currentTimeMillis() - last.getTime() >= 8000L) break;
-                if (last.getAttacker() == null ||
-                        last.getAttacker().getName().equalsIgnoreCase(damage.getAttacker().getName())) continue;
-                i++;
+            int i = 0;
+            if (history != null) {
+                for (Damage last : history) {
+                    if (System.currentTimeMillis() - last.getTime() >= 8000L) break;
+                    if (last.getAttacker() == null ||
+                            last.getAttacker().getName().equalsIgnoreCase(damage.getAttacker().getName())) continue;
+                    i++;
+                }
             }
-        }
 
-        if(i != 0) builder.append(" + " + i);
-        builder.append(ChatColor.GRAY);
-        builder.append(" using ");
-        builder.append(ChatColor.RESET);
-        builder.append(withMsg);
-        builder.append(ChatColor.GRAY);
-        builder.append(".");
+            if (i != 0) builder.append(" + " + i);
+            builder.append(ChatColor.GRAY);
+            builder.append(" using ");
+            builder.append(ChatColor.RESET);
+            builder.append(withMsg);
+            builder.append(ChatColor.GRAY);
+            builder.append(".");
+        }
         return builder.toString();
+    }
+
+    private void finishAttacker(StringBuilder builder) {
+
+    }
+    private void finishCause() {
+
     }
 
     public boolean wasUnsafe() {

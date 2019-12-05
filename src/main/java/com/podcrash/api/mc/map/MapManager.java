@@ -71,6 +71,7 @@ public final class MapManager {
      * @param tag - the tag name
      * @param value - must be a boolean, number or a string
      */
+    /*
     public static <T> void insert(String worldName, String tag, T value) {
         if(value instanceof Boolean)
             insert(worldName, tag, (boolean) value);
@@ -82,29 +83,47 @@ public final class MapManager {
             insert(worldName, tag, (Coordinate) value);
         }
     }
+
+     */
     //Assorted insert methods (equivalent to put(key, value)
-    private static void insert(String worldName, String tag, boolean value) {
+    public static void insert(String worldName, String tag, Boolean value) {
         JsonObject json = getMapJSON(worldName);
         json.addProperty(tag, value);
         Communicator.cache(MAPS_CACHE, worldName, json.toString());
     }
-    private static void insert(String worldName, String tag, Number value) {
+    public static void insert(String worldName, String tag, Number value) {
         JsonObject json = getMapJSON(worldName);
         json.addProperty(tag, value);
         Communicator.cache(MAPS_CACHE, worldName, json.toString());
     }
-    private static void insert(String worldName, String tag, String value) {
+    public static void insert(String worldName, String tag, String value) {
         JsonObject json = getMapJSON(worldName);
         json.addProperty(tag, value);
         Communicator.cache(MAPS_CACHE, worldName, json.toString());
     }
-    private static void insert(String worldName, String tag, double[] value) {
+    public static void insert(String worldName, String tag, double[] value) {
         JsonObject json = getMapJSON(worldName);
         json.add(tag, JsonHelper.wrapXYZ(value));
         Communicator.cache(MAPS_CACHE, worldName, json.toString());
     }
-    private static void insert(String worldName, String tag, Coordinate value) {
+    public static void insert(String worldName, String tag, Coordinate value) {
         insert(worldName, tag, new double[] {value.getX(), value.getY(), value.getZ(), value.getYaw(), value.getPitch()});
+    }
+
+    public static void appendObject(String worldName, String tag, String key, JsonElement element) {
+        JsonObject json = getMapJSON(worldName);
+        System.out.println(tag);
+        JsonElement elem = json.get(tag);
+        JsonObject tagJson = (elem == null) ? new JsonObject() : elem.getAsJsonObject();
+        tagJson.add(key, element);
+        json.add(tag, tagJson);
+        Communicator.cache(MAPS_CACHE, worldName, json.toString());
+    }
+    public static void remove(String worldName, String tag) {
+        JsonObject json = getMapJSON(worldName);
+        json.remove(tag);
+
+        Communicator.cache(MAPS_CACHE, worldName, json.toString());
     }
 
     /**
@@ -130,7 +149,24 @@ public final class MapManager {
 
         possible.get(index).getAsJsonArray().add(coordinates);
         Communicator.cache(MAPS_CACHE, worldName, json.toString());
+    }
+    public static void insertNext(String worldName, String tag, double[] value) {
+        JsonArray coordinates = JsonHelper.wrapXYZ(value);
 
+        JsonObject json = getMapJSON(worldName);
+        JsonElement possArr = json.get(tag);
+        JsonArray arr;
+        if(possArr == null) {
+            arr = new JsonArray();
+            arr.add(coordinates);
+
+            json.add(tag, arr);
+        } else {
+            arr = possArr.getAsJsonArray();
+            arr.getAsJsonArray().add(coordinates);
+        }
+
+        Communicator.cache(MAPS_CACHE, worldName, json.toString());
     }
     public static void insert(String worldName, String tag, int index, Coordinate value) {
         insert(worldName, tag, index, new double[] {value.getX(), value.getY(), value.getZ(), value.getYaw(), value.getPitch()});

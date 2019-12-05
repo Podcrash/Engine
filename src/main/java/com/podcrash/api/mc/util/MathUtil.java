@@ -10,4 +10,24 @@ public class MathUtil {
         int scale = (int) Math.pow(10, precision);
         return (double) Math.round(value * scale) / scale;
     }
+
+    /**
+     * Floor the number based on the factors of the factor.
+     * @param factor
+     * @param number
+     * @return
+     */
+    public static int floor(int factor, int number) {
+        return number - number % factor;
+    }
+
+    /**
+     * Ceil the number based on the factors of the factor
+     * @param factor
+     * @param number
+     * @return
+     */
+    public static int ceil(int factor, int number) {
+        return number + number % factor;
+    }
 }

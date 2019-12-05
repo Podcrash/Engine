@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.grinderwolf.swm.api.world.properties.SlimeProperties;
 import com.grinderwolf.swm.api.world.properties.SlimePropertyMap;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 
@@ -22,6 +23,7 @@ import java.util.List;
  */
 public class BaseGameMap implements IMap, Serializable {
     private static final long serialVersionUID = 1L;
+    private String gameWorldName;
 
     protected String name;
     protected List<double[][]> spawns;
@@ -254,6 +256,12 @@ public class BaseGameMap implements IMap, Serializable {
         this.allowMonsters = allowMonsters;
     }
 
+    public final World getGameWorld() {
+        return Bukkit.getWorld(gameWorldName);
+    }
+    public void setGameWorld(World world) {
+        this.gameWorldName = world.getName();
+    }
     @Override
     public String toString() {
         return "AbstractMap{" + "name='" + name + '\'' +

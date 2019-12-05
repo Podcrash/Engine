@@ -8,8 +8,16 @@ public enum Cause {
     BOW - duh
     NULL - for nothing
      */
-    CUSTOM, MELEE, MELEESKILL, PROJECTILE, NULL;
-    private Cause() {
+    CUSTOM,
+    FALL,
+    FIRE,
+    WITHER,
+    SUICIDE,
+    MELEE,
+    MELEESKILL,
+    PROJECTILE,
+    NULL;
+    Cause() {
 
     }
 }

@@ -16,6 +16,13 @@ public final class JsonHelper {
             coordinateObject.add(s);
         return coordinateObject;
     }
+    public static JsonArray wrapXYZ(int[] spawn) {
+        JsonArray coordinateObject = new JsonArray();
+        for(double s : spawn)
+            coordinateObject.add(s);
+        return coordinateObject;
+    }
+
     public static JsonArray wrapTeam(List<double[][]> teamSpawns) {
         JsonArray spawnObject = new JsonArray();
         for(int i = 0; i < teamSpawns.size(); i++) {
@@ -25,6 +32,7 @@ public final class JsonHelper {
         }
         return spawnObject;
     }
+
 
     private static JsonArray wrapSpawnGroup(double[][] spawnGroup) {
         JsonArray spawnsObject = new JsonArray();
@@ -43,6 +51,13 @@ public final class JsonHelper {
         double[] arr = new double[jsonArray.size()];
         for(int i = 0; i < arr.length; i++) {
             arr[i] = jsonArray.get(i).getAsDouble();
+        }
+        return arr;
+    }
+    public static Integer[] wrapInteger(JsonArray jsonArray) {
+        Integer[] arr = new Integer[jsonArray.size()];
+        for(int i = 0; i < arr.length; i++) {
+            arr[i] = jsonArray.get(i).getAsInt();
         }
         return arr;
     }

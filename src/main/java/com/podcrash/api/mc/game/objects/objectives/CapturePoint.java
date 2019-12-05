@@ -40,10 +40,10 @@ public final class CapturePoint extends WinObjective {
     /**
      * Constructor for setting up a capture point
      * @param name Name of the capture point
-     * @param location This is the center of the point, or the exact beacon location.
+     * @param vector This is the center of the point, or the exact beacon location.
      */
-    public CapturePoint(String name, Location location){
-        super(location);
+    public CapturePoint(String name, Vector vector){
+        super(vector);
         this.name = name;
         this.color = "white";
         this.blocks = new byte[][] {
@@ -92,41 +92,45 @@ public final class CapturePoint extends WinObjective {
      *      3. If there are 4 wool blocks that are abs(3,5,3) from the beacon.
      * @return
      */
-    public boolean validate(){
-        if(getLocation().getBlock().getType().equals(Material.BEACON)){
-            Location center = getLocation().clone().add(0, 1,0);
-            double x1 = center.getX() + 2;
-            double z1 = center.getZ() + 2;
-            double x2 = center.getX() - 2;
-            double z2 = center.getZ() - 2;
-            double y = center.getY();
-            for(double x = x1; x >= x2; x--){
-                for(double z = z1; z >= z2; z--){
-                    Location location = new Location(getLocation().getWorld(), x, y, z);
-                    //glass/condition2
-                    boolean isGlass = (location.getBlock().getType().equals(Material.STAINED_GLASS) || location.getBlock().getType().equals(Material.GLASS));
-                    if(isGlass){
-                        Location below = location.clone().subtract(0, 1, 0);
-                        //wool/condition1
-                        boolean isWoolOrBeacon = (below.equals(getLocation()) || below.getBlock().getType().equals(Material.WOOL));
-                        if(isWoolOrBeacon) continue;
-                    }
+    public boolean validate(World world){
+        setWorld(world);
+        if(!getLocation().getBlock().getType().equals(Material.BEACON)) return false;
+        System.out.println("is beacon");
+        Location center = getLocation().clone().add(0, 1,0);
+        double x1 = center.getX() + 2;
+        double z1 = center.getZ() + 2;
+        double x2 = center.getX() - 2;
+        double z2 = center.getZ() - 2;
+        double y = center.getY();
+        for(double x = x1; x >= x2; x--){
+            for(double z = z1; z >= z2; z--){
+                Location location = new Location(getWorld(), x, y, z);
+                //glass/condition2
+                boolean isGlass = (location.getBlock().getType().equals(Material.STAINED_GLASS) || location.getBlock().getType().equals(Material.GLASS));
+                if(isGlass){
+                    Location below = location.clone().subtract(0, 1, 0);
+                    //wool/condition1
+                    boolean isWoolOrBeacon = (below.equals(getLocation()) || below.getBlock().getType().equals(Material.WOOL));
+                    if(isWoolOrBeacon) continue;
+                }
+                return false;
+            }
+        }
+
+        System.out.println("is full glass");
+        //condition 3:
+        y += 4;
+        for(double x = x1 + 1; x >= x2 - 1; x -= 6){
+            for(double z = z1 + 1; z >= z2 - 1; z-= 6){
+                Location location = new Location(getWorld(), x, y, z);
+                if(!location.getBlock().getType().equals(Material.WOOL)) {
                     return false;
                 }
             }
-            //condition 3:
-            y += 4;
-            for(double x = x1 + 1; x >= x2 - 1; x -= 6){
-                for(double z = z1 + 1; z >= z2 - 1; z-= 6){
-                    Location location = new Location(getLocation().getWorld(), x, y, z);
-                    if(!location.getBlock().getType().equals(Material.WOOL)) {
-                        return false;
-                    }
-                }
-            }
-            return true;
         }
-        return false;
+
+        System.out.println("has 4 wool");
+        return true;
     }
 
     public boolean isFull() {
@@ -235,7 +239,7 @@ public final class CapturePoint extends WinObjective {
             this.blocks[row][col] = team.getByteData();
         }
         //update world
-        World world = getLocation().getWorld();
+        World world = getWorld();
         List<Player> players = game == null ? world.getPlayers() : game.getPlayers();
         sendWoolPackets(team, players);
 
@@ -262,7 +266,7 @@ public final class CapturePoint extends WinObjective {
         byte teamByte = team.getByteData();
         boolean check = false;
         boolean once = false;
-        World world = getLocation().getWorld();
+        World world = getWorld();
         List<Player> players = game == null ? world.getPlayers() : game.getPlayers();
 
         sendWoolPackets(team, players);
@@ -341,7 +345,7 @@ public final class CapturePoint extends WinObjective {
             int i = 0;
             for(double x = x1; x >= x2; x -= 6){
                 for(double z = z1; z >= z2; z-= 6){
-                    Location location = new Location(getLocation().getWorld(), x, y, z);
+                    Location location = new Location(getWorld(), x, y, z);
                     if(location.getBlock().getType().equals(Material.WOOL)) {
                         corners[i] = location;
                         i++;
@@ -361,14 +365,14 @@ public final class CapturePoint extends WinObjective {
     public Location[][] getWoolAndGlass(){
         if(woolGlass != null && woolGlass.length == 25 && woolGlass[0].length == 2) return woolGlass;
         Location[][] wools = new Location[25][2];
-        double x2 = getLocation().getX() + 2d;
-        double z2 = getLocation().getZ() + 2d;
+        double x2 = getVector().getX() + 2d;
+        double z2 = getVector().getZ() + 2d;
 
-        double y = getLocation().getY();
+        double y = getVector().getY();
         int i = 0;
-        for(double x = getLocation().getX() - 2d; x <= x2; x++){
-            for(double z = getLocation().getZ() - 2d; z <= z2; z++){
-                Location wool = new Location(getLocation().getWorld(), x, y, z);
+        for(double x = getVector().getX() - 2d; x <= x2; x++){
+            for(double z = getVector().getZ() - 2d; z <= z2; z++){
+                Location wool = new Location(getWorld(), x, y, z);
                 Location glass = wool.clone().add(0, 1, 0);
                 if((wool.getBlock().getType().equals(Material.WOOL) || wool.getBlock().getType().equals(Material.BEACON)) &&
                         (glass.getBlock().getType().equals(Material.STAINED_GLASS) || glass.getBlock().getType().equals(Material.GLASS))) {

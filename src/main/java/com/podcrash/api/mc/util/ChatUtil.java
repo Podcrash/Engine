@@ -1,6 +1,8 @@
 package com.podcrash.api.mc.util;
 
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 /**
  * Translating color codes
@@ -11,6 +13,21 @@ import org.bukkit.ChatColor;
 public final class ChatUtil {
     private static final char COLOR_CHAR = 167;
 
+    /**
+     * If the message overfills over 256 characters (the word limit on mc),
+     * then overflow it to the next sent chat message.
+     * //TODO: make a loop for this instead of using recursion as java doesn't optimized tail calls.
+     * @param sender
+     * @param message
+     */
+    public static void sendMessage(CommandSender sender, String message) {
+        if(message.length() <= 256) {
+            sender.sendMessage(message);
+            return;
+        }
+        sender.sendMessage(message.substring(0, 255));
+        sendMessage(sender, message.substring(256));
+    }
     /**
      * Converts a string to its color coded format
      * @param s The string to convert

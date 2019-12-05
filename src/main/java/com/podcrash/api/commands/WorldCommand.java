@@ -6,6 +6,7 @@ import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.mc.location.Coordinate;
 import com.podcrash.api.mc.map.BaseGameMap;
 import com.podcrash.api.mc.map.MapManager;
+import com.podcrash.api.mc.util.ChatUtil;
 import com.podcrash.api.mc.world.WorldManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -70,14 +71,14 @@ public class WorldCommand implements CommandExecutor {
             commandSender.sendMessage("Deleting world... " + worldName);
             WorldManager.getInstance().deleteWorld(Bukkit.getWorld(worldName), true);
         }else if(args[0].equalsIgnoreCase("infocache")) {
-            commandSender.sendMessage(MapManager.getFriendlyInfo(worldName));
+            ChatUtil.sendMessage(commandSender, MapManager.getFriendlyInfo(worldName));
         }else if(args[0].equalsIgnoreCase("set")) {
             if(args.length >= 5) {
                 commandSender.sendMessage("This command only works with 4 arguments!");
                 return true;
             }
             String tag = args[2];
-            Object value = cast(args[3]);
+            String value = args[3];
             MapManager.insert(worldName, tag, value);
             commandSender.sendMessage(String.format("Setted tag %s to a value of %s in world %s", tag, value, worldName));
         }else if(args[0].equalsIgnoreCase("mlocset")) {
@@ -105,23 +106,5 @@ public class WorldCommand implements CommandExecutor {
             commandSender.sendMessage(String.format("Setted tag %s to a value of %s in world %s", tag, ((Player) commandSender).getLocation(), worldName));
         }
         return true;
-    }
-
-    /**
-     * If the object can be an integer, double, or a boolean, cast it to that.
-     * @param object
-     * @return
-     */
-    private Object cast(String object) {
-        if (object.equalsIgnoreCase("true")) return Boolean.TRUE;
-        else if (object.equalsIgnoreCase("false")) return Boolean.FALSE;
-        Object a;
-        try {
-            a = Double.parseDouble(object);
-            return a;
-        } catch (NumberFormatException e) {
-
-        }
-        return object;
     }
 }

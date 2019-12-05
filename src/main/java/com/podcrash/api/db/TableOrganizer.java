@@ -47,6 +47,7 @@ public final class TableOrganizer {
             new PlayerTable(test),
             new ChampionsKitTable(test),
             new PlayerPermissionsTable(test),
+            new DescriptorTable(test),
             new MapTable(test),
         };
         process(tables);

@@ -1,8 +1,8 @@
 package com.podcrash.api.db;
 
 import com.podcrash.api.permissions.Perm;
-import nu.studer.sample.Tables;
-import nu.studer.sample.tables.Permissions;
+import com.podcrash.api.db.jooq.Tables;
+import com.podcrash.api.db.jooq.tables.Permissions;
 import org.jooq.Cursor;
 import org.jooq.Record;
 import org.jooq.Record1;

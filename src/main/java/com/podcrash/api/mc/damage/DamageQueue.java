@@ -111,23 +111,6 @@ public final class DamageQueue implements Runnable {
     }
 
     /**
-     * Calculate the armor value of the entity.
-     * Very important in finding how much damage an entity should recieve.
-     * @param entity the entity
-     * @return armor value of the entity
-     */
-    private int armorValue(LivingEntity entity) {
-        int i = 0;
-        for(ItemStack armor : entity.getEquipment().getArmorContents()) {
-            net.minecraft.server.v1_8_R3.ItemStack nmsArmor = CraftItemStack.asNMSCopy(armor);
-            if(nmsArmor != null && nmsArmor.getItem() instanceof ItemArmor) {
-                i += ((ItemArmor) nmsArmor.getItem()).c;
-            }
-        }
-        return i;
-    }
-
-    /**
      * Damage the entity with an amount of damage specified.
      * This uses setHealth, instead of damage, so that some stuff are skipped by the Bukkit API.
      * Because of that, a lot of this stuff is experimental.
@@ -206,10 +189,9 @@ public final class DamageQueue implements Runnable {
      * Damage calculations for {@link DamageQueue#damageEntity(LivingEntity, double)}
      * @param entity the victim
      * @param damage the unfiltered damage
-     * @param armorValue armor value of the victim, see {@link DamageQueue#armorValue(LivingEntity)}
      * @param damageEvent the event
      */
-    private void damage(LivingEntity entity, double damage, int armorValue, DamageApplyEvent damageEvent) {
+    private void damage(LivingEntity entity, double damage, double armorValue, DamageApplyEvent damageEvent) {
         double damageFormula = damage * (1D - 0.04D * armorValue);
         //Bukkit.broadcastMessage("AV: " + armorValue  + " " + damage + " --> " + damageFormula);
         if(damageEntity(entity, damageFormula)) return;
@@ -239,6 +221,7 @@ public final class DamageQueue implements Runnable {
         Damage damage = history.removeLast();
 
         DeathApplyEvent deathEvent = new DeathApplyEvent(damage, history);
+
         Bukkit.getPluginManager().callEvent(deathEvent);
         removeDeath((Player) victim);
         if(deathEvent.isCancelled()) return false;
@@ -334,7 +317,7 @@ public final class DamageQueue implements Runnable {
             damage += findPotionBonus(victim, attacker);
 
         addHistory(victim, damageWrapper);
-        int armorValue = armorValue(victim);
+        double armorValue = damageEvent.getArmorValue();
         playSound(victim, attacker, cause);
         System.out.println("Damage vs XP: " + damage + " vs " + damageEvent.getChangeXP());
         if(attacker instanceof Player) ((Player) attacker).setLevel((int) damageEvent.getChangeXP());

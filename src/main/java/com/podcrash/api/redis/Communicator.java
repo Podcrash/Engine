@@ -4,6 +4,7 @@ import gnu.trove.impl.sync.TSynchronizedCharByteMap;
 import org.bukkit.Bukkit;
 import org.redisson.Redisson;
 import org.redisson.api.RMap;
+import org.redisson.api.RMapCache;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -11,8 +12,14 @@ import org.redisson.config.Config;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+/**
+ * WARNING:
+ * To avoid confusion, all keys are lower-cased.
+ * DO NOT USE A SINGLE CAPITAL LETTER (for keys).
+ */
 public class Communicator {
     private static final String CACHE_CHANNEL = "PC-CACHE";
     private static RedissonClient client;
@@ -44,6 +51,9 @@ public class Communicator {
         }, executor).thenAcceptAsync(consumer, executor);
     }
 
+    public static boolean isReady() {
+        return client != null;
+    }
     //USE THESE METHODS BELOW FOR CACHING
     public static void cache(String key, String value) {
         cache(CACHE_CHANNEL, key, value);
@@ -77,8 +87,8 @@ public class Communicator {
      * @param value the value
      */
     public static synchronized void cache(String channel, String key, String value) {
-        final RMap<String, String> cache = client.getMapCache(channel);
-        cache.put(key, value);
+        final RMapCache<String, String> cache = client.getMapCache(channel);
+        cache.put(key.toLowerCase(), value, 10, TimeUnit.MINUTES);
     }
 
     /**
@@ -89,7 +99,7 @@ public class Communicator {
      */
     public static String getCacheValue(String channel, String key) {
         final RMap<String, String> cache = client.getMapCache(channel);
-        return cache.get(key);
+        return cache.get(key.toLowerCase());
     }
 
     /**
@@ -100,7 +110,7 @@ public class Communicator {
      */
     public static boolean containsKey(String channel, String key) {
         final RMap<String, String> cache = client.getMapCache(channel);
-        return cache.containsKey(key);
+        return cache.containsKey(key.toLowerCase());
     }
 
     /**
@@ -110,7 +120,7 @@ public class Communicator {
      */
     public static void removeCache(String channel, String key) {
         final RMap<String, String> cache = client.getMapCache(channel);
-        cache.remove(key);
+        cache.remove(key.toLowerCase());
     }
     // They are casted into arraylist because performance is slightly faster
     // when looping due to randomaccess interface

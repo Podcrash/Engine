@@ -2,8 +2,8 @@ package com.podcrash.api.db;
 
 //static imports are recommended to make the code look cleaner
 
-import nu.studer.sample.Tables;
-import nu.studer.sample.tables.Kits;
+import com.podcrash.api.db.jooq.Tables;
+import com.podcrash.api.db.jooq.tables.Kits;
 import org.jooq.CreateTableColumnStep;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;

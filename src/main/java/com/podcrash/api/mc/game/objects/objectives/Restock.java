@@ -5,12 +5,16 @@ import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.util.Vector;
 
 public class Restock extends ItemObjective {
     private static ObjectiveType otype = ObjectiveType.RESTOCK;
 
-    public Restock(Location spawnLocation){
-        super(Material.CHEST, Material.GOLD_BLOCK, spawnLocation);
+    public Restock(Location location) {
+        this(location.toVector());
+    }
+    public Restock(Vector spawnVector){
+        super(Material.CHEST, Material.GOLD_BLOCK, spawnVector);
         this.fireworkEffect = FireworkEffect.builder().withColor(Color.YELLOW).with(FireworkEffect.Type.BURST).build();
     }
 
