@@ -22,7 +22,8 @@ public class ScoreboardRepeater extends GameResource {
      * Remake the scoreboard and show it to the players
      */
     private void update() {
-        for (Player player : getGame().getPlayers()){
+        scoreboard.setLines(new ArrayList<>());
+        for (Player player : getGame().getBukkitPlayers()){
             player.setScoreboard(scoreboard.getBoard());
         }
     }
@@ -37,7 +38,7 @@ public class ScoreboardRepeater extends GameResource {
      */
     @Override
     public void cleanup() {
-        for (Player player : getGame().getPlayers()){
+        for (Player player : getGame().getBukkitPlayers()){
             //clear scoreboard
             player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
         }

@@ -112,7 +112,7 @@ public class WrapperPlayServerScoreboardObjective extends AbstractPacket {
     /**
      * Retrieve Mode.
      * <p>
-     * Notes: 0 to create the scoreboard. 1 to remove the scoreboard. 2 to update the display text.
+     * Notes: 0 to createScoreboard the scoreboard. 1 to remove the scoreboard. 2 to update the display text.
      * @return The current Mode
      */
     public int getMode() {

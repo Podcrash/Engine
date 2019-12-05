@@ -139,7 +139,9 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             new GameDamagerConverterListener(this);
             new MapMaintainListener(this);
             new SpigotJoinListener(this);
+            new PlayerInventoryListener(this);
             new StatusListener(this);
+            // TODO: Add more listeners here..
         });
     }
     private void registerCommands() {

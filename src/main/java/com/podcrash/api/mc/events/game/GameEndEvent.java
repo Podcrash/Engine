@@ -9,9 +9,9 @@ public class GameEndEvent extends GameEvent {
     public Location spawnlocation;
 
     public GameEndEvent(Game game, Location spawnlocation) {
-        super(game, "Game " + game.getId() + " has ended\n" +
-                "Red Team: " + game.getRedScore() + "\n" +
-                "Blue Team: " + game.getBlueScore());
+        super(game, "Game " + game.getId() + " has ended\n" + "");
+//                "Red Team: " + game.getRedScore() + "\n" +
+//                "Blue Team: " + game.getBlueScore());
         this.spawnlocation = spawnlocation;
     }
 

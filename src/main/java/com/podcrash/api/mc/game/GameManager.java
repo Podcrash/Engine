@@ -36,7 +36,7 @@ public class GameManager {
         }
         if(game == null) throw new IllegalArgumentException("only the Dom GameType works for now");
         currentGame = game;
-        game.create();
+        game.createScoreboard();
         game.setGameWorld("GulleyRevamp");
         return game;
     }*/
@@ -44,12 +44,13 @@ public class GameManager {
     public static int getCurrentID() {
         return gameID;
     }
+
     public static void createGame(Game game) {
         if(currentGame != null) throw new RuntimeException("Making more than 1 game is ill-advised");
         Validate.isTrue(game.getId() == gameID);
         gameID++;
         currentGame = game;
-        game.create();
+        game.createScoreboard();
 
     }
     public static void setGameMap(String worldName) {
@@ -148,22 +149,24 @@ public class GameManager {
         return currentGame != null && currentGame.contains(p);
     }
 
+    // TODO: Probably replace with a queue system.
+    // TODO: This is assuming blue and red team enums, which are subject to change.
     public static void randomTeam(Player player) {
         Game game = currentGame;
-        int blue = game.blueSize();
-        int red = game.redSize();
+        int red = game.getTeam(1).teamSize();
+        int blue = game.getTeam(2).teamSize();
         if(blue > red)
-            joinTeam(player, "red");
+            joinTeam(player, TeamEnum.RED);
         else if(red > blue)
-            joinTeam(player, "blue");
+            joinTeam(player, TeamEnum.BLUE);
         else //they are equal, good-ol RNG!
-            joinTeam(player, new String[]{"red","blue"}[(int) (Math.random() + 0.5)]);
+            joinTeam(player, new TeamEnum[]{TeamEnum.RED, TeamEnum.BLUE}[(int) (Math.random() + 0.5)]);
 
     }
-    public static void joinTeam(Player player, String color) {
+    public static void joinTeam(Player player, TeamEnum teamEnum) {
         Game game = currentGame;
         if (hasPlayer(player)) {
-            if(game.getTeamColor(player) != null && game.getTeamColor(player).equalsIgnoreCase(color)) {
+            if(game.getTeamColor(player) != null && game.getTeamEnum(player) == teamEnum) {
                 player.sendMessage(String.format(
                         "%sChampions> %sYou are already on this team%s!",
                         ChatColor.BLUE,
@@ -171,45 +174,35 @@ public class GameManager {
                         ChatColor.GRAY));
                 return;
             }
-            if (game.getRedTeam().contains(player)) {
-                game.removePlayerRed(player);
-                player.sendMessage(
-                        String.format(
-                                "%sChampions> %sYou left the %sRed Team%s.",
-                                ChatColor.BLUE,
-                                ChatColor.GRAY,
-                                ChatColor.RED,
-                                ChatColor.GRAY));
-            }else if (game.getBlueTeam().contains(player)) {
-                game.removePlayerBlue(player);
-                player.sendMessage(
-                        String.format(
-                                "%sChampions> %sYou left the %sBlue Team%s.",
-                                ChatColor.BLUE,
-                                ChatColor.GRAY,
-                                ChatColor.BLUE,
-                                ChatColor.GRAY));
+            for (GTeam team : game.getTeams()) {
+                if (team.isPlayerOnTeam(player)) {
+                    team.removeFromTeam(player.getUniqueId());
+                    player.sendMessage(
+                            String.format(
+                                    "%sChampions> %sYou left the %s%s Team%s.",
+                                    ChatColor.BLUE,
+                                    ChatColor.GRAY,
+                                    team.getTeamEnum().getChatColor(),
+                                    team.getTeamEnum().getName(),
+                                    ChatColor.GRAY));
+                }
             }
-            if (color.equalsIgnoreCase("red") || color.equalsIgnoreCase("blue")) {
-                game.addPlayerToTeam(player, color);
-                TeamEnum team = TeamEnum.getByColor(color);
-                player.sendMessage(
-                        String.format(
-                                "%sChampions> %sYou joined the %s%s Team %sin %sGame %s%s.",
-                                ChatColor.BLUE,
-                                ChatColor.GRAY,
-                                team.getChatColor(),
-                                team.getName(),
-                                ChatColor.GRAY,
-                                ChatColor.GREEN,
-                                game.getId(),
-                                ChatColor.GRAY));
-            }
+            GTeam team = game.getTeam(teamEnum);
+            team.addToTeam(player.getUniqueId());
+            player.sendMessage(
+                    String.format(
+                            "%sChampions> %sYou joined the %s%s Team %sin %sGame %s%s.",
+                            ChatColor.BLUE,
+                            ChatColor.GRAY,
+                            teamEnum.getChatColor(),
+                            team.getName(),
+                            ChatColor.GRAY,
+                            ChatColor.GREEN,
+                            game.getId(),
+                            ChatColor.GRAY));
         }
     }
 
-    /**
-     */
     public static void startGame() {
         if(currentGame == null) return;
         Game game = currentGame;
@@ -222,11 +215,13 @@ public class GameManager {
         Pluginizer.getSpigotPlugin().getServer().getPluginManager().callEvent(gamestart);
 
     }
+
     public static void endGame(Game game) {
         Location spawnLoc = Bukkit.getWorld("world").getSpawnLocation();
         game.setOngoing(false);
+        game.optIn();
         GameEndEvent gameend = new GameEndEvent(game, spawnLoc);
-        currentGame = null;
+        //currentGame = null;
         Pluginizer.getSpigotPlugin().getServer().getPluginManager().callEvent(gameend);
     }
 

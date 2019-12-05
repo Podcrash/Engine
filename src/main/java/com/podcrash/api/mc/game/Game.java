@@ -1,6 +1,5 @@
 package com.podcrash.api.mc.game;
 
-
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.PlayerInfoData;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
@@ -9,333 +8,842 @@ import com.podcrash.api.mc.events.game.GameJoinEvent;
 import com.podcrash.api.mc.events.game.GameLeaveEvent;
 import com.podcrash.api.mc.events.game.GameMapChangeEvent;
 import com.podcrash.api.mc.game.objects.ItemObjective;
-import com.podcrash.api.mc.game.objects.WinObjective;
 import com.podcrash.api.mc.game.resources.GameResource;
+import com.podcrash.api.mc.game.scoreboard.GameLobbyScoreboard;
 import com.podcrash.api.mc.game.scoreboard.GameScoreboard;
+import com.podcrash.api.mc.ui.TeamSelectGUI;
+import com.podcrash.api.mc.util.ChatUtil;
+import com.podcrash.api.mc.util.ItemStackUtil;
 import com.podcrash.api.mc.util.PlayerCache;
 import com.podcrash.api.mc.util.Utility;
 import com.podcrash.api.plugin.Pluginizer;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+
+/**
+ * Abstract Game Class
+ * @author RainDance & JJCunningCreeper.
+ *
+ * TODO: createTeams()
+ * TODO: Add kits?
+ * TODO: Deal with modes.
+ * TODO: Scoreboards and timers.
+ */
 
 public abstract class Game {
+
     private int id;
-    private List<GameResource> gameResources = new ArrayList<>();
     private String name;
-
-    private Set<String> players;
-    private Set<String> spectators;
-    private Set<String> blueTeam;
-    private Set<String> redTeam;
-    private Set<Player> respawning;
-
-    protected List<Location> redSpawn;
-    protected List<Location> blueSpawn;
-
-    protected AtomicInteger redScore;
-    protected AtomicInteger blueScore;
-
+    private List<GTeam> teams;
     private boolean isLoadedMap;
-    private boolean ongoing = false;
-
-    protected Scoreboard colorBoard;
+    private boolean ongoing;                            // TODO: May replace this with an Enum with a more specific state for the game.
     protected World gameWorld;
+    //private GameMap map;                              // TODO: Replace this with however we're determining the map.
+    private List<GameResource> gameResources;
 
-    private GameType type;
+    // TODO: Everything in this section is related to the mode or type. To be modified later.
+    private GameType type;                              // TODO: Mode - this may get replaced/removed later.
+    private String mode;
+    private String primary_color;
+    private String secondary_color;
 
+    private Set<UUID> participants;                     // Participating players only.
+    private Set<UUID> spectators;                       // Spectating players only.
+    private Set<UUID> optIn;                            // Spectators to participate next game.
+    private Set<UUID> respawning;                       // Respawning players.
 
-    public Game(int id, GameType type, String name) {
+    private GameLobbyScoreboard lobby_board;
+    private GameLobbyTimer lobby_timer;
+
+    /**
+     * Constructor for the game.
+     * @param id The ID of the game.
+     * @param name The name of the game.
+     * @param type The type of the game.
+     */
+    public Game(int id, String name, GameType type) {
         this.id = id;
         this.name = name;
-        this.players = new HashSet<>();
-        this.spectators = new HashSet<>();
-        this.respawning = new HashSet<>();
-        this.blueTeam = new HashSet<>();
-        this.redTeam = new HashSet<>();
-        this.redSpawn = new ArrayList<>();
-        this.blueSpawn = new ArrayList<>();
-        this.redScore = new AtomicInteger(0);
-        this.blueScore = new AtomicInteger(0);
-        this.gameWorld = Bukkit.getWorld("Gulley");
+        this.teams = new ArrayList<GTeam>();
+        this.isLoadedMap = false;
+        this.ongoing = false;
+        this.gameWorld = Bukkit.getWorld("world");
+        // this.map = something
         this.type = type;
+        this.gameResources = new ArrayList<>();
+
+        this.participants = new HashSet<>();
+        this.spectators = new HashSet<>();
+        this.optIn = new HashSet<>();
+        this.respawning = new HashSet<>();
+
+//        this.lobby_board = new GameLobbyScoreboard(15, 0, this);
+//        this.lobby_timer = new GameLobbyTimer();
     }
 
     public abstract GameScoreboard getGameScoreboard();
-    public abstract void increment(String team, int score);
 
-    public World getGameWorld() {
-        return gameWorld;
+    public abstract List<ItemObjective> getItemObjectives();
+
+    public abstract int getAbsoluteMinPlayers();
+
+    public abstract Location spectatorSpawn();
+
+    public abstract void leaveCheck();
+
+    public abstract void createTeams(TeamSettings settings, GTeam... teams);
+
+    /**
+     * @return The ID of the game.
+     */
+    public int getId() { return id; }
+
+    /**
+     * @return The name of the game.
+     */
+    public String getName() { return name; }
+
+    /**
+     * @return A list of teams.
+     */
+    public List<GTeam> getTeams() { return teams; }
+
+    /**
+     * Set the teams.
+     * @param teams The teams.
+     */
+    public void setTeams(List<GTeam> teams) { this.teams = teams; }
+
+    /**
+     * @return The number of teams.
+     */
+    public int numberOfTeams() { return teams.size(); }
+
+    /**
+     * @return If the map is loaded.
+     */
+    public boolean isLoadedMap() {
+        return isLoadedMap || (gameWorld != null);
     }
+
+    /**
+     * Set if the map is loaded.
+     * @param loadedMap If the map is loaded.
+     */
+    public void setLoadedMap(boolean loadedMap) {
+        isLoadedMap = loadedMap;
+    }
+
+    /**
+     * @return Whether the game is ongoing.
+     */
+    public boolean isOngoing() { return ongoing; }
+
+    /**
+     * Set whether the game is ongoing.
+     * @param ongoing The ongoing boolean.
+     */
+    public void setOngoing(boolean ongoing) { this.ongoing = ongoing; }
+
+    /**
+     * @return The Game World.
+     */
+    public World getGameWorld() { return gameWorld; }
+
+    /**
+     * Set the Game World.
+     * @param string The Game World name.
+     */
     public void setGameWorld(String string){
         this.gameWorld = Bukkit.getWorld(string);
         Bukkit.getPluginManager().callEvent(new GameMapChangeEvent(this, string));
     }
 
-    public abstract void loadMap();
-    public abstract void unloadWorld();
-
-    public abstract List<WinObjective> getWinObjectives();
-    public abstract List<ItemObjective> getItemObjectives();
-
+    /**
+     * Get the map name.
+     * TODO: This is suggesting that the world name is the map name. This will most likely change when the maps system is established.
+     * @return The map name.
+     */
     public String getMapName(){
-        if(gameWorld == null) return "null";
+        if (gameWorld == null) return "null";
         else return gameWorld.getName();
     }
-    public boolean isLoadedMap() {
-        return isLoadedMap || (gameWorld != null);
-    }
-    public void setLoadedMap(boolean loadedMap) {
-        isLoadedMap = loadedMap;
-    }
-
-    public abstract int getMaxPlayers();
-    public int getPlayerCount() {
-        return this.blueTeam.size() + this.redTeam.size();
-    }
-    public int size() {
-        int i = players.size();
-        for(String specName : spectators) {
-            if(players.contains(specName)) i--;
-        }
-        return i;
-    }
-    public int redSize() {
-        return this.redTeam.size();
-    }
-    public int blueSize() {
-        return this.blueTeam.size();
-    }
-    public boolean isFull() {
-        return getPlayerCount() >= getMaxPlayers();
-    }
-
-    public List<Player> getPlayers() {
-        List<Player> players = new ArrayList<>();
-        for(String name : this.players) {
-            Player p;
-            if ((p = Bukkit.getPlayer(name)) != null) players.add(p);
-        }
-        return players;
-    }
-    public Set<String> getPlayerNames() {
-        return players;
-    }
 
     /**
-     * Add the player to specified team and set their scoreboard
-     * @param player
-     * @param color
+     * @return The Game Type.
      */
-    public void addPlayerToTeam(Player player, String color) {
-        if (color.equalsIgnoreCase("red")) {
-            addPlayerToRed(player);
-        } else if (color.equalsIgnoreCase("blue")) {
-            addPlayerToBlue(player);
-        } else throw new IllegalArgumentException(String.format("%s must be either red or blue!", color));
-    }
-
-    public boolean isRespawning(Player player) {
-        return respawning.contains(player);
-    }
-
-    public Set<Player> getRespawning(){
-        return respawning;
-    }
-
-    /**
-     * Create a new scoreboard concerning redteam and blueteam
-     */
-    public void create(){
-        Scoreboard colorBoard = getGameScoreboard().createBoard();
-        String red = id + "redTeam";
-        String blue = id + "blueTeam";
-        if(colorBoard.getTeam(red) != null) {
-            colorBoard.getTeam(red).unregister();
-        }
-        if(colorBoard.getTeam(blue) != null) {
-            colorBoard.getTeam(blue).unregister();
-        }
-        Team redT = colorBoard.registerNewTeam(red);
-        Team blueT = colorBoard.registerNewTeam(blue);
-        redT.setPrefix(TeamEnum.RED.getChatColor().toString());
-        blueT.setPrefix(TeamEnum.BLUE.getChatColor().toString());
-    }
     public GameType getType() {
         return type;
     }
 
-    private void addPlayerToRed(Player player) {
-        this.redTeam.add(player.getName());
-        Scoreboard colorBoard = getGameScoreboard().getBoard();
-        Team red = colorBoard.getTeam(id + "redTeam");
-        player.setScoreboard(colorBoard);
-        red.addEntry(player.getName());
-        add(player);
-
-    }
-    private void addPlayerToBlue(Player player) {
-        this.blueTeam.add(player.getName());
-        Scoreboard colorBoard = getGameScoreboard().getBoard();
-        Team blue = colorBoard.getTeam(id + "blueTeam");
-        player.setScoreboard(colorBoard);
-        blue.addEntry(player.getName());
-        add(player);
-    }
-
-    public void removePlayerRed(Player player) {
-        redTeam.remove(player.getName());
-        remove(player);
-    }
-    public void removePlayerBlue(Player player) {
-        blueTeam.remove(player.getName());
-        remove(player);
-    }
     /**
-     * If the player wants sto spectate, add them to the list.
-     * If the game is ongoing, teleport them to the game
-     * @param player
+     * @return The capacity for the game (sum of all team capacities).
      */
-    public void addSpectator(Player player) {
-        this.spectators.add(player.getName());
-        add(player);
-        player.setScoreboard(getGameScoreboard().getBoard());
-        if(isOngoing()) {
-            Location spawn = getRedSpawn().get(1);
-            player.teleport(spawn);
-            player.setGameMode(GameMode.SPECTATOR);
+    public int getCapacity() {
+        int capacity = 0;
+        for (GTeam team : teams) {
+            capacity = capacity + team.getCapacity();
         }
-    }
-    public void removeSpectator(Player player) {
-        remove(player);
-        this.spectators.remove(player.getName());
-        player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+        return capacity;
     }
 
-    public void add(Player player) {
-        this.players.add(player.getName());
-        Bukkit.getServer().getPluginManager().callEvent(new GameJoinEvent(this, player));
-    }
-    public void remove(Player player) {
-        this.players.remove(player.getName());
-        Bukkit.getServer().getPluginManager().callEvent(new GameLeaveEvent(this, player));
-    }
-    public boolean contains(Player player) {
-        return isRed(player) || isBlue(player) || isSpectating(player) || players.contains(player.getName());
-    }
-
-    public Set<String> getTeamStr(String color) {
-        if (color.equalsIgnoreCase("red")) {
-            return redTeam;
-        } else if (color.equalsIgnoreCase("blue")) {
-            return blueTeam;
-        } else throw new IllegalArgumentException(String.format("%s must be either red or blue!", color));
-    }
-    public List<Player> getBlueTeam() {
-        List<Player> players = new ArrayList<>();
-        for(String name : this.blueTeam) {
-            Player p;
-            if ((p = Bukkit.getPlayer(name)) != null) players.add(p);
+    /**
+     * @return The max number of players for the game (sum of amm team maxes).
+     */
+    public int getMaxPlayers() {
+        int max = 0;
+        for (GTeam team : teams) {
+            max = max + team.getMaxPlayers();
         }
-        return players;
+        return max;
     }
-    public List<Player> getRedTeam() {
-        List<Player> players = new ArrayList<>();
-        for(String name : this.redTeam) {
-            Player p;
-            if ((p = Bukkit.getPlayer(name)) != null) players.add(p);
+
+    public int getMinPlayers() {
+        int min = 0;
+        for (GTeam team : teams) {
+            min = min + team.getMinPlayers();
         }
-        return players;
-    }
-    public List<Player> getSpectators() {
-        List<Player> players = new ArrayList<>();
-        for(String name : this.spectators) {
-            Player p;
-            if ((p = Bukkit.getPlayer(name)) != null) players.add(p);
-        }
-        return players;
+        return min;
     }
 
-    public Set<String> getTeam(Player player) {
-        if (redTeam.contains(player.getName())) return redTeam;
-        else if (blueTeam.contains(player.getName())) return blueTeam;
-        else return null;
-    }
-    public String getTeamColor(Player player) {
-        return getTeamColor(player.getName());
-    }
-    public String getTeamColor(String name) {
-        if (redTeam.contains(name)) return "red";
-        else if (blueTeam.contains(name)) return "blue";
-        else return "spec";
+    /**
+     * @return The game resources.
+     */
+    public List<GameResource> getGameResources() {
+        return gameResources;
     }
 
-    public boolean isRed(Player player) {
-        return redTeam.contains(player.getName());
-    }
-    public boolean isBlue(Player player) {
-        return blueTeam.contains(player.getName());
-    }
-    public boolean isSpectating(Player player) {
-        return isSpectating(player.getName());
-    }
-    public boolean isSpectating(String name) {
-        return spectators.contains(name);
-    }
-
+    /**
+     * Register a game resource.
+     * @param resource The game resource.
+     */
     public void registerResource(GameResource resource){
         if(resource.getGameID() != this.id) throw new IllegalArgumentException("resource does not correspond with its game id" + "gameid: " + id + " resourceid: " + resource.getGameID());
         gameResources.add(resource);
         resource.run(resource.getTicks(), resource.getDelayTicks());
     }
+
+    /**
+     * Register game resources.
+     * @param resources The game resources.
+     */
     public void registerResources(GameResource... resources){
         for (GameResource resource: resources) {
             registerResource(resource);
         }
     }
-    public List<GameResource> getGameResources() {
-        return gameResources;
-    }
+
+    /**
+     * Unregister a game resource.
+     * @param resource The game resource to unregister.
+     */
     public void unregisterGameResource(GameResource resource){
         resource.unregister();
         gameResources.remove(resource);
     }
 
-    public boolean isOngoing() {
-        return ongoing;
-    }
-    public void setOngoing(boolean ongoing) {
-        this.ongoing = ongoing;
+    /**
+     * @return A set of the participating players.
+     */
+    public Set<UUID> getParticipants() { return participants; }
+
+    /**
+     * @return A set of spectating players.
+     */
+    public Set<UUID> getSpectators() { return spectators; }
+
+    /**
+     * @return A set of spectators to opt in next game.
+     */
+    public Set<UUID> getOptIn() { return optIn; }
+
+    /**
+     * @return The set of respawning players.
+     */
+    public Set<UUID> getRespawning() { return respawning; }
+
+    /**
+     * @return A set of all players (participating and spectating).
+     */
+    public Set<UUID> getPlayers() {
+        Set<UUID> players = new HashSet<UUID>();
+        players.addAll(participants);
+        players.addAll(spectators);
+        return players;
     }
 
-    public int getId() {
-        return id;
-    }
-    public String getName() {
-        return name;
-    }
-
-    public List<Location> getRedSpawn() {
-        return redSpawn;
-    }
-    public List<Location> getBlueSpawn() {
-        return blueSpawn;
+    public Set<UUID> getParticipantsNoTeam() {
+        Set<UUID> result = new HashSet<UUID>();
+        for (UUID uuid : participants) {
+            if (!isOnTeam(uuid)) { result.add(uuid); }
+        }
+        return result;
     }
 
-    public int getRedScore() {
-        return redScore.get();
-    }
-    public int getBlueScore() {
-        return blueScore.get();
+    /**
+     * @return A list of all players.
+     */
+    public List<Player> getBukkitPlayers() {
+        List<Player> players = new ArrayList<>();
+        for(UUID uuid : getPlayers()) {
+            Player p;
+            if ((p = Bukkit.getPlayer(uuid)) != null) players.add(p);
+        }
+        return players;
     }
 
+    /**
+     * @return List of spectators.
+     */
+    public List<Player> getBukkitSpectators() {
+        List<Player> players = new ArrayList<>();
+        for(UUID uuid : getSpectators()) {
+            Player p;
+            if ((p = Bukkit.getPlayer(uuid)) != null) players.add(p);
+        }
+        return players;
+    }
+
+    /**
+     * The entire team of players that the specified player is on.
+     * @param player The player
+     * @return The list of team members.
+     */
+    public List<UUID> getTeamPlayers(Player player) {
+        for (GTeam team : teams) {
+            if (team.getPlayers().contains(player.getUniqueId())) {
+                return team.getPlayers();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @return The total player count (sum of players on each team).
+     */
+    public int getPlayerCount() {
+        int sum = 0;
+        for (GTeam team : teams) {
+            sum = sum + team.teamSize();
+        }
+        return sum;
+    }
+
+    /**
+     * @return The number of participating players in the game.
+     */
+    public int size() {
+        return participants.size();
+    }
+
+    /**
+     * @return If the game is full.
+     */
+    public boolean isFull() {
+        return getPlayerCount() >= getMaxPlayers();
+    }
+
+    /**
+     * @param player The player.
+     * @return If the player is respawning.
+     */
+    public boolean isRespawning(Player player) {
+        return respawning.contains(player.getUniqueId());
+    }
+
+    /**
+     * Create a new scoreboard for the teams.
+     * TODO: This should only be done when the game starts because team enums can change prior to that.
+     */
+    public void createScoreboard(){
+        Scoreboard colorBoard = getGameScoreboard().getBoard();
+        for (GTeam team : teams) {
+            String teamString = id + team.getTeamEnum().getByteData() + team.getTeamEnum().getName() + "Team";
+            if (colorBoard.getTeam(teamString) != null) {
+                colorBoard.getTeam(teamString).unregister();
+            }
+            Team newTeam = colorBoard.registerNewTeam(teamString);
+            newTeam.setPrefix(team.getTeamEnum().getChatColor().toString());
+        }
+    }
+
+    /**
+     * Toggles the spectating status of a player.
+     * @param player The player.
+     */
+    public void toggleSpec(Player player) {
+        if (isOngoing()) {
+            optIn.add(player.getUniqueId());
+            return;
+        }
+        if (isSpectating(player)) {
+            removeSpectator(player);
+        } else {
+            addSpectator(player);
+        }
+    }
+
+    /**
+     * Add a player to a scoreboard team with a team enum.
+     * This is used for display team colors in player display names (above player's head).
+     * This should only happen upon the start of a game as team enums can change prior to that.
+     * TODO: Perhaps a misleading method name that could be changed later?
+     * @param player The player to add.
+     * @param teamEnum The team enum.
+     */
+    public void addPlayerToTeam(Player player, TeamEnum teamEnum) {
+         spectators.remove(player.getUniqueId());
+         getTeam(teamEnum).addToTeam(player.getUniqueId());
+         Team team = getGameScoreboard().getBoard().getTeam(id + teamEnum.getByteData() + getTeam(teamEnum).getTeamEnum().getName() + "Team");
+         player.setScoreboard(getGameScoreboard().getBoard());
+         team.addEntry(player.getName());
+//         add(player);
+    }
+
+    /**
+     * Player joining a team.
+     * @param player The player.
+     * @param teamEnum The Team Enum of the team to join.
+     * @return If the join was successful.
+     */
+    public boolean joinTeam(Player player, TeamEnum teamEnum) {
+        if (!player.isOnline() || isOngoing()) { return false; }
+        leaveTeam(player);
+        addParticipant(player);
+        if (!contains(player)) { return false; }
+        GTeam team = getTeam(teamEnum);
+        if (team.teamSize() < team.getMaxPlayers()) {
+            player.setPlayerListName(ChatUtil.chat(team.getTeamEnum().getColorCode() + player.getName()));
+            team.addToTeam(player);
+            if (player.getOpenInventory().getTitle().equals(TeamSelectGUI.inventory_name)) { player.openInventory(TeamSelectGUI.selectTeam(this, player)); }
+            return true;
+        }
+        return false;
+    }
+
+
+    public boolean leaveTeam(Player player) {
+        if (!contains(player) || !isOnTeam(player)) { return false; }
+        getTeam(player).removeFromTeam(player);
+        player.setPlayerListName(ChatUtil.chat("&7" + player.getName()));
+        if (player.getOpenInventory().getTitle().equals(TeamSelectGUI.inventory_name)) { player.openInventory(TeamSelectGUI.selectTeam(this, player)); }
+        leaveCheck();
+        return true;
+    }
+
+    /**
+     * If the player wants to spectate, add them to the list.
+     * If the game is ongoing, teleport them to the game.
+     * TODO: Check if the added player is a participant/on a team and remove them accordingly?
+     * @param player The player.
+     */
+    public void addSpectator(Player player) {
+        // Add to spectators and remove from participants.
+        spectators.add(player.getUniqueId());
+        participants.remove(player.getUniqueId());
+        leaveTeam(player);
+        player.setPlayerListName(ChatUtil.chat("&7&o" + player.getName()));
+        // If is ongoing, set them to spectator mode and send them to the spectator spawn.
+        if (isOngoing()) {
+            player.teleport(spectatorSpawn());
+            player.setGameMode(GameMode.SPECTATOR);
+            player.setScoreboard(getGameScoreboard().getBoard());
+        } else {
+            updateLobbyInventory(player);
+        }
+    }
+
+    /**
+     * Remove a spectator.
+     * @param player The spectator player.
+     */
+    public void removeSpectator(Player player) {
+        spectators.remove(player.getUniqueId());
+        participants.add(player.getUniqueId());
+        player.setPlayerListName(ChatUtil.chat("&7" + player.getName()));
+        if (!isOngoing()) { updateLobbyInventory(player); }
+    }
+
+    public void addParticipant(Player player) {
+        removeSpectator(player);
+        // TODO: Set the lobby scoreboard, etc...
+    }
+
+    public void removeParticipant(Player player) {
+        addSpectator(player);
+    }
+
+    /**
+     * Add a player to the game.
+     * @param player The player.
+     */
+    public void add(Player player) {
+        // If ongoing, add to spectators. Else, add to participants.
+        if (isOngoing()) {
+            addSpectator(player);
+            optIn.add(player.getUniqueId());
+            resetPlayer(player, GameMode.ADVENTURE, false, true, true);
+        } else {
+            addParticipant(player);
+        }
+        // Call event.
+        Bukkit.getServer().getPluginManager().callEvent(new GameJoinEvent(this, player));
+    }
+
+    /**
+     * Remove a player from the game.
+     * @param player The player.
+     */
+    public void remove(Player player) {
+        // Remove from participants and spectators.
+        participants.remove(player.getUniqueId());
+        spectators.remove(player.getUniqueId());
+        optIn.remove(player.getUniqueId());
+        // If on a team, remove from team.
+        if (isOnTeam(player)) {
+            leaveTeam(player);
+        }
+        // Reset scoreboard.
+        player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+        // Call event.
+        Bukkit.getServer().getPluginManager().callEvent(new GameLeaveEvent(this, player));
+    }
+
+    /**
+     * @param player The player.
+     * @return Whether the game contains the player.
+     */
+    public boolean contains(Player player) {
+        return isOnTeam(player) || isSpectating(player) || participants.contains(player.getUniqueId()) || spectators.contains(player.getUniqueId());
+    }
+
+    /**
+     * Return a list of player UUIDs on a team, given the team name (color).
+     * @param color The team name (color).
+     * @return The list of player UUIDs on the team.
+     */
+    public List<UUID> getTeamStr(String color) {
+        for (GTeam team : teams) {
+            if (team.getTeamEnum().getName().equalsIgnoreCase(color)) {
+                return team.getPlayers();
+            }
+        }
+        throw new IllegalArgumentException(String.format("%s is not a valid team color!", color));
+    }
+
+    /**
+     * The team that the specified player is on.
+     * @param player The player.
+     * @return The team.
+     */
+    public GTeam getTeam(Player player) {
+        for (GTeam team : teams) {
+            if (team.getPlayers().contains(player.getUniqueId())) {
+                return team;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get team with team enum.
+     * @param teamEnum The Team Enum.
+     * @return The team.
+     */
+    public GTeam getTeam(TeamEnum teamEnum) {
+        for (GTeam team : teams) {
+            if (team.getTeamEnum() == teamEnum) {
+                return team;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get team with index in the teams list.
+     * @param index The index.
+     * @return The team.
+     */
+    public GTeam getTeam(int index) {
+        return teams.get(index);
+    }
+
+    /**
+     * Get the team ID of a player.
+     * @param player The player.
+     * @return The team ID of a player.
+     */
+    public TeamEnum getTeamEnum(Player player) {
+        return getTeam(player).getTeamEnum();
+    }
+
+    /**
+     * Get the players on a team with a team enum.
+     * @param teamEnum The team enum.
+     * @return The team players.
+     */
+    public List<UUID> getTeamPlayers(TeamEnum teamEnum) {
+        return getTeam(teamEnum).getPlayers();
+    }
+    
+    /**
+     * Get the team color of a player.
+     * @param player The player.
+     * @return The team color of the player.
+     */
+    public String getTeamColor(Player player) {
+        return getTeamColor(player.getUniqueId());
+    }
+
+    /**
+     * The color of the player's team.
+     * @param uuid UUID of the player.
+     * @return The color of their team.
+     */
+    public String getTeamColor(UUID uuid) {
+        for (GTeam team : teams) {
+            if (team.getPlayers().contains(uuid)) {
+                return team.getName();
+            }
+        }
+        return "spec";
+    }
+
+    /**
+     * If a player is on a team.
+     * @param player The player.
+     * @return Whether the player is on a team.
+     */
+    public boolean isOnTeam(Player player) {
+        return (isOnTeam(player.getUniqueId()));
+    }
+
+    /**
+     * If a player is on a team.
+     * @param uuid The UUID of the player.
+     * @return Whether the player is on a team.
+     */
+    public boolean isOnTeam(UUID uuid) {
+        for (GTeam team : teams) {
+            if (team.getPlayers().contains(uuid)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if a player is on a team with a team enum.
+     * @param player The player.
+     * @param teamEnum The team enum.
+     * @return Whether the player is on the team.
+     */
+    public boolean isOnTeam(Player player, TeamEnum teamEnum) {
+        return getTeam(teamEnum).getPlayers().contains(player.getUniqueId());
+    }
+
+    /**
+     * Set the new teamEnum of a team.
+     * @param teamEnum The team enum of the team to change.
+     * @param id The new teamEnum ID.
+     * @return Whether it was successful.
+     */
+    public boolean setTeamEnum(TeamEnum teamEnum, int id) {
+        return (setTeamEnum(teamEnum, TeamEnum.getByData(id)));
+    }
+
+    /**
+     * Set the newteamEnum of a team.
+     * @param teamEnum The team enum of the team to change.
+     * @param newTeamEnum The new team enum.
+     * @return Whether it was successful.
+     */
+    public boolean setTeamEnum(TeamEnum teamEnum, TeamEnum newTeamEnum) {
+        if (TeamEnum.isColorIDValid(id) && !isTeamEnumTaken(TeamEnum.getByData(id))) {
+            getTeam(teamEnum).setTeamEnum(newTeamEnum);
+            for (UUID uuid : getTeam(newTeamEnum).getPlayers()) {
+                Player p = Bukkit.getPlayer(uuid);
+                p.setPlayerListName(newTeamEnum.getChatColor() + p.getName());
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Checks if a team enum is already taken by a team.
+     * @param teamEnum The team enum.
+     * @return Whether the team enum has been taken.
+     */
+    public boolean isTeamEnumTaken(TeamEnum teamEnum) {
+        for (GTeam team : teams) {
+            if (team.getTeamEnum() == teamEnum) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if the game has an empty team.
+     * @return If the game has an empty team.
+     */
+    public boolean hasEmptyTeam() {
+        for (GTeam team : teams) {
+            if (team.isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if two players are on the same team.
+     * @param p1 Player 1.
+     * @param p2 Player 2.
+     * @return If they are on the same team.
+     */
+    public boolean isOnSameTeam(Player p1, Player p2) {
+        if (!(isOnTeam(p1) && isOnTeam(p2))) { return false; }
+        return (getTeam(p1).isPlayerOnTeam(p2));
+    }
+
+    /**
+     * If a player is participating.
+     * @param player The player.
+     * @return If the player is participating.
+     */
+    public boolean isParticipating(Player player) {
+        return isParticipating(player.getUniqueId());
+    }
+
+    /**
+     * Whether the player with a name is participating.
+     * @param name The name of the player.
+     * @return Whether the player with the name is participating.
+     */
+    public boolean isParticipating(String name) {
+        return isParticipating(Bukkit.getPlayer(name).getUniqueId());
+    }
+
+    /**
+     * Whether the player with a UUID is participating.
+     * @param uuid The UUID of the player.
+     * @return Whether the player with the UUID is participating.
+     */
+    public boolean isParticipating(UUID uuid) {
+        return participants.contains(uuid);
+    }
+
+    /**
+     * If a player is spectating.
+     * @param player The player.
+     * @return If the player is spectating.
+     */
+    public boolean isSpectating(Player player) {
+        return isSpectating(player.getUniqueId());
+    }
+
+    /**
+     * Whether the player with a name is spectating.
+     * @param name The name of the player.
+     * @return Whether the player with the name is spectating.
+     */
+    public boolean isSpectating(String name) {
+        return isSpectating(Bukkit.getPlayer(name).getUniqueId());
+    }
+
+    /**
+     * Whether the player with a UUID is spectating.
+     * @param uuid The UUID of the player.
+     * @return Whether the player with the UUID is spectating.
+     */
+    public boolean isSpectating(UUID uuid) {
+        return spectators.contains(uuid);
+    }
+
+    /**
+     * Opt in all spectators who have decided to opt in for the next game.
+     * This should only happen at the end of a game.
+     */
+    public void optIn() {
+        for (UUID uuid : optIn) {
+            removeSpectator(Bukkit.getPlayer(uuid));
+            addParticipant(Bukkit.getPlayer(uuid));
+        }
+    }
+
+    /**
+     * Reset a player.
+     * @param p The player.
+     * @param gm The Gamemode.
+     * @param flight If the player should be flying.
+     * @param resetExp If the player's experience/level should be reset to 0.
+     */
+    public void resetPlayer(Player p, GameMode gm, boolean visible, boolean flight, boolean resetExp) {
+        for (PotionEffect effect : p.getActivePotionEffects()) { p.removePotionEffect(effect.getType()); }
+        p.setHealth(20);
+        p.closeInventory();
+        p.setGameMode(gm);
+        p.setAllowFlight(flight);
+        p.setFlying(flight);
+        p.getInventory().clear();
+        for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+            if (visible) {
+                player.showPlayer(p);
+            } else {
+                player.hidePlayer(p);
+            }
+        }
+        if (resetExp) {
+            p.setLevel(0);
+            p.setExp(0);
+        }
+    }
+
+    public void updateLobbyInventory(Player p) {
+        p.getInventory().clear();
+        Inventory inv = p.getInventory();
+        // Setting items in the player's inventory
+        // TODO: Remove the Force Start Item.
+        ItemStackUtil.createItem(inv, 388, 1, 1, "&a&lForce-Start Game &7(Temporary for testing)");
+        ItemStackUtil.createItem(inv, 355, 1, 9, "&d&lReturn to Lobby");
+
+        ItemStackUtil.createItem(inv, 145, 1, 20, ChatUtil.chat("&6&lSelect Kit"));
+        ItemStackUtil.createItem(inv, 421, 1, 22, ChatUtil.chat("&6&lSelect Team"));
+        ItemStackUtil.createItem(inv, 95, 7, 1, 24, ChatUtil.chat("&7&lLeave Team Queue"));
+        ItemStack spectate;
+        if (isSpectating(p)) {
+            spectate = ItemStackUtil.createItem(373, 8270, 1, ChatUtil.chat("&7&lToggle Spectator Mode"));
+            spectate.getItemMeta().removeItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+        } else {
+            spectate = ItemStackUtil.createItem(374, 1, ChatUtil.chat("&7&lToggle Spectator Mode"));
+        }
+        inv.setItem(25, spectate);
+    }
+
+    /*
+    Not sure what these methods below do as much... Will probably focus on them later...
+     */
+
+    /**
+     * Update Data.
+     * TODO: Not sure what this does.
+     * @param player The player.
+     * @param reset Reset boolean.
+     * @return ???
+     */
     private PlayerInfoData updateData(Player player, boolean reset) {
         TeamEnum team = TeamEnum.getByColor(getTeamColor(player));
         if(team == null) throw new IllegalArgumentException("This is not allowed");
@@ -345,6 +853,11 @@ public abstract class Game {
         PlayerCache.getPlayerCache(player).setDisplayName(display);
         return new PlayerInfoData(WrappedGameProfile.fromPlayer(player), Utility.ping(player), EnumWrappers.NativeGameMode.SURVIVAL, component);
     }
+
+    /**
+     * TODO: Honestly not sure what the hell this does.
+     * @param reset Reset boolean.
+     */
     public void sendColorTab(boolean reset) {
         if(!reset) {
             /*
@@ -357,7 +870,7 @@ public abstract class Game {
                     teamPacket.setPlayers(new ArrayList<>(team.getEntries()));
                     teamPacket.setDisplayName(team.getDisplayName());
                     teamPacket.setName(team.getName());
-                    for(Player player : getPlayers()) teamPacket.sendPacket(player);
+                    for(Player player : getBukkitPlayers()) teamPacket.sendPacket(player);
                     for(Player player : getSpectators()) teamPacket.sendPacket(player);
                 }
             }
@@ -370,82 +883,76 @@ public abstract class Game {
                 }
             }
         }
-
     }
 
+    /**
+     * Remove a player from the game.
+     * TODO: Instead of passing in the team ID, find the team ID from the player?
+     * TODO: Fix this
+     * @param player The player.
+     */
     public void removePlayer(Player player) {
-        String name = player.getName();
-        if (players.contains(name)) {
+        getTeam(player).removeFromTeam(player.getUniqueId());
+        remove(player);
+        if (participants.contains(player.getUniqueId())) {
             remove(player);
-            Team team = null;
-            if (isRed(player)) {
-                redTeam.remove(name);
-                team = getGameScoreboard().getBoard().getTeam(id + "redTeam");
-            } else if (isBlue(player)) {
-                team = getGameScoreboard().getBoard().getTeam(id + "blueTeam");
-                blueTeam.remove(name);
-            } else if (isSpectating(player)) {
-                spectators.remove(name);
+            GTeam gteam = getTeam(player);
+            if (gteam == null) {
+                spectators.remove(player.getUniqueId());
             }
+            gteam.removeFromTeam(player.getUniqueId());
+            Team team = getGameScoreboard().getBoard().getTeam(id + gteam.getTeamEnum().getName() + "Team");
             if (team != null) {
                 team.removeEntry(name);
             }
             player.sendMessage(
                     String.format(
-                            "%sChampions> %sYou were removed from Game #" + id + '!',
+                            "%sGame> %sYou were removed from Game #" + id + '!',
                             ChatColor.BLUE,
                             ChatColor.GRAY));
             player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         }
     }
 
+    /**
+     * Send a player back to their spawn.
+     * @param player The player.
+     */
     public void backToSpawn(Player player) {
-        String color = getTeamColor(player.getName());
-        if(color == null) {
+        String color = getTeamColor(player.getUniqueId());
+        if (color == null) {
             player.teleport(gameWorld.getSpawnLocation());
             return;
         }
-        switch (color) {
-            case "red":
-                player.teleport(redSpawn.get(0));
-                break;
-            case "blue":
-                player.teleport(blueSpawn.get(0));
-                break;
-            default:
-                player.teleport(gameWorld.getSpawnLocation());
-                break;
+        Location spawn = getTeam(player).getSpawns().get(0);
+        if (spawn == null) {
+            player.teleport(gameWorld.getSpawnLocation());
         }
-    }
-    @Override
-    public String toString() {
-        return String.format("%s{Game %d}%s[%d/%d]%s:\n %s\n %s\n %s",ChatColor.GREEN, id, ChatColor.WHITE, getPlayerCount(), getMaxPlayers(), ChatColor.GRAY, niceLookingRed(), niceLookingBlue(), niceLookingSpec());
+        player.teleport(getTeam(player).getSpawns().get(0));
     }
 
-    private String niceLookingRed() {
-        StringBuilder result = new StringBuilder(ChatColor.RED + "" + ChatColor.BOLD + "Red Team: ");
-        result.append(ChatColor.RESET);
-        for(String name : redTeam) {
-            Player p = Bukkit.getPlayer(name);
-            result.append(p.getName());
-            result.append(' ');
-        }
-        return result.toString();
+    // TODO: Change this to work with more than 2 teams.
+    @Override
+    public String toString() {
+        return String.format("%s{Game %d}%s[%d/%d]%s:\n %s\n %s\n %s",ChatColor.GREEN, id, ChatColor.WHITE, getPlayerCount(), getMaxPlayers(), ChatColor.GRAY, niceLookingTeam(TeamEnum.RED), niceLookingTeam(TeamEnum.BLUE), niceLookingSpec());
     }
-    private String niceLookingBlue() {
-        StringBuilder result = new StringBuilder(ChatColor.BLUE + "" + ChatColor.BOLD + "Blue Team: ");
-        result.append(ChatColor.RESET);
-        for(String name : blueTeam) {
-            Player p = Bukkit.getPlayer(name);
-            result.append(p.getName());
-            result.append(' ');
-        }
-        return result.toString();
+
+    /**
+     * Get the nice looking string of a team with an ID.
+     * @param teamEnum The Team Enum.
+     * @return The team's nice looking string.
+     */
+    private String niceLookingTeam(TeamEnum teamEnum) {
+        return getTeam(teamEnum).niceLooking();
     }
+
+    /**
+     * @return The nice looking string of spectators.
+     */
     private String niceLookingSpec() {
         StringBuilder result = new StringBuilder(ChatColor.YELLOW + "" + ChatColor.BOLD + "Spectators: ");
         result.append(ChatColor.RESET);
-        for(String name : spectators) {
+        for(UUID uuid : spectators) {
             Player p = Bukkit.getPlayer(name);
             result.append(p.getName());
             result.append(' ');
@@ -453,8 +960,12 @@ public abstract class Game {
         return result.toString();
     }
 
+    /**
+     * Broadcast a message to all Bukkit Players involved in the game.
+     * @param msg
+     */
     public void broadcast(String msg) {
-        for(Player player : getPlayers()){
+        for (Player player : getBukkitPlayers()){
             player.sendMessage(msg);
         }
     }
@@ -483,24 +994,25 @@ public abstract class Game {
         desc.add(ChatColor.WHITE.toString() + getPlayerCount() + "/" + getMaxPlayers() + ": " + ChatColor.BOLD + Integer.toString(remainder) + " needed!");
         desc.add(ChatColor.YELLOW + "Map: " + getMapName());
         desc.add(ChatColor.WHITE + "Scores: ");
-        desc.add(ChatColor.BOLD + ChatColor.RED.toString() + "Red: " + redScore.get());
-        desc.add(ChatColor.BOLD + ChatColor.BLUE.toString() + "Blue: " + blueScore.get());
+        for (GTeam team : teams) {
+            desc.add(ChatColor.BOLD + team.getTeamEnum().getChatColor().toString() + team.getTeamEnum().getName() + ":" + team.getScore());
+        }
 
         desc.add("");
         desc.add(ChatColor.YELLOW + "Players:");
-        for(String name : players) {
+        for(UUID uuid : participants) {
             if(spectators.contains(name)) continue;
-            TeamEnum team = TeamEnum.getByColor(getTeamColor(name));
+            TeamEnum team = TeamEnum.getByColor(getTeamColor(uuid));
             desc.add(team.getChatColor() + name);
         }
 
         desc.add(" ");
         desc.add(ChatColor.WHITE + "Spectators: ");
-        for(String name : spectators) {
+        for(UUID uuid : spectators) {
             desc.add(ChatColor.YELLOW + name);
         }
 
-        if(players.size() > 0) {
+        if(participants.size() > 0) {
             info.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 1);
         }
         meta.setLore(desc);
@@ -517,7 +1029,7 @@ public abstract class Game {
     public void leftClickAction(Player player) {
         if(isOngoing())
             GameManager.addSpectator(player);
-        else if(players.contains(player.getName()))
+        else if(participants.contains(player.getUniqueId()))
                 GameManager.removePlayer(player);
             else
                 GameManager.addPlayer(player);
@@ -536,7 +1048,6 @@ public abstract class Game {
     }
     @Override
     public int hashCode() {
-
         return Objects.hash(id);
     }
 }

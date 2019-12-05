@@ -1,34 +1,29 @@
 package com.podcrash.api.mc.listeners;
 
-import com.podcrash.api.mc.events.DamageApplyEvent;
-import com.podcrash.api.mc.events.DeathApplyEvent;
-import com.podcrash.api.plugin.Pluginizer;
 import com.podcrash.api.mc.effect.status.Status;
 import com.podcrash.api.mc.effect.status.StatusApplier;
 import com.podcrash.api.mc.effect.status.StatusWrapper;
+import com.podcrash.api.mc.events.DamageApplyEvent;
+import com.podcrash.api.mc.events.DeathApplyEvent;
 import com.podcrash.api.mc.events.StatusApplyEvent;
 import com.podcrash.api.mc.events.game.*;
 import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.TeamEnum;
-import com.podcrash.api.mc.game.objects.IObjective;
 import com.podcrash.api.mc.game.objects.ItemObjective;
-import com.podcrash.api.mc.game.objects.objectives.CapturePoint;
-import com.podcrash.api.mc.game.objects.objectives.Emerald;
 import com.podcrash.api.mc.item.ItemManipulationManager;
-import com.podcrash.api.redis.Communicator;
 import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.time.resources.SimpleTimeResource;
 import com.podcrash.api.mc.util.EntityUtil;
 import com.podcrash.api.mc.util.PrefixUtil;
+import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.redis.Communicator;
 import org.bukkit.*;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
@@ -83,7 +78,7 @@ public class GameListener extends ListenerBase {
     public void onEnd(GameEndEvent e) {
         Game game = e.getGame();
         game.sendColorTab(true);
-        for (Player player : game.getPlayers()) {
+        for (Player player : game.getBukkitPlayers()) {
             player.teleport(e.getSpawnlocation());
             player.sendMessage(e.getMessage());
             if(game.isSpectating(player)){
@@ -115,7 +110,7 @@ public class GameListener extends ListenerBase {
         //e.getWho().
         //StatusApplier.getOrNew(e.getWho()).applyStatus(Status.INEPTITUDE, 9, 1);
         Bukkit.getScheduler().runTaskLater(Pluginizer.getSpigotPlugin(), () -> {
-            for(Player player : e.getGame().getPlayers()){
+            for(Player player : e.getGame().getBukkitPlayers()){
                 if(player != e.getWho() && player.canSee(e.getWho())) player.hidePlayer(e.getWho());
             }
         }, 1L);
@@ -216,7 +211,7 @@ public class GameListener extends ListenerBase {
         p.setHealth(p.getMaxHealth()); //heal right away
         if(e.wasUnsafe())
             p.teleport(game.getGameWorld().getSpawnLocation());
-        game.getRespawning().add(p);
+        game.getRespawning().add(p.getUniqueId());
         Bukkit.getServer().getPluginManager().callEvent(new GameDeathEvent(game, p, killer, e.getDeathMessage()));
     }
 
@@ -305,19 +300,21 @@ public class GameListener extends ListenerBase {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void blockBreak(BlockBreakEvent e){
-        if(GameManager.hasPlayer(e.getPlayer())) {
-            e.setCancelled(true);
-        }
-    }
+    // TODO: The following are invalid now? Turf Wars requires block placement.
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void blockPlace(BlockPlaceEvent e){
-        if(GameManager.hasPlayer(e.getPlayer())) {
-            e.setCancelled(true);
-        }
-    }
+//    @EventHandler(priority = EventPriority.HIGHEST)
+//    public void blockBreak(BlockBreakEvent e){
+//        if(GameManager.hasPlayer(e.getPlayer())) {
+//            e.setCancelled(true);
+//        }
+//    }
+//
+//    @EventHandler(priority = EventPriority.HIGHEST)
+//    public void blockPlace(BlockPlaceEvent e){
+//        if(GameManager.hasPlayer(e.getPlayer())) {
+//            e.setCancelled(true);
+//        }
+//    }
 
 
 }

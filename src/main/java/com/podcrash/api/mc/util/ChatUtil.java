@@ -9,6 +9,7 @@ import org.bukkit.ChatColor;
  */
 
 public final class ChatUtil {
+
     private static final char COLOR_CHAR = 167;
 
     /**

@@ -137,7 +137,7 @@ public class Hologram {
     }
 
     /**
-     * Combine the create and destroy methods to seamlessly update values.
+     * Combine the createScoreboard and destroy methods to seamlessly update values.
      * {@link me.raindance.champions.kits.skills.RangerSkills.HeartsEye}
      */
     public void update() {

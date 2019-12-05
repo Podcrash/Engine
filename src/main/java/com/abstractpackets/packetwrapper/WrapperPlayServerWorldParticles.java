@@ -200,7 +200,7 @@ public class WrapperPlayServerWorldParticles extends AbstractPacket {
     /**
      * Retrieve Number of particles.
      * <p>
-     * Notes: the number of particles to create
+     * Notes: the number of particles to createScoreboard
      * @return The current Number of particles
      */
     public int getNumberOfParticles() {
