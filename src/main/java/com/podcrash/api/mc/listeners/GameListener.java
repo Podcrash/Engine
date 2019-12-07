@@ -91,8 +91,8 @@ public class GameListener extends ListenerBase {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onGameDeath(GameDeathEvent e) {
-
-        TeamEnum victimTeam = TeamEnum.getByColor(e.getGame().getTeamColor(e.getWho()));
+        if(!(e.getKiller() instanceof Player)) return;
+        TeamEnum victimTeam = e.getGame().getTeamEnum((Player) e.getKiller());
         TeamEnum enemyTeam = null;
 
         Player victim = e.getWho();
@@ -173,19 +173,20 @@ public class GameListener extends ListenerBase {
         itemObjective.die();
         Player player = event.getWho();
         itemObjective.setAcquiredByPlayer(player);
-        Game game = event.getGame();
-        String teamColor = game.getTeamColor(player);
-        TeamEnum team = TeamEnum.getByColor(teamColor);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void gameDamage(GameDamageEvent event) {
         Game game = event.getGame();
         if(!game.isOngoing()) return;
-        String color = game.getTeamColor(event.getWho());
-        if("spec".equalsIgnoreCase(color) || color.equalsIgnoreCase(game.getTeamColor(event.getVictim()))) {
+        boolean cancel = false;
+
+        if(game.getTeam(event.getWho()) != null) {
             event.setCancelled(true);
+            return;
         }
+        cancel = game.isOnSameTeam(event.getVictim(), event.getWho());
+        event.setCancelled(cancel);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -289,7 +290,7 @@ public class GameListener extends ListenerBase {
             Game game = GameManager.getGame();
             game.broadcast(String.format("%s%s%s" + ChatColor.RESET + " %s",
                     PrefixUtil.getPrefix(PrefixUtil.getPlayerRole(player)),
-                    TeamEnum.getByColor(game.getTeamColor(player)).getChatColor(),
+                    game.getTeamEnum(player).getChatColor(),
                     player.getName(),
                     event.getMessage())
             );

@@ -1,6 +1,7 @@
 package com.podcrash.api.mc.game.objects;
 
 import com.podcrash.api.mc.game.GameManager;
+import com.podcrash.api.mc.game.TeamEnum;
 import com.podcrash.api.mc.item.ItemManipulationManager;
 import com.podcrash.api.mc.mob.CustomEntityFirework;
 import com.podcrash.api.mc.world.BlockUtil;
@@ -76,8 +77,8 @@ public abstract class ItemObjective implements IObjective {
     }
 
     @Override
-    public String acquiredByTeam() {
-        return GameManager.getGame().getTeamColor(player);
+    public TeamEnum acquiredByTeam() {
+        return GameManager.getGame().getTeamEnum(player);
     }
 
     @Override

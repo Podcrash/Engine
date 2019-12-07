@@ -50,6 +50,8 @@ public class GameManager {
         Validate.isTrue(game.getId() == gameID);
         gameID++;
         currentGame = game;
+
+        game.makeTeams();
         game.createScoreboard();
 
     }
@@ -153,20 +155,20 @@ public class GameManager {
     // TODO: This is assuming blue and red team enums, which are subject to change.
     public static void randomTeam(Player player) {
         Game game = currentGame;
-        int red = game.getTeam(1).teamSize();
-        int blue = game.getTeam(2).teamSize();
+        int red = game.getTeam(0).teamSize();
+        int blue = game.getTeam(1).teamSize();
         if(blue > red)
             joinTeam(player, TeamEnum.RED);
         else if(red > blue)
             joinTeam(player, TeamEnum.BLUE);
         else //they are equal, good-ol RNG!
-            joinTeam(player, new TeamEnum[]{TeamEnum.RED, TeamEnum.BLUE}[(int) (Math.random() + 0.5)]);
+            joinTeam(player, new TeamEnum[]{TeamEnum.RED, TeamEnum.BLUE}[(int) (Math.random() + 0.5D)]);
 
     }
     public static void joinTeam(Player player, TeamEnum teamEnum) {
         Game game = currentGame;
         if (hasPlayer(player)) {
-            if(game.getTeamColor(player) != null && game.getTeamEnum(player) == teamEnum) {
+            if(game.getTeam(player) != null && game.getTeamEnum(player) == teamEnum) {
                 player.sendMessage(String.format(
                         "%sChampions> %sYou are already on this team%s!",
                         ChatColor.BLUE,

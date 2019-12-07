@@ -1,5 +1,7 @@
 package com.podcrash.api.mc.game.scoreboard;
 
+import com.podcrash.api.mc.game.Game;
+import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.GameType;
 import com.podcrash.api.mc.scoreboard.CustomScoreboard;
 
@@ -56,6 +58,9 @@ public abstract class GameScoreboard extends CustomScoreboard {
         return this.gameId;
     }
 
+    public Game getGame() {
+        return GameManager.getGame();
+    }
     /**
      * Given a name, mode and lines, createScoreboard the final list of lines for the game scoreboard.
      * @param name The game name.

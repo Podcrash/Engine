@@ -11,6 +11,8 @@ import com.podcrash.api.mc.game.objects.ItemObjective;
 import com.podcrash.api.mc.game.resources.GameResource;
 import com.podcrash.api.mc.game.scoreboard.GameLobbyScoreboard;
 import com.podcrash.api.mc.game.scoreboard.GameScoreboard;
+import com.podcrash.api.mc.map.BaseGameMap;
+import com.podcrash.api.mc.map.IMap;
 import com.podcrash.api.mc.ui.TeamSelectGUI;
 import com.podcrash.api.mc.util.ChatUtil;
 import com.podcrash.api.mc.util.ItemStackUtil;
@@ -40,7 +42,7 @@ import java.util.*;
  * TODO: Scoreboards and timers.
  */
 
-public abstract class Game {
+public abstract class Game<T extends BaseGameMap> implements IGame {
 
     private int id;
     private String name;
@@ -92,16 +94,21 @@ public abstract class Game {
     }
 
     public abstract GameScoreboard getGameScoreboard();
-
-    public abstract List<ItemObjective> getItemObjectives();
-
     public abstract int getAbsoluteMinPlayers();
-
     public abstract Location spectatorSpawn();
-
     public abstract void leaveCheck();
+    public abstract TeamSettings getTeamSettings();
 
-    public abstract void createTeams(TeamSettings settings, GTeam... teams);
+    @Override
+    public void increment(TeamEnum team, int score) {
+        GTeam team1 = getTeam(team);
+        team1.setScore(team1.getScore() + score);
+        getGameScoreboard().update();
+    }
+
+    public void loadMap() {
+
+    }
 
     /**
      * @return The ID of the game.
@@ -117,12 +124,6 @@ public abstract class Game {
      * @return A list of teams.
      */
     public List<GTeam> getTeams() { return teams; }
-
-    /**
-     * Set the teams.
-     * @param teams The teams.
-     */
-    public void setTeams(List<GTeam> teams) { this.teams = teams; }
 
     /**
      * @return The number of teams.
@@ -361,6 +362,15 @@ public abstract class Game {
         return respawning.contains(player.getUniqueId());
     }
 
+    public void makeTeams() {
+        teams = new ArrayList<>();
+        TeamSettings settings = getTeamSettings();
+        for(TeamEnum team : settings.getTeamColors()) {
+            //better would be new GTeam(team, settings);
+            GTeam gTeam = new GTeam(team, settings.getCapacity(), settings.getMin(), settings.getMax(), null);
+            teams.add(gTeam);
+        }
+    }
     /**
      * Create a new scoreboard for the teams.
      * TODO: This should only be done when the game starts because team enums can change prior to that.
@@ -587,6 +597,7 @@ public abstract class Game {
         return getTeam(player).getTeamEnum();
     }
 
+
     /**
      * Get the players on a team with a team enum.
      * @param teamEnum The team enum.
@@ -594,29 +605,6 @@ public abstract class Game {
      */
     public List<UUID> getTeamPlayers(TeamEnum teamEnum) {
         return getTeam(teamEnum).getPlayers();
-    }
-    
-    /**
-     * Get the team color of a player.
-     * @param player The player.
-     * @return The team color of the player.
-     */
-    public String getTeamColor(Player player) {
-        return getTeamColor(player.getUniqueId());
-    }
-
-    /**
-     * The color of the player's team.
-     * @param uuid UUID of the player.
-     * @return The color of their team.
-     */
-    public String getTeamColor(UUID uuid) {
-        for (GTeam team : teams) {
-            if (team.getPlayers().contains(uuid)) {
-                return team.getName();
-            }
-        }
-        return "spec";
     }
 
     /**
@@ -845,7 +833,7 @@ public abstract class Game {
      * @return ???
      */
     private PlayerInfoData updateData(Player player, boolean reset) {
-        TeamEnum team = TeamEnum.getByColor(getTeamColor(player));
+        TeamEnum team = getTeamEnum(player);
         if(team == null) throw new IllegalArgumentException("This is not allowed");
 
         String display = reset ? player.getName() : team.getChatColor() + player.getName();
@@ -919,8 +907,7 @@ public abstract class Game {
      * @param player The player.
      */
     public void backToSpawn(Player player) {
-        String color = getTeamColor(player.getUniqueId());
-        if (color == null) {
+        if (getTeamEnum(player) == null) {
             player.teleport(gameWorld.getSpawnLocation());
             return;
         }
@@ -1002,7 +989,7 @@ public abstract class Game {
         desc.add(ChatColor.YELLOW + "Players:");
         for(UUID uuid : participants) {
             if(spectators.contains(name)) continue;
-            TeamEnum team = TeamEnum.getByColor(getTeamColor(uuid));
+            TeamEnum team = getTeamEnum(Bukkit.getPlayer(uuid));
             desc.add(team.getChatColor() + name);
         }
 

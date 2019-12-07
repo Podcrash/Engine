@@ -1,5 +1,6 @@
 package com.podcrash.api.mc.game.objects;
 
+import com.podcrash.api.mc.game.TeamEnum;
 import com.podcrash.api.mc.game.objects.objectives.ObjectiveType;
 import com.podcrash.api.plugin.Pluginizer;
 import org.bukkit.Location;
@@ -14,7 +15,7 @@ public interface IObjective {
      */
     void spawnFirework();
     Player acquiredByPlayer();
-    String acquiredByTeam();
+    TeamEnum acquiredByTeam();
     ObjectiveType getObjectiveType();
     void setAcquiredByPlayer(Player acquirer);
     Vector getVector();

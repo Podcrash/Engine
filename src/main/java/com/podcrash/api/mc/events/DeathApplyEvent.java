@@ -113,7 +113,7 @@ public class DeathApplyEvent extends Event implements Cancellable {
             withMsg = builder.toString();
         }
         Game game = GameManager.getGame();
-        TeamEnum victimT = TeamEnum.getByColor(game.getTeamColor(player));
+        TeamEnum victimT = game.getTeamEnum(player);
 
         StringBuilder builder = new StringBuilder();
         builder.append(ChatColor.LIGHT_PURPLE);
@@ -131,7 +131,7 @@ public class DeathApplyEvent extends Event implements Cancellable {
             String attackerName;
             if (attacker instanceof Player) {
                 Player attackerCast = ((Player) attacker);
-                TeamEnum attackerT = TeamEnum.getByColor(game.getTeamColor(attackerCast));
+                TeamEnum attackerT = game.getTeamEnum(attackerCast);
                 builder.append(attackerT.getChatColor());
                 attackerName = attackerCast.getDisplayName();
             } else attackerName = attacker.getName();

@@ -1,5 +1,7 @@
 package com.podcrash.api.mc.game.objects;
 
+import com.podcrash.api.mc.game.GameManager;
+import com.podcrash.api.mc.game.TeamEnum;
 import com.podcrash.api.mc.mob.CustomEntityFirework;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -10,7 +12,7 @@ public abstract class WinObjective implements IObjective {
     private final Vector vector;
     protected FireworkEffect fireworkEffect;
     private Player lastCaptured;
-    private String lastTeamCaptured;
+    private TeamEnum lastTeamCaptured;
 
     public WinObjective(Vector vector){
         this.fireworkEffect = FireworkEffect.builder().withColor(Color.WHITE).with(FireworkEffect.Type.BURST).build();
@@ -41,9 +43,10 @@ public abstract class WinObjective implements IObjective {
     }
     public void setAcquiredByPlayer(Player lastCaptured) {
         this.lastCaptured = lastCaptured;
+        this.lastTeamCaptured = GameManager.getGame().getTeamEnum(lastCaptured);
     }
 
-    public String acquiredByTeam(){
+    public TeamEnum acquiredByTeam(){
         return lastTeamCaptured;
     }
 

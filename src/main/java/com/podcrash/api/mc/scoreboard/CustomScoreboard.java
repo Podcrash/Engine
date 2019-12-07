@@ -18,7 +18,7 @@ import java.util.List;
  * @author JJCunningCreeper
  */
 
-public class CustomScoreboard {
+public class CustomScoreboard implements IScoreboard {
 
     private Scoreboard scoreboard;
     private Objective objective;
@@ -54,9 +54,6 @@ public class CustomScoreboard {
         return scoreboard;
     }
 
-    /**
-     * Make a new objective.
-     */
     public void makeObjective() {
         destroyScoreboard();
         objective = scoreboard.registerNewObjective("dummy", "");
@@ -77,10 +74,6 @@ public class CustomScoreboard {
         }
     }
 
-    /**
-     * Convert/assign an array of strings to the scoreboard, starting from the top.
-     * @param lines Array of lines to assign starting from the top of the scoreboard.
-     */
     public void setLines(String[] lines) {
         // Assign the lines starting from the top of the scoreboard.
         for (int i = 0; i < size && i < lines.length && lines[i] != null; i++) {
@@ -88,10 +81,6 @@ public class CustomScoreboard {
         }
     }
 
-    /**
-     * Convert/assign a list of strings to the scoreboard, starting from the top.
-     * @param lines List of lines to assign starting from the top of the scoreboard.
-     */
     public void setLines(List<String> lines) {
         // Assign the lines starting from the top of the scoreboard.
         for (int i = 0; i < size && i < lines.size(); i++) {
@@ -99,10 +88,6 @@ public class CustomScoreboard {
         }
     }
 
-    /**
-     * Destroy the scoreboard.
-     * Cancels the timer and unregisters objectives.
-     */
     public void destroyScoreboard() {
         // Stop the timer.
         TimeHandler.unregister(animator);
@@ -112,11 +97,6 @@ public class CustomScoreboard {
         }
     }
 
-    /**
-     * Get all the lines from the scoreboard
-     * @see #getLine(int)
-     * @return the display lines as seen from the client
-     */
     public List<String> getLines() {
         List<String> entries = new ArrayList<>();
         for(int i = 0; i < size; i++) {
@@ -125,24 +105,12 @@ public class CustomScoreboard {
         return entries;
     }
 
-    /**
-     * Get the prefix + suffix of a line on a scoreboard
-     * @param i team id
-     * @return the display line as seen from the client
-     */
     public String getLine(int i) {
         Team team = scoreboard.getTeam(Integer.toString(i));
         String prefix = team.getPrefix();
         return prefix + team.getSuffix();
     }
 
-    /**
-     * Appropriately sets a line of the scoreboard to the provided string.
-     * Depending on the length of the string, it may be shortened.
-     * TODO: This needs to be heavily tested and possibly refactored.
-     * @param line The line number as indicated by the score number.
-     * @param string The line to set.
-     */
     public void setLine(int line, String string) {
         // Initially empty strings to populate.
         String prefix = "";
@@ -205,23 +173,10 @@ public class CustomScoreboard {
         setLine(line, prefix, suffix);
     }
 
-    /**
-     * Sets a line of the scoreboard given a prefix and a suffix.
-     * @param line The line number as indicated by the score number.
-     * @param prefix The prefix string to set. Must be 16 characters or less.
-     * @param suffix The suffix string to set. Must be 16 characters or less.
-     * @return
-     */
     public boolean setLine(int line, String prefix, String suffix) {
         return (setPrefix(line, prefix) && setSuffix(line, suffix));
     }
 
-    /**
-     * Sets the prefix (first part) of a line number.
-     * @param line The line number as indicated by the score number.
-     * @param prefix The prefix string to set. Must be 16 characters or less.
-     * @return Whether the assignment was successful.
-     */
     public boolean setPrefix(int line, String prefix) {
         if (prefix.length() > 16) {
             return false;
@@ -231,12 +186,6 @@ public class CustomScoreboard {
         return true;
     }
 
-    /**
-     * Sets the suffix (latter part) of a line number.
-     * @param line The line number as indicated by the score number.
-     * @param suffix The suffix string to set. Must be 16 characters or less.
-     * @return Whether the assignment was successful.
-     */
     public boolean setSuffix(int line, String suffix) {
         if (suffix.length() > 16) {
             return false;
@@ -245,23 +194,15 @@ public class CustomScoreboard {
         return true;
     }
 
-    /**
-     * @return The custom scoreboard.
-     */
+
     public Scoreboard getBoard() {
         return this.scoreboard;
     }
 
-    /**
-     * @return The custom scoreboard objective.
-     */
     public Objective getObjective() {
         return this.objective;
     }
 
-    /**
-     * @return The size of the scoreboard.
-     */
     public int getSize() {
         return this.size;
     }
