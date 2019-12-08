@@ -4,24 +4,35 @@ import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.PlayerInfoData;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
+import com.podcrash.api.db.DataTableType;
+import com.podcrash.api.db.MapTable;
+import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.mc.events.game.GameJoinEvent;
 import com.podcrash.api.mc.events.game.GameLeaveEvent;
 import com.podcrash.api.mc.events.game.GameMapChangeEvent;
+import com.podcrash.api.mc.events.game.GameMapLoadEvent;
 import com.podcrash.api.mc.game.objects.ItemObjective;
 import com.podcrash.api.mc.game.resources.GameResource;
 import com.podcrash.api.mc.game.scoreboard.GameLobbyScoreboard;
 import com.podcrash.api.mc.game.scoreboard.GameScoreboard;
+import com.podcrash.api.mc.listeners.ListenerBase;
 import com.podcrash.api.mc.map.BaseGameMap;
 import com.podcrash.api.mc.map.IMap;
+import com.podcrash.api.mc.map.MapManager;
 import com.podcrash.api.mc.ui.TeamSelectGUI;
 import com.podcrash.api.mc.util.ChatUtil;
 import com.podcrash.api.mc.util.ItemStackUtil;
 import com.podcrash.api.mc.util.PlayerCache;
 import com.podcrash.api.mc.util.Utility;
 import com.podcrash.api.plugin.Pluginizer;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -29,8 +40,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
+import org.bukkit.util.Vector;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Abstract Game Class
@@ -42,15 +55,15 @@ import java.util.*;
  * TODO: Scoreboards and timers.
  */
 
-public abstract class Game<T extends BaseGameMap> implements IGame {
+public abstract class Game implements IGame {
 
     private int id;
     private String name;
     private List<GTeam> teams;
     private boolean isLoadedMap;
     private boolean ongoing;                            // TODO: May replace this with an Enum with a more specific state for the game.
-    protected World gameWorld;
-    //private GameMap map;                              // TODO: Replace this with however we're determining the map.
+    protected String gameWorldName;
+    private World world;
     private List<GameResource> gameResources;
 
     // TODO: Everything in this section is related to the mode or type. To be modified later.
@@ -67,6 +80,7 @@ public abstract class Game<T extends BaseGameMap> implements IGame {
     private GameLobbyScoreboard lobby_board;
     private GameLobbyTimer lobby_timer;
 
+    private BaseGameMap map;
     /**
      * Constructor for the game.
      * @param id The ID of the game.
@@ -76,11 +90,10 @@ public abstract class Game<T extends BaseGameMap> implements IGame {
     public Game(int id, String name, GameType type) {
         this.id = id;
         this.name = name;
-        this.teams = new ArrayList<GTeam>();
+        this.teams = new ArrayList<>();
         this.isLoadedMap = false;
         this.ongoing = false;
-        this.gameWorld = Bukkit.getWorld("world");
-        // this.map = something
+        this.world = Bukkit.getWorld("world");
         this.type = type;
         this.gameResources = new ArrayList<>();
 
@@ -97,6 +110,8 @@ public abstract class Game<T extends BaseGameMap> implements IGame {
     public abstract int getAbsoluteMinPlayers();
     public abstract Location spectatorSpawn();
     public abstract void leaveCheck();
+
+    public abstract Class<? extends BaseGameMap> getMapClass();
     public abstract TeamSettings getTeamSettings();
 
     @Override
@@ -106,8 +121,59 @@ public abstract class Game<T extends BaseGameMap> implements IGame {
         getGameScoreboard().update();
     }
 
-    public void loadMap() {
+    /**
+     * A cheap listener that allows us to listen on when worlds become loaded.
+     */
+    private static class WorldListener implements Listener {
+        private String mapName;
+        private CompletableFuture<Boolean> future;
+        public WorldListener(CompletableFuture<Boolean> future, String mapName) {
+            this.future = future;
+            this.mapName = mapName;
+        }
 
+        @EventHandler
+        public void load(WorldLoadEvent e) {
+            boolean loaded = e.getWorld().getName().equalsIgnoreCase(mapName);
+            if(loaded)
+                future.complete(loaded);
+        }
+    }
+    /**
+     * Load the map method, uses a callback of a bukkit event for custom loading
+     */
+    public void loadMap() {
+        if(isLoadedMap) return;
+        System.out.println("Loading map!");
+        MapManager.getMap(getMapClass(), gameWorldName, (map) -> {
+            if(map == null) {
+                log("map of name " + gameWorldName + " doesn't exist!");
+                return;
+            }
+            CompletableFuture<Boolean> future = new CompletableFuture<Boolean>();
+            WorldListener listener = new WorldListener(future, gameWorldName);
+            Bukkit.getPluginManager().registerEvents(listener, Pluginizer.getSpigotPlugin());
+
+            MapTable mapTable = TableOrganizer.getTable(DataTableType.MAPS);
+            mapTable.downloadWorld(gameWorldName);
+            System.out.println("Found!");
+            future.thenAcceptAsync(found -> {
+                if(!found) return;
+                try {
+                    System.out.println("ya");
+                    World gameWorld = Bukkit.getWorld(gameWorldName);
+                    Bukkit.getPluginManager().callEvent(new GameMapLoadEvent(this, map, gameWorld));
+                    map.setGameWorld(gameWorld);
+                    this.map = map;
+                    this.world = gameWorld;
+                    isLoadedMap = true;
+
+                    System.out.println("Map Loaded");
+                }catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        });
     }
 
     /**
@@ -134,15 +200,18 @@ public abstract class Game<T extends BaseGameMap> implements IGame {
      * @return If the map is loaded.
      */
     public boolean isLoadedMap() {
-        return isLoadedMap || (gameWorld != null);
+        return isLoadedMap;
     }
 
+    public boolean hasChosenMap() {
+        return gameWorldName != null && !gameWorldName.isEmpty();
+    }
     /**
-     * Set if the map is loaded.
-     * @param loadedMap If the map is loaded.
+     * Precondition: if loadMap has been called.
+     * @return the map
      */
-    public void setLoadedMap(boolean loadedMap) {
-        isLoadedMap = loadedMap;
+    public BaseGameMap getMap() {
+        return map;
     }
 
     /**
@@ -159,15 +228,16 @@ public abstract class Game<T extends BaseGameMap> implements IGame {
     /**
      * @return The Game World.
      */
-    public World getGameWorld() { return gameWorld; }
+    public World getGameWorld() { return Bukkit.getWorld(gameWorldName); }
 
     /**
      * Set the Game World.
-     * @param string The Game World name.
+     * @param world The Game World name.
      */
-    public void setGameWorld(String string){
-        this.gameWorld = Bukkit.getWorld(string);
-        Bukkit.getPluginManager().callEvent(new GameMapChangeEvent(this, string));
+    public void setGameWorld(String world){
+        this.gameWorldName = world;
+        Bukkit.getPluginManager().callEvent(new GameMapChangeEvent(this, world));
+        this.loadMap();
     }
 
     /**
@@ -176,8 +246,7 @@ public abstract class Game<T extends BaseGameMap> implements IGame {
      * @return The map name.
      */
     public String getMapName(){
-        if (gameWorld == null) return "null";
-        else return gameWorld.getName();
+        return gameWorldName;
     }
 
     /**
@@ -825,21 +894,8 @@ public abstract class Game<T extends BaseGameMap> implements IGame {
     Not sure what these methods below do as much... Will probably focus on them later...
      */
 
-    /**
-     * Update Data.
-     * TODO: Not sure what this does.
-     * @param player The player.
-     * @param reset Reset boolean.
-     * @return ???
-     */
-    private PlayerInfoData updateData(Player player, boolean reset) {
-        TeamEnum team = getTeamEnum(player);
-        if(team == null) throw new IllegalArgumentException("This is not allowed");
-
-        String display = reset ? player.getName() : team.getChatColor() + player.getName();
-        WrappedChatComponent component = WrappedChatComponent.fromText(display);
-        PlayerCache.getPlayerCache(player).setDisplayName(display);
-        return new PlayerInfoData(WrappedGameProfile.fromPlayer(player), Utility.ping(player), EnumWrappers.NativeGameMode.SURVIVAL, component);
+    public Location getSpawnLocation() {
+        return getGameWorld().getSpawnLocation();
     }
 
     /**
@@ -900,22 +956,6 @@ public abstract class Game<T extends BaseGameMap> implements IGame {
                             ChatColor.GRAY));
             player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         }
-    }
-
-    /**
-     * Send a player back to their spawn.
-     * @param player The player.
-     */
-    public void backToSpawn(Player player) {
-        if (getTeamEnum(player) == null) {
-            player.teleport(gameWorld.getSpawnLocation());
-            return;
-        }
-        Location spawn = getTeam(player).getSpawns().get(0);
-        if (spawn == null) {
-            player.teleport(gameWorld.getSpawnLocation());
-        }
-        player.teleport(getTeam(player).getSpawns().get(0));
     }
 
     // TODO: Change this to work with more than 2 teams.

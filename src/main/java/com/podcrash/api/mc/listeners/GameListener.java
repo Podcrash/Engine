@@ -7,11 +7,13 @@ import com.podcrash.api.mc.events.DamageApplyEvent;
 import com.podcrash.api.mc.events.DeathApplyEvent;
 import com.podcrash.api.mc.events.StatusApplyEvent;
 import com.podcrash.api.mc.events.game.*;
+import com.podcrash.api.mc.game.GTeam;
 import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.TeamEnum;
 import com.podcrash.api.mc.game.objects.ItemObjective;
 import com.podcrash.api.mc.item.ItemManipulationManager;
+import com.podcrash.api.mc.map.BaseGameMap;
 import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.time.resources.SimpleTimeResource;
 import com.podcrash.api.mc.util.EntityUtil;
@@ -35,6 +37,7 @@ import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * @see GameManager
@@ -62,6 +65,27 @@ public class GameListener extends ListenerBase {
         //Communicator.publish(e.getGame().getGameCount());
     }
 
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void mapLoad(GameMapLoadEvent event) {
+        System.out.println("test");
+        BaseGameMap map = event.getMap();
+        World world = event.getWorld();
+        Game game = event.getGame();
+
+        List<GTeam> teams = game.getTeams();
+        List<double[][]> spawnsArr = map.getSpawns();
+        //set spawns
+        for(int i = 0, gTeamSize = teams.size(); i < gTeamSize; i++) {
+            GTeam team = teams.get(i);
+            double[][] spawns = spawnsArr.get(i);
+            List<Location> spawnLocs = new ArrayList<>();
+            for(double[] s : spawns) {
+                spawnLocs.add(new Location(world, s[0], s[1], s[2]));
+            }
+            team.setSpawns(spawnLocs);
+        }
+    }
+
     //--------------------------------------
     //GameEvents
     //--------------------------------------
@@ -69,9 +93,11 @@ public class GameListener extends ListenerBase {
      * @see com.podcrash.api.mc.game.GameManager#startGame
      * @param e event callback
      */
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onStart(GameStartEvent e) {
-
+        Game game = e.getGame();
+        game.getTeams().forEach(GTeam::allSpawn);
+        game.getBukkitSpectators().forEach(player -> player.teleport(game.getSpawnLocation()));
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

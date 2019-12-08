@@ -21,6 +21,7 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 
 /**
@@ -63,7 +64,6 @@ public class MapTable extends MongoBaseTable {
         .find(Filters.eq("name", worldName.toUpperCase()))
         .first(callback);
     }
-
 
     /**
      * Download a world

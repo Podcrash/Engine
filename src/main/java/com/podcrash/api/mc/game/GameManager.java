@@ -13,6 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Singleton - Handles games
@@ -212,10 +213,25 @@ public class GameManager {
             return;
         }
         Pluginizer.getSpigotPlugin().getLogger().info("Attempting to start game " + game.getId());
-        GameStartEvent gamestart = new GameStartEvent(game);
-        game.setOngoing(true);
-        Pluginizer.getSpigotPlugin().getServer().getPluginManager().callEvent(gamestart);
+        if(!game.isLoadedMap())
+            game.loadMap();
 
+        System.out.println("Map Loaded: " + game.isLoadedMap());
+        long t = System.currentTimeMillis();
+        CompletableFuture.supplyAsync(() -> {
+            while(!game.isLoadedMap()){
+                if(System.currentTimeMillis() - t >= 20000)
+                    return false;
+            }
+            System.out.println("TRUE");
+            return true;
+        }).thenAccept((b) -> {
+            System.out.println(b);
+            if(!b) return;
+            GameStartEvent gamestart = new GameStartEvent(game);
+            game.setOngoing(true);
+            Pluginizer.getSpigotPlugin().getServer().getPluginManager().callEvent(gamestart);
+        });
     }
 
     public static void endGame(Game game) {
