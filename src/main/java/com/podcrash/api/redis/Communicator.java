@@ -54,6 +54,9 @@ public class Communicator {
     public static boolean isReady() {
         return client != null;
     }
+    public static boolean isGameLobby(){
+        return code != null;
+    }
     //USE THESE METHODS BELOW FOR CACHING
     public static void cache(String key, String value) {
         cache(CACHE_CHANNEL, key, value);
@@ -169,7 +172,8 @@ public class Communicator {
      */
     public static void readyGameLobby() {
         code = System.getProperty("lobby.code");
-        controllerMessages.publish(code + " READY");
+        if(code != null || code.isEmpty())
+            controllerMessages.publish(code + " READY");
     }
 
     private static void listeners() {

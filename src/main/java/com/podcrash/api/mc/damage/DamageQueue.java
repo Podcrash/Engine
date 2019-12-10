@@ -41,7 +41,8 @@ public final class DamageQueue implements Runnable {
     @Override
     public void run() {
         try {
-            while (damages.peek() != null) processDamage(damages.poll());
+            while (active && damages.peek() != null)
+                processDamage(damages.poll());
         }catch (Exception e) {
             e.printStackTrace();
         }

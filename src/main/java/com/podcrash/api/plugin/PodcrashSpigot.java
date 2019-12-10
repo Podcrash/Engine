@@ -7,8 +7,11 @@ import com.podcrash.api.mc.tracker.CoordinateTracker;
 import com.podcrash.api.mc.tracker.Tracker;
 import com.podcrash.api.mc.tracker.VectorTracker;
 import com.podcrash.api.mc.world.WorldManager;
+import com.podcrash.api.redis.Communicator;
 import org.bukkit.Bukkit;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 import org.redisson.api.RedissonClient;
 import org.spigotmc.SpigotConfig;
 
@@ -23,6 +26,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
         return INSTANCE;
     }
     private ExecutorService service = Executors.newCachedThreadPool();
+    private int dQInt;
 
     private List<Tracker> trackers;
     private CoordinateTracker coordinateTracker;
@@ -44,20 +48,20 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
         tracker.enable();
     }
 
-    @Override
-    public void onEnable() {
-        INSTANCE = this;
-        getLogger().info("Starting PodcrashSpigot!");
-        Pluginizer.setInstance(this);
+    /**
+     * This method is used to start setting up for the game servers
+     */
+    public void gameStart() {
+        if(Communicator.isGameLobby())
+            gameStart();
         Future future = CompletableFuture.allOf(
-            enableWrap(),
-            setKnockback(),
-            registerListeners()
+                setKnockback(),
+                registerListeners()
         );
-        registerCommands();
-        WorldManager.getInstance().loadWorlds();
+
         DamageQueue.active = true;
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, new DamageQueue(), 0, 0);
+        BukkitTask task = Bukkit.getScheduler().runTaskTimerAsynchronously(this, new DamageQueue(), 0, 0);
+        dQInt = task.getTaskId();
         trackers = new ArrayList<>();
         addTracker(coordinateTracker = new CoordinateTracker(this));
         addTracker(vectorTracker = new VectorTracker(this));
@@ -69,13 +73,40 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
         }catch (InterruptedException|ExecutionException e) {
             e.printStackTrace();
         }
+    }
 
+    public void gameDisable() {
+        DamageQueue.active = false;
+        Bukkit.getScheduler().cancelTask(dQInt);
+        HandlerList.unregisterAll(this);
+        for(Tracker tracker : trackers)
+            tracker.disable();
+
+    }
+    @Override
+    public void onEnable() {
+        INSTANCE = this;
+        Communicator.readyGameLobby();
+        getLogger().info("Starting PodcrashSpigot!");
+        Pluginizer.setInstance(this);
+        Future future = CompletableFuture.allOf(
+                enableWrap(),
+                registerCommands());
+        WorldManager.getInstance().loadWorlds();
+        try {
+            future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+
+
+        gameStart();
     }
 
     @Override
     public void onDisable() {
-        for(Tracker tracker : trackers)
-            tracker.disable();
+        if(Communicator.isGameLobby())
+            gameDisable();
         disable();
         WorldManager.getInstance().unloadWorlds();
     }
@@ -144,7 +175,9 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             // TODO: Add more listeners here..
         });
     }
-    private void registerCommands() {
-        getCommand("pworld").setExecutor(new WorldCommand());
+    private CompletableFuture<Void> registerCommands() {
+        return CompletableFuture.runAsync(() -> {
+            getCommand("pworld").setExecutor(new WorldCommand());
+        });
     }
 }
