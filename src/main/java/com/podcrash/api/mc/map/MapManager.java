@@ -12,7 +12,9 @@ import org.bukkit.World;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public final class MapManager {
@@ -30,9 +32,13 @@ public final class MapManager {
     public static JsonObject getMapJSON(String worldName) {
         String cacheValue = Communicator.getCacheValue(MAPS_CACHE, worldName);
         if(cacheValue == null || cacheValue.isEmpty()) {
-            World w = Bukkit.getWorld(worldName);
-            if(w != null) return new BaseGameMap(w).getJSON();
-            return new BaseGameMap(worldName, new ArrayList<>(), new double[3]).getJSON();
+            BaseGameMap map;
+            if(Bukkit.getServer() != null) {
+                World w = Bukkit.getWorld(worldName);
+                map = new BaseGameMap(w);
+            }else map = new BaseGameMap(worldName, new ArrayList<>(), new double[3]);
+            return map.getJSON();
+
         }else return new JsonParser().parse(cacheValue).getAsJsonObject();
     }
 
@@ -184,12 +190,12 @@ public final class MapManager {
      * @param worldName
      * @throws IllegalAccessException
      */
-    public static void save(String worldName) throws IllegalAccessException {
+    public static CompletableFuture<Void> save(String worldName) throws IllegalAccessException {
         String value = Communicator.getCacheValue(MAPS_CACHE, worldName);
         if(value == null || value.isEmpty()) throw new IllegalAccessException("the value stored in redis cannnot be empty or null! Start storing some data!");
         JsonObject json = new JsonParser().parse(value).getAsJsonObject();
         MapTable maps = TableOrganizer.getTable(DataTableType.MAPS);
-        maps.upsertMetaData(json);
+        return maps.upsertMetaData(json);
     }
     public static void delete(String worldName) {
         Communicator.removeCache(MAPS_CACHE, worldName);

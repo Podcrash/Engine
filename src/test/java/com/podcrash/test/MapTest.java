@@ -10,6 +10,7 @@ import com.podcrash.api.redis.Communicator;
 import org.junit.jupiter.api.*;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -65,7 +66,7 @@ public class MapTest {
     }
 
 
-    @Order(2)
+    @Order(5)
     @Test
     @DisplayName("Using Redis to cache AbstractMap")
     public void insertTest() {
@@ -74,8 +75,8 @@ public class MapTest {
         System.out.println(MapManager.getMapJSON(WORLDNAME).toString());
         assertTrue(MapManager.getMapJSON(WORLDNAME).get("custompoint").getAsBoolean());
         MapManager.insert(WORLDNAME, "spawns", 1, new double[]{0, 2, 3});
-        MapManager.insert(WORLDNAME, "spawns", 1, new double[]{3, 5, 7});
         MapManager.insert(WORLDNAME, "spawns", 9, new double[]{34, 12, 54, 34, 12});
+        MapManager.insert(WORLDNAME, "spawns", 1, new double[]{3, 5, 7});
 
         assertArrayEquals(new double[]{34, 12, 54, 34, 12}, MapManager.get(WORLDNAME, "spawns", 9, 0));
         assertArrayEquals(new double[]{0, 2, 3}, MapManager.get(WORLDNAME, "spawns", 1, 0));
@@ -87,7 +88,7 @@ public class MapTest {
     }
 
 
-    @Order(3)
+    @Order(10)
     @Test
     @DisplayName("Using Redis to convert data to AbstractMap, then save to mongo")
     public void ontoMap() {
@@ -99,8 +100,13 @@ public class MapTest {
         MapManager.insert(baseGameMap);
         MapManager.insert(sample, "intdata", 23);
 
+        System.out.println("test2");
         System.out.println(MapManager.getMapJSON(sample));
-        assertDoesNotThrow(() -> MapManager.save(sample));
+        assertDoesNotThrow(() -> {
+            Future<Void> future =  MapManager.save(sample);
+            future.get();
+        });
+
 
         MapManager.getMap(BaseGameMap.class, sample.toUpperCase(), map -> {
             System.out.println("ya" + map);

@@ -52,8 +52,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
      * This method is used to start setting up for the game servers
      */
     public void gameStart() {
-        if(Communicator.isGameLobby())
-            gameStart();
+        getLogger().info("This Server is a game lobby with code" + Communicator.getCode());
         Future future = CompletableFuture.allOf(
                 setKnockback(),
                 registerListeners()
@@ -86,7 +85,6 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
     @Override
     public void onEnable() {
         INSTANCE = this;
-        Communicator.readyGameLobby();
         getLogger().info("Starting PodcrashSpigot!");
         Pluginizer.setInstance(this);
         Future future = CompletableFuture.allOf(
@@ -99,8 +97,9 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             e.printStackTrace();
         }
 
-
-        gameStart();
+        Communicator.readyGameLobby();
+        if(Communicator.isGameLobby())
+            gameStart();
     }
 
     @Override

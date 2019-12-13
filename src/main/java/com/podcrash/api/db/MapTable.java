@@ -1,5 +1,7 @@
 package com.podcrash.api.db;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.grinderwolf.swm.api.SlimePlugin;
@@ -13,6 +15,8 @@ import com.podcrash.api.mc.map.BaseGameMap;
 import com.podcrash.api.mc.map.IMap;
 import com.podcrash.api.mc.world.WorldManager;
 import com.podcrash.api.plugin.Pluginizer;
+import com.sun.org.apache.bcel.internal.generic.ARETURN;
+import jodd.util.collection.StringKeyedMapAdapter;
 import org.apache.commons.io.FileUtils;
 import org.bson.Document;
 import org.bukkit.Bukkit;
@@ -20,6 +24,7 @@ import org.bukkit.Bukkit;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
@@ -125,23 +130,56 @@ public class MapTable extends MongoBaseTable {
      *
      * @param mapdata - json map of the map object
      */
-    public void upsertMetaData(@Nonnull JsonObject mapdata) {
+    public CompletableFuture<Void> upsertMetaData(@Nonnull JsonObject mapdata) {
         //TODO: instead of having null callbacks, make a general all purpose callback (esp for player permissions)
         String name = mapdata.get("name").getAsString();
+        CompletableFuture<Void> complete = new CompletableFuture<>();
         findWorld(name, (res, throwable) -> {
-            if(throwable != null) throwable.printStackTrace();
+            if(throwable != null) {
+                throwable.printStackTrace();
+                complete.complete(null);
+            }
             MongoCollection<Document> mapsCol = getCollection("maps");
+
+
             Document mapDoc = Document.parse(mapdata.toString());
-            if(res == null) mapsCol.insertOne(mapDoc, new RegularCallback());
+
+            Iterator<Map.Entry<String, Object>> entries = mapDoc.entrySet().iterator();
+            while(entries.hasNext()) {
+                Map.Entry<String, Object> entry = entries.next();
+                Object value = entry.getValue();
+                if (!(value instanceof List)) continue;
+                List list = (List) value;
+                if (list.get(0) == null || !(list.get(0) instanceof Number)) continue;
+                list.sort((o1, o2) -> {
+                    int o1h = o1.hashCode();
+                    int o2h = o2.hashCode();
+                    if (o2h > o1h)
+                        return 1;
+                    else if (o2h < o1h)
+                        return -1;
+                    else return 0;
+                });
+
+                mapDoc.put(entry.getKey(), list);
+
+
+            }
+            if(res == null) mapsCol.insertOne(mapDoc, (res1, throwable1) -> {
+                if(throwable1 != null) throwable1.printStackTrace();
+                complete.complete(res1);
+            });
             else {
                 mapsCol.replaceOne(
                     Filters.eq("name", name),
                     mapDoc,
                     (res1, throwable1) -> {
                         if(throwable1 != null) throwable1.printStackTrace();
+                        complete.complete(null);
                     });
             }
         });
+        return complete;
     }
 
     /**
