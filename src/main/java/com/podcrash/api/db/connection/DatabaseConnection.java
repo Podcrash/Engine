@@ -38,7 +38,7 @@ public class DatabaseConnection {
 
         source = new HikariDataSource(config);
     }
-    public static Connection makeConnection() throws SQLException {
+    public static synchronized Connection makeConnection() throws SQLException {
         if(source == null) setUp();
         return source.getConnection();
     }

@@ -1,5 +1,9 @@
 package com.podcrash.api.plugin;
 
+import com.grinderwolf.swm.api.SlimePlugin;
+import com.grinderwolf.swm.api.exceptions.UnknownWorldException;
+import com.grinderwolf.swm.api.exceptions.WorldInUseException;
+import com.grinderwolf.swm.api.loaders.SlimeLoader;
 import com.podcrash.api.commands.WorldCommand;
 import com.podcrash.api.mc.damage.DamageQueue;
 import com.podcrash.api.mc.listeners.*;
@@ -15,6 +19,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.redisson.api.RedissonClient;
 import org.spigotmc.SpigotConfig;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -72,6 +77,44 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
         }catch (InterruptedException|ExecutionException e) {
             e.printStackTrace();
         }
+
+        SlimePlugin slimePlugin = (SlimePlugin) Bukkit.getPluginManager().getPlugin("SlimeWorldManager");
+        slimePlugin.registerLoader("postgres", new SlimeLoader() {
+            @Override
+            public byte[] loadWorld(String s, boolean b) throws UnknownWorldException, WorldInUseException, IOException {
+                return new byte[0];
+            }
+
+            @Override
+            public boolean worldExists(String s) throws IOException {
+                return false;
+            }
+
+            @Override
+            public List<String> listWorlds() throws IOException {
+                return null;
+            }
+
+            @Override
+            public void saveWorld(String s, byte[] bytes, boolean b) throws IOException {
+
+            }
+
+            @Override
+            public void unlockWorld(String s) throws UnknownWorldException, IOException {
+
+            }
+
+            @Override
+            public boolean isWorldLocked(String s) throws UnknownWorldException, IOException {
+                return false;
+            }
+
+            @Override
+            public void deleteWorld(String s) throws UnknownWorldException, IOException {
+
+            }
+        });
     }
 
     public void gameDisable() {

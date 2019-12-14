@@ -149,6 +149,8 @@ public class GameListener extends ListenerBase {
         TimeHandler.delayTime(180L, new SimpleTimeResource() {
             @Override
             public void task() {
+                GTeam team = e.getGame().getTeam(e.getWho());
+                e.getWho().teleport(team.getSpawn(e.getWho()));
                 Bukkit.getPluginManager().callEvent(new GameResurrectEvent(e.getGame(), e.getWho()));
             }
         });
@@ -181,6 +183,7 @@ public class GameListener extends ListenerBase {
     @EventHandler
     public void onResurrect(GameResurrectEvent e) {
         deadPeople.remove(e.getWho());
+        e.getGame().getRespawning().remove(e.getWho().getUniqueId()); //forgot what this does tbh
         e.getWho().sendMessage(e.getMessage());
 
         StatusWrapper regen = new StatusWrapper(Status.REGENERATION, 4, 3, false);
