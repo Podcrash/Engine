@@ -22,10 +22,10 @@ public abstract class ItemObjective implements IObjective {
     private Item item;
     private Player player;
 
-    public ItemObjective(Material material, Material block, Vector vector) {
-        this.baseMaterial = material;
+    public ItemObjective(Material base, Material block, Vector vector) {
+        this.baseMaterial = base;
         this.blockMaterial = block;
-        this.vector = vector.add(new Vector(0.5, 0, 0.5));
+        this.vector = vector;
         this.vectorPlus1 = vector.clone().add(new Vector(0, 1, 0));
         this.fireworkEffect = FireworkEffect.builder().withColor(Color.WHITE).with(FireworkEffect.Type.BURST).build();
     }
@@ -52,9 +52,10 @@ public abstract class ItemObjective implements IObjective {
      * Spawn an item with a vertical velocity, set its block
      */
     public void respawn() {
-        if(this.item != null && this.item.isValid()) this.item.remove();
+        if(this.item != null && this.item.isValid()) return;
         this.item = ItemManipulationManager.regular(baseMaterial, vectorPlus1.toLocation(getWorld()), new Vector(0, 1, 0));
-        BlockUtil.setBlock(vectorPlus1.toLocation(getWorld()), blockMaterial);
+        BlockUtil.setBlock(getLocation(), blockMaterial);
+        BlockUtil.setBlock(getLocation().add(0, 1, 0), Material.AIR);
     }
 
     /**

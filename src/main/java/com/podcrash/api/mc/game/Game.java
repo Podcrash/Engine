@@ -235,6 +235,10 @@ public abstract class Game implements IGame {
      * @param world The Game World name.
      */
     public void setGameWorld(String world){
+        //unload the last game world
+        if(this.gameWorldName != null) Bukkit.unloadWorld(this.gameWorldName, false);
+        //unload the current world just in case
+        Bukkit.unloadWorld(world, false);
         this.gameWorldName = world;
         Bukkit.getPluginManager().callEvent(new GameMapChangeEvent(this, world));
         this.loadMap();

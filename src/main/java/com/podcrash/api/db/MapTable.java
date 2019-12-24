@@ -88,7 +88,8 @@ public class MapTable extends MongoBaseTable {
             slimeMap = BaseGameMap.getSlimeProperties(json);
             final SlimeWorld slimeWorld;
             try {
-                slimeWorld = slimePlugin.loadWorld(slimePlugin.getLoader("mongodb"), worldName, false, slimeMap);
+                Bukkit.unloadWorld(worldName, false);
+                slimeWorld = slimePlugin.loadWorld(slimePlugin.getLoader("mongodb"), worldName, true, slimeMap);
             } catch (UnknownWorldException | IOException | CorruptedWorldException | NewerFormatException | WorldInUseException e) {
                 e.printStackTrace();
                 return;
@@ -97,7 +98,7 @@ public class MapTable extends MongoBaseTable {
             Bukkit.getScheduler().runTaskLater(Pluginizer.getSpigotPlugin(), () -> {
                 slimePlugin.generateWorld(slimeWorld);
                 System.out.println("Generating " + slimeWorld.getName());
-            }, 5L);
+            }, 1L);
 
         }));
 
@@ -111,7 +112,7 @@ public class MapTable extends MongoBaseTable {
         WorldManager.getInstance().unloadWorld(worldName);
         return CompletableFuture.runAsync(() -> {
             File folder = Bukkit.getWorldContainer().getAbsoluteFile();
-            File worldFolder = FileUtils.getFile(folder.getAbsoluteFile() + "/" + worldName);
+            File worldFolder = FileUtils.getFile(folder.getAbsoluteFile() + File.separator + worldName);
             System.out.println(worldFolder.toString());
             System.out.println(worldFolder.getAbsoluteFile());
             SlimePlugin slimePlugin = getSlimePlugin();

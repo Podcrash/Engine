@@ -99,7 +99,7 @@ public class CustomScoreboard implements IScoreboard {
 
     public List<String> getLines() {
         List<String> entries = new ArrayList<>();
-        for(int i = 0; i < size; i++) {
+        for(int i = 1; i < size; i++) {
             entries.add(getLine(i));
         }
         return entries;
@@ -115,9 +115,9 @@ public class CustomScoreboard implements IScoreboard {
         // Initially empty strings to populate.
         String prefix = "";
         String suffix = "";
-        // Split the string up into a prefix and suffix, each at most 16 characters long, including chat formatting characters.
-        // If the string is less than or equal to 16 characters, then populating the prefix with the string will suffice.
-        if (string.length() <= 16) {
+        // Split the string up into a prefix and suffix, each at most size characters long, including chat formatting characters.
+        // If the string is less than or equal to size characters, then populating the prefix with the string will suffice.
+        if (string.length() <= size) {
             setLine(line, string, suffix);
             return;
         }
@@ -127,7 +127,7 @@ public class CustomScoreboard implements IScoreboard {
         // The start and end index of any format code substring.
         int format_start = -1;
         int format_end = -1;
-        // Looking for valid color codes starting from the end of the first 16 characters.
+        // Looking for valid color codes starting from the end of the first size characters.
         for (int i = 15; i >= 0; i--) {
             if (string.charAt(i) == '&' && codes.contains(string.charAt(i + 1))) {
                 // If a format code is found, indicate the start and end.
@@ -141,11 +141,11 @@ public class CustomScoreboard implements IScoreboard {
                 break;
             }
         }
-        // If the prefix (first 16 characters) doesn't contain a formatting code, then split the string as normal.
-        // Both prefix and suffix take a maximum of 16 characters.
+        // If the prefix (first size characters) doesn't contain a formatting code, then split the string as normal.
+        // Both prefix and suffix take a maximum of size characters.
         if (format_start == -1 && format_end == -1) {
             for (int i = 0; i < string.length() && i < 32; i++) {
-                if (i < 16) {
+                if (i < size) {
                     prefix = prefix.concat("" + string.charAt(i));
                 } else {
                     suffix = suffix.concat("" + string.charAt(i));
@@ -156,18 +156,18 @@ public class CustomScoreboard implements IScoreboard {
         }
         // If there is a format code, then assign it based off the start and end indices.
         format_code = string.substring(format_start, format_end + 1);
-        // Assign the prefix and suffix appropriately, limited to 16 characters each.
+        // Assign the prefix and suffix appropriately, limited to size characters each.
         // If the color code stretches across both the prefix and suffix (i.e. for "&a", the '&' is in the prefix and 'a' is in the suffix),
         // then the color code will have to begin at the suffix. (If the format code is at the very end of the prefix or beyond, move the format code to the start of the suffix).
         if (format_end >= 15) {
             prefix = string.substring(0, format_start);
             suffix = (format_code + string.substring(format_end + 1));
         } else {
-            prefix = string.substring(0, 16);
-            suffix = (format_code + string.substring(16));
+            prefix = string.substring(0, size);
+            suffix = (format_code + string.substring(size));
         }
-        // Reduce the suffix length if over 16 characters
-        if (suffix.length() > 16) {
+        // Reduce the suffix length if over size characters
+        if (suffix.length() > size) {
             suffix = suffix.substring(0, 15);
         }
         setLine(line, prefix, suffix);
@@ -178,7 +178,7 @@ public class CustomScoreboard implements IScoreboard {
     }
 
     public boolean setPrefix(int line, String prefix) {
-        if (prefix.length() > 16) {
+        if (prefix.length() > size) {
             return false;
         }
         //Bukkit.broadcastMessage("Line: " + line + " ScoreboardTeam: " + scoreboard.getTeam(Integer.toString(line)) + " Prefix: " + prefix);
@@ -187,7 +187,7 @@ public class CustomScoreboard implements IScoreboard {
     }
 
     public boolean setSuffix(int line, String suffix) {
-        if (suffix.length() > 16) {
+        if (suffix.length() > size) {
             return false;
         }
         scoreboard.getTeam(Integer.toString(line)).setSuffix(ChatUtil.chat(suffix));

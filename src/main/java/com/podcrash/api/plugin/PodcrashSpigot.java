@@ -13,6 +13,7 @@ import com.podcrash.api.mc.tracker.VectorTracker;
 import com.podcrash.api.mc.world.WorldManager;
 import com.podcrash.api.redis.Communicator;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -118,6 +119,10 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
     }
 
     public void gameDisable() {
+        for(World world : Bukkit.getWorlds()) {
+            if(world.getName().equalsIgnoreCase("world")) continue;
+            Bukkit.unloadWorld(world, false);
+        }
         DamageQueue.active = false;
         Bukkit.getScheduler().cancelTask(dQInt);
         HandlerList.unregisterAll(this);

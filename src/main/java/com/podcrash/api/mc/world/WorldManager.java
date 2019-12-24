@@ -108,13 +108,16 @@ public class WorldManager {
             e.printStackTrace();
         }
     }
+    public void unloadWorlds() {
+        unloadWorlds(false);
+    }
     /**
      * Delete all the temporary worlds.
      */
-    public void unloadWorlds(){
+    public void unloadWorlds(boolean perm){
         for(String worldName : worlds){
             World world = Bukkit.getWorld(worldName);
-            deleteWorld(world, true);
+            deleteWorld(world, perm);
         }
     }
 
