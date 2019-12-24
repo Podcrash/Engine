@@ -3,6 +3,7 @@ package com.podcrash.api.db;
 import com.podcrash.api.db.connection.DatabaseConnection;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -49,6 +50,7 @@ public abstract class BaseTable implements ITable {
     protected Connection getConnection() {
         return this.connection;
     }
+    @Deprecated
     public DSLContext getContext() {
         try {
             if (connection.isClosed())
@@ -58,6 +60,18 @@ public abstract class BaseTable implements ITable {
             throw new RuntimeException("basetable:55");
         }
         return using(connection, SQLDialect.POSTGRES_10);
+    }
+
+    /**
+     * Use this instead
+     * @param dslConnection
+     */
+    public void useContext(DSLConnection dslConnection) {
+        try(Connection conn = DatabaseConnection.makeConnection()) {
+            dslConnection.useConnection(using(conn, SQLDialect.POSTGRES_10));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public void createTable(String name) {
@@ -72,5 +86,9 @@ public abstract class BaseTable implements ITable {
     }
     public void dropTable() {
         this.dropTable(name);
+    }
+
+    public interface DSLConnection {
+        void useConnection(DSLContext context);
     }
 }

@@ -18,7 +18,8 @@ public class MathUtil {
      * @return
      */
     public static int floor(int factor, int number) {
-        return number - number % factor;
+        int add = (number % factor);
+        return number - add;
     }
 
     /**
@@ -28,6 +29,7 @@ public class MathUtil {
      * @return
      */
     public static int ceil(int factor, int number) {
-        return number + number % factor;
+        int add = (factor - number % factor);
+        return number + add;
     }
 }

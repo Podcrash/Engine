@@ -126,6 +126,7 @@ public final class DamageApplier {
     public static void damage(LivingEntity victim, LivingEntity attacker, double damage, Arrow arrow, boolean applyKb) {
         damage(victim, attacker, damage, arrow, null, Cause.PROJECTILE, applyKb);
     }
+
     //For everything else
     public static void damage(LivingEntity victim, LivingEntity attacker, double damage, DamageSource source, boolean applyKb) {
         damage(victim, attacker, damage, null, source, Cause.CUSTOM, applyKb);

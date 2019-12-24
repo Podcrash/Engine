@@ -111,7 +111,7 @@ public class MapTable extends MongoBaseTable {
         WorldManager.getInstance().unloadWorld(worldName);
         return CompletableFuture.runAsync(() -> {
             File folder = Bukkit.getWorldContainer().getAbsoluteFile();
-            File worldFolder = FileUtils.getFile(folder.getAbsoluteFile() + "\\" + worldName);
+            File worldFolder = FileUtils.getFile(folder.getAbsoluteFile() + "/" + worldName);
             System.out.println(worldFolder.toString());
             System.out.println(worldFolder.getAbsoluteFile());
             SlimePlugin slimePlugin = getSlimePlugin();

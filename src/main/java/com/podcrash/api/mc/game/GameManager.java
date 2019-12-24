@@ -54,7 +54,10 @@ public class GameManager {
 
         game.makeTeams();
         game.createScoreboard();
+    }
 
+    public static void destroyCurrentGame() {
+        currentGame = null;
     }
     public static void setGameMap(String worldName) {
         currentGame.setGameWorld(worldName);

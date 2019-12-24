@@ -7,6 +7,7 @@ import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.util.UnsafeList;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.lang.reflect.Field;
 
@@ -91,5 +92,9 @@ public class CustomSkeleton extends EntitySkeleton {
     protected String bo() {
         if (this.player == null) return super.bo();
         else return null;
+    }
+
+    public void addWorld(World world) {
+        ((CraftWorld) world).getHandle().addEntity(this, CreatureSpawnEvent.SpawnReason.CUSTOM);
     }
 }

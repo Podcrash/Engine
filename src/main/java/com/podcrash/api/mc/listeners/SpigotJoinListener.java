@@ -2,6 +2,7 @@ package com.podcrash.api.mc.listeners;
 
 import com.podcrash.api.mc.damage.HitDetectionInjector;
 import com.podcrash.api.plugin.PodcrashSpigot;
+import com.podcrash.api.redis.Communicator;
 import net.minecraft.server.v1_8_R3.GenericAttributes;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.event.EventHandler;
@@ -17,7 +18,7 @@ public class SpigotJoinListener extends ListenerBase{
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void join(PlayerJoinEvent event) {
-        //new HitDetectionInjector(event.getPlayer()).injectHitDetection();
+        if(Communicator.isGameLobby()) new HitDetectionInjector(event.getPlayer()).injectHitDetection();
         ((CraftPlayer) event.getPlayer()).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).setValue(1);
         PodcrashSpigot.getInstance().getLogger().info(((CraftPlayer) event.getPlayer()).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).getValue() + "");
         PodcrashSpigot.getInstance().getLogger().info("join SPIGOTJOIN");

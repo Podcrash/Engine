@@ -6,6 +6,7 @@ import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.plugin.Pluginizer;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -38,6 +39,9 @@ public class StatusApplier {
             appliers.put(player.getName(), new StatusApplier(player));
         }
         return appliers.get(player.getName());
+    }
+    public static StatusApplier getOrNew(LivingEntity entity) {
+        throw new IllegalArgumentException("This is current a stub!");
     }
 
     public static void remove(Player player) {

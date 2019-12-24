@@ -3,6 +3,7 @@ package com.podcrash.api.mc.util;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.Vector;
 
 public final class EntityUtil  {
@@ -20,5 +21,15 @@ public final class EntityUtil  {
         if(entity.isOnGround()) return true;
         Location location = entity.getLocation();
         return location.subtract(new Vector(0, acc, 0)).getBlock().getType() != Material.AIR;
+    }
+
+    /**
+     * Check to see if a player is lower than OR equal to a certain amount of health
+     * @param entity
+     * @param health
+     * @return
+     */
+    public static boolean isBelow(LivingEntity entity, double health) {
+        return health >= entity.getHealth()/entity.getMaxHealth();
     }
 }
