@@ -15,6 +15,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 //TODO: REPLACE WITH ANNOTATIONS!
+//TODO: REPLACE WITH SOMEHTING MORE SUITABLE
 public class WorldCommand implements CommandExecutor {
     private String name;
     public WorldCommand() {

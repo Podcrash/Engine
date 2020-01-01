@@ -37,7 +37,6 @@ import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * @see GameManager
@@ -117,43 +116,46 @@ public class GameListener extends ListenerBase {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onGameDeath(GameDeathEvent e) {
-        if(!(e.getKiller() instanceof Player)) return;
-        TeamEnum victimTeam = e.getGame().getTeamEnum((Player) e.getKiller());
-        TeamEnum enemyTeam = null;
+        //if(!(e.getKiller() instanceof Player)) return;
 
         Player victim = e.getWho();
         LivingEntity killer = e.getKiller();
-        String msg = e.getMessage();
-        if(enemyTeam != null && killer != null) {
+        Game game = e.getGame();
+
+        String finalMsg = editMessage(e.getMessage(), game, victim, killer);
+
+
+        e.getWho().sendMessage(String.format("%sRespawn>%s You will respawn in 9 seconds.",ChatColor.BLUE, ChatColor.GRAY));
+        Bukkit.getScheduler().runTaskLater(Pluginizer.getSpigotPlugin(), () -> {
+            deathAnimation(victim.getLocation());
+            victim.setAllowFlight(true);
+            victim.setFlying(true);
+            e.getGame().consumeBukkitPlayer(player -> {
+                player.sendMessage(finalMsg);
+                if(player != victim && player.canSee(victim)) player.hidePlayer(victim);
+            });
+        }, 1L);
+        Vector vector = victim.getVelocity();
+        victim.setVelocity(vector.add(new Vector(0, 0.75D, 0)));
+        deadPeople.add(victim);
+        StatusApplier.getOrNew(victim).removeStatus(Status.values());
+        //StatusApplier.getOrNew(victim).applyStatus(Status.INEPTITUDE, 9, 1);
+        TimeHandler.delayTime(180L, () -> {
+            GTeam team = game.getTeam(victim);
+            victim.teleport(team.getSpawn(victim));
+            Bukkit.getPluginManager().callEvent(new GameResurrectEvent(game, victim));
+        });
+    }
+
+    private String editMessage(String msg, Game game, Player victim, LivingEntity killer) {
+        TeamEnum victimTeam = game.getTeamEnum(victim);
+        if(killer != null) {
+            TeamEnum enemyTeam = game.getTeamEnum((Player) killer);
             msg = msg.replace(victim.getName(), victimTeam.getChatColor() + victim.getName())
                     .replace(killer.getName(), enemyTeam.getChatColor() + killer.getName());
         }
-        e.getGame().broadcast(msg);
 
-        deathAnimation(e.getWho().getLocation());
-
-        e.getWho().sendMessage(String.format("%sRespawn>%s You will respawn in 9 seconds.",ChatColor.BLUE, ChatColor.GRAY));
-        //e.getWho().
-        //StatusApplier.getOrNew(e.getWho()).applyStatus(Status.INEPTITUDE, 9, 1);
-        Bukkit.getScheduler().runTaskLater(Pluginizer.getSpigotPlugin(), () -> {
-            for(Player player : e.getGame().getBukkitPlayers()){
-                if(player != e.getWho() && player.canSee(e.getWho())) player.hidePlayer(e.getWho());
-            }
-        }, 1L);
-        Vector vector = e.getWho().getVelocity();
-        e.getWho().setVelocity(vector.add(new Vector(0, 0.75D, 0)));
-        e.getWho().setAllowFlight(true);
-        e.getWho().setFlying(true);
-        deadPeople.add(e.getWho());
-        StatusApplier.getOrNew(e.getWho()).removeStatus(Status.values());
-        TimeHandler.delayTime(180L, new SimpleTimeResource() {
-            @Override
-            public void task() {
-                GTeam team = e.getGame().getTeam(e.getWho());
-                e.getWho().teleport(team.getSpawn(e.getWho()));
-                Bukkit.getPluginManager().callEvent(new GameResurrectEvent(e.getGame(), e.getWho()));
-            }
-        });
+        return msg;
     }
 
     private void deathAnimation(Location loc){
@@ -204,17 +206,21 @@ public class GameListener extends ListenerBase {
         itemObjective.setAcquiredByPlayer(player);
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void gameDamage(GameDamageEvent event) {
         Game game = event.getGame();
         if(!game.isOngoing()) return;
         boolean cancel = false;
 
-        if(game.getTeam(event.getWho()) != null) {
+        if(game.getTeam(event.getWho()) == null) {
             event.setCancelled(true);
             return;
         }
-        cancel = game.isOnSameTeam(event.getVictim(), event.getWho());
+        if(deadPeople.contains(event.getKiller())) {
+            event.setCancelled(true);
+            return;
+        }
+        cancel = game.isOnSameTeam(event.getKiller(), event.getWho());
         event.setCancelled(cancel);
     }
 
@@ -233,7 +239,7 @@ public class GameListener extends ListenerBase {
      * GameDeathEvent(Game game, Player who)
      */
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onDeath(final DeathApplyEvent e) {
+    public void onDeath(DeathApplyEvent e) {
         Player p = e.getPlayer();
         Game game = GameManager.getGame();
         LivingEntity killer = e.getAttacker();

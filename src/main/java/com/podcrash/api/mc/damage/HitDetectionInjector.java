@@ -13,6 +13,7 @@ import com.podcrash.api.plugin.PodcrashSpigot;
 import net.minecraft.server.v1_8_R3.EntityLiving;
 import net.minecraft.server.v1_8_R3.GenericAttributes;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -92,6 +93,7 @@ public final class HitDetectionInjector {
      */
     public void injectHitDetection() {
         ProtocolLibrary.getProtocolManager().addPacketListener(listener);
+        Pluginizer.getSpigotPlugin().getLogger().info(player.getName() + " injected with hit detection.");
     }
 
     public void deinject() {
@@ -149,7 +151,8 @@ public final class HitDetectionInjector {
      * @return the amount of damage
      */
     private double findDamage(LivingEntity attacker) {
-        if(attacker.getEquipment().getItemInHand().getType() == null) return 1D;
+        Material mat = attacker.getEquipment().getItemInHand().getType();
+        if(mat == null || mat == Material.AIR) return 1D;
         double unfiltered = ((CraftLivingEntity) attacker).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).getValue();
         PodcrashSpigot.getInstance().getLogger().info(unfiltered + "");
         for(PotionEffect effect : attacker.getActivePotionEffects()) {

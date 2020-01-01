@@ -171,42 +171,41 @@ public class GameManager {
     }
     public static void joinTeam(Player player, TeamEnum teamEnum) {
         Game game = currentGame;
-        if (hasPlayer(player)) {
-            if(game.getTeam(player) != null && game.getTeamEnum(player) == teamEnum) {
-                player.sendMessage(String.format(
-                        "%sChampions> %sYou are already on this team%s!",
+        if (!hasPlayer(player)) return;
+
+        if(game.getTeam(player) != null && game.getTeamEnum(player) == teamEnum) {
+            player.sendMessage(String.format(
+                    "%sChampions> %sYou are already on this team%s!",
+                    ChatColor.BLUE,
+                    ChatColor.GRAY,
+                    ChatColor.GRAY));
+            return;
+        }
+        for (GTeam team : game.getTeams()) {
+            if (team.isPlayerOnTeam(player)) {
+                team.removeFromTeam(player.getUniqueId());
+                player.sendMessage(
+                        String.format(
+                                "%sChampions> %sYou left the %s%s Team%s.",
+                                ChatColor.BLUE,
+                                ChatColor.GRAY,
+                                team.getTeamEnum().getChatColor(),
+                                team.getTeamEnum().getName(),
+                                ChatColor.GRAY));
+            }
+        }
+        game.joinTeam(player, teamEnum);
+        player.sendMessage(
+                String.format(
+                        "%sChampions> %sYou joined the %s%s Team %sin %sGame %s%s.",
                         ChatColor.BLUE,
                         ChatColor.GRAY,
+                        teamEnum.getChatColor(),
+                        teamEnum.getName(),
+                        ChatColor.GRAY,
+                        ChatColor.GREEN,
+                        game.getId(),
                         ChatColor.GRAY));
-                return;
-            }
-            for (GTeam team : game.getTeams()) {
-                if (team.isPlayerOnTeam(player)) {
-                    team.removeFromTeam(player.getUniqueId());
-                    player.sendMessage(
-                            String.format(
-                                    "%sChampions> %sYou left the %s%s Team%s.",
-                                    ChatColor.BLUE,
-                                    ChatColor.GRAY,
-                                    team.getTeamEnum().getChatColor(),
-                                    team.getTeamEnum().getName(),
-                                    ChatColor.GRAY));
-                }
-            }
-            GTeam team = game.getTeam(teamEnum);
-            team.addToTeam(player.getUniqueId());
-            player.sendMessage(
-                    String.format(
-                            "%sChampions> %sYou joined the %s%s Team %sin %sGame %s%s.",
-                            ChatColor.BLUE,
-                            ChatColor.GRAY,
-                            teamEnum.getChatColor(),
-                            team.getName(),
-                            ChatColor.GRAY,
-                            ChatColor.GREEN,
-                            game.getId(),
-                            ChatColor.GRAY));
-        }
     }
 
     public static void startGame() {

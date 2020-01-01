@@ -11,14 +11,15 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class SpigotJoinListener extends ListenerBase{
+public class SpigotJoinListener extends ListenerBase {
     public SpigotJoinListener(JavaPlugin plugin) {
         super(plugin);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void join(PlayerJoinEvent event) {
-        if(Communicator.isGameLobby()) new HitDetectionInjector(event.getPlayer()).injectHitDetection();
+        if(Communicator.isGameLobby())
+            new HitDetectionInjector(event.getPlayer()).injectHitDetection();
         ((CraftPlayer) event.getPlayer()).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).setValue(1);
         PodcrashSpigot.getInstance().getLogger().info(((CraftPlayer) event.getPlayer()).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).getValue() + "");
         PodcrashSpigot.getInstance().getLogger().info("join SPIGOTJOIN");

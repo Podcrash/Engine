@@ -41,7 +41,7 @@ public class CustomScoreboard implements IScoreboard {
      * @param size The size (number of lines) of the scoreboard (Between 1 and 15 inclusive).
      * @return The scoreboard.
      */
-    private Scoreboard createBoard(int size) {
+    private void createBoard(int size) {
         // Create the scoreboard.
         this.scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
         // Check for a valid scoreboard size. If not, set size to 15.
@@ -51,15 +51,14 @@ public class CustomScoreboard implements IScoreboard {
         this.size = size;
         makeObjective();
         setupScoreboard();
-        return scoreboard;
     }
 
-    public void makeObjective() {
+    private void makeObjective() {
         destroyScoreboard();
         objective = scoreboard.registerNewObjective("dummy", "");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         objective.setDisplayName(ChatUtil.chat(""));
-        animateTitle("JJsTest", "&f&l", "&7&l");
+        //animateTitle("Control", "&f&l", "&7&l");
     }
 
     /**
@@ -69,8 +68,10 @@ public class CustomScoreboard implements IScoreboard {
     private void setupScoreboard() {
         for (int i = 1; i <= size; i++) {
             Team team = scoreboard.registerNewTeam(Integer.toString(i));
-            team.addEntry(ChatUtil.chat("&" + codes.get(i - 1) + "&r"));
-            objective.getScore(ChatUtil.chat("&" + codes.get(i - 1) + "&r")).setScore(i);
+            String code = codes.get(i - 1).toString();
+            String line = ChatUtil.chat("&" + code + "&r");
+            team.addEntry(line);
+            objective.getScore(line).setScore(i);
         }
     }
 
@@ -214,4 +215,7 @@ public class CustomScoreboard implements IScoreboard {
         animator = new ScoreboardTitleAnimator(this, title, primary, secondary);
         animator.run(5, 0);
     }
+
+
+
 }

@@ -40,8 +40,9 @@ public class DeathApplyEvent extends Event implements Cancellable {
      */
     public DeathApplyEvent(Damage lastDamage, Deque<Damage> damages) {
         this.player = (Player) lastDamage.getVictim();
-        boolean combat12SecondsAgo = FastMath.abs(lastDamage.getTime() - damages.getLast().getTime()) > 12;
-        this.attacker = (combat12SecondsAgo) ? null : lastDamage.getAttacker();
+        boolean combat12SecondsAgo = (damages != null && damages.size() != 0)
+                && FastMath.abs(lastDamage.getTime() - damages.getLast().getTime()) > 1200;
+        this.attacker = (combat12SecondsAgo) ? lastDamage.getAttacker() : null;
         this.damage = lastDamage;
         this.history = damages;
     }

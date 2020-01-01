@@ -1,7 +1,5 @@
 package com.podcrash.api.db;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.grinderwolf.swm.api.SlimePlugin;
@@ -15,8 +13,6 @@ import com.podcrash.api.mc.map.BaseGameMap;
 import com.podcrash.api.mc.map.IMap;
 import com.podcrash.api.mc.world.WorldManager;
 import com.podcrash.api.plugin.Pluginizer;
-import com.sun.org.apache.bcel.internal.generic.ARETURN;
-import jodd.util.collection.StringKeyedMapAdapter;
 import org.apache.commons.io.FileUtils;
 import org.bson.Document;
 import org.bukkit.Bukkit;

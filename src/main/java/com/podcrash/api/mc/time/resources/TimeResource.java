@@ -21,6 +21,9 @@ public interface TimeResource {
     default void run(long ticks, long delay) {
         TimeHandler.repeatedTime(ticks, delay, this);
     }
+    default void run(long ticks) {
+        this.run(ticks, 0);
+    }
 
     default void delaySync(long delay) {
         TimeHandler.delayTime(delay, this);

@@ -7,11 +7,6 @@ import java.util.List;
 
 public interface IScoreboard {
     /**
-     * Make a new objective.
-     */
-    void makeObjective();
-
-    /**
      * Convert/assign an array of strings to the scoreboard, starting from the top.
      * @param lines Array of lines to assign starting from the top of the scoreboard.
      */

@@ -8,19 +8,19 @@ import org.bukkit.event.HandlerList;
 public class GameDamageEvent extends GamePlayerEvent implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
     private boolean cancelled;
-    private Player victim;
+    private Player killer;
 
-    public GameDamageEvent(Game game, Player who, Player victim) {
+    public GameDamageEvent(Game game, Player who, Player killer) {
         super(game, who, "");
-        this.victim = victim;
+        this.killer = killer;
     }
 
     public GameDamageEvent(Game game, Player who, String message) {
         super(game, who, message);
     }
 
-    public Player getVictim() {
-        return victim;
+    public Player getKiller() {
+        return killer;
     }
 
 

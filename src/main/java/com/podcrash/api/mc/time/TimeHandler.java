@@ -48,6 +48,9 @@ public final class TimeHandler {
         //runnable.runTaskTimer(plugin, delaySeconds * 20, seconds * 20);
     }
 
+    public static void delayTime(long delay, Runnable runnable) {
+        int taskID = Bukkit.getScheduler().scheduleSyncDelayedTask(Pluginizer.getSpigotPlugin(), runnable, delay);
+    }
     public static void delayTime(long delay, TimeResource resource) {
         Runnable runnable = () -> {
             resource.task();

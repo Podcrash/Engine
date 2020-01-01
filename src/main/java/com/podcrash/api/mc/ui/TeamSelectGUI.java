@@ -4,6 +4,7 @@ import com.podcrash.api.mc.game.GTeam;
 import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.util.ChatUtil;
 import com.podcrash.api.mc.util.ItemStackUtil;
+import org.bukkit.ChatColor;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -27,7 +28,8 @@ public class TeamSelectGUI {
         inventory_name = ChatUtil.chat("&0&lSelect Team");
         List<ItemStack> teamIcons = new ArrayList<>();
         for (GTeam team : game.getTeams()) {
-            ItemStack icon = ItemStackUtil.createItem(35, team.getTeamEnum().getData(), 1, team.getDisplayBold());
+            String boldedColored = ChatColor.BOLD.toString() + team.getTeamEnum().getChatColor();
+            ItemStack icon = ItemStackUtil.createItem(35, team.getTeamEnum().getData(), 1, boldedColored);
             if (game.getTeam(p) != null && game.getTeam(p).getTeamEnum().getData() == team.getTeamEnum().getData()) {
                 ItemMeta meta = icon.getItemMeta();
                 meta.addEnchant(Enchantment.DAMAGE_ALL, 1, true);

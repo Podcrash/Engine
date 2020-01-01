@@ -32,7 +32,7 @@ public class GTeam {
     public GTeam(TeamEnum teamEnum, int capacity, int min, int max, List<Location> spawnpoints) {
         this.teamEnum = teamEnum;
         this.name = teamEnum.getName();
-        this.players = new ArrayList<UUID>();
+        this.players = new ArrayList<>();
         this.capacity = capacity;
         this.min = min;
         this.max = max;
@@ -208,34 +208,6 @@ public class GTeam {
     }
 
     /**
-     * @return The team's display.
-     */
-    public String getDisplay() {
-        return teamEnum.getDisplay();
-    }
-
-    /**
-     * @return The team's display in bold.
-     */
-    public String getDisplayBold() {
-        return teamEnum.getDisplayBold();
-    }
-
-    /**
-     * @return The team's capitalized and bolded display.
-     */
-    public String getDisplayCapsBold() {
-        return teamEnum.getDisplayCapsBold();
-    }
-
-    /**
-     * @return The team's color code.
-     */
-    public String getColorCode() {
-        return teamEnum.getColorCode();
-    }
-
-    /**
      * @return The team's spawnpoints.
      */
     public List<Location> getSpawns() {
@@ -258,7 +230,7 @@ public class GTeam {
      */
     public Location getSpawn(Player player) {
         if (!isPlayerOnTeam(player)) { return null; }
-        return spawnpoints.get(players.indexOf(player));
+        return spawnpoints.get(players.indexOf(player.getUniqueId()));
     }
 
     /**

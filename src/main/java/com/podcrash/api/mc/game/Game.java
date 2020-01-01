@@ -1,9 +1,5 @@
 package com.podcrash.api.mc.game;
 
-import com.comphenix.protocol.wrappers.EnumWrappers;
-import com.comphenix.protocol.wrappers.PlayerInfoData;
-import com.comphenix.protocol.wrappers.WrappedChatComponent;
-import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import com.podcrash.api.db.DataTableType;
 import com.podcrash.api.db.MapTable;
 import com.podcrash.api.db.TableOrganizer;
@@ -11,26 +7,20 @@ import com.podcrash.api.mc.events.game.GameJoinEvent;
 import com.podcrash.api.mc.events.game.GameLeaveEvent;
 import com.podcrash.api.mc.events.game.GameMapChangeEvent;
 import com.podcrash.api.mc.events.game.GameMapLoadEvent;
-import com.podcrash.api.mc.game.objects.ItemObjective;
 import com.podcrash.api.mc.game.resources.GameResource;
 import com.podcrash.api.mc.game.scoreboard.GameLobbyScoreboard;
 import com.podcrash.api.mc.game.scoreboard.GameScoreboard;
-import com.podcrash.api.mc.listeners.ListenerBase;
 import com.podcrash.api.mc.map.BaseGameMap;
-import com.podcrash.api.mc.map.IMap;
 import com.podcrash.api.mc.map.MapManager;
 import com.podcrash.api.mc.ui.TeamSelectGUI;
 import com.podcrash.api.mc.util.ChatUtil;
 import com.podcrash.api.mc.util.ItemStackUtil;
-import com.podcrash.api.mc.util.PlayerCache;
-import com.podcrash.api.mc.util.Utility;
 import com.podcrash.api.plugin.Pluginizer;
-import com.sun.org.apache.xpath.internal.operations.Bool;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.inventory.Inventory;
@@ -38,12 +28,13 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
-import org.bukkit.util.Vector;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 /**
  * Abstract Game Class
@@ -118,7 +109,7 @@ public abstract class Game implements IGame {
     public void increment(TeamEnum team, int score) {
         GTeam team1 = getTeam(team);
         team1.setScore(team1.getScore() + score);
-        getGameScoreboard().update();
+        //getGameScoreboard().update();
     }
 
     /**
@@ -350,7 +341,7 @@ public abstract class Game implements IGame {
      * @return A set of all players (participating and spectating).
      */
     public Set<UUID> getPlayers() {
-        Set<UUID> players = new HashSet<UUID>();
+        Set<UUID> players = new HashSet<>();
         players.addAll(participants);
         players.addAll(spectators);
         return players;
@@ -374,6 +365,12 @@ public abstract class Game implements IGame {
             if ((p = Bukkit.getPlayer(uuid)) != null) players.add(p);
         }
         return players;
+    }
+    public void consumeBukkitPlayer(Consumer<Player> playerConsumer) {
+        for(UUID uuid : getPlayers()) {
+            Player p = Bukkit.getPlayer(uuid);
+            if(p != null) playerConsumer.accept(p);
+        }
     }
 
     /**
@@ -451,13 +448,26 @@ public abstract class Game implements IGame {
     public void createScoreboard(){
         Scoreboard colorBoard = getGameScoreboard().getBoard();
         for (GTeam team : teams) {
-            String teamString = id + team.getTeamEnum().getByteData() + team.getTeamEnum().getName() + "Team";
-            if (colorBoard.getTeam(teamString) != null) {
+            TeamEnum gTeam = team.getTeamEnum();
+            String teamString = getTeamString(gTeam);
+            if (colorBoard.getTeam(teamString) != null)
                 colorBoard.getTeam(teamString).unregister();
-            }
+
             Team newTeam = colorBoard.registerNewTeam(teamString);
-            newTeam.setPrefix(team.getTeamEnum().getChatColor().toString());
+            newTeam.setPrefix(gTeam.getChatColor().toString());
+            newTeam.setAllowFriendlyFire(false);
+            newTeam.setCanSeeFriendlyInvisibles(true);
+            newTeam.setNameTagVisibility(NameTagVisibility.ALWAYS);
+
         }
+    }
+    /**
+     * Get the team unique string for putting player colors
+     * @param team the team enum that correlates with the color
+     * @return the unique string
+     */
+    protected final String getTeamString(TeamEnum team) {
+        return id + team.getByteData() + team.getName() + "Team";
     }
 
     /**
@@ -487,7 +497,7 @@ public abstract class Game implements IGame {
     public void addPlayerToTeam(Player player, TeamEnum teamEnum) {
          spectators.remove(player.getUniqueId());
          getTeam(teamEnum).addToTeam(player.getUniqueId());
-         Team team = getGameScoreboard().getBoard().getTeam(id + teamEnum.getByteData() + getTeam(teamEnum).getTeamEnum().getName() + "Team");
+         Team team = getGameScoreboard().getBoard().getTeam(getTeamString(teamEnum));
          player.setScoreboard(getGameScoreboard().getBoard());
          team.addEntry(player.getName());
 //         add(player);
@@ -500,18 +510,19 @@ public abstract class Game implements IGame {
      * @return If the join was successful.
      */
     public boolean joinTeam(Player player, TeamEnum teamEnum) {
-        if (!player.isOnline() || isOngoing()) { return false; }
+        if (!player.isOnline() || isOngoing() || !isParticipating(player)) return false;
         leaveTeam(player);
-        addParticipant(player);
-        if (!contains(player)) { return false; }
+
         GTeam team = getTeam(teamEnum);
-        if (team.teamSize() < team.getMaxPlayers()) {
-            player.setPlayerListName(ChatUtil.chat(team.getTeamEnum().getColorCode() + player.getName()));
-            team.addToTeam(player);
-            if (player.getOpenInventory().getTitle().equals(TeamSelectGUI.inventory_name)) { player.openInventory(TeamSelectGUI.selectTeam(this, player)); }
-            return true;
-        }
-        return false;
+        if (team == null || team.teamSize() >= team.getMaxPlayers()) return false;
+
+        Scoreboard scoreboard =  getGameScoreboard().getBoard();
+        Team bukkitTeam = scoreboard.getTeam(getTeamString(teamEnum));
+        player.setScoreboard(scoreboard);
+        bukkitTeam.addEntry(player.getName());
+        team.addToTeam(player);
+        if (player.getOpenInventory().getTitle().equals(TeamSelectGUI.inventory_name)) { player.openInventory(TeamSelectGUI.selectTeam(this, player)); }
+        return true;
     }
 
 
@@ -553,7 +564,6 @@ public abstract class Game implements IGame {
     public void removeSpectator(Player player) {
         spectators.remove(player.getUniqueId());
         participants.add(player.getUniqueId());
-        player.setPlayerListName(ChatUtil.chat("&7" + player.getName()));
         if (!isOngoing()) { updateLobbyInventory(player); }
     }
 
@@ -597,7 +607,7 @@ public abstract class Game implements IGame {
             leaveTeam(player);
         }
         // Reset scoreboard.
-        player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+        //player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         // Call event.
         Bukkit.getServer().getPluginManager().callEvent(new GameLeaveEvent(this, player));
     }
@@ -958,7 +968,7 @@ public abstract class Game implements IGame {
                             "%sGame> %sYou were removed from Game #" + id + '!',
                             ChatColor.BLUE,
                             ChatColor.GRAY));
-            player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+            //player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         }
     }
 

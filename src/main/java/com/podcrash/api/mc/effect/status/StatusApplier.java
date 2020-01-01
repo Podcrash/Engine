@@ -41,7 +41,8 @@ public class StatusApplier {
         return appliers.get(player.getName());
     }
     public static StatusApplier getOrNew(LivingEntity entity) {
-        throw new IllegalArgumentException("This is current a stub!");
+        if(entity instanceof Player) return getOrNew((Player) entity);
+        else throw new IllegalArgumentException("This is current a stub!");
     }
 
     public static void remove(Player player) {
@@ -237,6 +238,7 @@ public class StatusApplier {
                 break;
             case GROUND:
                 applyGround(duration);
+                this.player.setSprinting(false);
                 break;
             case INEPTITUDE:
                 applyInept(duration);

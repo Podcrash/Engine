@@ -7,8 +7,6 @@ import com.podcrash.api.mc.sound.SoundPlayer;
 import com.podcrash.api.mc.util.PacketUtil;
 import com.podcrash.api.mc.world.WorldManager;
 import com.podcrash.api.plugin.Pluginizer;
-import com.podcrash.api.plugin.PodcrashPlugin;
-import com.podcrash.api.plugin.PodcrashSpigot;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -112,12 +110,16 @@ public class MapMaintainListener extends ListenerBase {
         }
     }
 
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void damage(EntityDamageByEntityEvent e) {
+        if(e.getDamager() instanceof Player) e.setCancelled(true);
+    }
     /**
      * Remove the default damage tick which makes alters your velocity
      * Remove default death mechanics.
      * @param event
      */
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void statusDamage(EntityDamageEvent event) {
         //if the event was cancelled, or the entity isn't living, or if it's in the og world,
         //or if the cause is null or custom
@@ -138,7 +140,7 @@ public class MapMaintainListener extends ListenerBase {
         }
         double afterHealth = p.getHealth() - damage;
 
-        List<EntityDamageEvent.DamageCause> poss = Arrays.asList(
+        final List<EntityDamageEvent.DamageCause> poss = Arrays.asList(
                 EntityDamageEvent.DamageCause.FIRE_TICK,
                 EntityDamageEvent.DamageCause.FALL,
                 EntityDamageEvent.DamageCause.POISON,
@@ -155,7 +157,7 @@ public class MapMaintainListener extends ListenerBase {
         //if the player is about to die, cancel it
         //Then call our own death event.
         if(p instanceof Player && afterHealth <= 0D) {
-            DamageQueue.artificialDie((Player) event.getEntity());
+            DamageQueue.artificialDie((Player) p);
             event.setCancelled(true);
         }
     }

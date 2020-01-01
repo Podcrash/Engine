@@ -122,40 +122,21 @@ public final class DamageQueue implements Runnable {
      * @returns if the entity will die
      */
     private boolean damageEntity(LivingEntity entity, double damage) {
-        final double future;
-        boolean a = false;
         if(entity instanceof Player) {
-            double health = entity.getHealth() - damage;
-            if (health > entity.getMaxHealth()) {
-                health = entity.getMaxHealth(); //this will never happen, but just in case
-                a = false;
-            } else if (health < 0) {
-                health = 0;
-                a = true;
-            }
-            future = health;
-        }else future = damage;
+            double nowHealth = entity.getHealth() - damage;
+            if (nowHealth > entity.getMaxHealth()) //this will never happen, but just in case
+                nowHealth = entity.getMaxHealth();
+            if(nowHealth <= 0) {
+                PlayerInventory inventory = ((Player) entity).getInventory();
+                inventory.clear();
+                inventory.setArmorContents(new ItemStack[]{null, null, null, null});
+                die(entity);
+                SoundPlayer.sendSound(entity.getLocation(), "game.neutral.die", 1, 75);
+                return true;
+            }else entity.setHealth(nowHealth);
+        }else TimeHandler.delayTime(0L, () -> entity.damage(damage));
 
-        final boolean b = a;
-        TimeHandler.delayTime(0L, new SimpleTimeResource() {
-            @Override
-            public void task() {
-                if(entity instanceof Player) {
-                    if(b) {
-                        PlayerInventory inventory = ((Player) entity).getInventory();
-                        inventory.clear();
-                        inventory.setArmorContents(new ItemStack[]{null, null, null, null});
-                    }
-                    if(future <= 0) {
-                        if(die(entity)) {
-                            SoundPlayer.sendSound(entity.getLocation(), "game.neutral.die", 1, 75);
-                        }else entity.setHealth(future + damage);
-                    }else entity.setHealth(future);
-                } else entity.damage(future);
-            }
-        });
-
-        return b;
+        return false;
     }
 
     /**
@@ -214,7 +195,6 @@ public final class DamageQueue implements Runnable {
      * @return
      */
     private boolean die(LivingEntity victim) {
-        if(!(victim instanceof Player)) return false;
         String name = getNameFor(victim);
         Deque<Damage> history = damageHistory.get(name);
         if(history.size() == 0) return false;
@@ -222,7 +202,6 @@ public final class DamageQueue implements Runnable {
         Damage damage = history.removeLast();
 
         DeathApplyEvent deathEvent = new DeathApplyEvent(damage, history);
-
         Bukkit.getPluginManager().callEvent(deathEvent);
         removeDeath((Player) victim);
         if(deathEvent.isCancelled()) return false;
@@ -337,14 +316,11 @@ public final class DamageQueue implements Runnable {
         Damage damage;
         final Damage nullDamage = new Damage(player, player, -99, null, Cause.NULL, null, (DamageSource) null,false);
         boolean a = false;
-        if(damages == null) damage = nullDamage;
+        if(damages == null ||
+           damages.size() == 0) damage = nullDamage;
         else {
-            if(damages.size() != 0) {
-                damage = damages.removeLast();
-                a = true;
-            }else {
-                damage = nullDamage;
-            }//ie this dude hasn't done anything
+            damage = damages.removeLast();
+            a = true;
         }
         Bukkit.getPluginManager().callEvent(new DeathApplyEvent(damage, damages));
         if(a) damages.clear();

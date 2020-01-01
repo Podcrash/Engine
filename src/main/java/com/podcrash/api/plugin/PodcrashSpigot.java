@@ -5,6 +5,7 @@ import com.grinderwolf.swm.api.exceptions.UnknownWorldException;
 import com.grinderwolf.swm.api.exceptions.WorldInUseException;
 import com.grinderwolf.swm.api.loaders.SlimeLoader;
 import com.podcrash.api.commands.WorldCommand;
+import com.podcrash.api.mc.Configurator;
 import com.podcrash.api.mc.damage.DamageQueue;
 import com.podcrash.api.mc.listeners.*;
 import com.podcrash.api.mc.tracker.CoordinateTracker;
@@ -22,7 +23,9 @@ import org.spigotmc.SpigotConfig;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
 
@@ -38,6 +41,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
     private CoordinateTracker coordinateTracker;
     private VectorTracker vectorTracker;
 
+    private final Map<String, Configurator> configurators = new HashMap<>();
     @Override
     public void redis(RedissonClient client) {
 
@@ -52,6 +56,10 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
     private void addTracker(Tracker tracker) {
         trackers.add(tracker);
         tracker.enable();
+    }
+
+    public void registerConfigurator(String identifier) {
+        configurators.put(identifier, new Configurator(this, identifier));
     }
 
     /**
