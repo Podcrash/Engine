@@ -3,9 +3,15 @@
 .vscode
 .project
 .settings/
-/build/
-/out
 
+# help whitelisting
+!build/generated-src/
+build/classes/
+build/libs/
+build/resources/
+build/tmp/
+
+/out
 # Ignore Gradle GUI config
 gradle-app.setting
 

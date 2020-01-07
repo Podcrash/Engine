@@ -38,11 +38,20 @@ public class DatabaseConnection {
 
         source = new HikariDataSource(config);
     }
+
+    /**
+     * Makes the connection pool
+     * @return the connection
+     * @throws SQLException
+     */
     public static synchronized Connection makeConnection() throws SQLException {
         if(source == null) setUp();
         return source.getConnection();
     }
 
+    /**
+     * Closes it
+     */
     public static void close() {
         source.close();
         source = null;

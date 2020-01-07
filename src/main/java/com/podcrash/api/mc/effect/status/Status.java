@@ -15,7 +15,7 @@ public enum Status {
     INVISIBILITY("INVISIBILITY", PotionEffectType.INVISIBILITY, true, false, 14),
     WITHER("WITHER", PotionEffectType.WITHER, true, true, 20),
     STRENGTH("Strength", PotionEffectType.INCREASE_DAMAGE, true, false, 5),
-    WEAKNESS("Weakness", PotionEffectType.WEAKNESS, true, true, 5),
+    WEAKNESS("Weakness", PotionEffectType.WEAKNESS, true, true, 18),
     RESISTANCE("Resistance", PotionEffectType.DAMAGE_RESISTANCE, true, false, 11),
     REGENERATION("Regeneration", PotionEffectType.REGENERATION, true, false, 10),
     ABSORPTION("Absorption", PotionEffectType.ABSORPTION, true, false, 22),

@@ -21,8 +21,10 @@ package com.abstractpackets.packetwrapper;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.BlockPosition;
+import org.bukkit.Location;
+import org.bukkit.util.Vector;
 
-public class WrapperPlayServerWorldEvent extends AbstractPacket {
+public class WrapperPlayServerWorldEvent extends AbstractPacket implements ILocationPacket {
     public static final PacketType TYPE = PacketType.Play.Server.WORLD_EVENT;
     
     public WrapperPlayServerWorldEvent() {
@@ -69,7 +71,29 @@ public class WrapperPlayServerWorldEvent extends AbstractPacket {
     public void setLocation(BlockPosition value) {
         handle.getBlockPositionModifier().write(0, value);
     }
-    
+
+    @Override
+    public void setLocation(Location location) {
+        setLocation(location.toVector());
+    }
+
+    @Override
+    public void setLocation(Vector vector) {
+        setLocation(new BlockPosition(vector));
+    }
+
+    /**
+     * Please don't use this.
+     * @param x
+     * @param y
+     * @param z
+     */
+
+    @Override
+    public void setLocation(float x, float y, float z) {
+        setLocation(new BlockPosition((int) x, (int) y, (int) z));
+    }
+
     /**
      * Retrieve Data.
      * <p>

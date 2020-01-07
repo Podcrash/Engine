@@ -1,6 +1,7 @@
 package com.podcrash.api.mc.sound;
 
 import com.abstractpackets.packetwrapper.WrapperPlayServerNamedSoundEffect;
+import com.podcrash.api.mc.util.PacketUtil;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -38,7 +39,7 @@ public final class SoundPlayer {
         WrapperPlayServerNamedSoundEffect soundPacket = createSound(loc, sound, volume, pitch);
 
         if(players == null) players = loc.getWorld().getPlayers();
-        players.forEach(soundPacket::sendPacket);
+        PacketUtil.asyncSend(soundPacket, players);
     }
 
     public static void sendSound(Location loc, String sound, float volume, int pitch) {

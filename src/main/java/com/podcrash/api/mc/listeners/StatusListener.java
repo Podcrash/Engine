@@ -3,10 +3,16 @@ package com.podcrash.api.mc.listeners;
 import com.podcrash.api.mc.effect.status.Status;
 import com.podcrash.api.mc.effect.status.StatusApplier;
 import com.podcrash.api.mc.events.DamageApplyEvent;
+import com.podcrash.api.plugin.PodcrashSpigot;
+import net.minecraft.server.v1_8_R3.EntityPlayer;
+import net.minecraft.server.v1_8_R3.GenericAttributes;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -15,16 +21,10 @@ public class StatusListener extends ListenerBase {
         super(plugin);
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void sprint(PlayerToggleSprintEvent event) {
-        if(event.isSprinting() &&
-                StatusApplier.getOrNew(event.getPlayer()).has(Status.GROUND)) event.setCancelled(true);
-    }
-
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void damage(DamageApplyEvent event) {
         if(!(event.getVictim() instanceof Player)) return;
-        StatusApplier applier = StatusApplier.getOrNew((Player) event.getVictim());
+        StatusApplier applier = StatusApplier.getOrNew(event.getVictim());
         if(applier.has(Status.ROOTED))
             event.setDoKnockback(false);
     }

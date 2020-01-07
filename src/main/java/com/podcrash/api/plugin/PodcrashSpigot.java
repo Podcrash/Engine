@@ -235,4 +235,12 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             getCommand("pworld").setExecutor(new WorldCommand());
         });
     }
+
+    public Configurator getConfigurator(String identifier) {
+        return configurators.get(identifier);
+    }
+    public void reloadConfigurators() {
+        CompletableFuture.runAsync(() ->
+                configurators.values().forEach(Configurator::reloadConfig));
+    }
 }

@@ -23,8 +23,9 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.EnumWrappers.Particle;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
-public class WrapperPlayServerWorldParticles extends AbstractPacket {
+public class WrapperPlayServerWorldParticles extends AbstractPacket implements ILocationPacket {
     public static final PacketType TYPE = PacketType.Play.Server.WORLD_PARTICLES;
 
     public WrapperPlayServerWorldParticles() {
@@ -54,6 +55,16 @@ public class WrapperPlayServerWorldParticles extends AbstractPacket {
         setX((float) loc.getX());
         setY((float) loc.getY());
         setZ((float) loc.getZ());
+    }
+    public void setLocation(Vector vector) {
+        setX((float) vector.getX());
+        setY((float) vector.getY());
+        setZ((float) vector.getZ());
+    }
+    public void setLocation(float x, float y, float z) {
+        setX(x);
+        setY(y);
+        setZ(z);
     }
     /**
      * Retrieve Particle type.

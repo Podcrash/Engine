@@ -17,6 +17,7 @@ import java.util.function.Consumer;
 
 /**
  * To make this class better, there has to be less structure here
+ * TODO: Rewrite
  */
 public class StatusApplier {
     private Player player;

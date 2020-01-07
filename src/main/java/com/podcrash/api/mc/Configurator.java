@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -97,6 +99,11 @@ public class Configurator {
     public CompletableFuture<Void> readString(String path, Consumer<String> consumer) {
         return CompletableFuture.supplyAsync(() -> {
             return (String) this.config.get(path);
+        }, executor).thenAcceptAsync(consumer);
+    }
+    public CompletableFuture<Void> readList(String path, Consumer<List> consumer) {
+        return CompletableFuture.supplyAsync(() -> {
+            return this.config.getList(path, new ArrayList<>());
         }, executor).thenAcceptAsync(consumer);
     }
 

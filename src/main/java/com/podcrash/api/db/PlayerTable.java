@@ -1,8 +1,8 @@
 package com.podcrash.api.db;
 
 
-import com.podcrash.api.db.jooq.Tables;
-import com.podcrash.api.db.jooq.tables.Players;
+import nu.studer.sample.Tables;
+import nu.studer.sample.tables.Players;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;

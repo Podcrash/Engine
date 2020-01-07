@@ -286,21 +286,20 @@ public final class DamageQueue implements Runnable {
         if(hasDeath((Player) attacker) || hasDeath((Player) victim)) return; //if the attacker/victim is currently dead, don't process the damage at all
         if(victim instanceof Player && cause == Cause.MELEE && StatusApplier.getOrNew((Player) victim).isCloaked()) return;
 
-        DamageApplyEvent damageEvent = new DamageApplyEvent(victim, attacker, damageWrapper.getDamage(), cause,
+        double bonus = 0;
+        if(cause == Cause.MELEE || cause == Cause.MELEESKILL)
+            bonus = findPotionBonus(victim, attacker);
+        DamageApplyEvent damageEvent = new DamageApplyEvent(victim, attacker, damageWrapper.getDamage() + bonus, cause,
                 damageWrapper.getArrow(), damageWrapper.getSource(), damageWrapper.isApplyKnockback());
         double damage = damageEvent.getDamage();
         Bukkit.getPluginManager().callEvent(damageEvent);
 
         if(damageEvent.isCancelled() || damageEvent.getAttacker() == damageEvent.getVictim()) return;
         if(damageEvent.isModified()) damage = damageEvent.getDamage();
-        if((cause == Cause.MELEE || cause == Cause.MELEESKILL) && damageWrapper.getArrow() == null)
-            damage += findPotionBonus(victim, attacker);
-
         addHistory(victim, damageWrapper);
         double armorValue = damageEvent.getArmorValue();
         playSound(victim, attacker, cause);
-        System.out.println("Damage vs XP: " + damage + " vs " + damageEvent.getChangeXP());
-        if(attacker instanceof Player) ((Player) attacker).setLevel((int) damageEvent.getChangeXP());
+        if(attacker instanceof Player) ((Player) attacker).setLevel((int) damage);
         sendUsePacket(victim);
         damage(victim, damage, armorValue, damageEvent);
     }

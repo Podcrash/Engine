@@ -21,6 +21,7 @@ public class SpigotJoinListener extends ListenerBase {
         if(Communicator.isGameLobby())
             new HitDetectionInjector(event.getPlayer()).injectHitDetection();
         ((CraftPlayer) event.getPlayer()).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).setValue(1);
+        event.getPlayer().setWalkSpeed(0.2F);
         PodcrashSpigot.getInstance().getLogger().info(((CraftPlayer) event.getPlayer()).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).getValue() + "");
         PodcrashSpigot.getInstance().getLogger().info("join SPIGOTJOIN");
     }

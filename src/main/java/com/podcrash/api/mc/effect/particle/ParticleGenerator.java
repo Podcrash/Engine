@@ -1,6 +1,7 @@
 package com.podcrash.api.mc.effect.particle;
 
 import com.abstractpackets.packetwrapper.AbstractPacket;
+import com.abstractpackets.packetwrapper.ILocationPacket;
 import com.abstractpackets.packetwrapper.WrapperPlayServerWorldEvent;
 import com.abstractpackets.packetwrapper.WrapperPlayServerWorldParticles;
 import com.comphenix.protocol.wrappers.BlockPosition;
@@ -91,10 +92,10 @@ public final class ParticleGenerator {
         return createParticle(vector, particle, new int[]{1}, particleCount, offsetX, offsetY, offsetZ);
     }
 
-    public static void generateProjectile(Projectile proj, WrapperPlayServerWorldParticles packet) {
+    public static void generateProjectile(Projectile proj, ILocationPacket packet) {
         ParticleRunnable.particleRunnable.getWrappers().add(new ProjectileParticleWrapper(proj, packet));
     }
-    public static void generateEntity(Entity entity, WrapperPlayServerWorldParticles packet, SoundWrapper sound){
+    public static void generateEntity(Entity entity, ILocationPacket packet, SoundWrapper sound){
         ParticleRunnable.particleRunnable.getWrappers().add(new EntityParticleWrapper(entity, packet, sound));
     }
 

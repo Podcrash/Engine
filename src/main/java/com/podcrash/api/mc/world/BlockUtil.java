@@ -137,10 +137,11 @@ public final class BlockUtil {
     }
 
     public static Location getHighestUnderneath(Location loc) {
-        final Vector down = new Vector(0, 1, 0);
-        while (isPassable(loc.getBlock())) {
+        Block block = loc.getBlock();
+        while (isPassable(block)) {
             if(loc.getY() < 0) return loc;
-            loc.subtract(down);
+            loc.subtract(0, 1, 0);
+            block = loc.getBlock();
         }
 
         return loc;
