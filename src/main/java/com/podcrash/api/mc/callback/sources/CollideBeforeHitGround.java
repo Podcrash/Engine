@@ -4,6 +4,9 @@ import com.podcrash.api.mc.callback.CallbackAction;
 import com.podcrash.api.mc.util.EntityUtil;
 import org.bukkit.entity.Player;
 
+/**
+ * This is used when a player uses a skill or similar that requires being in the air and having dropped back down to the ground
+ */
 public class CollideBeforeHitGround extends CallbackAction<CollideBeforeHitGround> {
     private Player player;
 

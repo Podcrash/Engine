@@ -1,5 +1,6 @@
 package com.podcrash.api.mc.events;
 
+import com.comphenix.net.sf.cglib.asm.$ClassReader;
 import com.podcrash.api.mc.damage.Cause;
 import com.podcrash.api.mc.damage.Damage;
 
@@ -17,6 +18,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
@@ -40,11 +42,26 @@ public class DeathApplyEvent extends Event implements Cancellable {
      */
     public DeathApplyEvent(Damage lastDamage, Deque<Damage> damages) {
         this.player = (Player) lastDamage.getVictim();
-        boolean combat12SecondsAgo = (damages != null && damages.size() != 0)
-                && FastMath.abs(lastDamage.getTime() - damages.getLast().getTime()) > 1200;
-        this.attacker = (combat12SecondsAgo) ? lastDamage.getAttacker() : null;
         this.damage = lastDamage;
         this.history = damages;
+        this.attacker = lastDamage.getAttacker();//findAttacker();
+        //boolean combat12SecondsAgo = (damages != null && damages.size() != 0)
+        //        && FastMath.abs(lastDamage.getTime() - damages.getLast().getTime()) > 1200;
+    }
+
+    private LivingEntity findAttacker() {
+        if(damage == null || history.size() == 0) return null;
+        List<Damage> damageList = new ArrayList<>(history);
+        //find the player who last damaged
+        Damage lastEntityDamage = null;
+        for(int i = damageList.size() - 1; i >= 0; i--) {
+            lastEntityDamage = damageList.get(i);
+            if(lastEntityDamage.getAttacker() != null) break;
+        }
+
+        if(lastEntityDamage == null) return null;
+        if(damage.getTime() - lastEntityDamage.getTime() > 1200) return null;
+        return lastEntityDamage.getAttacker();
     }
 
     public Player getPlayer() {

@@ -10,6 +10,9 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
+/**
+ * This class is used to look for an item and see if it either hits the ground or an entity
+ */
 public class ItemIntercept extends CallbackAction<ItemIntercept> {
     protected LivingEntity entity;
     protected Player owner;

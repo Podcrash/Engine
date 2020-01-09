@@ -9,6 +9,10 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
+/**
+ * //TODO: FIX ALL OF THIS, callbacks are very confusing and hard to understand
+ * This class is used to look for an item and see if it either hits the ground or an entity, or a certain time has passed
+ */
 public class DelayItemIntercept extends ItemIntercept {
     private final long duration;
     public DelayItemIntercept(Player owner, Item item, float duration) {

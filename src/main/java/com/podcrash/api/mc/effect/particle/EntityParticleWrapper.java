@@ -11,6 +11,9 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
+/**
+ * This ties a particle to an entity de
+ */
 public class EntityParticleWrapper {
     private final Entity entity;
     private final ILocationPacket packet;

@@ -3,6 +3,9 @@ package com.podcrash.api.mc.disguise;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 
+/**
+ * The disguise data class used to handle disguises for packets
+ */
 public final class Disguise {
     private final Entity entity;
     private final EntityType entityType;
