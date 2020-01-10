@@ -1,5 +1,6 @@
 package com.podcrash.api.mc.effect.status;
 
+import net.bytebuddy.pool.TypePool;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.Arrays;
@@ -68,8 +69,8 @@ public enum Status {
         return null;
     }
 
-    public PotionEffectType getPotionEffectType() {
-        if(!isVanilla) return null;
+    PotionEffectType getPotionEffectType() {
+        if(!isVanilla) throw new IllegalStateException("Vanilla potions must have isVanilla");
         return potionEffectType;
     }
 

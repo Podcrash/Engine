@@ -12,6 +12,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -108,54 +109,8 @@ public class StatusApplier {
         }
     }
 
-    private void applyVanilla(Status status, int duration, int potency, boolean ambient, boolean override) {
-        PotionEffect potion = null;
-        switch (status) {
-            case SLOW:
-                potion = new PotionEffect(PotionEffectType.SLOW, duration, potency, ambient);
-                break;
-            case SPEED:
-                potion = new PotionEffect(PotionEffectType.SPEED, duration, potency, ambient);
-                break;
-            case POISON:
-                potion = new PotionEffect(PotionEffectType.POISON, duration, potency, ambient);
-                break;
-            case JUMP_BOOST:
-                potion = new PotionEffect(PotionEffectType.JUMP, duration, potency, ambient);
-                break;
-            case FIRE_RESISTANCE:
-                potion = new PotionEffect(PotionEffectType.FIRE_RESISTANCE, duration, potency, ambient);
-                break;
-            case INVISIBILITY:
-                potion = new PotionEffect(PotionEffectType.INVISIBILITY, duration, potency, ambient);
-                break;
-            case DIZZY:
-                potion = new PotionEffect(PotionEffectType.CONFUSION, duration, potency, ambient);
-                break;
-            case BLIND:
-                potion = new PotionEffect(PotionEffectType.BLINDNESS, duration, potency, ambient);
-                break;
-            case WITHER:
-                potion = new PotionEffect(PotionEffectType.WITHER, duration, potency, ambient);
-                break;
-            case STRENGTH:
-                potion = new PotionEffect(PotionEffectType.INCREASE_DAMAGE, duration, potency, ambient);
-                break;
-            case RESISTANCE:
-                potion = new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, duration, potency, ambient);
-                break;
-            case REGENERATION:
-                potion = new PotionEffect(PotionEffectType.REGENERATION, duration, potency, ambient);
-                break;
-            case WEAKNESS:
-                potion = new PotionEffect(PotionEffectType.WEAKNESS, duration, potency, ambient);
-                break;
-        }
-
-        if (potion == null) {
-            return;
-        }
-        final PotionEffect addpotion = potion;
+    private void applyVanilla(@Nonnull Status status, int duration, int potency, boolean ambient, boolean override) {
+        final PotionEffect addpotion = new PotionEffect(status.getPotionEffectType(), duration, potency, ambient);
         Bukkit.getScheduler().runTaskLater(Pluginizer.getSpigotPlugin(), () -> {
             player.addPotionEffect(addpotion, override);
         }, 1L);

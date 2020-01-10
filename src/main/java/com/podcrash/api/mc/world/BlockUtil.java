@@ -271,7 +271,7 @@ public final class BlockUtil {
     }
 
     public static List<Player> getAllPlayersHere(Location loc, List<Player> players) {
-        List<Player> result = new Stack<>();
+        List<Player> result = new ArrayList<>();
         if(players == null) players = loc.getWorld().getPlayers();
         for(Player p: players) {
             double playerX = p.getLocation().getBlockX();

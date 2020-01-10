@@ -10,6 +10,7 @@ import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.TeamEnum;
 import net.jafama.FastMath;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -44,13 +45,13 @@ public class DeathApplyEvent extends Event implements Cancellable {
         this.player = (Player) lastDamage.getVictim();
         this.damage = lastDamage;
         this.history = damages;
-        this.attacker = lastDamage.getAttacker();//findAttacker();
+        this.attacker = findAttacker();//findAttacker();
         //boolean combat12SecondsAgo = (damages != null && damages.size() != 0)
         //        && FastMath.abs(lastDamage.getTime() - damages.getLast().getTime()) > 1200;
     }
 
     private LivingEntity findAttacker() {
-        if(damage == null || history.size() == 0) return null;
+        if(damage == null || history == null || history.size() == 0) return null;
         List<Damage> damageList = new ArrayList<>(history);
         //find the player who last damaged
         Damage lastEntityDamage = null;
