@@ -4,12 +4,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import net.minecraft.server.v1_8_R1.NBTTagCompound;
-import org.bukkit.craftbukkit.v1_8_R1.entity.CraftEntity;
+import net.minecraft.server.v1_8_R3.NBTTagCompound;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -123,11 +123,11 @@ public class MobManager {
 	 */
 
 	public static void freezeEntity(Entity en) {
-		net.minecraft.server.v1_8_R1.Entity nmsEn = ((CraftEntity) en).getHandle();
+		net.minecraft.server.v1_8_R3.Entity nmsEn = ((CraftEntity) en).getHandle();
 	    NBTTagCompound compound = new NBTTagCompound();
-	    ((net.minecraft.server.v1_8_R1.Entity) nmsEn).c(compound);
+	    ((net.minecraft.server.v1_8_R3.Entity) nmsEn).c(compound);
 	    compound.setByte("NoAI", (byte) 1);
-	    ((net.minecraft.server.v1_8_R1.Entity) nmsEn).f(compound);
+	    ((net.minecraft.server.v1_8_R3.Entity) nmsEn).f(compound);
 	}
 
     /*
