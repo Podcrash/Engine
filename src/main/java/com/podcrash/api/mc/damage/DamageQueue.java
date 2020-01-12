@@ -10,8 +10,11 @@ import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.time.resources.SimpleTimeResource;
 import com.podcrash.api.mc.util.PacketUtil;
 import com.podcrash.api.plugin.Pluginizer;
+import net.minecraft.server.v1_8_R3.EntityLiving;
 import net.minecraft.server.v1_8_R3.ItemArmor;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -122,23 +125,43 @@ public final class DamageQueue implements Runnable {
      * @returns if the entity will die
      */
     private boolean damageEntity(LivingEntity entity, double damage) {
-        if(entity instanceof Player) {
-            double nowHealth = entity.getHealth() - damage;
-            if (nowHealth > entity.getMaxHealth()) //this will never happen, but just in case
-                nowHealth = entity.getMaxHealth();
-            if(nowHealth <= 0) {
+        //handle absorption health
+        double absorp = getAbsorptionHealth(entity);
+        double nowAbsorp = absorp - damage;
+
+        //set absorption hp
+        setAbsorptionHealth(entity, nowAbsorp);
+
+        //handle damage, only if nowAbsorp turns out to be negative
+        if(nowAbsorp > 0) return false;
+        double nowHealth = entity.getHealth() + nowAbsorp;
+        if (nowHealth > entity.getMaxHealth()) //this will never happen, but just in case
+            nowHealth = entity.getMaxHealth();
+
+        if(nowHealth <= 0) {
+            if(entity instanceof Player) {
                 PlayerInventory inventory = ((Player) entity).getInventory();
                 inventory.clear();
                 inventory.setArmorContents(new ItemStack[]{null, null, null, null});
-                die(entity);
-                SoundPlayer.sendSound(entity.getLocation(), "game.neutral.die", 1, 75);
-                return true;
-            }else entity.setHealth(nowHealth);
-        }else TimeHandler.delayTime(0L, () -> entity.damage(damage));
+            }
+            SoundPlayer.sendSound(entity.getLocation(), "game.neutral.die", 1, 75);
+            die(entity);
+            return true;
+        }else entity.setHealth(nowHealth);
 
         return false;
     }
 
+    private double getAbsorptionHealth(Entity player) {
+        CraftEntity craftEntity = (CraftEntity) player;
+        EntityLiving livingCraft = (EntityLiving) craftEntity.getHandle();
+        return livingCraft.getAbsorptionHearts();
+    }
+    private void setAbsorptionHealth(Entity player, double health) {
+        CraftEntity craftEntity = (CraftEntity) player;
+        EntityLiving livingCraft = (EntityLiving) craftEntity.getHandle();
+        livingCraft.setAbsorptionHearts((float) health);
+    }
     /**
      * Custom strength/resistance/weakness handling.
      * Where x is the potency of each potion:
