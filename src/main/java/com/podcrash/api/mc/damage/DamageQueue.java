@@ -1,10 +1,14 @@
 package com.podcrash.api.mc.damage;
 
 import com.abstractpackets.packetwrapper.WrapperPlayServerEntityStatus;
+import com.comphenix.protocol.PacketType;
 import com.podcrash.api.mc.effect.status.StatusApplier;
 import com.podcrash.api.mc.events.DamageApplyEvent;
 import com.podcrash.api.mc.events.DeathApplyEvent;
 import com.podcrash.api.mc.events.SoundApplyEvent;
+import com.podcrash.api.mc.events.game.GameDamageEvent;
+import com.podcrash.api.mc.game.Game;
+import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.sound.SoundPlayer;
 import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.time.resources.SimpleTimeResource;
@@ -162,6 +166,23 @@ public final class DamageQueue implements Runnable {
         EntityLiving livingCraft = (EntityLiving) craftEntity.getHandle();
         livingCraft.setAbsorptionHearts((float) health);
     }
+
+    /**
+     * Calls the GameDamageEvent to see if the damage should be processed.
+     * @return if the damage should be processed
+     */
+    private boolean evaluateGame(LivingEntity victim, LivingEntity attacker) {
+        Game game = GameManager.getGame();
+        //if there's no game, then it's fine to process the damage
+        //if it isn't ongoing, return false;
+        if(game == null) return false;
+        if(!game.isOngoing()) return true;
+        //if the entities involved aren't players, then process the damage
+        if(!(victim instanceof Player) || !(attacker instanceof Player)) return false;
+        GameDamageEvent event = new GameDamageEvent(game, (Player) victim, (Player) attacker);
+        Bukkit.getPluginManager().callEvent(event);
+        return !event.isCancelled();
+    }
     /**
      * Custom strength/resistance/weakness handling.
      * Where x is the potency of each potion:
@@ -206,8 +227,8 @@ public final class DamageQueue implements Runnable {
         Cause cause = damageEvent.getCause();
         LivingEntity victim = damageEvent.getVictim();
         LivingEntity attacker = damageEvent.getAttacker();
-        double[] modifiers = findVectorModifiers(damageEvent.getVelocityModifiers(), cause, damage, attacker);
-
+        double[] modifiers = findVectorModifiers(damageEvent.getVelocityModifiers(), cause, damage);
+        System.out.println(Arrays.toString(modifiers));
         applyKnockback(victim, attacker, modifiers);
     }
 
@@ -259,15 +280,14 @@ public final class DamageQueue implements Runnable {
         SoundPlayer.sendSound(victim.getLocation(), sound.getSound());
     }
 
-    private double[] findVectorModifiers(double[] velocity, Cause cause, double damage, LivingEntity attacker) {
+    private double[] findVectorModifiers(double[] velocity, Cause cause, double damage) {
         if (cause == Cause.PROJECTILE) {
             if (damage < 1) damage = 1;
             double multiplier = (Math.log(damage) / 3d);
             if (multiplier < 0) multiplier = 1; //uhs
             velocity[0] *= multiplier;
             velocity[2] *= multiplier;
-        }
-        if ((cause == Cause.MELEE || cause == Cause.MELEESKILL) && attacker instanceof Player) {
+        }else if ((cause == Cause.MELEE || cause == Cause.MELEESKILL)) {
             double multiplier = .05 * damage + 0.65;
             velocity[0] *= multiplier;
             velocity[1] *= multiplier;
@@ -305,6 +325,7 @@ public final class DamageQueue implements Runnable {
         LivingEntity attacker = damageWrapper.getAttacker();
         Cause cause = damageWrapper.getCause();
 
+        if(!evaluateGame(victim, attacker)) return;
         if(!(attacker instanceof Player) || !(victim instanceof Player)) return;
         if(hasDeath((Player) attacker) || hasDeath((Player) victim)) return; //if the attacker/victim is currently dead, don't process the damage at all
         if(victim instanceof Player && cause == Cause.MELEE && StatusApplier.getOrNew((Player) victim).isCloaked()) return;

@@ -23,6 +23,10 @@ public abstract class GameEvent extends Event {
     protected String message;
 
     public GameEvent(Game game, String message) {
+        this(game, message, false);
+    }
+    public GameEvent(Game game, String message, boolean async) {
+        super(async);
         this.game = game;
         this.players = game.getBukkitPlayers();
         this.message = message;

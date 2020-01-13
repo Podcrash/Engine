@@ -4,6 +4,7 @@ import com.podcrash.api.mc.tracker.Tracker;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
 
 public final class Pluginizer {
     private static final ExecutorService SERVICE = Executors.newCachedThreadPool();
@@ -40,5 +41,8 @@ public final class Pluginizer {
 
     public static ExecutorService getService() {
         return SERVICE;
+    }
+    public static Logger getLogger() {
+        return plugin.getLogger();
     }
 }

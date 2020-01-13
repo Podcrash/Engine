@@ -11,5 +11,7 @@ public final class ExpUtil {
         experiencePacket.setLevel(player.getLevel());
         experiencePacket.setTotalExperience(player.getTotalExperience());
         experiencePacket.sendPacket(player);
+        //update sync
+        player.setExp(xp);
     }
 }

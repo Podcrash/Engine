@@ -14,6 +14,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
 
 import java.util.Random;
@@ -52,6 +53,12 @@ public class ItemManipulationManager {
     public static Item spawnItem(ItemStack itemStack, Location location, Vector vector) {
         World world = location.getWorld();
         CraftWorld craftWorld = (CraftWorld) world;
+        //rename
+        ItemMeta meta = itemStack.getItemMeta();
+        meta.setDisplayName(itemStack.getType().name() + System.currentTimeMillis());
+        itemStack.setItemMeta(meta);
+
+        //spawn
         EntityItem entity = new EntityItem(craftWorld.getHandle(), location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(itemStack));
         entity.pickupDelay = 5;
         craftWorld.getHandle().addEntity(entity, CreatureSpawnEvent.SpawnReason.CUSTOM);

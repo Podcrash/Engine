@@ -11,7 +11,7 @@ public class GameDamageEvent extends GamePlayerEvent implements Cancellable {
     private Player killer;
 
     public GameDamageEvent(Game game, Player who, Player killer) {
-        super(game, who, "");
+        super(game, who, "", true);
         this.killer = killer;
     }
 

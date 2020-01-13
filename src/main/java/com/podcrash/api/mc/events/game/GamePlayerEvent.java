@@ -9,6 +9,9 @@ public class GamePlayerEvent extends GameEvent {
     protected Player who;
 
     public GamePlayerEvent(Game game, Player who, String message) {
+        this(game, who, message, false);
+    }
+    public GamePlayerEvent(Game game, Player who, String message, boolean async) {
         super(game, message);
         this.who = who;
     }

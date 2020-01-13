@@ -206,24 +206,32 @@ public class GameListener extends ListenerBase {
         itemObjective.setAcquiredByPlayer(player);
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void gameDamage(GameDamageEvent event) {
-        Game game = event.getGame();
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void gameDamage(GameDamageEvent e) {
+        Game game = e.getGame();
         if(!game.isOngoing()) return;
-        boolean cancel = false;
 
-        if(game.getTeam(event.getWho()) == null) {
-            event.setCancelled(true);
-            return;
-        }
-        if(deadPeople.contains(event.getKiller())) {
-            event.setCancelled(true);
-            return;
-        }
-        cancel = game.isOnSameTeam(event.getKiller(), event.getWho());
-        event.setCancelled(cancel);
+        if(!(e.getWho() instanceof Player) || !(e.getKiller() instanceof Player)) return;
+        Player victim = (Player) e.getWho();
+        if(deadPeople.contains(victim) || deadPeople.contains(e.getKiller())|| GameManager.isSpectating(victim))
+            e.setCancelled(true);
+        else if(game.getTeam(e.getWho()) == null)
+            e.setCancelled(true);
+        else if(deadPeople.contains(e.getKiller()))
+            e.setCancelled(true);
+        else if(game.isSpectating(e.getKiller()) || game.isSpectating(e.getWho()))
+            //latter part might be uneeded but just in case
+            e.setCancelled(true);
     }
 
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void hit(DamageApplyEvent e) {
+        Game game = GameManager.getGame();
+        if(!game.isOngoing()) return;
+        if(!(e.getAttacker() instanceof Player) && !(e.getVictim() instanceof Player)) return;
+        if(game.isOnSameTeam((Player) e.getAttacker(), (Player) e.getVictim()))
+        e.setCancelled(true);
+    }
     @EventHandler(priority = EventPriority.MONITOR)
     public void damage(EntityDamageEvent e) {
         if(e.getEntity() instanceof Player) {
@@ -255,35 +263,19 @@ public class GameListener extends ListenerBase {
      * GameDamageEvent(Game game, Player who, Player victim)
      */
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onHit(DamageApplyEvent e) {
-        if(!(e.getVictim() instanceof Player) || !(e.getAttacker() instanceof Player)) return;
-        Player victim = (Player) e.getVictim();
-        if(deadPeople.contains(victim) || deadPeople.contains(e.getAttacker())|| GameManager.isSpectating(victim)) {
+    @EventHandler
+    public void status(StatusApplyEvent e) {
+        if(!(e.getEntity() instanceof Player)) return;
+        Player player = (Player) e.getEntity();
+        if(GameManager.isSpectating(player) || deadPeople.contains(player))
             e.setCancelled(true);
-        }else if (e.getAttacker() != null) {
-            Player attacker = (Player) e.getAttacker();
-            Game game = GameManager.getGame();
-            if (game == null) return;
-            GameDamageEvent event = new GameDamageEvent(game, attacker, victim);
-            Bukkit.getServer().getPluginManager().callEvent(event);
-            e.setCancelled(event.isCancelled());
-        }
     }
 
     @EventHandler
-    public void status(StatusApplyEvent event) {
-        if(!(event.getEntity() instanceof Player)) return;
-        Player player = (Player) event.getEntity();
+    public void velocity(PlayerVelocityEvent e) {
+        Player player = e.getPlayer();
         if(GameManager.isSpectating(player) || deadPeople.contains(player))
-            event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void velocity(PlayerVelocityEvent event) {
-        Player player = event.getPlayer();
-        if(GameManager.isSpectating(player) || deadPeople.contains(player))
-            event.setCancelled(true);
+            e.setCancelled(true);
     }
 
     /**
@@ -313,25 +305,25 @@ public class GameListener extends ListenerBase {
     }
 
     @EventHandler
-    public void chat(AsyncPlayerChatEvent event) {
-        Player player = event.getPlayer();
+    public void chat(AsyncPlayerChatEvent e) {
+        Player player = e.getPlayer();
         if(player.hasPermission("Champions.mute")){
-            event.setCancelled(true);
+            e.setCancelled(true);
             player.sendMessage(String.format("%sChampions> %sYou are muted.", ChatColor.BLUE, ChatColor.GRAY));
             return;
         }
         if(GameManager.hasPlayer(player)) {
-            event.setCancelled(true);
+            e.setCancelled(true);
             Game game = GameManager.getGame();
             game.broadcast(String.format("%s%s%s" + ChatColor.RESET + " %s",
                     PrefixUtil.getPrefix(PrefixUtil.getPlayerRole(player)),
                     game.getTeamEnum(player).getChatColor(),
                     player.getName(),
-                    event.getMessage())
+                    e.getMessage())
             );
         }else {
-            event.getRecipients().removeIf(GameManager::hasPlayer);
-            event.setFormat(PrefixUtil.getPrefix(PrefixUtil.getPlayerRole(player)) + ChatColor.RESET + "%s " + ChatColor.GRAY + "%s");
+            e.getRecipients().removeIf(GameManager::hasPlayer);
+            e.setFormat(PrefixUtil.getPrefix(PrefixUtil.getPlayerRole(player)) + ChatColor.RESET + "%s " + ChatColor.GRAY + "%s");
 
         }
     }

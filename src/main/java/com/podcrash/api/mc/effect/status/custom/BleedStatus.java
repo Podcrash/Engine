@@ -1,16 +1,30 @@
 package com.podcrash.api.mc.effect.status.custom;
 
+import com.abstractpackets.packetwrapper.AbstractPacket;
+import com.podcrash.api.mc.effect.particle.ParticleGenerator;
 import com.podcrash.api.mc.effect.status.Status;
+import com.podcrash.api.mc.util.PacketUtil;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+
 public class BleedStatus extends CustomStatus {
+    private List<Player> players;
+    private int i = 0;
     public BleedStatus(Player player) {
         super(player, Status.BLEED);
+        this.players = getPlayer().getWorld().getPlayers();
     }
 
     @Override
     protected void doWhileAffected() {
-
+        if(i >= 3) {
+            AbstractPacket bleedPacket = ParticleGenerator.createBlockEffect(getPlayer().getLocation(), Material.REDSTONE.getId());
+            PacketUtil.asyncSend(bleedPacket, players);
+            i = 0;
+        }
+        i++;
     }
 
     @Override
@@ -21,5 +35,7 @@ public class BleedStatus extends CustomStatus {
     @Override
     protected void removeEffect() {
         getApplier().removeStatus(Status.BLEED);
+        players.clear();
+        players = null;
     }
 }
