@@ -111,9 +111,14 @@ public class StatusApplier {
 
     private void applyVanilla(@Nonnull Status status, int duration, int potency, boolean ambient, boolean override) {
         final PotionEffect addpotion = new PotionEffect(status.getPotionEffectType(), duration, potency, ambient);
+
+        if(duration == Integer.MAX_VALUE && status == Status.SPEED)
+            Pluginizer.getLogger().info("Lightweight call!");
         Bukkit.getScheduler().runTaskLater(Pluginizer.getSpigotPlugin(), () -> {
-            player.addPotionEffect(addpotion, override);
-        }, 1L);
+            if(!player.addPotionEffect(addpotion, override)) {
+                if(duration == Integer.MAX_VALUE && status == Status.SPEED) Pluginizer.getLogger().info("speed not applied");
+            }else if(duration == Integer.MAX_VALUE && status == Status.SPEED) Pluginizer.getLogger().info("speed applied");
+        }, 0L);
 
     }
 

@@ -20,7 +20,7 @@ public class BleedStatus extends CustomStatus {
     @Override
     protected void doWhileAffected() {
         if(i >= 3) {
-            AbstractPacket bleedPacket = ParticleGenerator.createBlockEffect(getPlayer().getLocation(), Material.REDSTONE.getId());
+            AbstractPacket bleedPacket = ParticleGenerator.createBlockEffect(getPlayer().getLocation(), Material.REDSTONE_BLOCK.getId());
             PacketUtil.asyncSend(bleedPacket, players);
             i = 0;
         }
