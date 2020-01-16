@@ -114,11 +114,11 @@ public class StatusApplier {
 
         if(duration == Integer.MAX_VALUE && status == Status.SPEED)
             Pluginizer.getLogger().info("Lightweight call!");
-        Bukkit.getScheduler().runTaskLater(Pluginizer.getSpigotPlugin(), () -> {
+        Bukkit.getScheduler().runTask(Pluginizer.getSpigotPlugin(), () -> {
             if(!player.addPotionEffect(addpotion, override)) {
                 if(duration == Integer.MAX_VALUE && status == Status.SPEED) Pluginizer.getLogger().info("speed not applied");
             }else if(duration == Integer.MAX_VALUE && status == Status.SPEED) Pluginizer.getLogger().info("speed applied");
-        }, 0L);
+        });
 
     }
 
