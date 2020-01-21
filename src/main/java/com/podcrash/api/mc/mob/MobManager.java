@@ -1,6 +1,7 @@
 package com.podcrash.api.mc.mob;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import net.minecraft.server.v1_8_R1.NBTTagCompound;
 import org.bukkit.*;
@@ -16,17 +17,23 @@ import org.bukkit.inventory.ItemStack;
 
 public class MobManager {
 
-	public static HashMap<Integer, MobData> mobs = new HashMap<Integer, MobData>();
+	public static Map<Integer, MobData> mobs = new HashMap<Integer, MobData>();
 
-	private static void addMob(Integer id, MobData creature) {
+	private static void addMobMap(int id, MobData creature) {
 		mobs.put(id, creature);
 	}
 
-	private static void removeMob(Integer id) {
+	private static void removeMobMap(int id) {
 		mobs.remove(id);
 	}
 
-	private static Entity getMob(Integer id) {
+	public static MobData getMobData(int id) {
+		MobData data = mobs.get(id);
+		return data;
+		
+	}
+	
+	public static Entity getMob(int id) {
 		MobData mobClass = mobs.get(id);
 		Entity entity = mobClass.getEntity();
 		
@@ -35,49 +42,25 @@ public class MobManager {
 	}
 
 
-	private static void setMobDamageable(Integer id) {
+	private static void setMobDamageable(int id) {
 		MobData mobData = mobs.get(id);
-		mobData.damage = true;
+		mobData.toggleDamage(true);
 	}
 
-	private static void setMobUndamageable(Integer id) {
+	private static void setMobUndamageable(int id) {
 		MobData mobData = mobs.get(id);
-		mobData.damage = false;
-	}
-
-	/*
-	 * Create an Entity
-	 * @param EntityType mobType | Type of mob to spawn
-	 * @param String mobName | Name of the entity
-	 * @param World world | World to spawn the entity in
-	 * @param Location spawnLoc | Location within the world to spawn the entity
-	 */
-
-	public static void createMob(EntityType mobType, String mobName, World world, Location spawnLoc) {
-
-		Entity entity = (Entity) world.spawnEntity(spawnLoc, mobType);
-		entity.setCustomName(mobName);
-		entity.setCustomNameVisible(true);
-		((LivingEntity) entity).setCanPickupItems(false);
-		((LivingEntity) entity).setRemoveWhenFarAway(false);
-		if (entity instanceof Zombie) {
-		 ((Zombie) entity).setBaby(false);
-		}
-
-		MobData mob = new MobData(entity, entity.getEntityId(), false, true);
-		addMob(entity.getEntityId(), mob);
-
+		mobData.toggleDamage(false);
 	}
 
 	/*
 	 * Delete Entity
-	 * Integer id | Entity to be deleted
+	 * int id | Entity to be deleted
 	 */
 
-	public static void deleteMob(Integer id) {
+	public static void deleteMob(int id) {
 		Entity en = getMob(id);
 
-		removeMob(id);
+		removeMobMap(id);
 		en.remove();
 	}
 
@@ -93,22 +76,22 @@ public class MobManager {
 	  compound.setByte("NoAI", (byte) 1);
 	  ((net.minecraft.server.v1_8_R1.Entity) nmsEn).f(compound);
 	  MobData mob = mobs.get(en.getEntityId());
-	  mob.frozen = true;
+	  mob.toggleFreeze(true);
 	}
 
     /*
      * Duplicated the entity provided and spawns a duplicate Entity with Ai enabled.
-     * @param Integer id | id of the Entity to unFreeze
+     * @param int id | id of the Entity to unFreeze
      */
 
-    public static void unFreezeEntity(Integer id) {
+    public static void unFreezeEntity(int id) {
     	Entity creature = getMob(id);
       World world = creature.getWorld();
-     	Location creatureLocation = creature.getLocation();
-     	EntityEquipment equiped = ((LivingEntity) creature).getEquipment();
-     	EntityType newEntityType = creature.getType();
-     	creature.remove();
-			
+      Location creatureLocation = creature.getLocation();
+      EntityEquipment equiped = ((LivingEntity) creature).getEquipment();
+      EntityType newEntityType = creature.getType();
+      creature.remove();
+
       Entity entity = (Entity) world.spawnEntity(creatureLocation, newEntityType);
       EntityEquipment entityEquiped = ((LivingEntity) entity).getEquipment();
       entityEquiped.setBoots(equiped.getBoots());
@@ -120,118 +103,48 @@ public class MobManager {
       ((LivingEntity) entity).setCanPickupItems(false);
       ((LivingEntity) entity).setRemoveWhenFarAway(false);
 
-      MobData oldMob = mobs.get(id);
-			MobData mob = new MobData(entity, entity.getEntityId(), false, true);
+			MobData mob = new MobData(entity, entity.getEntityId(), false, false);
+			addMobMap(entity.getEntityId(), mob);
       if (mob.getDamageable()) {
-        mob.damage = true;
+        mob.toggleDamage(true);
       }
       if (entity instanceof Zombie) {
         ((Zombie) entity).setBaby(false);
       }
 
-      	removeMob(id);
+      removeMobMap(id);
     }
 
     /*
      * Equip entity with a material provided by name. Example: diamond_sword
-     * @param Integer id | id of the entity you want to equip
+     * @param int id | id of the entity you want to equip
      * @param String useMaterial | the material you want the entity to hold.
      */
 
-    public static void equipEntity(Integer id, String useMaterial) {
+    public static void equipEntity(int id, ItemStack item) {
     	Entity creature = getMob(id);
     	EntityEquipment equiped = ((LivingEntity) creature).getEquipment();
 
-    	if (useMaterial.toLowerCase() == "none") {
-      		equiped.setItemInHand(null);
-    	} else {
-      		Material addMaterial = Material.valueOf(useMaterial.toUpperCase());
-      		ItemStack item = new ItemStack(addMaterial);
-      		equiped.setItemInHand(item);
-    	}
+			equiped.setItemInHand(item);
   	}
 
   	/*
    	 * Equip an entity with armor
-   	 * @param Integer id | id of the entity to equip with armor
-     * @param String armor | armor type to equip. If "none" removes armor
+   	 * @param int id | id of the entity to equip with armor
+     * @param ItemStack helmet | Helmet to place on entity
+     * @param ItemStack chestplate | Chestplate to place on entity
+     * @param ItemStack leggings | Leggings to place on entity
+     * @param ItemStack boots | Boots to place on entity
      */
 
-  	public static void armorEntity(Integer id, String armor) {
+    public static void armorEntity(int id, ItemStack helmet, ItemStack chestplate, ItemStack leggings, ItemStack boots) {
     	Entity creature = getMob(id);
     	EntityEquipment equiped = ((LivingEntity) creature).getEquipment();
 
-    	switch (armor) {
-
-    		case "none":
-      			equiped.setArmorContents(null);
-      			break;
-
-    		case "diamond":
-      			ItemStack diamond_helmet = new ItemStack(Material.DIAMOND_HELMET);
-      			ItemStack diamond_chestplate = new ItemStack(Material.DIAMOND_CHESTPLATE);
-      			ItemStack diamond_leggings = new ItemStack(Material.DIAMOND_LEGGINGS);
-      			ItemStack diamond_boots = new ItemStack(Material.DIAMOND_BOOTS);
-
-      			equiped.setHelmet(diamond_helmet);
-      			equiped.setChestplate(diamond_chestplate);
-      			equiped.setLeggings(diamond_leggings);
-      			equiped.setBoots(diamond_boots);
-
-      			break;
-
-    		case "iron":
-      			ItemStack iron_helmet = new ItemStack(Material.IRON_HELMET);
-      			ItemStack iron_chestplate = new ItemStack(Material.IRON_CHESTPLATE);
-      			ItemStack iron_leggings = new ItemStack(Material.IRON_LEGGINGS);
-      			ItemStack iron_boots = new ItemStack(Material.IRON_BOOTS);
-
-      			equiped.setHelmet(iron_helmet);
-      			equiped.setChestplate(iron_chestplate);
-      			equiped.setLeggings(iron_leggings);
-      			equiped.setBoots(iron_boots);
-
-      			break;
-
-    		case "chain":
-      			ItemStack chain_helmet = new ItemStack(Material.CHAINMAIL_HELMET);
-      			ItemStack chain_chestplate = new ItemStack(Material.CHAINMAIL_CHESTPLATE);
-      			ItemStack chain_leggings = new ItemStack(Material.CHAINMAIL_LEGGINGS);
-      			ItemStack chain_boots = new ItemStack(Material.CHAINMAIL_BOOTS);
-
-      			equiped.setHelmet(chain_helmet);
-      			equiped.setChestplate(chain_chestplate);
-      			equiped.setLeggings(chain_leggings);
-      			equiped.setBoots(chain_boots);
-
-      			break;
-
-    		case "gold":
-      			ItemStack gold_helmet = new ItemStack(Material.GOLD_HELMET);
-      			ItemStack gold_chestplate = new ItemStack(Material.GOLD_CHESTPLATE);
-      			ItemStack gold_leggings = new ItemStack(Material.GOLD_LEGGINGS);
-      			ItemStack gold_boots = new ItemStack(Material.GOLD_BOOTS);
-
-      			equiped.setHelmet(gold_helmet);
-      			equiped.setChestplate(gold_chestplate);
-      			equiped.setLeggings(gold_leggings);
-      			equiped.setBoots(gold_boots);
-
-      			break;
-
-    		case "leather":
-      			ItemStack leather_helmet = new ItemStack(Material.LEATHER_HELMET);
-      			ItemStack leather_chestplate = new ItemStack(Material.LEATHER_CHESTPLATE);
-      			ItemStack leather_leggings = new ItemStack(Material.LEATHER_LEGGINGS);
-      			ItemStack leather_boots = new ItemStack(Material.LEATHER_BOOTS);
-
-      			equiped.setHelmet(leather_helmet);
-      			equiped.setChestplate(leather_chestplate);
-      			equiped.setLeggings(leather_leggings);
-      			equiped.setBoots(leather_boots);
-
-      			break;
-    	}
+    	equiped.setHelmet(helmet);
+    	equiped.setChestplate(chestplate);
+    	equiped.setLeggings(leggings);
+    	equiped.setBoots(boots);
   	}
 
   	/*
@@ -242,7 +155,6 @@ public class MobManager {
 
 	 @EventHandler
      public void onMobDamage(EntityDamageEvent e) {
-    	Entity en = e.getEntity();
 
     	Iterator<?> mobsIterator = mobs.entrySet().iterator();
 
@@ -263,20 +175,48 @@ public class MobManager {
 
 	 /*
 	  * Make a mob damageable
-		* @param Integer id | id of the entity to allow damage on
+		* @param int id | id of the entity to allow damage on
 	  */
 
-	 public static void damageOn(Integer id) {
+	 public static void damageOn(int id) {
 		 setMobDamageable(id);
 	 }
 
 	 /*
 	  * Make a mob undamageable
-	  * @param Integer id | id of the entity to not allow damage on
+	  * @param int id | id of the entity to not allow damage on
 	  */
 
-	 public static void damageOff(Integer id) {
+	 public static void damageOff(int id) {
 		 setMobUndamageable(id);
 	 }
 
+	/*
+	 * Create an Entity
+	 * @param EntityType mobType | Type of mob to spawn
+	 * @param Location spawnLoc | Location within the world to spawn the entity
+	 */
+
+	public static Entity createMob(EntityType mobType, Location spawnLoc) {
+
+		World world = spawnLoc.getWorld();
+
+		Entity entity = (Entity) world.spawnEntity(spawnLoc, mobType);
+		((LivingEntity) entity).setCanPickupItems(false);
+		((LivingEntity) entity).setRemoveWhenFarAway(false);
+
+		MobData mob = new MobData(entity, entity.getEntityId(), false, true);
+		addMobMap(entity.getEntityId(), mob);
+
+		freezeEntity(entity);
+		damageOff(entity.getEntityId());
+		if (entity instanceof Zombie) {
+			((Zombie) entity).setBaby(false);
+		}
+
+		return entity;
+
+	}
+
 }
+
