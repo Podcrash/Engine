@@ -5,12 +5,12 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.EntityEquipment;
 
 public class MobData {
-	public static Entity creature;
-	public static Integer id;
-	public static boolean damage;
-	public static boolean frozen;
+	private Entity creature;
+	private int id;
+	private boolean damage;
+	private boolean frozen;
 
-	public MobData(Entity entity, Integer creatureId, boolean takesDamage, boolean isFrozen) {
+	public MobData(Entity entity, int creatureId, boolean takesDamage, boolean isFrozen) {
 		this.creature = entity;
 		this.id = creatureId;
 		this.damage = takesDamage;
@@ -37,5 +37,22 @@ public class MobData {
 	public EntityEquipment getArmor() {
 		return ((LivingEntity) creature).getEquipment();
 	}
+	
+	public void toggleDamage(boolean dmg) {
+		this.damage = dmg;
+	}
+	
+	public void setEntity(Entity en) {
+		this.creature = en;
+	}
+	
+	public void toggleFreeze(boolean froze) {
+		this.frozen = froze;
+	}
+	
+	public void setId(int newId) {
+		this.id = newId;
+	}
 
 }
+
