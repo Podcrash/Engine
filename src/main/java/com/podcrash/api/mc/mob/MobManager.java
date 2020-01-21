@@ -66,10 +66,13 @@ public class MobManager {
 
 	/*
    * Removes the ai from an Entity
-	 * @param Entity e | Entity to freeze
+	 * @param int id | Id of the entity to freeze
 	 */
 
-	public static void freezeEntity(Entity en) {
+	public static void freezeEntity(int id) {
+		
+		Entity en = getMob(id);
+		
 		net.minecraft.server.v1_8_R1.Entity nmsEn = ((CraftEntity) en).getHandle();
 	  NBTTagCompound compound = new NBTTagCompound();
 	  ((net.minecraft.server.v1_8_R1.Entity) nmsEn).c(compound);
@@ -85,34 +88,15 @@ public class MobManager {
      */
 
     public static void unFreezeEntity(int id) {
-    	Entity creature = getMob(id);
-      World world = creature.getWorld();
-      Location creatureLocation = creature.getLocation();
-      EntityEquipment equiped = ((LivingEntity) creature).getEquipment();
-      EntityType newEntityType = creature.getType();
-      creature.remove();
-
-      Entity entity = (Entity) world.spawnEntity(creatureLocation, newEntityType);
-      EntityEquipment entityEquiped = ((LivingEntity) entity).getEquipment();
-      entityEquiped.setBoots(equiped.getBoots());
-      entityEquiped.setLeggings(equiped.getLeggings());
-      entityEquiped.setChestplate(equiped.getChestplate());
-      entityEquiped.setHelmet(equiped.getHelmet());
-      entity.setCustomName(creature.getCustomName());
-      entity.setCustomNameVisible(true);
-      ((LivingEntity) entity).setCanPickupItems(false);
-      ((LivingEntity) entity).setRemoveWhenFarAway(false);
-
-			MobData mob = new MobData(entity, entity.getEntityId(), false, false);
-			addMobMap(entity.getEntityId(), mob);
-      if (mob.getDamageable()) {
-        mob.toggleDamage(true);
-      }
-      if (entity instanceof Zombie) {
-        ((Zombie) entity).setBaby(false);
-      }
-
-      removeMobMap(id);
+    	Entity en = getMob(id);
+		
+			net.minecraft.server.v1_8_R1.Entity nmsEn = ((CraftEntity) en).getHandle();
+	  	NBTTagCompound compound = new NBTTagCompound();
+	  	((net.minecraft.server.v1_8_R1.Entity) nmsEn).c(compound);
+	  	compound.setByte("NoAI", (byte) 0);
+	  	((net.minecraft.server.v1_8_R1.Entity) nmsEn).f(compound);
+	  	MobData mob = mobs.get(en.getEntityId());
+	  	mob.toggleFreeze(false);
     }
 
     /*
@@ -208,7 +192,7 @@ public class MobManager {
 		MobData mob = new MobData(entity, entity.getEntityId(), false, true);
 		addMobMap(entity.getEntityId(), mob);
 
-		freezeEntity(entity);
+		freezeEntity(entity.getEntityId());
 		damageOff(entity.getEntityId());
 		if (entity instanceof Zombie) {
 			((Zombie) entity).setBaby(false);
