@@ -42,17 +42,8 @@ public class MobData {
 		this.damage = dmg;
 	}
 	
-	public void setEntity(Entity en) {
-		this.creature = en;
-	}
-	
 	public void toggleFreeze(boolean froze) {
 		this.frozen = froze;
 	}
-	
-	public void setId(int newId) {
-		this.id = newId;
-	}
-
 }
 
