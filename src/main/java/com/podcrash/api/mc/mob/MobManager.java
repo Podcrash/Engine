@@ -112,9 +112,9 @@ public class MobManager {
 			equiped.setItemInHand(item);
   	}
 
-  	/*
-   	 * Equip an entity with armor
-   	 * @param int id | id of the entity to equip with armor
+     /*
+     * Equip an entity with armor
+     * @param int id | id of the entity to equip with armor
      * @param ItemStack helmet | Helmet to place on entity
      * @param ItemStack chestplate | Chestplate to place on entity
      * @param ItemStack leggings | Leggings to place on entity
@@ -130,32 +130,6 @@ public class MobManager {
     	equiped.setLeggings(leggings);
     	equiped.setBoots(boots);
   	}
-
-  	/*
-	 ==================
-	 NOTE: This system uses event listeners to toggle mob damage!
-	 To allow the damage toggle to work paste the following code into your event handler
-
-
-	 @EventHandler
-     public void onMobDamage(EntityDamageEvent e) {
-
-    	Iterator<?> mobsIterator = mobs.entrySet().iterator();
-
-		while (mobsIterator.hasNext()) {
-			Map.Entry mapElement = (Map.Entry)mobsIterator.next();
-			MobData mob = mobs.get(mapElement.getKey());
-			if (!mob.getDamageable()) {
-				e.setCancelled(true);
-			} else {
-				return;
-			}
-		}
-     }
-
-	 ==================
-	/*
-
 
 	 /*
 	  * Make a mob damageable
