@@ -1,37 +1,44 @@
 package com.podcrash.api.mc.listeners;
 
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Monster;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
+
+import java.util.Collection;
 
 import com.podcrash.api.mc.mob.MobManager.mobs;
 
-public class MobListeners implements Listener {
+public class MobListeners extends ListenerBase {
   
 	@EventHandler(priority = EventPriority.LOW)
-	 public void onEntityCombust(EntityCombustEvent event){
-		 if(event.getEntity() instanceof Monster){
-			 event.setCancelled(true);
-		 }
-	 }
+	public void onEntityCombust(EntityCombustEvent event){
+		if(event.getEntity() instanceof Monster){
+			event.setCancelled(true);
+		}
+	}
    
    @EventHandler(priority = EventPriority.LOW)
     public void onMobDamage(EntityDamageEvent e) {
 
-    	Iterator<?> mobsIterator = mobs.entrySet().iterator();
-      while (mobsIterator.hasNext()) {
-      	Map.Entry mapElement = (Map.Entry)mobsIterator.next();
-        MobData mob = mobs.get(mapElement.getKey());
-        if (!mob.getDamageable()) {
+    	int id = e.getEntity().getEntityId();
+      MobData mob = mobs.get(id);
+
+      if (mob == null) {
+      	return;
+      } else {
+      	if(!mob.isDamageable()) {
         	e.setCancelled(true);
         } else {
-          return;
+        	return;
         }
       }
+
     }
     
     @EventHandler(priority = EventPriority.LOW)
