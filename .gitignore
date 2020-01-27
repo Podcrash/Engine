@@ -10,6 +10,8 @@ build/classes/
 build/libs/
 build/resources/
 build/tmp/
+build/reports
+build/test-results
 
 /out
 # Ignore Gradle GUI config

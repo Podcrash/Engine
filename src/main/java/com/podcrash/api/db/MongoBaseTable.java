@@ -1,6 +1,8 @@
 package com.podcrash.api.db;
 
+import com.mongodb.async.client.MongoCollection;
 import com.podcrash.api.db.connection.IMongoDoc;
+import org.bson.Document;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -41,5 +43,9 @@ public abstract class MongoBaseTable implements ITable, IMongoDoc {
     @Override
     public void dropTable() {
         dropTable(getName());
+    }
+
+    public MongoCollection<Document> getCollection() {
+        return getDatabase().getCollection(getName());
     }
 }

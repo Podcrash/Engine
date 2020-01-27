@@ -1,16 +1,20 @@
 package com.podcrash.api.db;
 
 
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Indexes;
+import com.podcrash.api.plugin.Pluginizer;
 import nu.studer.sample.Tables;
 import nu.studer.sample.tables.Players;
-import org.jooq.*;
-import org.jooq.impl.DSL;
-import org.jooq.impl.SQLDataType;
+import org.bson.Document;
 
 import java.math.BigInteger;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
-public class PlayerTable extends BaseTable {
+public class PlayerTable extends MongoBaseTable {
     private final Players PLAYERS;
     public PlayerTable(boolean test) {
         super("players", test);
@@ -24,49 +28,47 @@ public class PlayerTable extends BaseTable {
 
     @Override
     public void createTable() {
-        DSLContext create = getContext();
-
-        create.createSequenceIfNotExists(getConstraintPrefix() + "player_id_sequence").execute();
-
-        create.createTableIfNotExists(getName())
-            .column("_id", SQLDataType.BIGINT)
-            .column("uuid", SQLDataType.UUID)
-            .constraints(
-                DSL.constraint(getConstraintPrefix() + "_primary_player_id").primaryKey("_id"),
-                DSL.constraint(getConstraintPrefix() + "_unique_player_uuid").unique("uuid")
-            ).execute();
+        getCollection().createIndex(Indexes.descending("uuid"),
+                new IndexOptions().unique(true), ((result, t) -> {
+            DBUtils.handleThrowables(t);
+            Pluginizer.getLogger().info(result);
+        }));
     }
 
     public void insert(UUID uuid) {
-        DSLContext insert = getContext();
+        Document insert = new Document("uuid", uuid);
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        getCollection().insertOne(insert, (res, t) -> {
+            DBUtils.handleThrowables(t);
+            future.complete(res);
+        });
 
-        BigInteger nextVal = insert.nextval(getConstraintPrefix() + "player_id_sequence");
-
-        insert.insertInto(PLAYERS,
-            PLAYERS._ID, PLAYERS.UUID)
-            .values(nextVal.longValue(), uuid)
-            .onConflictDoNothing()
-            .execute();
+        try {
+            future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
-    public long getID(UUID uuid) {
-        DSLContext select = getContext();
-
-        return select.select(PLAYERS._ID)
-            .from(PLAYERS)
-            .where(PLAYERS.UUID.eq(uuid))
-            .fetchOneInto(Long.class);
+    public Document getPlayerDocumentSync(UUID uuid) {
+        CompletableFuture<Document> future = getPlayerDocumentAsync(uuid);
+        try {
+            return future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        Pluginizer.getLogger().info("PlayerTable: getPlayerDocumentSync returned null?");
+        return null;
     }
 
-    public SelectConditionStep<Record1<Long>> joinTable(UUID uuid, TableLike<? extends Record> tableLike) {
-        DSLContext join = getContext();
-        return null; //join.select(PLAYERS).;
-    }
-    @Override
-    public void dropTable() {
-        getContext().dropSequenceIfExists(getConstraintPrefix() + "player_id_sequence").execute();
-        super.dropTable();
-    }
+    public CompletableFuture<Document> getPlayerDocumentAsync(UUID uuid) {
+        CompletableFuture<Document> future = new CompletableFuture<>();
+        getCollection().find(Filters.eq("uuid", uuid)).first((res, t) -> {
+            DBUtils.handleThrowables(t);
+            if (res == null) throw new IllegalStateException("the uuid had to be inserted when the player joins");
+            future.complete(res);
+        });
 
-
+        return future;
+    }
 }

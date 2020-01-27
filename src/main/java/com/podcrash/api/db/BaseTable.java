@@ -26,12 +26,7 @@ public abstract class BaseTable implements ITable {
         this.test = test;
         this.name = test ? tableName + "TEST" : tableName;
         System.out.println("Creating the SQLTable: " + name);
-
-        try {
-            this.connection = DatabaseConnection.makeConnection();
-        }catch (SQLException ex) {
-            ex.printStackTrace();
-        }
+            //this.connection = DatabaseConnection.makeConnection();
     }
     public BaseTable(String tableName) {
         this(tableName, false);

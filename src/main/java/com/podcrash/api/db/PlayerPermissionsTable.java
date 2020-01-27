@@ -33,19 +33,6 @@ public class PlayerPermissionsTable extends BaseTable implements IPlayerDB {
     @Override
     public void createTable() {
 
-        getContext().createTableIfNotExists(getName())
-            .column("player_id", SQLDataType.BIGINT)
-            .column("permission_id", SQLDataType.INTEGER)
-            .constraints(
-                DSL.constraint(getConstraintPrefix() + "unique").unique("player_id", "permission_id"),
-                DSL.constraint(getConstraintPrefix() + "foreign_player_id")
-                    .foreignKey("player_id")
-                    .references(getPlayerTable().getName(), "_id")
-                    .onDeleteCascade())
-            .execute();
-
-        getContext().createIndexIfNotExists(getConstraintPrefix() + "player_id_index").on(getName(), "player_id")
-            .execute();
     }
 
     @Override
@@ -79,6 +66,8 @@ public class PlayerPermissionsTable extends BaseTable implements IPlayerDB {
     }
 
     public List<Perm> getRoles(UUID uuid) {
+        return new ArrayList<>();
+        /*
         List<Perm> perms = new ArrayList<>();
         Cursor<Record1<Integer>> cursor = getContext().select(PERMISSIONS.PERMISSION_ID)
                 .from(PERMISSIONS)
@@ -89,6 +78,8 @@ public class PlayerPermissionsTable extends BaseTable implements IPlayerDB {
             perms.add(Perm.getBy(id.into(Integer.class)));
         }
         return perms;
+
+         */
     }
 
     public void removeRole(UUID uuid, Perm role) {

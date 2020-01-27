@@ -43,7 +43,6 @@ public final class TableOrganizer {
     }
     public static void createTables(boolean test) {
         ITable[] tables = new ITable[]{
-            new LocationTable(test),
             new PlayerTable(test),
             new ChampionsKitTable(test),
             new PlayerPermissionsTable(test),

@@ -4,10 +4,10 @@ import javax.security.auth.Destroyable;
 
 public enum DataTableType {
     KITS(ChampionsKitTable.class),
-    LOCATIONS(LocationTable.class),
     PLAYERS(PlayerTable.class),
     PERMISSIONS(PlayerPermissionsTable.class),
     DESCRIPTIONS(DescriptorTable.class),
+    SEQUENCES(SequenceTable.class),
     MAPS(MapTable.class);
 
     private Class<? extends ITable> table;

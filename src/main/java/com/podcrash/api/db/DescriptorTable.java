@@ -26,23 +26,6 @@ public class DescriptorTable extends BaseTable {
 
     @Override
     public void createTable() {
-        DSLContext create = getContext();
-
-        create.createSequenceIfNotExists(getConstraintPrefix() + "id_sequence").execute();
-
-        create.createTableIfNotExists(getName())
-            .column("id", PostgresDataType.INT
-                .defaultValue(Sequences.DESCRIPTIONS_ID_SEQUENCE.nextval().cast(PostgresDataType.INT)))
-            .column("key", SQLDataType.VARCHAR(32))
-            .column("value", SQLDataType.VARCHAR(1024))
-            .constraints(
-                DSL.constraint(getConstraintPrefix() + "_unique_key").unique("key"),
-                DSL.constraint(getConstraintPrefix() + "_primary_id").primaryKey("id")
-            ).execute();
-
-        create.createIndexIfNotExists(getConstraintPrefix() + "id")
-                .on(getName(), "id")
-                .execute();
     }
 
     public void insert(String key, Object value) {
