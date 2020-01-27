@@ -1,12 +1,16 @@
 package com.podcrash.api.db.connection;
 
+import com.mongodb.MongoClientSettings;
 import com.mongodb.ServerAddress;
-import com.mongodb.async.client.MongoClientSettings;
-import com.mongodb.connection.ClusterSettings;
-import com.mongodb.async.client.MongoClient;
-import com.mongodb.async.client.MongoClients;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import org.bson.UuidRepresentation;
+import org.bson.codecs.UuidCodec;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.configuration.CodecRegistry;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 public class MongoConnection implements IConnection<MongoClient> {
     private MongoClient client;
@@ -36,9 +40,14 @@ public class MongoConnection implements IConnection<MongoClient> {
                 (HOST == null || PORT == null) ?
                 new ServerAddress() :
                 new ServerAddress(HOST, Integer.parseInt(PORT));
+        CodecRegistry codecRegistry =
+                CodecRegistries.fromRegistries(CodecRegistries.fromCodecs(new UuidCodec(UuidRepresentation.STANDARD)),
+                        MongoClientSettings.getDefaultCodecRegistry());
 
-        ClusterSettings clusterSettings = ClusterSettings.builder().hosts(Arrays.asList(address)).build();
-        MongoClientSettings settings = MongoClientSettings.builder().clusterSettings(clusterSettings).build();
+        MongoClientSettings settings = MongoClientSettings.builder()
+            .applyToClusterSettings(builder -> builder.hosts(Collections.singletonList(address)))
+            .codecRegistry(codecRegistry)
+            .build();
 
 
         System.out.println("[Mongo] Creating connection client");

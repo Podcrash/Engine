@@ -1,6 +1,6 @@
 package com.podcrash.api.db;
 
-import com.mongodb.async.client.MongoCollection;
+import com.mongodb.client.MongoCollection;
 import com.podcrash.api.db.connection.IMongoDoc;
 import org.bson.Document;
 
@@ -35,9 +35,7 @@ public abstract class MongoBaseTable implements ITable, IMongoDoc {
 
     @Override
     public void dropTable(String name) {
-        getClient().getDatabase(name).drop((res, throwable) -> {
-            if(throwable != null) throwable.printStackTrace();
-        });
+
     }
 
     @Override

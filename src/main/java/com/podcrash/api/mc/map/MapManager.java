@@ -210,14 +210,13 @@ public final class MapManager {
      */
     public static <T extends IMap> void getMap(Class<T> mapClass, String worldName, Consumer<T> mapsumer) {
         MapTable table = TableOrganizer.getTable(DataTableType.MAPS);
-        table.findWorld(worldName, map -> {
-            try {
-                Constructor<T> constructor = mapClass.getConstructor(JsonObject.class);
-                T abstractMap = constructor.newInstance(map);
-                mapsumer.accept(abstractMap);
-            } catch (NoSuchMethodException| InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                e.printStackTrace();
-            }
-        });
+        JsonObject map = table.findWorld(worldName);
+        try {
+            Constructor<T> constructor = mapClass.getConstructor(JsonObject.class);
+            T abstractMap = constructor.newInstance(map);
+            mapsumer.accept(abstractMap);
+        } catch (NoSuchMethodException| InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
     }
 }

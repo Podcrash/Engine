@@ -2,12 +2,12 @@ package com.podcrash.api.db;
 
 //static imports are recommended to make the code look cleaner
 
-import com.mongodb.client.model.Filters;
 import com.podcrash.api.plugin.Pluginizer;
 import nu.studer.sample.Tables;
 import nu.studer.sample.tables.Kits;
 import org.bson.Document;
-import org.jooq.DSLContext;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -49,17 +49,7 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
 
         log.info("updating?");
         log.info(addColumn.toString());
-        CompletableFuture<Document> future = new CompletableFuture<>();
-        getPlayerTable().getCollection().findOneAndUpdate(playerDoc, new Document("$set", addColumn), ((result, t) -> {
-            DBUtils.handleThrowables(t);
-            future.complete(result);
-        }));
-        try {
-            Document futureDoc = future.get();
-            if(futureDoc != null) log.info(future.toString());
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        getPlayerTable().getCollection().findOneAndUpdate(playerDoc, new Document("$set", addColumn));
     }
     private CompletableFuture<Document> getKitDocumentAsync(UUID uuid) {
         evaluate(uuid);
@@ -90,21 +80,9 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
     }
 
     private void updateSync(Document playerDocument, Document updated) {
-        CompletableFuture<Document> future = new CompletableFuture<>();
-        getCollection().findOneAndUpdate(playerDocument, updated, ((result, t) -> {
-            DBUtils.handleThrowables(t);
-            Pluginizer.getLogger().info(playerDocument.toString());
-            Pluginizer.getLogger().info(updated.toString());
-            future.complete(result);
-        }));
-
-        try {
-            Document futureDoc = future.get();
-            Pluginizer.getLogger().info("update sync!");
-            if(futureDoc != null) Pluginizer.getLogger().info(futureDoc.toString());
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        getCollection().findOneAndUpdate(playerDocument, updated);
+        Pluginizer.getLogger().info(playerDocument.toString());
+        Pluginizer.getLogger().info(updated.toString());
     }
 
     public void set(UUID uuid, String clasz, int build_id, String data) {

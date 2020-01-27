@@ -1,8 +1,8 @@
 package com.podcrash.api.db.connection;
 
-import com.mongodb.async.client.MongoClient;
-import com.mongodb.async.client.MongoCollection;
-import com.mongodb.async.client.MongoDatabase;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.podcrash.api.db.TableOrganizer;
 import org.bson.Document;
 

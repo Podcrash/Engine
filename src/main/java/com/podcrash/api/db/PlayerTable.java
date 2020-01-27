@@ -1,6 +1,7 @@
 package com.podcrash.api.db;
 
 
+import com.mongodb.MongoWriteException;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
@@ -8,8 +9,6 @@ import com.podcrash.api.plugin.Pluginizer;
 import nu.studer.sample.Tables;
 import nu.studer.sample.tables.Players;
 import org.bson.Document;
-
-import java.math.BigInteger;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -29,24 +28,15 @@ public class PlayerTable extends MongoBaseTable {
     @Override
     public void createTable() {
         getCollection().createIndex(Indexes.descending("uuid"),
-                new IndexOptions().unique(true), ((result, t) -> {
-            DBUtils.handleThrowables(t);
-            Pluginizer.getLogger().info(result);
-        }));
+                new IndexOptions().unique(true));
     }
 
     public void insert(UUID uuid) {
         Document insert = new Document("uuid", uuid);
-        CompletableFuture<Void> future = new CompletableFuture<>();
-        getCollection().insertOne(insert, (res, t) -> {
-            DBUtils.handleThrowables(t);
-            future.complete(res);
-        });
-
         try {
-            future.get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+            getCollection().insertOne(insert);
+        }catch (MongoWriteException e) { //e probably because of duplicate uuid insert
+            //do nothing
         }
     }
 
@@ -63,12 +53,7 @@ public class PlayerTable extends MongoBaseTable {
 
     public CompletableFuture<Document> getPlayerDocumentAsync(UUID uuid) {
         CompletableFuture<Document> future = new CompletableFuture<>();
-        getCollection().find(Filters.eq("uuid", uuid)).first((res, t) -> {
-            DBUtils.handleThrowables(t);
-            if (res == null) throw new IllegalStateException("the uuid had to be inserted when the player joins");
-            future.complete(res);
-        });
-
+        future.complete(getCollection().find(Filters.eq("uuid", uuid)).first());
         return future;
     }
 }

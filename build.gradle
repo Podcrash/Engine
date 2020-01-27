@@ -53,7 +53,7 @@ dependencies {
     implementation 'org.jooq:jooq:3.12.1'
 
     implementation 'postgresql:postgresql:9.4.1208-jdbc42-atlassian-hosted'
-    implementation 'org.mongodb:mongodb-driver-reactivestreams:1.6.0'
+    implementation 'org.mongodb:mongodb-driver-sync:4.0.0-beta1'
 
     jooqRuntime('postgresql:postgresql:9.4.1208-jdbc42-atlassian-hosted')
     implementation 'org.redisson:redisson:3.11.3'

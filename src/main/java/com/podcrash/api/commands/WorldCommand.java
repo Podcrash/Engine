@@ -1,5 +1,6 @@
 package com.podcrash.api.commands;
 
+import com.google.gson.JsonObject;
 import com.podcrash.api.db.DataTableType;
 import com.podcrash.api.db.MapTable;
 import com.podcrash.api.db.TableOrganizer;
@@ -48,10 +49,9 @@ public class WorldCommand implements CommandExecutor {
         String worldName = args[1];
         MapTable table = TableOrganizer.getTable(DataTableType.MAPS);
         if(args[0].equalsIgnoreCase("info")) {
-            table.findWorld(worldName, (jsonObject) -> {
-                if(jsonObject == null) commandSender.sendMessage("This map doesn't exist yet!");
-                else commandSender.sendMessage(jsonObject.toString());
-            });
+            JsonObject jsonObject = table.findWorld(worldName);
+            if(jsonObject == null) commandSender.sendMessage("This map doesn't exist yet!");
+            else commandSender.sendMessage(jsonObject.toString());
         }else if(args[0].equalsIgnoreCase("download")) {
             commandSender.sendMessage("Downloading... " + worldName);
             table.downloadWorld(worldName);

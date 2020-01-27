@@ -22,10 +22,7 @@ class SequenceTable extends MongoBaseTable implements IMongoDoc {
         Document entry = new Document()
                 .append("name", sequenceName)
                 .append("value", 0);
-        getCollection().insertOne(entry, ((result, t) -> {
-            if(t == null) Pluginizer.getSpigotPlugin().getLogger().info(t.getLocalizedMessage());
-            future.complete(null);
-        }));
+        getCollection().insertOne(entry);
 
         try {
             future.get();
@@ -35,44 +32,13 @@ class SequenceTable extends MongoBaseTable implements IMongoDoc {
     }
 
     private int get(String sequenceName) {
-        CompletableFuture future = new CompletableFuture();
-        getCollection().find(Filters.eq("name", sequenceName)).first((res, t) -> {
-            Integer value;
-            if(t != null) {
-                Pluginizer.getSpigotPlugin().getLogger().info(t.getLocalizedMessage());
-                value = -1;
-            }else value = (Integer) res.get("value");
-            future.complete(value);
-        });
-        try {
-            return (int) future.get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-        throw new IllegalStateException("sequence getting failed");
+        Document res = getCollection().find(Filters.eq("name", sequenceName)).first();
+        return (int) res.get("value");
     }
 
     private void increment(String sequenceName) {
-        CompletableFuture future = new CompletableFuture();
-        getCollection().find(Filters.eq("name", sequenceName)).first((res, t) -> {
-            if(t != null) {
-                Pluginizer.getSpigotPlugin().getLogger().info(t.getLocalizedMessage());
-                future.complete(new IllegalStateException("sequence incrementing failed"));
-            }
-
-            int value = (int) res.get("value");
-            res.put("value", value + 1);
-            future.complete(value);
-        });
-        Object get = null;
-        try {
-            get = future.get();
-            if(get instanceof Throwable) {
-                Pluginizer.getSpigotPlugin().getLogger().info(((Throwable) get).getLocalizedMessage());
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        Document incrementValue = new Document("value", 1);
+        getCollection().updateOne(Filters.eq("name", sequenceName), new Document("$inc", incrementValue));
     }
 
     @Override
