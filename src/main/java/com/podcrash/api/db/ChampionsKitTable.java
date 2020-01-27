@@ -80,7 +80,7 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
     }
 
     private void updateSync(Document playerDocument, Document updated) {
-        getCollection().findOneAndUpdate(playerDocument, updated);
+        getCollection().updateOne(playerDocument, updated);
         Pluginizer.getLogger().info(playerDocument.toString());
         Pluginizer.getLogger().info(updated.toString());
     }
