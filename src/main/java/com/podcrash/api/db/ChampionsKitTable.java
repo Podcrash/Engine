@@ -2,6 +2,7 @@ package com.podcrash.api.db;
 
 //static imports are recommended to make the code look cleaner
 
+import com.mongodb.client.result.UpdateResult;
 import com.podcrash.api.plugin.Pluginizer;
 import nu.studer.sample.Tables;
 import nu.studer.sample.tables.Kits;
@@ -49,7 +50,7 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
 
         log.info("updating?");
         log.info(addColumn.toString());
-        getPlayerTable().getCollection().findOneAndUpdate(playerDoc, new Document("$set", addColumn));
+        getPlayerTable().getCollection().updateOne(playerDoc, new Document("$set", addColumn));
     }
     private CompletableFuture<Document> getKitDocumentAsync(UUID uuid) {
         evaluate(uuid);
@@ -80,9 +81,11 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
     }
 
     private void updateSync(Document playerDocument, Document updated) {
-        getCollection().updateOne(playerDocument, updated);
+        UpdateResult update = getPlayerTable().getCollection().updateOne(playerDocument, updated);
+
         Pluginizer.getLogger().info(playerDocument.toString());
         Pluginizer.getLogger().info(updated.toString());
+        Pluginizer.getLogger().info(update.toString());
     }
 
     public void set(UUID uuid, String clasz, int build_id, String data) {
