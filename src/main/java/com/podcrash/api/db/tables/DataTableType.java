@@ -1,13 +1,14 @@
-package com.podcrash.api.db;
+package com.podcrash.api.db.tables;
 
-import javax.security.auth.Destroyable;
+import com.podcrash.api.db.ITable;
+import com.podcrash.api.db.MapTable;
+import com.podcrash.api.db.tables.*;
 
 public enum DataTableType {
     KITS(ChampionsKitTable.class),
     PLAYERS(PlayerTable.class),
-    PERMISSIONS(PlayerPermissionsTable.class),
+    PERMISSIONS(PermissionsTable.class),
     DESCRIPTIONS(DescriptorTable.class),
-    SEQUENCES(SequenceTable.class),
     MAPS(MapTable.class);
 
     private Class<? extends ITable> table;

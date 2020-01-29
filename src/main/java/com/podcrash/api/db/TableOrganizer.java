@@ -3,6 +3,7 @@ package com.podcrash.api.db;
 import com.podcrash.api.db.connection.DatabaseConnection;
 import com.podcrash.api.db.connection.IConnection;
 import com.podcrash.api.db.connection.MongoConnection;
+import com.podcrash.api.db.tables.*;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.Sequence;
@@ -44,8 +45,8 @@ public final class TableOrganizer {
     public static void createTables(boolean test) {
         ITable[] tables = new ITable[]{
             new PlayerTable(test),
-            new ChampionsKitTable(test),
-            new PlayerPermissionsTable(test),
+            new ChampionsKitTable(),
+            new PermissionsTable(),
             new DescriptorTable(test),
             new MapTable(test),
         };

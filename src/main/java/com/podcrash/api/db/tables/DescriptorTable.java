@@ -1,13 +1,10 @@
-package com.podcrash.api.db;
+package com.podcrash.api.db.tables;
 
+import com.podcrash.api.db.BaseTable;
 import nu.studer.sample.Tables;
 import nu.studer.sample.tables.Descriptions;
 import com.podcrash.api.redis.Communicator;
-import nu.studer.sample.Sequences;
 import org.jooq.*;
-import org.jooq.impl.DSL;
-import org.jooq.impl.SQLDataType;
-import org.jooq.util.postgres.PostgresDataType;
 
 import java.util.concurrent.CompletableFuture;
 

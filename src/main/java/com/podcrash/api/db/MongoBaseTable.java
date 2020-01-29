@@ -1,21 +1,18 @@
 package com.podcrash.api.db;
 
-import com.mongodb.client.MongoCollection;
+import com.mongodb.async.client.MongoCollection;
 import com.podcrash.api.db.connection.IMongoDoc;
 import org.bson.Document;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 //TODO:
 public abstract class MongoBaseTable implements ITable, IMongoDoc {
     protected final static ExecutorService SERVICE = Executors.newFixedThreadPool(4);
     private String collectionName;
-    private boolean test;
 
-    public MongoBaseTable(String collectionName, boolean test) {
-        this.test = test;
-        this.collectionName = (test) ? collectionName + "test" : collectionName;
+    public MongoBaseTable(String collectionName) {
+        this.collectionName = collectionName;
     }
 
     @Override
@@ -45,5 +42,18 @@ public abstract class MongoBaseTable implements ITable, IMongoDoc {
 
     public MongoCollection<Document> getCollection() {
         return getDatabase().getCollection(getName());
+    }
+    public <T> MongoCollection<T> getCollection(Class<T> tClass) {
+        return getDatabase().getCollection(getName(), tClass);
+    }
+
+    protected <T> T futureGuaranteeGet(CompletableFuture<T> future) {
+        try {
+            return future.get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException | TimeoutException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        //this should never happen. (Ideally)
+        return null;
     }
 }

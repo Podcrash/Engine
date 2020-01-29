@@ -1,6 +1,8 @@
 package com.podcrash.api.db;
 
-import org.bson.Document;
+import com.podcrash.api.db.pojos.InvictaPlayer;
+import com.podcrash.api.db.tables.DataTableType;
+import com.podcrash.api.db.tables.PlayerTable;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -10,10 +12,10 @@ public interface IPlayerDB {
         return TableOrganizer.getTable(DataTableType.PLAYERS);
     }
 
-    default Document getPlayerDocumentSync(UUID uuid) {
+    default InvictaPlayer getPlayerDocumentSync(UUID uuid) {
         return getPlayerTable().getPlayerDocumentSync(uuid);
     }
-    default CompletableFuture<Document> getPlayerDocumentAsync(UUID uuid) {
+    default CompletableFuture<InvictaPlayer> getPlayerDocumentAsync(UUID uuid) {
         return getPlayerTable().getPlayerDocumentAsync(uuid);
     }
 

@@ -2,12 +2,13 @@ package com.podcrash.api.db.connection;
 
 import com.mongodb.MongoClientSettings;
 import com.mongodb.ServerAddress;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
+import com.mongodb.async.client.MongoClient;
+import com.mongodb.async.client.MongoClients;
 import org.bson.UuidRepresentation;
 import org.bson.codecs.UuidCodec;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.PojoCodecProvider;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,8 +42,9 @@ public class MongoConnection implements IConnection<MongoClient> {
                 new ServerAddress() :
                 new ServerAddress(HOST, Integer.parseInt(PORT));
         CodecRegistry codecRegistry =
-                CodecRegistries.fromRegistries(CodecRegistries.fromCodecs(new UuidCodec(UuidRepresentation.STANDARD)),
-                        MongoClientSettings.getDefaultCodecRegistry());
+                CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
+                        CodecRegistries.fromCodecs(new UuidCodec(UuidRepresentation.STANDARD)),
+                        CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build()));
 
         MongoClientSettings settings = MongoClientSettings.builder()
             .applyToClusterSettings(builder -> builder.hosts(Collections.singletonList(address)))

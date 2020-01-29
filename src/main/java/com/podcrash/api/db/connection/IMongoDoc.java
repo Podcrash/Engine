@@ -1,17 +1,20 @@
 package com.podcrash.api.db.connection;
 
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+import com.mongodb.async.client.MongoClient;
+import com.mongodb.async.client.MongoCollection;
+import com.mongodb.async.client.MongoDatabase;
 import com.podcrash.api.db.TableOrganizer;
 import org.bson.Document;
 
 public interface IMongoDoc {
     /**
      * Name of the database
+     * TODO: Change based on environment.
      * @return the name
      */
-    String getName();
+    default String getDatabaseName() {
+        return "invicta";
+    }
 
     default MongoClient getClient() {
         return TableOrganizer.getConnection(MongoConnection.class).makeConnection();
@@ -22,12 +25,10 @@ public interface IMongoDoc {
      * @return the db
      */
     default MongoDatabase getDatabase() {
-        return getClient().getDatabase(getName());
+        return getClient().getDatabase(getDatabaseName());
     }
 
     default MongoCollection<Document> getCollection(String collectionName) {
         return getDatabase().getCollection(collectionName);
     }
-
-
 }

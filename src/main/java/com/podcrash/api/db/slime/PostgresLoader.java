@@ -4,7 +4,7 @@ import com.grinderwolf.swm.api.exceptions.UnknownWorldException;
 import com.grinderwolf.swm.api.exceptions.WorldInUseException;
 import com.grinderwolf.swm.api.loaders.SlimeLoader;
 import com.podcrash.api.db.BaseTable;
-import com.podcrash.api.db.DataTableType;
+import com.podcrash.api.db.tables.DataTableType;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 
