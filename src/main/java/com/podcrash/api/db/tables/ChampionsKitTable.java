@@ -17,6 +17,7 @@ import com.podcrash.api.db.pojos.PojoHelper;
 import com.podcrash.api.plugin.Pluginizer;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.jooq.Update;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,25 +86,33 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
         return futureGuaranteeGet(data);
     }
 
-    private void updateSync(Bson player, Bson updated) {
-        CompletableFuture<UpdateResult> future = new CompletableFuture<>();
-        getPlayerTable().getCollection(InvictaPlayer.class).updateOne(player, updated, (res, t) -> {
+    private void updateSync(Bson query, Bson update) {
+        CompletableFuture<UpdateResult> updateResult = new CompletableFuture<>();
+        getCollection(InvictaPlayer.class).updateOne(query, update, (res, t) -> {
             DBUtils.handleThrowables(t);
-            future.complete(res);
+            updateResult.complete(res);
         });
-        futureGuaranteeGet(future);
+        futureGuaranteeGet(updateResult);
     }
-
     public void set(UUID uuid, String clasz, int build_id, String data) {
-        updateSync(eq("uuid", uuid), Updates.set(clasz + build_id, data));
+        String key = "gameData.conquest." + clasz + build_id;
+        //data = value
+        Bson update = Updates.push(key, data);
+        updateSync(eq("uuid", uuid), update);
     }
 
     public void alter(UUID uuid, String clasz, int build_id, String data) {
-        set(uuid, clasz, build_id, data);
+        String key = "gameData.conquest" + clasz + build_id;
+        //data = value
+        Bson update = Updates.set(key, data);
+        updateSync(eq("uuid", uuid), update);
     }
 
     public void delete(UUID uuid, String clasz, int build_id) {
-        updateSync(eq("uuid", uuid), Updates.unset(clasz + build_id));
+        String key = "gameData.conquest" + clasz + build_id;
+        //data = value
+        Bson update = Updates.unset(key);
+        updateSync(eq("uuid", uuid), update);
     }
 
 }

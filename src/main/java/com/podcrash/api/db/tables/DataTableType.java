@@ -2,12 +2,11 @@ package com.podcrash.api.db.tables;
 
 import com.podcrash.api.db.ITable;
 import com.podcrash.api.db.MapTable;
-import com.podcrash.api.db.tables.*;
 
 public enum DataTableType {
     KITS(ChampionsKitTable.class),
     PLAYERS(PlayerTable.class),
-    PERMISSIONS(PermissionsTable.class),
+    PERMISSIONS(RanksTable.class),
     DESCRIPTIONS(DescriptorTable.class),
     MAPS(MapTable.class);
 

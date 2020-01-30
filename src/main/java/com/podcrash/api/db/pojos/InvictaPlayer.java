@@ -5,15 +5,16 @@ import org.bson.types.ObjectId;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public final class InvictaPlayer {
     private ObjectId objectId;
     private UUID uuid;
     private String lastUsername;
-    private String rank;
 
-    private List<String> extraPerms;
+    private Set<String> ranks;
+    private Set<String> extraPerms;
 
     private Currency currency;
 
@@ -46,19 +47,19 @@ public final class InvictaPlayer {
         this.lastUsername = lastUsername;
     }
 
-    public String getRank() {
-        return rank;
+    public Set<String> getRanks() {
+        return ranks;
     }
 
-    public void setRank(String rank) {
-        this.rank = rank;
+    public void setRanks(Set<String> ranks) {
+        this.ranks = ranks;
     }
 
-    public List<String> getExtraPerms() {
+    public Set<String> getExtraPerms() {
         return extraPerms;
     }
 
-    public void setExtraPerms(List<String> extraPerms) {
+    public void setExtraPerms(Set<String> extraPerms) {
         this.extraPerms = extraPerms;
     }
 

@@ -1,9 +1,12 @@
 package com.podcrash.api.db.pojos;
 
+import com.podcrash.api.db.TableOrganizer;
+import com.podcrash.api.db.tables.DataTableType;
 import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.UUID;
 
 /**
@@ -35,8 +38,8 @@ public final class PojoHelper {
     public static InvictaPlayer createInvictaPlayer(UUID uuid) {
         InvictaPlayer player = new InvictaPlayer();
         player.setCurrency(new Currency());
-        player.setExtraPerms(new ArrayList<>());
-        player.setRank("");
+        player.setExtraPerms(new HashSet<>());
+        player.setRanks(new HashSet<>());
         player.setUuid(uuid);
         player.setGameData(new HashMap<>());
         player.setLastUsername(Bukkit.getPlayer(uuid).getName());

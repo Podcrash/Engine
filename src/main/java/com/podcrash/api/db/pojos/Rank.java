@@ -2,7 +2,9 @@ package com.podcrash.api.db.pojos;
 
 import org.bson.types.ObjectId;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public final class Rank {
     private ObjectId objectId;
@@ -10,7 +12,7 @@ public final class Rank {
     private String color;
     private int position;
 
-    private List<String> permissions;
+    private Set<String> permissions;
 
     public Rank() {
     }
@@ -47,11 +49,11 @@ public final class Rank {
         this.position = position;
     }
 
-    public List<String> getPermissions() {
+    public Set<String> getPermissions() {
         return permissions;
     }
 
-    public void setPermissions(List<String> permissions) {
+    public void setPermissions(HashSet<String> permissions) {
         this.permissions = permissions;
     }
 }

@@ -46,7 +46,7 @@ public final class TableOrganizer {
         ITable[] tables = new ITable[]{
             new PlayerTable(test),
             new ChampionsKitTable(),
-            new PermissionsTable(),
+            new RanksTable(),
             new DescriptorTable(test),
             new MapTable(test),
         };
