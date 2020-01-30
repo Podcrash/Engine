@@ -88,4 +88,9 @@ public enum Perm {
                 return Collections.emptyList();
         }
     }
+
+    @Override
+    public String toString() {
+        return name();
+    }
 }

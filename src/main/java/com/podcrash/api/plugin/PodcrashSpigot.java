@@ -59,6 +59,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
     }
 
     public void registerConfigurator(String identifier) {
+        getLogger().info("Registering configurator: " + identifier);
         configurators.put(identifier, new Configurator(this, identifier));
     }
 

@@ -1,7 +1,7 @@
 package com.podcrash.api.mc.map;
 
 import com.google.gson.*;
-import com.podcrash.api.db.DataTableType;
+import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.MapTable;
 import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.mc.location.Coordinate;
@@ -12,7 +12,6 @@ import org.bukkit.World;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -210,13 +209,14 @@ public final class MapManager {
      */
     public static <T extends IMap> void getMap(Class<T> mapClass, String worldName, Consumer<T> mapsumer) {
         MapTable table = TableOrganizer.getTable(DataTableType.MAPS);
-        JsonObject map = table.findWorld(worldName);
-        try {
-            Constructor<T> constructor = mapClass.getConstructor(JsonObject.class);
-            T abstractMap = constructor.newInstance(map);
-            mapsumer.accept(abstractMap);
-        } catch (NoSuchMethodException| InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
-        }
+        table.findWorld(worldName, (map) -> {
+            try {
+                Constructor<T> constructor = mapClass.getConstructor(JsonObject.class);
+                T abstractMap = constructor.newInstance(map);
+                mapsumer.accept(abstractMap);
+            } catch (NoSuchMethodException| InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

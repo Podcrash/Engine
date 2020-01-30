@@ -1,6 +1,6 @@
 package com.podcrash.api.mc.game;
 
-import com.podcrash.api.db.DataTableType;
+import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.MapTable;
 import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.mc.events.game.GameJoinEvent;
@@ -16,7 +16,6 @@ import com.podcrash.api.mc.ui.TeamSelectGUI;
 import com.podcrash.api.mc.util.ChatUtil;
 import com.podcrash.api.mc.util.ItemStackUtil;
 import com.podcrash.api.plugin.Pluginizer;
-import com.podcrash.api.plugin.PodcrashSpigot;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
