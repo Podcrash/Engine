@@ -78,4 +78,18 @@ public final class InvictaPlayer {
     public void setGameData(Map<String, GameData> gameData) {
         this.gameData = gameData;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("InvictaPlayer{");
+        sb.append("objectId=").append(objectId);
+        sb.append(", uuid=").append(uuid);
+        sb.append(", lastUsername='").append(lastUsername).append('\'');
+        sb.append(", ranks=").append(ranks);
+        sb.append(", extraPerms=").append(extraPerms);
+        sb.append(", currency=").append(currency);
+        sb.append(", gameData=").append(gameData);
+        sb.append('}');
+        return sb.toString();
+    }
 }

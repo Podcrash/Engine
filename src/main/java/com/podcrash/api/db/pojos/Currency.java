@@ -27,4 +27,13 @@ public final class Currency {
     public void setGold(double gold) {
         this.gold = gold;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Currency{");
+        sb.append("objectId=").append(objectId);
+        sb.append(", gold=").append(gold);
+        sb.append('}');
+        return sb.toString();
+    }
 }

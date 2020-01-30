@@ -2,6 +2,7 @@ package com.podcrash.api.db.pojos;
 
 import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.db.tables.DataTableType;
+import org.bson.Document;
 import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ public final class PojoHelper {
     public static ConquestGameData createConquestGameData() {
         ConquestGameData conquestData = new ConquestGameData();
         conquestData.setAllowedSkills(new ArrayList<>());
-        conquestData.setBuilds(new HashMap<>());
+        conquestData.setBuilds(new Document());
         return conquestData;
     }
 

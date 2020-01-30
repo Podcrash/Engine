@@ -4,10 +4,12 @@ import com.mongodb.MongoClientSettings;
 import com.mongodb.ServerAddress;
 import com.mongodb.async.client.MongoClient;
 import com.mongodb.async.client.MongoClients;
+import com.podcrash.api.db.pojos.*;
 import org.bson.UuidRepresentation;
 import org.bson.codecs.UuidCodec;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.PojoCodecProvider;
 
 import java.util.Arrays;
@@ -41,10 +43,22 @@ public class MongoConnection implements IConnection<MongoClient> {
                 (HOST == null || PORT == null) ?
                 new ServerAddress() :
                 new ServerAddress(HOST, Integer.parseInt(PORT));
+
+        ClassModel<GameData> gameDataModel = ClassModel.builder(GameData.class).enableDiscriminator(true).build();
+        ClassModel<ConquestGameData> conquestDataModel = ClassModel.builder(ConquestGameData.class).enableDiscriminator(true).build();
+
+        ClassModel<InvictaPlayer> playerModel = ClassModel.builder(InvictaPlayer.class).enableDiscriminator(true).build();
+        ClassModel<Rank> rankModel = ClassModel.builder(Rank.class).enableDiscriminator(false).build();
+        ClassModel<Currency> currencyModel = ClassModel.builder(Currency.class).enableDiscriminator(false).build();
+
+        PojoCodecProvider pojoProvider = PojoCodecProvider.builder()
+            .register(gameDataModel, conquestDataModel, playerModel, rankModel, currencyModel)
+            .automatic(true)
+            .build();
         CodecRegistry codecRegistry =
-                CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
-                        CodecRegistries.fromCodecs(new UuidCodec(UuidRepresentation.STANDARD)),
-                        CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build()));
+            CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
+            CodecRegistries.fromCodecs(new UuidCodec(UuidRepresentation.STANDARD)),
+            CodecRegistries.fromProviders(pojoProvider));
 
         MongoClientSettings settings = MongoClientSettings.builder()
             .applyToClusterSettings(builder -> builder.hosts(Collections.singletonList(address)))

@@ -12,8 +12,6 @@ import com.podcrash.api.db.IPlayerDB;
 import com.podcrash.api.db.MongoBaseTable;
 import com.podcrash.api.db.pojos.InvictaPlayer;
 import com.podcrash.api.db.pojos.Rank;
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import org.bson.Document;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -36,7 +34,7 @@ public class RanksTable extends MongoBaseTable implements IPlayerDB {
         List<IndexModel> models = new ArrayList<>();
         models.add(new IndexModel(Indexes.ascending("name"), new IndexOptions().unique(true)));
         models.add(new IndexModel(Indexes.ascending("permissions"),
-                new IndexOptions().collation(Collation.builder().caseLevel(false).build())));
+                new IndexOptions().collation(Collation.builder().caseLevel(false).locale("en_US").build())));
         CompletableFuture<List<String>> future = new CompletableFuture<>();
         getCollection().createIndexes(models, (res, t) -> {
             DBUtils.handleThrowables(t);
@@ -147,6 +145,9 @@ public class RanksTable extends MongoBaseTable implements IPlayerDB {
             futureGuaranteeGet(future);
             return rankList;
         });
+    }
+    public List<Rank> getRanksSync(UUID uuid) {
+        return futureGuaranteeGet(getRanksAsync(uuid));
     }
     public void addRole(UUID uuid, String role) {
         CompletableFuture<UpdateResult> future = new CompletableFuture<>();

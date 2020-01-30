@@ -15,16 +15,10 @@ import com.podcrash.api.db.pojos.GameData;
 import com.podcrash.api.db.pojos.InvictaPlayer;
 import com.podcrash.api.db.pojos.PojoHelper;
 import com.podcrash.api.plugin.Pluginizer;
-import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.jooq.Update;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
 /**
@@ -52,17 +46,13 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
      */
     private void evaluate(UUID uuid) {
         InvictaPlayer playerDoc = getPlayerDocumentSync(uuid);
-        Logger log = Pluginizer.getLogger();
-        log.info(playerDoc.toString());
 
         if(playerDoc.getGameData().containsKey("conquest")) return;
-        Map<String, GameData> gameDataMap = playerDoc.getGameData();
 
         ConquestGameData conquestData = PojoHelper.createConquestGameData();
-        gameDataMap.put(conquestData.getName(), conquestData);
 
         CompletableFuture<UpdateResult> future = new CompletableFuture<>();
-        getPlayerTable().getCollection(InvictaPlayer.class).updateOne(eq("uuid", uuid), Updates.set("gameData", gameDataMap), (res, t) -> {
+        getPlayerTable().getCollection(InvictaPlayer.class).updateOne(eq("uuid", uuid), Updates.set("gameData.conquest", conquestData), (res, t) -> {
             DBUtils.handleThrowables(t);
             future.complete(res);
         });
@@ -79,7 +69,7 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
     public CompletableFuture<String> getJSONDataAsync(UUID uuid, String clasz, int build_id) {
         //TODO: Find out if this works
         CompletableFuture<ConquestGameData> kitDocument = getKitDocumentAsync(uuid);
-        return kitDocument.thenApplyAsync((kits -> kits.getBuilds().get(clasz + build_id)), SERVICE);
+        return kitDocument.thenApplyAsync((kits -> (String) kits.getBuilds().get(clasz + build_id)), SERVICE);
     }
     public String getJSONData(UUID uuid, String clasz, int build_id) {
         CompletableFuture<String> data = getJSONDataAsync(uuid, clasz, build_id);
@@ -88,28 +78,32 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
 
     private void updateSync(Bson query, Bson update) {
         CompletableFuture<UpdateResult> updateResult = new CompletableFuture<>();
-        getCollection(InvictaPlayer.class).updateOne(query, update, (res, t) -> {
+        getPlayerTable().getCollection(InvictaPlayer.class).updateOne(query, update, (res, t) -> {
             DBUtils.handleThrowables(t);
+            Pluginizer.getLogger().info("query: " + query);
+            Pluginizer.getLogger().info("query: " + update);
+
+            Pluginizer.getLogger().info("update querry: " +  res.toString());
             updateResult.complete(res);
         });
         futureGuaranteeGet(updateResult);
     }
     public void set(UUID uuid, String clasz, int build_id, String data) {
-        String key = "gameData.conquest." + clasz + build_id;
+        String key = "gameData.conquest.builds." + clasz + build_id;
         //data = value
         Bson update = Updates.push(key, data);
         updateSync(eq("uuid", uuid), update);
     }
 
     public void alter(UUID uuid, String clasz, int build_id, String data) {
-        String key = "gameData.conquest" + clasz + build_id;
+        String key = "gameData.conquest.builds." + clasz + build_id;
         //data = value
         Bson update = Updates.set(key, data);
         updateSync(eq("uuid", uuid), update);
     }
 
     public void delete(UUID uuid, String clasz, int build_id) {
-        String key = "gameData.conquest" + clasz + build_id;
+        String key = "gameData.conquest.builds." + clasz + build_id;
         //data = value
         Bson update = Updates.unset(key);
         updateSync(eq("uuid", uuid), update);

@@ -56,4 +56,16 @@ public final class Rank {
     public void setPermissions(HashSet<String> permissions) {
         this.permissions = permissions;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Rank{");
+        sb.append("objectId=").append(objectId);
+        sb.append(", name='").append(name).append('\'');
+        sb.append(", color='").append(color).append('\'');
+        sb.append(", position=").append(position);
+        sb.append(", permissions=").append(permissions);
+        sb.append('}');
+        return sb.toString();
+    }
 }

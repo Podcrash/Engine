@@ -3,23 +3,16 @@ package com.podcrash.api.db.tables;
 import com.mongodb.async.SingleResultCallback;
 import com.podcrash.api.db.DBUtils;
 import com.podcrash.api.db.MongoBaseTable;
-import com.podcrash.api.db.pojos.Currency;
-
-import java.util.ArrayList;
 
 import static com.mongodb.client.model.Filters.*;
-import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
-import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import com.podcrash.api.db.pojos.InvictaPlayer;
 import com.podcrash.api.db.pojos.PojoHelper;
+import com.podcrash.api.plugin.Pluginizer;
 import nu.studer.sample.Tables;
 import nu.studer.sample.tables.Players;
-import org.bukkit.Bukkit;
-
-import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -66,6 +59,7 @@ public class PlayerTable extends MongoBaseTable {
         CompletableFuture<InvictaPlayer> future = new CompletableFuture<>();
         SingleResultCallback<InvictaPlayer> callback = (invictaPlayer, t) -> {
             DBUtils.handleThrowables(t);
+            Pluginizer.getLogger().info("returned invicta player: " + invictaPlayer);
             future.complete(invictaPlayer);
         };
         getCollection(InvictaPlayer.class).find(eq("uuid", uuid)).first(callback);

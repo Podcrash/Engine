@@ -48,7 +48,7 @@ public final class TableOrganizer {
             new ChampionsKitTable(),
             new RanksTable(),
             new DescriptorTable(test),
-            new MapTable(test),
+            new MapTable(),
         };
         process(tables);
     }
@@ -59,7 +59,7 @@ public final class TableOrganizer {
      */
     public static void createMongoTables(boolean test) {
         MongoBaseTable[] tables = new MongoBaseTable[] {
-            new MapTable(test)
+            new MapTable()
         };
         process(tables);
     }
