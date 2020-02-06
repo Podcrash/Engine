@@ -13,12 +13,14 @@ import org.bukkit.event.entity.PotionSplashEvent;
 import java.util.Collection;
 
 import com.podcrash.api.mc.mob.MobManager.mobs;
+import com.podcrash.api.mc.mob.MobData;
 
 public class MobListeners extends ListenerBase {
   
 	@EventHandler(priority = EventPriority.LOW)
 	public void onEntityCombust(EntityCombustEvent event){
-		if(event.getEntity() instanceof Monster){
+		MobData mob = MobManager.getMobData(event.getEntity().getEntityId());
+		if (!mob.canBurn()) {
 			event.setCancelled(true);
 		}
 	}
@@ -27,17 +29,13 @@ public class MobListeners extends ListenerBase {
     public void onMobDamage(EntityDamageEvent e) {
 
     	int id = e.getEntity().getEntityId();
-      MobData mob = mobs.get(id);
-
-      if (mob == null) {
-      	return;
-      } else {
-      	if(!mob.isDamageable()) {
-        	e.setCancelled(true);
-        } else {
-        	return;
-        }
-      }
+			MobData mob = MobManager.getMobData(id);
+		
+			if (!mob.isDamageable()) {
+				e.setCancelled(true);
+			} else {
+				return;
+			}
 
     }
     
@@ -45,10 +43,15 @@ public class MobListeners extends ListenerBase {
     public void onPotionSplash(PotionSplashEvent e) {
         Collection<LivingEntity> entities = e.getAffectedEntities();
         for (LivingEntity entity: entities) {
-            if(entity instanceof Player) {
-                return;
-            } else {
-                e.setCancelled(true);
+
+            int id = entity.getEntityId();
+            MobData mob = MobManager.getMobData(id);
+
+            if (!mob.takesPotionEffects()) {
+                Collection<PotionEffect> entityEffects = entity.getActivePotionEffects();
+                for (PotionEffect entityEffect : entityEffects) {
+                    entity.removePotionEffect(entityEffect.getType());
+                }
             }
         }
 
