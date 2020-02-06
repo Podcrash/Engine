@@ -1,4 +1,4 @@
-package import com.podcrash.api.mc.mob;
+package com.podcrash.api.mc.mob;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
