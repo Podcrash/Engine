@@ -7,25 +7,20 @@ import com.podcrash.api.db.TableOrganizer;
 import org.bson.Document;
 
 public interface IMongoDoc {
-    /**
-     * Name of the database
-     * TODO: Change based on environment.
-     * @return the name
-     */
-    default String getDatabaseName() {
-        return "invicta";
+
+    default MongoConnection getMongoConnection() {
+        return TableOrganizer.getConnection(MongoConnection.class);
     }
 
     default MongoClient getClient() {
-        return TableOrganizer.getConnection(MongoConnection.class).makeConnection();
+        return getMongoConnection().getConnection();
     }
-
     /**
      * Get the database
      * @return the db
      */
     default MongoDatabase getDatabase() {
-        return getClient().getDatabase(getDatabaseName());
+        return getMongoConnection().getDatabase();
     }
 
     default MongoCollection<Document> getCollection(String collectionName) {

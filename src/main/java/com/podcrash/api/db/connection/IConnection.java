@@ -11,7 +11,7 @@ public interface IConnection<T> {
      * The equivalent of getting a connection.
      * @return the connection pool
      */
-    T makeConnection();
+    T getConnection();
 
     /**
      * Closes the database.

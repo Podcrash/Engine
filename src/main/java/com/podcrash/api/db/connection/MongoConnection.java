@@ -5,6 +5,7 @@ import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.async.client.MongoClient;
 import com.mongodb.async.client.MongoClients;
+import com.mongodb.async.client.MongoDatabase;
 import com.podcrash.api.db.pojos.*;
 import org.bson.UuidRepresentation;
 import org.bson.codecs.UuidCodec;
@@ -18,11 +19,12 @@ import java.util.Collections;
 
 public class MongoConnection implements IConnection<MongoClient> {
     private MongoClient client;
+    private String databaseName;
 
     private MongoCredential getCredential() {
         String user = System.getenv("MONGO_USER");
         String password = System.getenv("MONGO_PASSWORD");
-        String databaseName = System.getenv("INVICTA_DATABASE_NAME");
+        databaseName = System.getenv("INVICTA_DATABASE_NAME");
 
         return MongoCredential.createCredential(user, databaseName, password.toCharArray());
     }
@@ -77,19 +79,22 @@ public class MongoConnection implements IConnection<MongoClient> {
         MongoClientSettings settings = MongoClientSettings.builder()
             .applyToClusterSettings(builder -> builder.hosts(Collections.singletonList(address)))
             .codecRegistry(codecRegistry)
+            .credential(getCredential())
             .build();
 
 
         System.out.println("[Mongo] Creating connection client");
         this.client = MongoClients.create(settings);
-
-        client.getDatabase("invicta");
     }
 
 
     @Override
-    public MongoClient makeConnection() {
+    public MongoClient getConnection() {
         return client;
+    }
+
+    public MongoDatabase getDatabase() {
+        return client.getDatabase(databaseName);
     }
 
     @Override
