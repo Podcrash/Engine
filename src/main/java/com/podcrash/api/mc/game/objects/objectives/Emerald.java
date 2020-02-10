@@ -15,7 +15,7 @@ public class Emerald extends ItemObjective {
         this(location.toVector());
     }
     public Emerald(Vector spawnVector){
-        super(Material.EMERALD, Material.EMERALD_BLOCK, spawnVector);
+        super(Material.NETHER_STAR, Material.ENDER_PORTAL_FRAME, spawnVector);
         this.fireworkEffect = FireworkEffect.builder().withColor(Color.GREEN).with(FireworkEffect.Type.BALL_LARGE).build();
     }
     public ObjectiveType getObjectiveType(){

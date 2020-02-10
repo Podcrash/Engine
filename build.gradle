@@ -49,13 +49,7 @@ dependencies {
     implementation 'com.grinderwolf:slimeworldmanager-api:2.1.1'
     //implementation 'com.comphenix.protocol:ProtocolLib:4.4.0'
 
-    implementation 'com.zaxxer:HikariCP:3.3.1'
-    implementation 'org.jooq:jooq:3.12.1'
-
-    implementation 'postgresql:postgresql:9.4.1208-jdbc42-atlassian-hosted'
     implementation 'org.mongodb:mongodb-driver-async:3.12.1'
-
-    jooqRuntime('postgresql:postgresql:9.4.1208-jdbc42-atlassian-hosted')
     implementation 'org.redisson:redisson:3.11.3'
 }
 
@@ -65,74 +59,6 @@ test {
     systemProperty "lobby.code", "dom1234132"
 
     testLogging.showStandardStreams true
-}
-
-jooq {
-    version = '3.11.11'
-    edition = 'OSS'
-
-    ext.getUrl = {databaseName ->
-        final String HOST = System.getenv("PSQL_HOST")
-        final int PORT = 5432
-        return String.format("jdbc:postgresql://%s:%d/%s",
-                HOST, PORT, databaseName)
-    }
-
-    String[] dbs = "champions".split(" ");
-    for(String db : dbs) {
-        println "Loading for " + db + " databases!"
-        String funcName = db + "database"
-        String _url = getUrl(db)
-        "${funcName}"(sourceSets.main) {
-            final String USER = System.getenv("PSQL_USER")
-            final String PASSWORD = System.getenv("PSQL_PASS")
-
-            jdbc {
-                driver = 'org.postgresql.Driver'
-                url = _url
-                user = USER
-                password = PASSWORD
-                println "Attempting to find the mappings for " + _url
-            }
-            generator {
-                name = 'org.jooq.codegen.DefaultGenerator'
-                strategy {
-                    name = 'org.jooq.codegen.DefaultGeneratorStrategy'
-                    // ...
-                }
-                database {
-                    name = 'org.jooq.meta.postgres.PostgresDatabase'
-                    inputSchema = 'public'
-                    forcedTypes {
-                        forcedType {
-                            name = 'varchar'
-                            expression = '.*'
-                            types = 'JSONB?'
-                        }
-                        forcedType {
-                            name = 'varchar'
-                            expression = '.*'
-                            types = 'INET'
-                        }
-                    }
-                    // ...
-                }
-                generate {
-                    relations = true
-                    deprecated = false
-                    records = true
-                    immutablePojos = true
-                    fluentSetters = true
-                    // ...
-                }
-                target {
-                    packageName = 'nu.studer.sample'
-                    // directory = ...
-                }
-            }
-        }
-    }
-
 }
 
 task spigot(dependsOn: shadowJar) {

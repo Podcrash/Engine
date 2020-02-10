@@ -6,7 +6,7 @@ import com.podcrash.api.mc.map.BaseGameMap;
 import com.podcrash.api.mc.map.JsonHelper;
 import com.podcrash.api.mc.map.MapManager;
 import com.podcrash.api.plugin.Pluginizer;
-import com.podcrash.api.redis.Communicator;
+import com.podcrash.api.db.redis.Communicator;
 import org.junit.jupiter.api.*;
 
 import java.util.concurrent.ExecutionException;
@@ -22,7 +22,7 @@ public class MapTest {
         try {
             Communicator.setup(Pluginizer.getService()).get();
             TableOrganizer.initConnections();
-            TableOrganizer.createMongoTables(true);
+            TableOrganizer.createMongoTables();
         } catch (InterruptedException|ExecutionException e) {
             e.printStackTrace();
         }
@@ -117,7 +117,6 @@ public class MapTest {
     @AfterAll
     public static void end() {
         MapManager.delete(WORLDNAME);
-        TableOrganizer.deleteTables(true);
         TableOrganizer.deleteConnections();
     }
 }

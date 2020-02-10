@@ -12,7 +12,7 @@ import com.podcrash.api.mc.tracker.CoordinateTracker;
 import com.podcrash.api.mc.tracker.Tracker;
 import com.podcrash.api.mc.tracker.VectorTracker;
 import com.podcrash.api.mc.world.WorldManager;
-import com.podcrash.api.redis.Communicator;
+import com.podcrash.api.db.redis.Communicator;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.event.HandlerList;

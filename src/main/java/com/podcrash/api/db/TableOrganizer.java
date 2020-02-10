@@ -1,18 +1,10 @@
 package com.podcrash.api.db;
 
-import com.podcrash.api.db.connection.DatabaseConnection;
 import com.podcrash.api.db.connection.IConnection;
 import com.podcrash.api.db.connection.MongoConnection;
 import com.podcrash.api.db.tables.*;
-import org.jooq.DSLContext;
-import org.jooq.SQLDialect;
-import org.jooq.Sequence;
-import org.jooq.Table;
 
-import java.sql.SQLException;
 import java.util.*;
-
-import static org.jooq.impl.DSL.using;
 
 public final class TableOrganizer {
     private static Map<DataTableType, ITable> typeTables = new HashMap<>();
@@ -42,24 +34,17 @@ public final class TableOrganizer {
             if(connection.getClass() == clasz) return (T) connection;
         return null;
     }
-    public static void createTables(boolean test) {
-        ITable[] tables = new ITable[]{
-            new PlayerTable(test),
-            new ChampionsKitTable(),
-            new RanksTable(),
-            new DescriptorTable(test),
-            new MapTable(),
-        };
-        process(tables);
-    }
 
     /**
-     * For testing only
-     * @param test
-     */
-    public static void createMongoTables(boolean test) {
-        MongoBaseTable[] tables = new MongoBaseTable[] {
-            new MapTable()
+     *
+     *
+     * */
+    public static void createTables() {
+        ITable[] tables = new ITable[]{
+                new PlayerTable(),
+                new ChampionsKitTable(),
+                new RanksTable(),
+                new MapTable(),
         };
         process(tables);
     }
@@ -68,41 +53,6 @@ public final class TableOrganizer {
             System.out.println("Processing the " + t.getName() + " Table!");
             t.createTable();
             typeTables.put(t.getDataTableType(), t);
-        }
-    }
-    public static void deleteTables(boolean test) {
-        if(!test) return;
-        try {
-            System.out.println("Dropping test tables");
-            Collection<? extends ITable> tables = typeTables.values();
-            if(tables.size() > 0) {
-                System.out.println("Code-generated tables found!");
-                tables.forEach(table -> {
-                    if(table.getName().toLowerCase().contains("test")) {
-                        System.out.println("Dropping " + table.getName());
-                        table.dropTable();
-                    }
-                });
-                return;
-            }
-            DSLContext context = using(DatabaseConnection.makeConnection(), SQLDialect.POSTGRES_10);
-            for(Table table : context.meta().getTables()) {
-                String name = table.getName();
-                if(name.toLowerCase().contains("test")) {
-                    System.out.println("Dropping the " + name + " table!");
-                    context.dropTable(name).execute();
-                }
-            }
-
-            for(Sequence sequence : context.meta().getSequences()) {
-                String name = sequence.getName();
-                if(name.toLowerCase().contains("test")) {
-                    System.out.println("Dropping the " + name + " sequence!");
-                    context.dropTable(name).execute();
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 }

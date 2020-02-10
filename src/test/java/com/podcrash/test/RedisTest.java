@@ -1,12 +1,7 @@
 package com.podcrash.test;
 
-import com.podcrash.api.redis.Communicator;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 
 public class RedisTest {
     @Test

@@ -5,7 +5,6 @@ import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.types.ObjectId;
 
 import java.util.List;
-import java.util.Map;
 
 public class ConquestGameData implements GameData {
     private ObjectId objectId;

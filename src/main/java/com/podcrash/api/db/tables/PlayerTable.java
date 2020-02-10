@@ -11,16 +11,12 @@ import com.mongodb.client.model.Indexes;
 import com.podcrash.api.db.pojos.InvictaPlayer;
 import com.podcrash.api.db.pojos.PojoHelper;
 import com.podcrash.api.plugin.Pluginizer;
-import nu.studer.sample.Tables;
-import nu.studer.sample.tables.Players;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class PlayerTable extends MongoBaseTable {
-    private final Players PLAYERS;
-    public PlayerTable(boolean test) {
+    public PlayerTable() {
         super("players");
-        this.PLAYERS = Tables.PLAYERS.rename(getName());
     }
 
     @Override

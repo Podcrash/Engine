@@ -1,8 +1,7 @@
 package com.podcrash.api.plugin;
 
-import com.podcrash.api.db.connection.DatabaseConnection;
 import com.podcrash.api.db.TableOrganizer;
-import com.podcrash.api.redis.Communicator;
+import com.podcrash.api.db.redis.Communicator;
 import org.redisson.api.RedissonClient;
 
 import java.util.concurrent.CompletableFuture;
@@ -26,20 +25,19 @@ public interface PodcrashPlugin {
     default void connectDbs() {
         Communicator.setup(getExecutorService(), this::redis);
         TableOrganizer.initConnections();
-        TableOrganizer.createTables(false);
+        TableOrganizer.createTables();
     }
 
     default void closeDBs() {
         Communicator.shutdown();
         TableOrganizer.deleteConnections();
-        DatabaseConnection.close();
     }
 
     default CompletableFuture<Void> enableWrap() {
         return CompletableFuture.allOf(
             Communicator.setup(getExecutorService(), this::redis),
             CompletableFuture.runAsync(TableOrganizer::initConnections)
-        ).thenRunAsync(() -> TableOrganizer.createTables(false));
+        ).thenRunAsync(TableOrganizer::createTables);
     }
 
 }

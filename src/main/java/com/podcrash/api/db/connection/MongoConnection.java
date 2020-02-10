@@ -1,6 +1,7 @@
 package com.podcrash.api.db.connection;
 
 import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.async.client.MongoClient;
 import com.mongodb.async.client.MongoClients;
@@ -17,14 +18,38 @@ import java.util.Collections;
 
 public class MongoConnection implements IConnection<MongoClient> {
     private MongoClient client;
+
+    private MongoCredential getCredential() {
+        String user = System.getenv("MONGO_USER");
+        String password = System.getenv("MONGO_PASSWORD");
+        String databaseName = System.getenv("INVICTA_DATABASE_NAME");
+
+        return MongoCredential.createCredential(user, databaseName, password.toCharArray());
+    }
+    private PojoCodecProvider getPojoCodec() {
+        ClassModel<GameData> gameDataModel = ClassModel.builder(GameData.class).enableDiscriminator(true).build();
+        ClassModel<ConquestGameData> conquestDataModel = ClassModel.builder(ConquestGameData.class).enableDiscriminator(true).build();
+
+        ClassModel<InvictaPlayer> playerModel = ClassModel.builder(InvictaPlayer.class).enableDiscriminator(true).build();
+        ClassModel<Rank> rankModel = ClassModel.builder(Rank.class).enableDiscriminator(false).build();
+        ClassModel<Currency> currencyModel = ClassModel.builder(Currency.class).enableDiscriminator(false).build();
+
+        ClassModel<?>[] models = new ClassModel[] {
+            playerModel, rankModel, currencyModel,
+            gameDataModel, conquestDataModel,
+        };
+        return PojoCodecProvider.builder()
+            .register(models)
+            .automatic(true)
+            .build();
+    }
     @Override
     public void setUp() {
-        String HOST = null, PORT = null, PASSWORD = null;
+        String HOST = null, PORT = null;
         System.out.println("[Mongo] Connecting to mongo");
         try {
             HOST = System.getenv("MONGO_HOST");
             PORT = System.getenv("MONGO_PORT");
-            PASSWORD = System.getenv("MONGO_PASSWORD");
             System.out.println("[Mongo] Getting Credentials");
         }catch (NullPointerException e) {
             System.out.println("[Mongo] Credentials not found");
@@ -43,18 +68,7 @@ public class MongoConnection implements IConnection<MongoClient> {
                 (HOST == null || PORT == null) ?
                 new ServerAddress() :
                 new ServerAddress(HOST, Integer.parseInt(PORT));
-
-        ClassModel<GameData> gameDataModel = ClassModel.builder(GameData.class).enableDiscriminator(true).build();
-        ClassModel<ConquestGameData> conquestDataModel = ClassModel.builder(ConquestGameData.class).enableDiscriminator(true).build();
-
-        ClassModel<InvictaPlayer> playerModel = ClassModel.builder(InvictaPlayer.class).enableDiscriminator(true).build();
-        ClassModel<Rank> rankModel = ClassModel.builder(Rank.class).enableDiscriminator(false).build();
-        ClassModel<Currency> currencyModel = ClassModel.builder(Currency.class).enableDiscriminator(false).build();
-
-        PojoCodecProvider pojoProvider = PojoCodecProvider.builder()
-            .register(gameDataModel, conquestDataModel, playerModel, rankModel, currencyModel)
-            .automatic(true)
-            .build();
+        PojoCodecProvider pojoProvider = getPojoCodec();
         CodecRegistry codecRegistry =
             CodecRegistries.fromRegistries(MongoClientSettings.getDefaultCodecRegistry(),
             CodecRegistries.fromCodecs(new UuidCodec(UuidRepresentation.STANDARD)),
@@ -68,7 +82,10 @@ public class MongoConnection implements IConnection<MongoClient> {
 
         System.out.println("[Mongo] Creating connection client");
         this.client = MongoClients.create(settings);
+
+        client.getDatabase("invicta");
     }
+
 
     @Override
     public MongoClient makeConnection() {

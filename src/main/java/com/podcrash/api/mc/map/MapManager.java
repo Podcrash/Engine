@@ -5,7 +5,7 @@ import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.MapTable;
 import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.mc.location.Coordinate;
-import com.podcrash.api.redis.Communicator;
+import com.podcrash.api.db.redis.Communicator;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 

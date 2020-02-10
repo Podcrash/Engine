@@ -19,7 +19,7 @@ import com.podcrash.api.mc.time.resources.SimpleTimeResource;
 import com.podcrash.api.mc.util.EntityUtil;
 import com.podcrash.api.mc.util.PrefixUtil;
 import com.podcrash.api.plugin.Pluginizer;
-import com.podcrash.api.redis.Communicator;
+import com.podcrash.api.db.redis.Communicator;
 import org.bukkit.*;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;

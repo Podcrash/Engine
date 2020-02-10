@@ -66,6 +66,14 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
         return futureGuaranteeGet(getKitDocumentAsync(uuid));
     }
 
+    /**
+     * TODO: Optimize queries
+     *
+     * @param uuid
+     * @param clasz
+     * @param build_id
+     * @return
+     */
     public CompletableFuture<String> getJSONDataAsync(UUID uuid, String clasz, int build_id) {
         //TODO: Find out if this works
         CompletableFuture<ConquestGameData> kitDocument = getKitDocumentAsync(uuid);
@@ -80,10 +88,6 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
         CompletableFuture<UpdateResult> updateResult = new CompletableFuture<>();
         getPlayerTable().getCollection(InvictaPlayer.class).updateOne(query, update, (res, t) -> {
             DBUtils.handleThrowables(t);
-            Pluginizer.getLogger().info("query: " + query);
-            Pluginizer.getLogger().info("query: " + update);
-
-            Pluginizer.getLogger().info("update querry: " +  res.toString());
             updateResult.complete(res);
         });
         futureGuaranteeGet(updateResult);
@@ -91,7 +95,7 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
     public void set(UUID uuid, String clasz, int build_id, String data) {
         String key = "gameData.conquest.builds." + clasz + build_id;
         //data = value
-        Bson update = Updates.push(key, data);
+        Bson update = Updates.set(key, data);
         updateSync(eq("uuid", uuid), update);
     }
 

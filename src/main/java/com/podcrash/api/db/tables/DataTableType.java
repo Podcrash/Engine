@@ -7,7 +7,6 @@ public enum DataTableType {
     KITS(ChampionsKitTable.class),
     PLAYERS(PlayerTable.class),
     PERMISSIONS(RanksTable.class),
-    DESCRIPTIONS(DescriptorTable.class),
     MAPS(MapTable.class);
 
     private Class<? extends ITable> table;

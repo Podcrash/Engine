@@ -2,7 +2,7 @@ package com.podcrash.api.mc.listeners;
 
 import com.podcrash.api.mc.damage.HitDetectionInjector;
 import com.podcrash.api.plugin.PodcrashSpigot;
-import com.podcrash.api.redis.Communicator;
+import com.podcrash.api.db.redis.Communicator;
 import net.minecraft.server.v1_8_R3.GenericAttributes;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.event.EventHandler;
