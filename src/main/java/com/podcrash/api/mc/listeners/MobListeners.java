@@ -19,7 +19,6 @@ public class MobListeners extends ListenerBase {
 	 @EventHandler(priority = EventPriority.LOW)
     public void onPotionSplash(PotionSplashEvent e) {
         Collection<LivingEntity> entities = e.getAffectedEntities();
-        ThrownPotion effect = e.getPotion();
 
         for (LivingEntity entity: entities) {
 
