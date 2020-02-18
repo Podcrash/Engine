@@ -1,7 +1,7 @@
 package com.podcrash.api.mc.game;
 
 import com.podcrash.api.db.tables.DataTableType;
-import com.podcrash.api.db.MapTable;
+import com.podcrash.api.db.tables.MapTable;
 import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.mc.events.game.GameJoinEvent;
 import com.podcrash.api.mc.events.game.GameLeaveEvent;

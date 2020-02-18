@@ -170,7 +170,7 @@ public class Communicator {
      */
     public static void readyGameLobby() {
         code = System.getProperty("lobby.code");
-        if(code != null || code.isEmpty())
+        if(code != null && !code.isEmpty())
             controllerMessages.publish(code + " READY");
     }
 

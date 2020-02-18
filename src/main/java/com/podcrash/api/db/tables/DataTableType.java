@@ -1,7 +1,6 @@
 package com.podcrash.api.db.tables;
 
 import com.podcrash.api.db.ITable;
-import com.podcrash.api.db.MapTable;
 
 public enum DataTableType {
     KITS(ChampionsKitTable.class),

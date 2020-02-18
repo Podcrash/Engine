@@ -1,8 +1,7 @@
 package com.podcrash.api.commands;
 
-import com.google.gson.JsonObject;
 import com.podcrash.api.db.tables.DataTableType;
-import com.podcrash.api.db.MapTable;
+import com.podcrash.api.db.tables.MapTable;
 import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.mc.location.Coordinate;
 import com.podcrash.api.mc.map.MapManager;

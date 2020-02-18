@@ -41,8 +41,14 @@ public abstract class MongoBaseTable implements ITable, IMongoDoc {
     }
 
     public MongoCollection<Document> getCollection() {
-        return getDatabase().getCollection(getName());
+        return getCollection(getName());
     }
+
+    @Override
+    public MongoCollection<Document> getCollection(String collectionName) {
+        return getDatabase().getCollection(collectionName);
+    }
+
     public <T> MongoCollection<T> getCollection(Class<T> tClass) {
         return getDatabase().getCollection(getName(), tClass);
     }

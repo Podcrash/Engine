@@ -1,4 +1,4 @@
-package com.podcrash.api.db;
+package com.podcrash.api.db.tables;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -9,6 +9,7 @@ import com.grinderwolf.swm.api.world.properties.SlimePropertyMap;
 import com.mongodb.async.SingleResultCallback;
 import com.mongodb.async.client.MongoCollection;
 import com.mongodb.client.model.Filters;
+import com.podcrash.api.db.MongoBaseTable;
 import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.mc.map.BaseGameMap;
 import com.podcrash.api.mc.map.IMap;
