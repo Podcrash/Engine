@@ -66,20 +66,20 @@ public class MobManager {
 
 	/*
    * Removes the ai from an Entity
-	 * @param int id | Id of the entity to freeze
+	 * @param int id | Id of entity to freeze
 	 */
 
 	public static void freezeEntity(int id) {
 		
 		Entity en = getMob(id);
-		
+
 		net.minecraft.server.v1_8_R1.Entity nmsEn = ((CraftEntity) en).getHandle();
-	  NBTTagCompound compound = new NBTTagCompound();
-	  ((net.minecraft.server.v1_8_R1.Entity) nmsEn).c(compound);
-	  compound.setByte("NoAI", (byte) 1);
-	  ((net.minecraft.server.v1_8_R1.Entity) nmsEn).f(compound);
-	  MobData mob = mobs.get(en.getEntityId());
-	  mob.toggleFreeze(true);
+	  	NBTTagCompound compound = new NBTTagCompound();
+	  	((net.minecraft.server.v1_8_R1.Entity) nmsEn).c(compound);
+	  	compound.setByte("NoAI", (byte) 1);
+	  	((net.minecraft.server.v1_8_R1.Entity) nmsEn).f(compound);
+	  	MobData mob = mobs.get(id);
+	  	mob.toggleFreeze(true);
 	}
 
     /*
@@ -88,14 +88,15 @@ public class MobManager {
      */
 
     public static void unFreezeEntity(int id) {
+    	
     	Entity en = getMob(id);
-		
-			net.minecraft.server.v1_8_R1.Entity nmsEn = ((CraftEntity) en).getHandle();
-	  	NBTTagCompound compound = new NBTTagCompound();
-	  	((net.minecraft.server.v1_8_R1.Entity) nmsEn).c(compound);
-	  	compound.setByte("NoAI", (byte) 0);
-	  	((net.minecraft.server.v1_8_R1.Entity) nmsEn).f(compound);
-	  	MobData mob = mobs.get(en.getEntityId());
+    	
+    	net.minecraft.server.v1_8_R1.Entity nmsEn = ((CraftEntity) en).getHandle();
+        NBTTagCompound compound = new NBTTagCompound();
+        ((net.minecraft.server.v1_8_R1.Entity) nmsEn).c(compound);
+        compound.setByte("NoAI", (byte) 0);
+        ((net.minecraft.server.v1_8_R1.Entity) nmsEn).f(compound);
+        MobData mob = mobs.get(id);
 	  	mob.toggleFreeze(false);
     }
 
@@ -109,12 +110,12 @@ public class MobManager {
     	Entity creature = getMob(id);
     	EntityEquipment equiped = ((LivingEntity) creature).getEquipment();
 
-			equiped.setItemInHand(item);
+		equiped.setItemInHand(item);
   	}
 
-     /*
-     * Equip an entity with armor
-     * @param int id | id of the entity to equip with armor
+  	/*
+   	 * Equip an entity with armor
+   	 * @param int id | id of the entity to equip with armor
      * @param ItemStack helmet | Helmet to place on entity
      * @param ItemStack chestplate | Chestplate to place on entity
      * @param ItemStack leggings | Leggings to place on entity
@@ -130,6 +131,7 @@ public class MobManager {
     	equiped.setLeggings(leggings);
     	equiped.setBoots(boots);
   	}
+
 
 	 /*
 	  * Make a mob damageable
@@ -151,6 +153,7 @@ public class MobManager {
 
 	/*
 	 * Create an Entity
+	 * Defaults: Does not take damage, is frozen, will NOT burn in day light or fire, and will NOT be effected by potions.
 	 * @param EntityType mobType | Type of mob to spawn
 	 * @param Location spawnLoc | Location within the world to spawn the entity
 	 */
@@ -163,7 +166,7 @@ public class MobManager {
 		((LivingEntity) entity).setCanPickupItems(false);
 		((LivingEntity) entity).setRemoveWhenFarAway(false);
 
-		MobData mob = new MobData(entity, entity.getEntityId(), false, true);
+		MobData mob = new MobData(entity, entity.getEntityId(), false, true, false, false);
 		addMobMap(entity.getEntityId(), mob);
 
 		freezeEntity(entity.getEntityId());
@@ -177,4 +180,3 @@ public class MobManager {
 	}
 
 }
-
