@@ -1,9 +1,11 @@
 package com.podcrash.api.db.pojos;
 
 import com.podcrash.api.db.TableOrganizer;
+import com.podcrash.api.db.pojos.map.Point;
 import com.podcrash.api.db.tables.DataTableType;
 import org.bson.Document;
 import org.bukkit.Bukkit;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,5 +48,17 @@ public final class PojoHelper {
         player.setLastUsername(Bukkit.getPlayer(uuid).getName());
 
         return player;
+    }
+
+
+    public static Vector convertPoint2Vector(Point point) {
+        return new Vector(point.getX(), point.getY(), point.getZ());
+    }
+    public static Point convertVector2Point(Vector vector) {
+        Point p = new Point();
+        p.setX(vector.getX());
+        p.setY(vector.getY());
+        p.setZ(vector.getZ());
+        return p;
     }
 }

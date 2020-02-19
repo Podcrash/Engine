@@ -4,8 +4,6 @@ import com.grinderwolf.swm.api.SlimePlugin;
 import com.grinderwolf.swm.api.exceptions.UnknownWorldException;
 import com.grinderwolf.swm.api.exceptions.WorldInUseException;
 import com.grinderwolf.swm.api.loaders.SlimeLoader;
-import com.podcrash.api.commands.WorldCommand;
-import com.podcrash.api.db.tables.MapTable;
 import com.podcrash.api.db.tables.WorldLoader;
 import com.podcrash.api.mc.Configurator;
 import com.podcrash.api.mc.damage.DamageQueue;
@@ -146,8 +144,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
         INSTANCE = this;
         getLogger().info("Starting PodcrashSpigot!");
         Pluginizer.setInstance(this);
-        SlimePlugin slimePlugin = (SlimePlugin) Bukkit.getPluginManager().getPlugin("SlimeWorldManager");
-        slimePlugin.registerLoader("podcrash", new WorldLoader());
+
         Future future = CompletableFuture.allOf(
                 enableWrap(),
                 registerCommands());
@@ -237,7 +234,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
     }
     private CompletableFuture<Void> registerCommands() {
         return CompletableFuture.runAsync(() -> {
-            getCommand("pworld").setExecutor(new WorldCommand());
+
         });
     }
 

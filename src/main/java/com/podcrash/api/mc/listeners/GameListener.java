@@ -1,5 +1,7 @@
 package com.podcrash.api.mc.listeners;
 
+import com.podcrash.api.db.pojos.map.BaseMap;
+import com.podcrash.api.db.pojos.map.Point;
 import com.podcrash.api.mc.effect.status.Status;
 import com.podcrash.api.mc.effect.status.StatusApplier;
 import com.podcrash.api.mc.effect.status.StatusWrapper;
@@ -13,7 +15,6 @@ import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.TeamEnum;
 import com.podcrash.api.mc.game.objects.ItemObjective;
 import com.podcrash.api.mc.item.ItemManipulationManager;
-import com.podcrash.api.mc.map.BaseGameMap;
 import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.time.resources.SimpleTimeResource;
 import com.podcrash.api.mc.util.EntityUtil;
@@ -37,6 +38,7 @@ import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @see GameManager
@@ -67,19 +69,20 @@ public class GameListener extends ListenerBase {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void mapLoad(GameMapLoadEvent event) {
         System.out.println("test");
-        BaseGameMap map = event.getMap();
+        BaseMap map = event.getMap();
         World world = event.getWorld();
         Game game = event.getGame();
 
         List<GTeam> teams = game.getTeams();
-        List<double[][]> spawnsArr = map.getSpawns();
+        Map<String, List<Point>> spawnsArr = map.getSpawns();
         //set spawns
         for(int i = 0, gTeamSize = teams.size(); i < gTeamSize; i++) {
             GTeam team = teams.get(i);
-            double[][] spawns = spawnsArr.get(i);
+            String color = team.getTeamEnum().getColor().name();
+            List<Point> spawns = spawnsArr.get(color);
             List<Location> spawnLocs = new ArrayList<>();
-            for(double[] s : spawns) {
-                spawnLocs.add(new Location(world, s[0], s[1], s[2]));
+            for(Point s : spawns) {
+                spawnLocs.add(new Location(world, s.getX(), s.getY(), s.getZ()));
             }
             team.setSpawns(spawnLocs);
         }
@@ -140,7 +143,7 @@ public class GameListener extends ListenerBase {
         deadPeople.add(victim);
         StatusApplier.getOrNew(victim).removeStatus(Status.values());
         //StatusApplier.getOrNew(victim).applyStatus(Status.INEPTITUDE, 9, 1);
-        TimeHandler.delayTime(180L, () -> {
+        TimeHandler.delayTime(200L, () -> {
             GTeam team = game.getTeam(victim);
             victim.teleport(team.getSpawn(victim));
             Bukkit.getPluginManager().callEvent(new GameResurrectEvent(game, victim));

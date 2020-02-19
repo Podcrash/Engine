@@ -50,6 +50,7 @@ dependencies {
     //implementation 'com.comphenix.protocol:ProtocolLib:4.4.0'
 
     implementation 'org.mongodb:mongodb-driver-async:3.12.1'
+    implementation 'dev.morphia.morphia:core:1.5.8'
     implementation 'org.redisson:redisson:3.11.3'
 }
 

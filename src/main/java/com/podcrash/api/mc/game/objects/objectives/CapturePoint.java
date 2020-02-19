@@ -2,6 +2,8 @@ package com.podcrash.api.mc.game.objects.objectives;
 
 import com.abstractpackets.packetwrapper.WrapperPlayServerWorldEvent;
 import com.comphenix.protocol.wrappers.BlockPosition;
+import com.podcrash.api.db.pojos.PojoHelper;
+import com.podcrash.api.db.pojos.map.CapturePointPojo;
 import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.TeamEnum;
@@ -66,9 +68,14 @@ public final class CapturePoint extends WinObjective {
         this.game = GameManager.getGame();
     }
 
+    public CapturePoint(CapturePointPojo pojo) {
+        this(pojo.getName(), PojoHelper.convertPoint2Vector(pojo.getPoint()));
+    }
+
+
     @Override
     public void spawnFirework() {
-        this.fireworkEffect = FireworkEffect.builder().withColor(TeamEnum.getByColor(color).getColor()).with(FireworkEffect.Type.BALL_LARGE).build();
+        this.fireworkEffect = FireworkEffect.builder().withColor(TeamEnum.getByColor(color).getColor().getColor()).with(FireworkEffect.Type.BALL_LARGE).build();
         super.spawnFirework();
     }
 
@@ -209,7 +216,6 @@ public final class CapturePoint extends WinObjective {
      * Find a random part of the wool map.
      * Turn it into red or blue
      * If the entire thing is red or blue, return the team.
-     * {@link com.podcrash.api.mc.game.resources.CapturePointDetector#capture(int)}
      * @param color
      * @return if it isn't null, the point is captured and its color set
      */

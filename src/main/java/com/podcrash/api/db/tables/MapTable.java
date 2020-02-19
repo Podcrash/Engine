@@ -1,22 +1,20 @@
 package com.podcrash.api.db.tables;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.grinderwolf.swm.api.SlimePlugin;
 import com.grinderwolf.swm.api.exceptions.*;
+import com.grinderwolf.swm.api.loaders.SlimeLoader;
 import com.grinderwolf.swm.api.world.SlimeWorld;
+import com.grinderwolf.swm.api.world.properties.SlimeProperties;
 import com.grinderwolf.swm.api.world.properties.SlimePropertyMap;
-import com.mongodb.async.SingleResultCallback;
-import com.mongodb.async.client.MongoCollection;
-import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.*;
+import com.podcrash.api.db.DBUtils;
 import com.podcrash.api.db.MongoBaseTable;
-import com.podcrash.api.db.tables.DataTableType;
-import com.podcrash.api.mc.map.BaseGameMap;
-import com.podcrash.api.mc.map.IMap;
+import com.podcrash.api.db.pojos.map.BaseMap;
+import com.podcrash.api.db.pojos.map.Point;
 import com.podcrash.api.mc.world.WorldManager;
 import com.podcrash.api.plugin.Pluginizer;
 import org.apache.commons.io.FileUtils;
-import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bukkit.Bukkit;
 
 import javax.annotation.Nonnull;
@@ -25,72 +23,107 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
-import java.util.function.Consumer;
 
 /**
- * This should return GSONS
+ * This manages both the metadata of the world and the actual data of the map.
  */
 public class MapTable extends MongoBaseTable {
 
     public MapTable() {
         super("worldmaps");
-
-        //TODO: custom make a collection easily and be able to modify its settings maybe
-        //getDatabase().createCollection(getName());
     }
 
+    @Override
+    public void createTable() {
+        CompletableFuture<String> future = new CompletableFuture<>();
+        getCollection().createIndex(Indexes.descending("name", "gamemode"), new IndexOptions().unique(true), (res, t) -> {
+            DBUtils.handleThrowables(t);
+            future.complete(res);
+        });
+        futureGuaranteeGet(future);
+    }
+
+    /**
+     *
+     * @param mapName
+     * @param <T> type of BaseMap
+     * @return
+     */
+    public <T> CompletableFuture<T> getMetadataAsync(String mapName, String mode, Class<T> mapClass) {
+        CompletableFuture<T> future = new CompletableFuture<>();
+        Bson filter = Filters.and(Filters.eq("name", mapName), Filters.eq("gamemode", mode));
+        getCollection(mapClass).find(filter).first((result, t) -> {
+            DBUtils.handleThrowables(t);
+            future.complete(result);
+        });
+        return future;
+    }
+    public <T> T getMetadataSync(String mapName, String mode, Class<T> mapClass) {
+        return futureGuaranteeGet(getMetadataAsync(mapName, mode, mapClass));
+    }
+
+    private <T> CompletableFuture<Boolean> exists(String mapName, String mode, Class<T> mapClass) {
+        return getMetadataAsync(mapName, mode, mapClass).thenApplyAsync(Objects::nonNull, SERVICE);
+    }
+
+    /**
+     * super expensive quer(ies), maybe with morphia it could be better?
+     * @param map
+     */
+    public <T extends BaseMap> CompletableFuture<Void> saveMetadataAsync(T map, Class<T> mapClass) {
+        String name = map.getName();
+        String mode = map.getGamemode();
+        CompletableFuture<Void> future = new CompletableFuture<>();
+
+        Bson filter = Filters.and(Filters.eq("name", name), Filters.eq("gamemode", mode));
+        //delete if exists:
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        getCollection(mapClass).deleteOne(filter, (result, t) -> {
+            DBUtils.handleThrowables(t);
+            countDownLatch.countDown();
+        });
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        //insert
+        getCollection(mapClass).insertOne(map, ((result, t) -> {
+            DBUtils.handleThrowables(t);
+            future.complete(result);
+        }));
+        return future;
+    }
+
+    public <T extends BaseMap> void saveMetadataSync(T map, Class<T> mapClass) {
+        futureGuaranteeGet(saveMetadataAsync(map, mapClass));
+    }
     @Override
     public DataTableType getDataTableType() {
         return DataTableType.MAPS;
     }
 
     /**
-     * Find the world metadata, uses a json string.
-     * This is needed since the child project don't have mongo as a dependency
-     * @param worldName
-     * @param callback - once the function is completed, it calls the callback
-     */
-    public void findWorld(@Nonnull String worldName, Consumer<JsonObject> callback) {
-        findWorld(worldName, (res, throwable) -> {
-            if(throwable != null) Pluginizer.getSpigotPlugin().getLogger().info(throwable.getLocalizedMessage());
-            JsonObject json = (res == null) ? null : new JsonParser().parse(res.toJson()).getAsJsonObject();
-            callback.accept(json);
-        });
-    }
-    /**
-     * Find the world metadata, uses document
-     * @param worldName
-     * @param callback - once the function is completed, it calls the callback
-     */
-    private void findWorld(@Nonnull String worldName, SingleResultCallback<Document> callback) {
-        getCollection("maps")
-                .find(Filters.eq("name", worldName.toUpperCase()))
-                .first(callback);
-    }
-
-    /**
      * Download a world
      * @param worldName
      */
-    public void downloadWorld(@Nonnull String worldName) {
+    public <T extends BaseMap> CompletableFuture<T> downloadWorld(@Nonnull String worldName, String mode, Class<T> mapClass) {
         SlimePlugin slimePlugin = getSlimePlugin();
 
-        findWorld(worldName, ((result, t) -> {
-            if (t != null) t.printStackTrace();
-            SlimePropertyMap slimeMap;
-            if (result == null) {
+        return getMetadataAsync(worldName, mode, mapClass).thenApplyAsync(map -> {
+            if(map == null) {
                 System.out.println(worldName + " doesn't exist!");
-                return;
+                return null;
             }
-            JsonObject json = new JsonParser().parse(result.toJson()).getAsJsonObject();
-            slimeMap = BaseGameMap.getSlimeProperties(json);
+            SlimePropertyMap slimeMap = getSlimeProperties(map);
             final SlimeWorld slimeWorld;
             try {
                 Bukkit.unloadWorld(worldName, false);
-                slimeWorld = slimePlugin.loadWorld(slimePlugin.getLoader("mongodb"), worldName, true, slimeMap);
+                slimeWorld = slimePlugin.loadWorld(getSlimeLoader(), worldName, true, slimeMap);
             } catch (UnknownWorldException | IOException | CorruptedWorldException | NewerFormatException | WorldInUseException e) {
                 e.printStackTrace();
-                return;
+                return map;
             }
             System.out.println("Loading " + slimeWorld.getName());
             Bukkit.getScheduler().runTaskLater(Pluginizer.getSpigotPlugin(), () -> {
@@ -98,8 +131,23 @@ public class MapTable extends MongoBaseTable {
                 System.out.println("Generating " + slimeWorld.getName());
             }, 1L);
 
-        }));
+            return map;
+        } , SERVICE);
+    }
 
+    private SlimePropertyMap getSlimeProperties(BaseMap map) {
+        SlimePropertyMap slimePropertyMap = new SlimePropertyMap();
+        slimePropertyMap.setBoolean(SlimeProperties.ALLOW_ANIMALS, map.isAllowAnimals());
+        slimePropertyMap.setBoolean(SlimeProperties.ALLOW_MONSTERS, map.isAllowMonsters());
+        slimePropertyMap.setBoolean(SlimeProperties.PVP, map.isAllowPvP());
+        slimePropertyMap.setString(SlimeProperties.WORLD_TYPE, map.getWorldType());
+        slimePropertyMap.setString(SlimeProperties.ENVIRONMENT, map.getEnvironment());
+
+        Point spawn = map.getDefaultSpawn();
+        slimePropertyMap.setInt(SlimeProperties.SPAWN_X, (int) spawn.getX());
+        slimePropertyMap.setInt(SlimeProperties.SPAWN_Y, (int) spawn.getY());
+        slimePropertyMap.setInt(SlimeProperties.SPAWN_Z, (int) spawn.getZ());
+        return slimePropertyMap;
     }
 
     /**
@@ -116,87 +164,17 @@ public class MapTable extends MongoBaseTable {
             SlimePlugin slimePlugin = getSlimePlugin();
 
             try {
-                slimePlugin.importWorld(worldFolder, worldName, slimePlugin.getLoader("mongodb"));
+                slimePlugin.importWorld(worldFolder, worldName, getSlimeLoader());
             } catch (WorldAlreadyExistsException | InvalidWorldException | WorldLoadedException | WorldTooBigException | IOException e) {
                 e.printStackTrace();
             }
         }, SERVICE);
     }
 
-    /**
-     * Update mapdata
-     * @see {@link BaseGameMap#getJSON()}
-     *
-     * @param mapdata - json map of the map object
-     */
-    public CompletableFuture<Void> upsertMetaData(@Nonnull JsonObject mapdata) {
-        //TODO: instead of having null callbacks, make a general all purpose callback (esp for player permissions)
-        String name = mapdata.get("name").getAsString();
-        CompletableFuture<Void> complete = new CompletableFuture<>();
-        findWorld(name, (res, throwable) -> {
-            if(throwable != null) {
-                throwable.printStackTrace();
-                complete.complete(null);
-            }
-            MongoCollection<Document> mapsCol = getCollection("maps");
-
-
-            Document mapDoc = Document.parse(mapdata.toString());
-
-            Iterator<Map.Entry<String, Object>> entries = mapDoc.entrySet().iterator();
-            while(entries.hasNext()) {
-                Map.Entry<String, Object> entry = entries.next();
-                Object value = entry.getValue();
-                if (!(value instanceof List)) continue;
-                List list = (List) value;
-                if (list.get(0) == null || !(list.get(0) instanceof Number)) continue;
-                list.sort((o1, o2) -> {
-                    int o1h = o1.hashCode();
-                    int o2h = o2.hashCode();
-                    if (o2h > o1h)
-                        return 1;
-                    else if (o2h < o1h)
-                        return -1;
-                    else return 0;
-                });
-
-                mapDoc.put(entry.getKey(), list);
-
-
-            }
-            if(res == null) mapsCol.insertOne(mapDoc, (res1, throwable1) -> {
-                if(throwable1 != null) throwable1.printStackTrace();
-                complete.complete(res1);
-            });
-            else {
-                mapsCol.replaceOne(
-                        Filters.eq("name", name),
-                        mapDoc,
-                        (res1, throwable1) -> {
-                            if(throwable1 != null) throwable1.printStackTrace();
-                            complete.complete(null);
-                        });
-            }
-        });
-        return complete;
-    }
-
-    /**
-     * @see {@link #upsertMetaData(JsonObject)}
-     * @param mapdata
-     */
-    public void upsertMetaData(@Nonnull IMap mapdata) {
-        upsertMetaData(mapdata.getJSON());
-    }
-
-    private static class RegularCallback implements SingleResultCallback<Void> {
-        @Override
-        public void onResult(Void result, Throwable t) {
-            if(t != null) t.printStackTrace();
-        }
-    }
-
     private SlimePlugin getSlimePlugin() {
         return (SlimePlugin) Bukkit.getPluginManager().getPlugin("SlimeWorldManager");
+    }
+    private SlimeLoader getSlimeLoader() {
+       return getSlimePlugin().getLoader("podcrash");
     }
 }

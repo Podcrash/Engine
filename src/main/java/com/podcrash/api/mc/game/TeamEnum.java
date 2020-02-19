@@ -1,8 +1,7 @@
 package com.podcrash.api.mc.game;
 
-import com.podcrash.api.mc.util.ChatUtil;
 import org.bukkit.ChatColor;
-import org.bukkit.Color;
+import org.bukkit.DyeColor;
 
 /**
  * Team Enumeration
@@ -13,17 +12,14 @@ import org.bukkit.Color;
 public enum TeamEnum {
 
     // TODO: Fill the rest of the colours out appropriately for byteData and protocolData.
-    RED("Red", 14,(byte) 1, ChatColor.RED, Color.RED, 57379),
-    BLUE("Blue", 11, (byte) -1,  ChatColor.BLUE, Color.BLUE, 45091),
-    LIGHT_BLUE("Blue", 3, (byte) 1,  ChatColor.AQUA, Color.AQUA, 0),
-    GOLD("Gold", 4, (byte) 1,  ChatColor.YELLOW, Color.YELLOW, 0),
-    GREEN("Green", 5, (byte) 1,  ChatColor.GREEN, Color.LIME, 0),
-    GRAPE("Grape", 2, (byte) 1,  ChatColor.DARK_PURPLE, Color.PURPLE, 0),
-    ORANGE("Orange", 1, (byte) 1,  ChatColor.GOLD, Color.ORANGE, 0),
-    VANILLA("Vanilla", 0, (byte) 0,  ChatColor.WHITE, Color.WHITE, 35),
-    STRAWBERRY("Strawberry", 6, (byte) 0,  ChatColor.LIGHT_PURPLE, Color.FUCHSIA, 0),
-    CHOCOLATE("Chocolate", 12, (byte) 0,  ChatColor.DARK_GRAY, Color.MAROON, 0),
-    WHITE("White", 0, (byte) 0,  ChatColor.WHITE, Color.WHITE, 35),
+    RED("Red", 14,(byte) 1, ChatColor.RED, DyeColor.RED, 57379),
+    BLUE("Blue", 11, (byte) -1,  ChatColor.BLUE, DyeColor.BLUE, 45091),
+    GOLD("Gold", 4, (byte) 1,  ChatColor.YELLOW, DyeColor.YELLOW, 0),
+    GREEN("Green", 5, (byte) 1,  ChatColor.GREEN, DyeColor.LIME, 0),
+    GRAPE("Grape", 2, (byte) 1,  ChatColor.DARK_PURPLE, DyeColor.PURPLE, 0),
+    ORANGE("Orange", 1, (byte) 1,  ChatColor.GOLD, DyeColor.ORANGE, 0),
+    VANILLA("Vanilla", 0, (byte) 0,  ChatColor.WHITE, DyeColor.WHITE, 35),
+    WHITE("White", 0, (byte) 0,  ChatColor.WHITE, DyeColor.WHITE, 35),
     NULL(null, -1, (byte) 0,  ChatColor.GRAY, null, 0);
 
     private final String name;
@@ -31,16 +27,16 @@ public enum TeamEnum {
     private final byte byteData;
     private final int intData;
     private final ChatColor chatColor;
-    private final Color color;
+    private final DyeColor dyeColor;
     private final int protocolData;
 
-    TeamEnum(String name, int data, byte byteData, ChatColor chatColor, Color color, int protocolData) {
+    TeamEnum(String name, int data, byte byteData, ChatColor chatColor, DyeColor dyeColor, int protocolData) {
         this.name = name;
         this.data = data;
         this.byteData = byteData;
         this.intData = (int) byteData;
         this.chatColor = chatColor;
-        this.color = color;
+        this.dyeColor = dyeColor;
         this.protocolData = protocolData;
     }
 
@@ -52,7 +48,7 @@ public enum TeamEnum {
     }
 
     /**
-     * @return The color data (for wool and glass).
+     * @return The DyeColor data (for wool and glass).
      */
     public int getData() {
         return data;
@@ -80,10 +76,10 @@ public enum TeamEnum {
     }
 
     /**
-     * @return The Color
+     * @return The DyeColor
      */
-    public Color getColor() {
-        return color;
+    public DyeColor getColor() {
+        return dyeColor;
     }
 
     /**
@@ -97,26 +93,26 @@ public enum TeamEnum {
      * @return The red value in the RGB.
      */
     public float getRed() {
-        return color.getRed();
+        return dyeColor.getColor().getRed();
     }
 
     /**
      * @return The blue value in the RGB.
      */
     public float getBlue() {
-        return color.getBlue();
+        return dyeColor.getColor().getBlue();
     }
 
     /**
      * @return The green value in the RGB.
      */
     public float getGreen() {
-        return color.getGreen();
+        return dyeColor.getColor().getGreen();
     }
 
     /**
      * Return a TeamEnum by teamColor
-     * @param teamColor The team color
+     * @param teamColor The team DyeColor
      * @return The TeamEnum.
      */
     public static TeamEnum getByColor(String teamColor) {

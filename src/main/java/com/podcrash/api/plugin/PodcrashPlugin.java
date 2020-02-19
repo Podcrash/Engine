@@ -35,7 +35,7 @@ public interface PodcrashPlugin {
 
     default CompletableFuture<Void> enableWrap() {
         return CompletableFuture.allOf(
-            Communicator.setup(getExecutorService(), this::redis),
+                Communicator.setup(getExecutorService(), this::redis),
             CompletableFuture.runAsync(TableOrganizer::initConnections)
         ).thenRunAsync(TableOrganizer::createTables);
     }

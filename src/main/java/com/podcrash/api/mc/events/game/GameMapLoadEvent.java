@@ -1,23 +1,25 @@
 package com.podcrash.api.mc.events.game;
 
+import com.podcrash.api.db.pojos.map.BaseMap;
 import com.podcrash.api.mc.game.Game;
-import com.podcrash.api.mc.map.BaseGameMap;
 import org.bukkit.World;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.world.WorldLoadEvent;
 
+/**
+ * This will be called when the game is started
+ */
 public class GameMapLoadEvent extends GameEvent {
     private static HandlerList handlers = new HandlerList();
-    private BaseGameMap map;
+    private BaseMap map;
     private World world;
 
-    public GameMapLoadEvent(Game game, BaseGameMap map, World world) {
+    public GameMapLoadEvent(Game game, BaseMap map, World world) {
         super(game, "loading the map " + map.getName());
         this.map = map;
         this.world = world;
     }
 
-    public BaseGameMap getMap() {
+    public BaseMap getMap() {
         return map;
     }
 

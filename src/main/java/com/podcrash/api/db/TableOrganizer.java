@@ -1,8 +1,10 @@
 package com.podcrash.api.db;
 
+import com.grinderwolf.swm.api.SlimePlugin;
 import com.podcrash.api.db.connection.IConnection;
 import com.podcrash.api.db.connection.MongoConnection;
 import com.podcrash.api.db.tables.*;
+import org.bukkit.Bukkit;
 
 import java.util.*;
 
@@ -40,13 +42,19 @@ public final class TableOrganizer {
      *
      * */
     public static void createTables() {
+        WorldLoader loader = new WorldLoader();
+
         ITable[] tables = new ITable[]{
                 new PlayerTable(),
                 new ChampionsKitTable(),
                 new RanksTable(),
                 new MapTable(),
+                loader
         };
         process(tables);
+
+        SlimePlugin slimePlugin = (SlimePlugin) Bukkit.getPluginManager().getPlugin("SlimeWorldManager");
+        slimePlugin.registerLoader("podcrash", new WorldLoader());
     }
     private static void process(ITable[] tables) {
         for(ITable t : tables) {

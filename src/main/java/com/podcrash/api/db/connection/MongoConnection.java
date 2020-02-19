@@ -7,6 +7,10 @@ import com.mongodb.async.client.MongoClient;
 import com.mongodb.async.client.MongoClients;
 import com.mongodb.async.client.MongoDatabase;
 import com.podcrash.api.db.pojos.*;
+import com.podcrash.api.db.pojos.map.BaseMap;
+import com.podcrash.api.db.pojos.map.CapturePointPojo;
+import com.podcrash.api.db.pojos.map.ConquestMap;
+import com.podcrash.api.db.pojos.map.Point;
 import org.bson.UuidRepresentation;
 import org.bson.codecs.UuidCodec;
 import org.bson.codecs.configuration.CodecRegistries;
@@ -28,22 +32,43 @@ public class MongoConnection implements IConnection<MongoClient> {
 
         return MongoCredential.createCredential(user, databaseName, password.toCharArray());
     }
+
+    /**
+     * TODO: annotations with reflection pls
+     * @return
+     */
     private PojoCodecProvider getPojoCodec() {
-        ClassModel<GameData> gameDataModel = ClassModel.builder(GameData.class).enableDiscriminator(true).build();
-        ClassModel<ConquestGameData> conquestDataModel = ClassModel.builder(ConquestGameData.class).enableDiscriminator(true).build();
+        ClassModel<GameData> gameDataModel = getClassModel(GameData.class, true);
+        ClassModel<ConquestGameData> conquestDataModel = getClassModel(ConquestGameData.class, true);
 
-        ClassModel<InvictaPlayer> playerModel = ClassModel.builder(InvictaPlayer.class).enableDiscriminator(true).build();
-        ClassModel<Rank> rankModel = ClassModel.builder(Rank.class).enableDiscriminator(false).build();
-        ClassModel<Currency> currencyModel = ClassModel.builder(Currency.class).enableDiscriminator(false).build();
+        ClassModel<InvictaPlayer> playerModel = getClassModel(InvictaPlayer.class, true);
+        ClassModel<Rank> rankModel = getClassModel(Rank.class, false);
+        ClassModel<Currency> currencyModel = getClassModel(Currency.class, false);
 
+        ClassModel<BaseMap> baseMapModel = getClassModel(BaseMap.class, true);
+        ClassModel<Point> pointModel = getClassModel(Point.class, true);
+        ClassModel<ConquestMap> conquestMapModel = getClassModel(ConquestMap.class, true);
+        ClassModel<CapturePointPojo> capturePointModel = getClassModel(CapturePointPojo.class, true);
         ClassModel<?>[] models = new ClassModel[] {
             playerModel, rankModel, currencyModel,
             gameDataModel, conquestDataModel,
+            baseMapModel, pointModel, conquestMapModel, capturePointModel
         };
         return PojoCodecProvider.builder()
             .register(models)
             .automatic(true)
             .build();
+    }
+
+    /**
+     * simple helper method to generate a classmodel
+     * @param clazz
+     * @param discriminator
+     * @param <T>
+     * @return
+     */
+    private <T> ClassModel<T> getClassModel(Class<T> clazz, boolean discriminator) {
+        return ClassModel.builder(clazz).enableDiscriminator(discriminator).build();
     }
     @Override
     public void setUp() {

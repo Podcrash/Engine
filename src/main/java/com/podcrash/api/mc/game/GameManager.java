@@ -14,6 +14,8 @@ import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Singleton - Handles games
@@ -215,8 +217,13 @@ public class GameManager {
             return;
         }
         Pluginizer.getSpigotPlugin().getLogger().info("Attempting to start game " + game.getId());
-        if(!game.isLoadedMap())
-            game.loadMap();
+        if(!game.isLoadedMap()) {
+            try {
+                game.loadMap();
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                e.printStackTrace();
+            }
+        }
 
         System.out.println("Map Loaded: " + game.isLoadedMap());
         long t = System.currentTimeMillis();

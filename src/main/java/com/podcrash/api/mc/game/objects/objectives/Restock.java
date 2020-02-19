@@ -1,5 +1,7 @@
 package com.podcrash.api.mc.game.objects.objectives;
 
+import com.podcrash.api.db.pojos.PojoHelper;
+import com.podcrash.api.db.pojos.map.Point;
 import com.podcrash.api.mc.game.objects.ItemObjective;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
@@ -16,6 +18,9 @@ public class Restock extends ItemObjective {
     public Restock(Vector spawnVector){
         super(Material.CHEST, Material.GOLD_BLOCK, spawnVector);
         this.fireworkEffect = FireworkEffect.builder().withColor(Color.YELLOW).with(FireworkEffect.Type.BURST).build();
+    }
+    public Restock(Point point) {
+        this(PojoHelper.convertPoint2Vector(point));
     }
 
     public ObjectiveType getObjectiveType(){
