@@ -118,7 +118,7 @@ public class CustomScoreboard implements IScoreboard {
         String suffix = "";
         // Split the string up into a prefix and suffix, each at most size characters long, including chat formatting characters.
         // If the string is less than or equal to size characters, then populating the prefix with the string will suffice.
-        if (string.length() <= size) {
+        if (string.length() <= 16) {
             setLine(line, string, suffix);
             return;
         }

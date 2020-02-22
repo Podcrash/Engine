@@ -59,6 +59,7 @@ public class GameManager {
     }
 
     public static void destroyCurrentGame() {
+        if(currentGame.getGameWorld() != null) Bukkit.unloadWorld(currentGame.getGameWorld(), false);
         currentGame = null;
     }
     public static void setGameMap(String worldName) {
@@ -217,30 +218,12 @@ public class GameManager {
             return;
         }
         Pluginizer.getSpigotPlugin().getLogger().info("Attempting to start game " + game.getId());
-        if(!game.isLoadedMap()) {
-            try {
-                game.loadMap();
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                e.printStackTrace();
-            }
+        if(!game.hasChosenMap()) {
+            game.broadcast("There is no map selected for this game.");
         }
-
-        System.out.println("Map Loaded: " + game.isLoadedMap());
-        long t = System.currentTimeMillis();
-        CompletableFuture.supplyAsync(() -> {
-            while(!game.isLoadedMap()){
-                if(System.currentTimeMillis() - t >= 20000)
-                    return false;
-            }
-            System.out.println("TRUE");
-            return true;
-        }).thenAccept((b) -> {
-            System.out.println(b);
-            if(!b) return;
-            GameStartEvent gamestart = new GameStartEvent(game);
-            game.setOngoing(true);
-            Pluginizer.getSpigotPlugin().getServer().getPluginManager().callEvent(gamestart);
-        });
+        GameStartEvent gamestart = new GameStartEvent(game);
+        game.setOngoing(true);
+        Pluginizer.getSpigotPlugin().getServer().getPluginManager().callEvent(gamestart);
     }
 
     public static void endGame(Game game) {

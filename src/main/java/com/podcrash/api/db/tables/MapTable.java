@@ -6,6 +6,7 @@ import com.grinderwolf.swm.api.loaders.SlimeLoader;
 import com.grinderwolf.swm.api.world.SlimeWorld;
 import com.grinderwolf.swm.api.world.properties.SlimeProperties;
 import com.grinderwolf.swm.api.world.properties.SlimePropertyMap;
+import com.mongodb.Block;
 import com.mongodb.client.model.*;
 import com.podcrash.api.db.DBUtils;
 import com.podcrash.api.db.MongoBaseTable;
@@ -54,6 +55,7 @@ public class MapTable extends MongoBaseTable {
         Bson filter = Filters.and(Filters.eq("name", mapName), Filters.eq("gamemode", mode));
         getCollection(mapClass).find(filter).first((result, t) -> {
             DBUtils.handleThrowables(t);
+            Pluginizer.getLogger().info("found map metadata async: " + result);
             future.complete(result);
         });
         return future;
@@ -127,9 +129,13 @@ public class MapTable extends MongoBaseTable {
             }
             System.out.println("Loading " + slimeWorld.getName());
             Bukkit.getScheduler().runTaskLater(Pluginizer.getSpigotPlugin(), () -> {
-                slimePlugin.generateWorld(slimeWorld);
+                try {
+                    slimePlugin.generateWorld(slimeWorld);
+                }catch (Exception e) {
+                    e.printStackTrace();
+                }
                 System.out.println("Generating " + slimeWorld.getName());
-            }, 1L);
+            }, 0L);
 
             return map;
         } , SERVICE);
@@ -171,6 +177,27 @@ public class MapTable extends MongoBaseTable {
         }, SERVICE);
     }
 
+    public List<String> getWorlds(String mode) {
+        final List<String> worlds = new ArrayList<>();
+        Bson select = Projections.fields(Projections.include("name"), Projections.excludeId());
+        Block<BaseMap> addToList = document -> {
+            worlds.add(document.getName());
+        };
+        CountDownLatch latch = new CountDownLatch(1);
+        getCollection(BaseMap.class)
+            .find(Filters.eq("gamemode", mode))
+            .projection(select)
+            .forEach(addToList, (result, t) -> {
+                DBUtils.handleThrowables(t);
+                latch.countDown();
+            });
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return worlds;
+    }
     private SlimePlugin getSlimePlugin() {
         return (SlimePlugin) Bukkit.getPluginManager().getPlugin("SlimeWorldManager");
     }

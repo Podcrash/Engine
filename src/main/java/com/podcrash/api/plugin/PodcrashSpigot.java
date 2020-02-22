@@ -229,6 +229,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             new SpigotJoinListener(this);
             new PlayerInventoryListener(this);
             new StatusListener(this);
+            new MobListeners(this);
             // TODO: Add more listeners here..
         });
     }

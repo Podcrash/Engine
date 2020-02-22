@@ -33,10 +33,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 
 /**
@@ -118,8 +115,8 @@ public abstract class Game implements IGame {
      */
     private static class WorldListener implements Listener {
         private String mapName;
-        private CompletableFuture<Boolean> future;
-        public WorldListener(CompletableFuture<Boolean> future, String mapName) {
+        private CountDownLatch future;
+        public WorldListener(CountDownLatch future, String mapName) {
             this.future = future;
             this.mapName = mapName;
         }
@@ -127,29 +124,32 @@ public abstract class Game implements IGame {
         @EventHandler
         public void load(WorldLoadEvent e) {
             boolean loaded = e.getWorld().getName().equalsIgnoreCase(mapName);
-            if(loaded)
-                future.complete(loaded);
+            if(loaded) future.countDown();
         }
     }
     /**
      * Load the map method, uses a callback of a bukkit event for custom loading
      */
-    public void loadMap() throws InterruptedException, ExecutionException, TimeoutException {
-        if(isLoadedMap) return;
+    public void loadMap()  {
         System.out.println("Loading map!");
         MapTable mapTable = TableOrganizer.getTable(DataTableType.MAPS);
 
         //TODO: this solution is not clever.... rework
-        CompletableFuture<Boolean> truth = new CompletableFuture<>();
+        CountDownLatch truth = new CountDownLatch(1);
         WorldListener listener = new WorldListener(truth, gameWorldName);
         Bukkit.getPluginManager().registerEvents(listener, Pluginizer.getSpigotPlugin());
-        mapTable.downloadWorld(gameWorldName, getMode(), getMapClass()).thenAccept(smap -> this.map = smap);
-
-        boolean bukkitLoaded = truth.get(10, TimeUnit.SECONDS);
-        WorldLoadEvent.getHandlerList().unregister(listener);
-        if(bukkitLoaded){
-            Bukkit.getPluginManager().callEvent(new GameMapLoadEvent(this, map, Bukkit.getWorld(gameWorldName)));
-        } else throw new RuntimeException("world is not valid?");
+        CompletableFuture<? extends BaseMap> futureMap = mapTable.downloadWorld(gameWorldName, getMode(), getMapClass());
+        futureMap.thenAcceptAsync(map -> {
+            try {
+                truth.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            this.map = map;
+            WorldLoadEvent.getHandlerList().unregister(listener);
+            Bukkit.getScheduler().runTask(Pluginizer.getSpigotPlugin(), () ->
+            Bukkit.getPluginManager().callEvent(new GameMapLoadEvent(this, this.map, Bukkit.getWorld(gameWorldName))));
+        });
     }
 
     /**
@@ -213,15 +213,12 @@ public abstract class Game implements IGame {
     public void setGameWorld(String world){
         //unload the last game world
         if(this.gameWorldName != null) Bukkit.unloadWorld(this.gameWorldName, false);
+        if(world.equalsIgnoreCase(gameWorldName)) return;
         //unload the current world just in case
         Bukkit.unloadWorld(world, false);
         this.gameWorldName = world;
         Bukkit.getPluginManager().callEvent(new GameMapChangeEvent(this, world));
-        try {
-            this.loadMap();
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            e.printStackTrace();
-        }
+        this.loadMap();
     }
 
     /**

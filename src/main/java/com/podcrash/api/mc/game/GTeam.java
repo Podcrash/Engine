@@ -266,10 +266,10 @@ public class GTeam {
     public final void allSpawn() {
         List<Player> players = getBukkitPlayers();
         int locCursor = 0;
-        int spawnSize = getSpawns().size();
+        int spawnSize = spawnpoints.size();
         for(Player player : players) {
             if(locCursor >= spawnSize) locCursor = 0;//if more players than spawns
-            player.teleport(getSpawn(locCursor));
+            player.teleport(spawnpoints.get(locCursor));
             locCursor++;
         }
     }

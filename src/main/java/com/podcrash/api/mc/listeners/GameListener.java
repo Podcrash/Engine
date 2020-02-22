@@ -68,11 +68,12 @@ public class GameListener extends ListenerBase {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void mapLoad(GameMapLoadEvent event) {
-        System.out.println("test");
+        System.out.println("test MAP LOAD");
         BaseMap map = event.getMap();
         World world = event.getWorld();
         Game game = event.getGame();
 
+        System.out.println("test " + map);
         List<GTeam> teams = game.getTeams();
         Map<String, List<Point>> spawnsArr = map.getSpawns();
         //set spawns
@@ -106,6 +107,13 @@ public class GameListener extends ListenerBase {
     public void onEnd(GameEndEvent e) {
         Game game = e.getGame();
         game.sendColorTab(true);
+        StringBuilder builder = new StringBuilder("Scores: \n");
+        game.getTeams().forEach(team -> {
+            builder.append(team.getName());
+            builder.append(": ");
+            builder.append(team.getScore());
+            builder.append("\n");
+        });
         for (Player player : game.getBukkitPlayers()) {
             player.teleport(e.getSpawnlocation());
             player.sendMessage(e.getMessage());
@@ -113,6 +121,7 @@ public class GameListener extends ListenerBase {
                 player.setGameMode(GameMode.ADVENTURE);
             }
             deadPeople.remove(player);
+            player.sendMessage(builder.toString());
         }
         //WorldManager.getInstance().deleteWorld(e.getGame().getGameWorld(), true);
     }

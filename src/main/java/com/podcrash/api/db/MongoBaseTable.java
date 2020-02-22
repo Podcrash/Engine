@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 
 //TODO:
 public abstract class MongoBaseTable implements ITable, IMongoDoc {
-    protected final static ExecutorService SERVICE = Executors.newFixedThreadPool(4);
+    protected final static ExecutorService SERVICE = Executors.newCachedThreadPool();
     private String collectionName;
 
     public MongoBaseTable(String collectionName) {
