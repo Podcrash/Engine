@@ -11,11 +11,13 @@ import com.podcrash.api.mc.listeners.*;
 import com.podcrash.api.mc.tracker.CoordinateTracker;
 import com.podcrash.api.mc.tracker.Tracker;
 import com.podcrash.api.mc.tracker.VectorTracker;
+import com.podcrash.api.mc.ui.CreateInventory;
 import com.podcrash.api.mc.world.WorldManager;
 import com.podcrash.api.db.redis.Communicator;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.event.HandlerList;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.redisson.api.RedissonClient;
@@ -155,6 +157,11 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             e.printStackTrace();
         }
 
+        //Create the Hub Inventory
+        Map<Integer, ItemStack> items = new HashMap<>();
+        CreateInventory.createCustomInventory("hubInventory", 27, items);
+
+
         Communicator.readyGameLobby();
         if(Communicator.isGameLobby())
             gameStart();
@@ -230,6 +237,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             new PlayerInventoryListener(this);
             new StatusListener(this);
             new MobListeners(this);
+            new CustomInventoryListener(this);
             // TODO: Add more listeners here..
         });
     }
