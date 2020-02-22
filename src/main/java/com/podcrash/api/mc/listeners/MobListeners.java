@@ -8,14 +8,20 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 
 import java.util.Collection;
 
-import com.podcrash.api.mc.mob.MobManager.mobs;
+import com.podcrash.api.mc.mob.MobManager;
 import com.podcrash.api.mc.mob.MobData;
 
 public class MobListeners extends ListenerBase {
+
+    public MobListeners(JavaPlugin plugin) {
+        super(plugin);
+    }
+
 	 @EventHandler(priority = EventPriority.LOW)
     public void onPotionSplash(PotionSplashEvent e) {
         Collection<LivingEntity> entities = e.getAffectedEntities();
@@ -23,7 +29,7 @@ public class MobListeners extends ListenerBase {
         for (LivingEntity entity: entities) {
 
             int id = entity.getEntityId();
-            MobData mob = mobs.get(id);
+            MobData mob = MobManager.mobs.get(id);
 
             if (mob == null) continue;
 
@@ -42,7 +48,7 @@ public class MobListeners extends ListenerBase {
     @EventHandler(priority = EventPriority.LOW)
     public void onEntityCombust(EntityCombustEvent e){
         int id = e.getEntity().getEntityId();
-        MobData mob = mobs.get(id);
+        MobData mob = MobManager.mobs.get(id);
 
         if (mob == null) return;
 
@@ -56,7 +62,7 @@ public class MobListeners extends ListenerBase {
     public void onMobDamage(EntityDamageEvent e) {
 
         int id = e.getEntity().getEntityId();
-        MobData mob = mobs.get(id);
+        MobData mob = MobManager.mobs.get(id);
 
         if (mob == null) return;
 
