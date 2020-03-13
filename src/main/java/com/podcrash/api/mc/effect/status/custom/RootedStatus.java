@@ -1,40 +1,25 @@
 package com.podcrash.api.mc.effect.status.custom;
 
 import com.podcrash.api.mc.effect.status.Status;
+import com.podcrash.api.mc.effect.status.StatusApplier;
 import com.podcrash.api.mc.time.resources.TimeResource;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 public class RootedStatus extends CustomStatus {
-    private final float walkSpeed;
-    private final PotionEffect jump = new PotionEffect(PotionEffectType.JUMP, 5, 128, true);
+    private final PotionEffect jump = new PotionEffect(PotionEffectType.JUMP, 2, 128, true);
 
     public RootedStatus(Player player) {
         super(player, Status.ROOTED);
-        this.walkSpeed = getPlayer().getWalkSpeed();
         getPlayer().setFoodLevel(3);
         getPlayer().setWalkSpeed(0);
+        StatusApplier.getOrNew(player).applyStatus(Status.JUMP_BOOST, 90, 128);
     }
 
     @Override
     protected void doWhileAffected() {
-        new TimeResource() {
-            @Override
-            public void task() {
-                if (!getPlayer().hasPotionEffect(PotionEffectType.JUMP)) getPlayer().addPotionEffect(jump);
-            }
 
-            @Override
-            public boolean cancel() {
-                return true;
-            }
-
-            @Override
-            public void cleanup() {
-
-            }
-        }.delaySync(1);
     }
 
     @Override
@@ -47,6 +32,7 @@ public class RootedStatus extends CustomStatus {
         getApplier().removeRoot();
         getApplier().removeStatus(Status.JUMP_BOOST);
         getPlayer().setFoodLevel(20);
-        getPlayer().setWalkSpeed(walkSpeed);
+        //0.2F is the default, if this needs to be changed, we'll see
+        getPlayer().setWalkSpeed(0.2F);
     }
 }

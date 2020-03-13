@@ -1,5 +1,6 @@
 package com.podcrash.api.mc.listeners;
 
+import com.podcrash.api.db.pojos.Rank;
 import com.podcrash.api.db.pojos.map.BaseMap;
 import com.podcrash.api.db.pojos.map.Point;
 import com.podcrash.api.mc.effect.status.Status;
@@ -244,7 +245,7 @@ public class GameListener extends ListenerBase {
         if(game.isOnSameTeam((Player) e.getAttacker(), (Player) e.getVictim()))
         e.setCancelled(true);
     }
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.NORMAL)
     public void damage(EntityDamageEvent e) {
         if(e.getEntity() instanceof Player) {
             if (deadPeople.contains(e.getEntity()) || GameManager.isSpectating((Player) e.getEntity()))
@@ -305,7 +306,9 @@ public class GameListener extends ListenerBase {
         e.setCancelled(true);
         org.bukkit.entity.Item item = e.getItem();
         ItemObjective itemObj = null;
-        for(ItemObjective itemObjective : game.getItemObjectives()) {
+        List<ItemObjective> objectives = game.getItemObjectives();
+        if(objectives == null) return;
+        for(ItemObjective itemObjective : objectives) {
             if(itemObjective.getItem().getEntityId() == item.getEntityId()) {
                 itemObj = itemObjective;
             }
@@ -319,23 +322,30 @@ public class GameListener extends ListenerBase {
     @EventHandler
     public void chat(AsyncPlayerChatEvent e) {
         Player player = e.getPlayer();
-        if(player.hasPermission("Champions.mute")){
+        Rank rank = PrefixUtil.getPlayerRole(player);
+        if(rank == null) return;
+
+        /*
+        if(rank.getName().equalsIgnoreCase("muted")){
             e.setCancelled(true);
             player.sendMessage(String.format("%sChampions> %sYou are muted.", ChatColor.BLUE, ChatColor.GRAY));
             return;
         }
+
+         */
+        String prefix = PrefixUtil.getPrefix(rank);
         if(GameManager.hasPlayer(player)) {
             e.setCancelled(true);
             Game game = GameManager.getGame();
             game.broadcast(String.format("%s%s%s" + ChatColor.RESET + " %s",
-                    PrefixUtil.getPrefix(PrefixUtil.getPlayerRole(player)),
+                    prefix,
                     game.getTeamEnum(player).getChatColor(),
                     player.getName(),
                     e.getMessage())
             );
         }else {
             e.getRecipients().removeIf(GameManager::hasPlayer);
-            e.setFormat(PrefixUtil.getPrefix(PrefixUtil.getPlayerRole(player)) + ChatColor.RESET + "%s " + ChatColor.GRAY + "%s");
+            e.setFormat(prefix + ChatColor.RESET + "%s " + ChatColor.GRAY + "%s");
 
         }
     }

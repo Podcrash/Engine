@@ -19,6 +19,7 @@ public class PlayerInventoryListener extends ListenerBase {
 
     @EventHandler
     public void playerTeamSelectEvent(InventoryClickEvent e) {
+        /*
         Player p = (Player) e.getWhoClicked();
         Game g = GameManager.getGame();
         if (!g.contains(p) || e.getCurrentItem() == null) { return; }
@@ -40,5 +41,7 @@ public class PlayerInventoryListener extends ListenerBase {
                 g.joinTeam(p, TeamEnum.getByData((int) e.getCurrentItem().getDurability()));
             }
         }
+
+         */
     }
 }

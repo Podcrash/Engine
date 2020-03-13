@@ -3,6 +3,7 @@ package com.podcrash.api.mc.time;
 import com.podcrash.api.mc.time.resources.TimeResource;
 import com.podcrash.api.plugin.Pluginizer;
 import org.bukkit.Bukkit;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,14 +53,12 @@ public final class TimeHandler {
         int taskID = Bukkit.getScheduler().scheduleSyncDelayedTask(Pluginizer.getSpigotPlugin(), runnable, delay);
     }
     public static void delayTime(long delay, TimeResource resource) {
-        Runnable runnable = () -> {
-            resource.task();
-            if (resource.cancel()) {
-                unregister(resource);
-                resource.cleanup();
+        int taskID = new BukkitRunnable() {
+            @Override
+            public void run() {
+
             }
-        };
-        int taskID = Bukkit.getScheduler().scheduleSyncDelayedTask(Pluginizer.getSpigotPlugin(), runnable, delay);
+        }.runTaskLater(Pluginizer.getSpigotPlugin(), delay).getTaskId();
         register(resource, taskID);
         //runnable.scheduleSync(plugin, delay * 20);
     }

@@ -38,7 +38,14 @@ public class ItemManipulationManager {
     private static Item spawnItem(Material material, Location location, Vector vector) {
         World world = location.getWorld();
         CraftWorld craftWorld = (CraftWorld) world;
-        EntityItem entity = new EntityItem(craftWorld.getHandle(), location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(new ItemStack(material)));
+
+        ItemStack itemStack = new ItemStack(material);
+        //rename
+        ItemMeta meta = itemStack.getItemMeta();
+        meta.setDisplayName(itemStack.getType().name() + System.currentTimeMillis());
+        itemStack.setItemMeta(meta);
+
+        EntityItem entity = new EntityItem(craftWorld.getHandle(), location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(itemStack));
         entity.pickupDelay = 5;
         craftWorld.getHandle().addEntity(entity, CreatureSpawnEvent.SpawnReason.CUSTOM);
         if(vector != null) {

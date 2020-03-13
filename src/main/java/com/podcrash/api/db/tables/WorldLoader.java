@@ -105,7 +105,7 @@ public class WorldLoader extends MongoBaseTable implements SlimeLoader {// World
 
     @SuppressWarnings("deprecation")
     @Override
-    public List<String> listWorlds() throws IOException {
+    public List<String> listWorlds() {
         List<String> list = new ArrayList<>();
         Block<Document> listBlock = (doc) -> {
             String name = doc.getString("name");
@@ -230,7 +230,7 @@ public class WorldLoader extends MongoBaseTable implements SlimeLoader {// World
 
     @Override
     public DataTableType getDataTableType() {
-        return null;
+        return DataTableType.WORLDS;
     }
 
     @SuppressWarnings("deprecation")

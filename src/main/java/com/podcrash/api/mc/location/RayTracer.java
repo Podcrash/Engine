@@ -42,9 +42,7 @@ public class RayTracer {
 
             originClone.add(addVector.multiply(i));
             lastV = originClone;
-            particles(Bukkit.getWorld("Gulley"), originClone);
             if(intersectsBox(originClone, box)) {
-                particles(Bukkit.getWorld("Gulley"), lastV);
                 return lastV.distance(origin) < distance;
             }
         }

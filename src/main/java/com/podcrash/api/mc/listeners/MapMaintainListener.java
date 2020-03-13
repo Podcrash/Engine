@@ -1,6 +1,9 @@
 package com.podcrash.api.mc.listeners;
 
 import com.abstractpackets.packetwrapper.WrapperPlayServerEntityStatus;
+import com.podcrash.api.db.TableOrganizer;
+import com.podcrash.api.db.tables.DataTableType;
+import com.podcrash.api.db.tables.WorldLoader;
 import com.podcrash.api.mc.damage.DamageQueue;
 import com.podcrash.api.mc.events.DamageApplyEvent;
 import com.podcrash.api.mc.sound.SoundPlayer;
@@ -119,13 +122,13 @@ public class MapMaintainListener extends ListenerBase {
      * Remove default death mechanics.
      * @param event
      */
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGH)
     public void statusDamage(EntityDamageEvent event) {
+        if(event.isCancelled()) return;
         //if the event was cancelled, or the entity isn't living, or if it's in the og world,
         //or if the cause is null or custom
         // then cancel it
-        if((event.isCancelled() ||
-                !(event.getEntity() instanceof LivingEntity)) ||
+        if((!(event.getEntity() instanceof LivingEntity)) ||
                 (event.getEntity().getWorld().getName().equals("world")) ||
                 (event.getCause() == null || event.getCause() == EntityDamageEvent.DamageCause.CUSTOM)) {
             event.setCancelled(true);
@@ -216,6 +219,7 @@ public class MapMaintainListener extends ListenerBase {
     }
 
     private boolean evaluate(World world) {
-        return WorldManager.getInstance().getWorlds().contains(world.getName());
+        WorldLoader loader = TableOrganizer.getTable(DataTableType.WORLDS);
+        return loader.listWorlds().contains(world.getName());
     }
 }
