@@ -218,6 +218,7 @@ public final class DamageQueue implements Runnable {
      * @param damageEvent the event
      */
     private void damage(LivingEntity entity, double damage, double armorValue, DamageApplyEvent damageEvent) {
+        if(damage < 0) damage = 0;
         double damageFormula = damage * (1D - 0.04D * armorValue);
         //Bukkit.broadcastMessage("AV: " + armorValue  + " " + damage + " --> " + damageFormula);
         if(damageEntity(entity, damageFormula)) return;
