@@ -37,7 +37,7 @@ public class StatusApplier {
     }
 
     public static StatusApplier getOrNew(Player player) {
-        if (appliers.get(player.getName()) == null) {
+        if (!appliers.containsKey(player.getName())) {
             appliers.put(player.getName(), new StatusApplier(player));
         }
         return appliers.get(player.getName());

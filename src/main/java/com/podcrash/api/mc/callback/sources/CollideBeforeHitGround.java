@@ -2,22 +2,23 @@ package com.podcrash.api.mc.callback.sources;
 
 import com.podcrash.api.mc.callback.CallbackAction;
 import com.podcrash.api.mc.util.EntityUtil;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 /**
  * This is used when a player uses a skill or similar that requires being in the air and having dropped back down to the ground
  */
 public class CollideBeforeHitGround extends CallbackAction<CollideBeforeHitGround> {
-    private Player player;
+    private Entity entity;
 
-    public CollideBeforeHitGround(Player player, long delay) {
+    public CollideBeforeHitGround(Entity entity, long delay) {
         super(delay, 1);
-        this.player = player;
+        this.entity = entity;
         this.changeEvaluation(() -> (
-                player.getNearbyEntities(1.15, 1.15, 1.15).size() > 0) ||
-                EntityUtil.onGround(player));
+                this.entity.getNearbyEntities(1.15, 1.15, 1.15).size() > 0) ||
+                EntityUtil.onGround(this.entity));
     }
-    public CollideBeforeHitGround(Player player) {
-        this(player, 1);
+    public CollideBeforeHitGround(Player entity) {
+        this(entity, 1);
     }
 }

@@ -145,6 +145,7 @@ public class MapTable extends MongoBaseTable {
         SlimePropertyMap slimePropertyMap = new SlimePropertyMap();
         slimePropertyMap.setBoolean(SlimeProperties.ALLOW_ANIMALS, map.isAllowAnimals());
         slimePropertyMap.setBoolean(SlimeProperties.ALLOW_MONSTERS, map.isAllowMonsters());
+        slimePropertyMap.setString(SlimeProperties.DIFFICULTY, "hard");
         slimePropertyMap.setBoolean(SlimeProperties.PVP, map.isAllowPvP());
         slimePropertyMap.setString(SlimeProperties.WORLD_TYPE, map.getWorldType());
         slimePropertyMap.setString(SlimeProperties.ENVIRONMENT, map.getEnvironment());
