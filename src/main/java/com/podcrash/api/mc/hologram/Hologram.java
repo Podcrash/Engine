@@ -21,8 +21,9 @@ public class Hologram {
     //TODO: use HologramMaker
     private static final double gapDistance = 0.23;
     private final List<String> lines;
-    private final List<Integer> entityIDs = new ArrayList<>();
+    private final List<Integer> entityIDs = Collections.synchronizedList(new ArrayList<>());
     private Location location;
+    private Vector pastLocation;
     private boolean distCheck = false;
 
     private boolean show;
@@ -116,10 +117,11 @@ public class Hologram {
         if(show) return;
         Location use = this.location.clone();
         final Vector down = new Vector(0, gapDistance, 0);
-        for(String line : this.lines) {
+        for (String line : this.lines) {
             entityIDs.add(showLine(line, use));
             use.subtract(down);
         }
+        pastLocation = use.toVector();
         show = true;
 
     }
@@ -128,11 +130,11 @@ public class Hologram {
      * Use a destroy packet to get rid of IDS
      */
     public void destroy() {
-        if(!show || entityIDs.size() == 0) return;
+        if (!show || entityIDs.size() == 0) return;
         show = false;
         WrapperPlayServerEntityDestroy destroy = new WrapperPlayServerEntityDestroy();
         destroy.setEntityIds(entityIDs.stream().mapToInt(i -> i).toArray());
-        location.getWorld().getPlayers().forEach(destroy::sendPacket);
+        PacketUtil.asyncSend(destroy, location.getWorld().getPlayers());
         this.entityIDs.clear();
     }
 
@@ -141,6 +143,8 @@ public class Hologram {
      * {@link me.raindance.champions.kits.skills.RangerSkills.HeartsEye}
      */
     public void update() {
+        //if the previous and current locations matchup, then you don't need to update it.
+        if(pastLocation == location.toVector()) return;
         destroy();
         render();
     }

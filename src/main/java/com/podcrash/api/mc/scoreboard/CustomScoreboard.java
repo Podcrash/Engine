@@ -216,6 +216,7 @@ public class CustomScoreboard implements IScoreboard {
         animator.run(5, 0);
     }
 
-
-
+    public Scoreboard getScoreboard() {
+        return scoreboard;
+    }
 }
