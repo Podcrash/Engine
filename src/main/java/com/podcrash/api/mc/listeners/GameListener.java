@@ -100,7 +100,10 @@ public class GameListener extends ListenerBase {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onStart(GameStartEvent e) {
         Game game = e.getGame();
-        game.getTeams().forEach(GTeam::allSpawn);
+        game.getTeams().forEach(team -> {
+            team.allSpawn();
+            team.getBukkitPlayers().forEach(player -> player.setSpectator(false));
+        });
         game.getBukkitSpectators().forEach(player -> player.teleport(game.getSpawnLocation()));
     }
 
@@ -224,8 +227,8 @@ public class GameListener extends ListenerBase {
         Game game = e.getGame();
         if(!game.isOngoing()) return;
 
-        if(!(e.getWho() instanceof Player) || !(e.getKiller() instanceof Player)) return;
-        Player victim = (Player) e.getWho();
+        if(e.getWho() == null || e.getKiller() == null) return;
+        Player victim = e.getWho();
         if(deadPeople.contains(victim) || deadPeople.contains(e.getKiller())|| GameManager.isSpectating(victim))
             e.setCancelled(true);
         else if(game.getTeam(e.getWho()) == null)
@@ -242,8 +245,10 @@ public class GameListener extends ListenerBase {
         Game game = GameManager.getGame();
         if(!game.isOngoing()) return;
         if(!(e.getAttacker() instanceof Player) && !(e.getVictim() instanceof Player)) return;
-        if(game.isOnSameTeam((Player) e.getAttacker(), (Player) e.getVictim()))
-        e.setCancelled(true);
+        boolean sameTeam = game.isOnSameTeam((Player) e.getAttacker(), (Player) e.getVictim());
+        System.out.println(e.getCause() + " sameTeam clause: " + sameTeam + " attacker: " + e.getAttacker() + " victim: " + e.getVictim());
+        if(sameTeam)
+            e.setCancelled(true);
     }
     @EventHandler(priority = EventPriority.NORMAL)
     public void damage(EntityDamageEvent e) {
@@ -322,8 +327,6 @@ public class GameListener extends ListenerBase {
     @EventHandler
     public void chat(AsyncPlayerChatEvent e) {
         Player player = e.getPlayer();
-        Rank rank = PrefixUtil.getPlayerRole(player);
-        if(rank == null) return;
 
         /*
         if(rank.getName().equalsIgnoreCase("muted")){
@@ -333,7 +336,12 @@ public class GameListener extends ListenerBase {
         }
 
          */
-        String prefix = PrefixUtil.getPrefix(rank);
+        String prefix = "";
+
+        Rank rank = PrefixUtil.getPlayerRole(player);
+        if(rank != null) {
+            prefix = PrefixUtil.getPrefix(rank);
+        }
         if(GameManager.hasPlayer(player)) {
             e.setCancelled(true);
             Game game = GameManager.getGame();

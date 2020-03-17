@@ -18,7 +18,7 @@ public class PrefixUtil {
     public static Rank getPlayerRole(Player player) {
         RanksTable table = TableOrganizer.getTable(DataTableType.PERMISSIONS);
         List<Rank> perms = table.getRanksSync(player.getUniqueId());
-        if(perms == null) return null;
+        if(perms == null || perms.size() == 0) return null;
         Rank current = perms.get(0);
         for(int i = 1; i < perms.size(); i++) {
             if(current.getPosition() < perms.get(i).getPosition()) {

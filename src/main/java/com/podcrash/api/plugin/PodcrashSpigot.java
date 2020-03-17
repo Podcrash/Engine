@@ -88,43 +88,6 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             e.printStackTrace();
         }
 
-        SlimePlugin slimePlugin = (SlimePlugin) Bukkit.getPluginManager().getPlugin("SlimeWorldManager");
-        slimePlugin.registerLoader("postgres", new SlimeLoader() {
-            @Override
-            public byte[] loadWorld(String s, boolean b) throws UnknownWorldException, WorldInUseException, IOException {
-                return new byte[0];
-            }
-
-            @Override
-            public boolean worldExists(String s) throws IOException {
-                return false;
-            }
-
-            @Override
-            public List<String> listWorlds() throws IOException {
-                return null;
-            }
-
-            @Override
-            public void saveWorld(String s, byte[] bytes, boolean b) throws IOException {
-
-            }
-
-            @Override
-            public void unlockWorld(String s) throws UnknownWorldException, IOException {
-
-            }
-
-            @Override
-            public boolean isWorldLocked(String s) throws UnknownWorldException, IOException {
-                return false;
-            }
-
-            @Override
-            public void deleteWorld(String s) throws UnknownWorldException, IOException {
-
-            }
-        });
     }
 
     public void gameDisable() {

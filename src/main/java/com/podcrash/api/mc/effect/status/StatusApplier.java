@@ -303,13 +303,11 @@ public class StatusApplier {
     public void removeCloak() {
         cloaked = 0;
         List<Player> players = this.player.getWorld().getPlayers();
-        Bukkit.getScheduler().runTask(Pluginizer.getSpigotPlugin(), () -> {
-            for (Player player : players) {
-                if (this.player != player) {
-                    player.showPlayer(this.player);
-                }
+        for (Player player : players) {
+            if (this.player != player) {
+                player.showPlayer(this.player);
             }
-        });
+        }
     }
 
     public void removeMark() {

@@ -442,6 +442,7 @@ public abstract class Game implements IGame {
             Team newTeam = colorBoard.registerNewTeam(teamString);
             newTeam.setPrefix(gTeam.getChatColor().toString());
             newTeam.setCanSeeFriendlyInvisibles(true);
+            newTeam.setAllowFriendlyFire(false);
             newTeam.setNameTagVisibility(NameTagVisibility.ALWAYS);
 
         }
@@ -537,6 +538,7 @@ public abstract class Game implements IGame {
             player.teleport(spectatorSpawn());
             player.setGameMode(GameMode.SPECTATOR);
             player.setScoreboard(getGameScoreboard().getBoard());
+            player.setSpectator(true);
         } else {
             updateLobbyInventory(player);
         }
@@ -771,8 +773,8 @@ public abstract class Game implements IGame {
      * @return If they are on the same team.
      */
     public boolean isOnSameTeam(Player p1, Player p2) {
-        if (!(isOnTeam(p1) && isOnTeam(p2))) { return false; }
-        return (getTeam(p1).isPlayerOnTeam(p2));
+        if (!(isOnTeam(p1) && isOnTeam(p2)))  return false;
+        return getTeam(p1).isPlayerOnTeam(p2);
     }
 
     /**

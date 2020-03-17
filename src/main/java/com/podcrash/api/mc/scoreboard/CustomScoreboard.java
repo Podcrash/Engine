@@ -55,7 +55,7 @@ public class CustomScoreboard implements IScoreboard {
 
     private void makeObjective() {
         destroyScoreboard();
-        objective = scoreboard.registerNewObjective("dummy", "");
+        objective = scoreboard.registerNewObjective("gameboard", "dummy");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         objective.setDisplayName(ChatUtil.chat(""));
         //animateTitle("Control", "&f&l", "&7&l");
