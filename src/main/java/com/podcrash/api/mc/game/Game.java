@@ -35,6 +35,7 @@ import org.bukkit.scoreboard.Team;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
 /**
  * Abstract Game Class
@@ -147,8 +148,15 @@ public abstract class Game implements IGame {
             }
             this.map = map;
             WorldLoadEvent.getHandlerList().unregister(listener);
-            Bukkit.getScheduler().runTask(Pluginizer.getSpigotPlugin(), () ->
-            Bukkit.getPluginManager().callEvent(new GameMapLoadEvent(this, this.map, Bukkit.getWorld(gameWorldName))));
+            Bukkit.getScheduler().runTask(Pluginizer.getSpigotPlugin(), () -> {
+                try {
+                Bukkit.getPluginManager().callEvent(new GameMapLoadEvent(this, this.map, Bukkit.getWorld(gameWorldName)));
+                }catch (Exception e) {
+                    Pluginizer.getLogger().log(Level.SEVERE, e.getMessage());
+                    e.printStackTrace();
+                    Pluginizer.getLogger().info(e.getMessage());
+                }
+            });
         });
     }
 

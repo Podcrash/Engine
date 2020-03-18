@@ -6,30 +6,27 @@ import com.podcrash.api.mc.game.objects.ItemObjective;
 import com.podcrash.api.mc.sound.SoundPlayer;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.util.Vector;
 
-public class Emerald extends ItemObjective {
-    private static ObjectiveType otype = ObjectiveType.EMERALD;
-
-    public Emerald(Location location) {
-        this(location.toVector());
+public class Star extends ItemObjective {
+    public Star(Vector vector) {
+        super(Material.NETHER_STAR, Material.ENDER_PORTAL_FRAME, vector);
+        fireworkEffect = FireworkEffect.builder().withColor(Color.WHITE).with(FireworkEffect.Type.BALL_LARGE).build();
     }
-    public Emerald(Vector spawnVector){
-        super(Material.NETHER_STAR, Material.ENDER_PORTAL_FRAME, spawnVector);
-        this.fireworkEffect = FireworkEffect.builder().withColor(Color.GREEN).with(FireworkEffect.Type.BALL_LARGE).build();
-    }
-    public Emerald(Point point) {
+    public Star(Point point) {
         this(PojoHelper.convertPoint2Vector(point));
     }
-    public ObjectiveType getObjectiveType(){
-        return otype;
+
+
+    @Override
+    public ObjectiveType getObjectiveType() {
+        return ObjectiveType.STAR;
     }
 
     @Override
     public String getName() {
-        return "Emerald";
+        return "Star";
     }
 
     @Override
@@ -37,6 +34,4 @@ public class Emerald extends ItemObjective {
         super.spawnFirework();
         SoundPlayer.sendSound(getLocation(), "fireworks.launch", 1, 63);
     }
-
-
 }

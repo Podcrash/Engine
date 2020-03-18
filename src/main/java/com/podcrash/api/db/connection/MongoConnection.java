@@ -7,10 +7,7 @@ import com.mongodb.async.client.MongoClient;
 import com.mongodb.async.client.MongoClients;
 import com.mongodb.async.client.MongoDatabase;
 import com.podcrash.api.db.pojos.*;
-import com.podcrash.api.db.pojos.map.BaseMap;
-import com.podcrash.api.db.pojos.map.CapturePointPojo;
-import com.podcrash.api.db.pojos.map.ConquestMap;
-import com.podcrash.api.db.pojos.map.Point;
+import com.podcrash.api.db.pojos.map.*;
 import org.bson.UuidRepresentation;
 import org.bson.codecs.UuidCodec;
 import org.bson.codecs.configuration.CodecRegistries;
@@ -47,12 +44,13 @@ public class MongoConnection implements IConnection<MongoClient> {
 
         ClassModel<BaseMap> baseMapModel = getClassModel(BaseMap.class, true);
         ClassModel<Point> pointModel = getClassModel(Point.class, true);
+        ClassModel<Point2Point> point2Model = getClassModel(Point2Point.class, true);
         ClassModel<ConquestMap> conquestMapModel = getClassModel(ConquestMap.class, true);
         ClassModel<CapturePointPojo> capturePointModel = getClassModel(CapturePointPojo.class, true);
         ClassModel<?>[] models = new ClassModel[] {
             playerModel, rankModel, currencyModel,
             gameDataModel, conquestDataModel,
-            baseMapModel, pointModel, conquestMapModel, capturePointModel
+            baseMapModel, pointModel, point2Model, conquestMapModel, capturePointModel
         };
         return PojoCodecProvider.builder()
             .register(models)

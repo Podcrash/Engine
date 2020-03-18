@@ -93,6 +93,10 @@ public final class BlockUtil {
         return (m.equals(Material.STATIONARY_WATER) || m.equals(Material.WATER));
     }
 
+    public static boolean isSign(Block block) {
+        Material signType = block.getType();
+        return signType == Material.WALL_SIGN || signType == Material.SIGN_POST;
+    }
     public static boolean isPassable(Block block) {
         if (Arrays.stream(passables).anyMatch(material -> material.equals(block.getType()))) {
             return true;

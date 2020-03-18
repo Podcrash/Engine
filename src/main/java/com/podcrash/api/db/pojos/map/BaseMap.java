@@ -1,5 +1,7 @@
 package com.podcrash.api.db.pojos.map;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +24,22 @@ public class BaseMap {
     private boolean allowAnimals;
     private boolean allowPvP;
     private boolean allowMonsters;
+
+    private List<Point2Point> launchPads;
+    private List<Point2Point> teleportPads;
+
+    public BaseMap() {
+        this.authors = new ArrayList<>();
+        this.spawns = new HashMap<>();
+        this.allowAnimals = true;
+        this.allowPvP = true;
+        this.allowMonsters = true;
+        this.environment = "normal";
+        this.worldType = "default";
+
+        this.launchPads = new ArrayList<>();
+        this.teleportPads = new ArrayList<>();
+    }
 
     public String getName() {
         return name;
@@ -101,6 +119,22 @@ public class BaseMap {
 
     public void setAllowMonsters(boolean allowMonsters) {
         this.allowMonsters = allowMonsters;
+    }
+
+    public List<Point2Point> getLaunchPads() {
+        return launchPads;
+    }
+
+    public void setLaunchPads(List<Point2Point> launchPads) {
+        this.launchPads = launchPads;
+    }
+
+    public List<Point2Point> getTeleportPads() {
+        return teleportPads;
+    }
+
+    public void setTeleportPads(List<Point2Point> teleportPads) {
+        this.teleportPads = teleportPads;
     }
 
     @Override

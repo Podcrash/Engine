@@ -3,6 +3,7 @@ package com.podcrash.api.mc.listeners;
 import com.podcrash.api.db.pojos.Rank;
 import com.podcrash.api.db.pojos.map.BaseMap;
 import com.podcrash.api.db.pojos.map.Point;
+import com.podcrash.api.db.pojos.map.Point2Point;
 import com.podcrash.api.mc.effect.status.Status;
 import com.podcrash.api.mc.effect.status.StatusApplier;
 import com.podcrash.api.mc.effect.status.StatusWrapper;
@@ -15,6 +16,7 @@ import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.TeamEnum;
 import com.podcrash.api.mc.game.objects.ItemObjective;
+import com.podcrash.api.mc.game.objects.action.ActionBlock;
 import com.podcrash.api.mc.item.ItemManipulationManager;
 import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.time.resources.SimpleTimeResource;
@@ -87,6 +89,23 @@ public class GameListener extends ListenerBase {
                 spawnLocs.add(new Location(world, s.getX(), s.getY(), s.getZ()));
             }
             team.setSpawns(spawnLocs);
+        }
+
+        List<Point2Point> launchPads = map.getLaunchPads();
+        List<Point2Point> teleportPads = map.getTeleportPads();
+
+        List<ActionBlock> blocks = new ArrayList<>();
+        addActionBlocks(blocks, ActionBlock.Type.SLIME, launchPads);
+        addActionBlocks(blocks, ActionBlock.Type.TELEPORT, teleportPads);
+
+        ActionBlockListener.setBlocks(world, blocks);
+    }
+
+    private void addActionBlocks(List<ActionBlock> list, ActionBlock.Type type, List<Point2Point> points) {
+        for(Point2Point p : points) {
+            ActionBlock block = new ActionBlock(p);
+            block.setType(type);
+            list.add(block);
         }
     }
 

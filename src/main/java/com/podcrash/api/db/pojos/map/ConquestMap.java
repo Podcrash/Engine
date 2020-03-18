@@ -1,12 +1,23 @@
 package com.podcrash.api.db.pojos.map;
 
-import java.util.List;
-import java.util.StringJoiner;
+import javax.swing.text.Document;
+import java.util.*;
 
 public class ConquestMap extends BaseMap {
     private List<CapturePointPojo> capturePointPojos;
-    private List<Point> emeralds;
+    private List<Point> stars;
+    private List<Point> diamonds;
+    private List<Point> mines;
     private List<Point> restocks;
+
+    public ConquestMap() {
+        super();
+        this.capturePointPojos = new ArrayList<>();
+        this.stars = new ArrayList<>();
+        this.diamonds = new ArrayList<>();
+        this.mines = new ArrayList<>();
+        this.restocks = new ArrayList<>();
+    }
 
     public List<CapturePointPojo> getCapturePointPojos() {
         return capturePointPojos;
@@ -16,12 +27,28 @@ public class ConquestMap extends BaseMap {
         this.capturePointPojos = capturePointPojos;
     }
 
-    public List<Point> getEmeralds() {
-        return emeralds;
+    public List<Point> getDiamonds() {
+        return diamonds;
     }
 
-    public void setEmeralds(List<Point> emeralds) {
-        this.emeralds = emeralds;
+    public void setDiamonds(List<Point> diamonds) {
+        this.diamonds = diamonds;
+    }
+
+    public List<Point> getMines() {
+        return mines;
+    }
+
+    public void setMines(List<Point> mines) {
+        this.mines = mines;
+    }
+
+    public List<Point> getStars() {
+        return stars;
+    }
+
+    public void setStars(List<Point> stars) {
+        this.stars = stars;
     }
 
     public List<Point> getRestocks() {
@@ -32,12 +59,15 @@ public class ConquestMap extends BaseMap {
         this.restocks = restocks;
     }
 
-    @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("ConquestMap{");
         sb.append("capturePointPojos=").append(capturePointPojos);
-        sb.append(", emeralds=").append(emeralds);
+        sb.append(", stars=").append(stars);
+        sb.append(", diamonds=").append(diamonds);
+        sb.append(", mines=").append(mines);
         sb.append(", restocks=").append(restocks);
+        sb.append(", launchPads=").append(getLaunchPads());
+        sb.append(", teleportPads=").append(getTeleportPads());
         sb.append(", name='").append(getName()).append('\'');
         sb.append(", gamemode='").append(getGamemode()).append('\'');
         sb.append(", authors=").append(getAuthors());
