@@ -17,8 +17,11 @@ public class TrapListener extends ListenerBase {
     public void itemPickUp(PlayerPickupItemEvent e) {
         Item item = e.getItem();
         if(!TrapSetter.deleteTrap(item)) return;
-        e.setCancelled(true);
-        Bukkit.getPluginManager().callEvent(new TrapSnareEvent(e.getItem(), e.getPlayer()));
-        item.remove();
+        TrapSnareEvent snareEvent = new TrapSnareEvent(e.getItem(), e.getPlayer());
+        Bukkit.getPluginManager().callEvent(snareEvent);
+        if(!snareEvent.isCancelled()) {
+            e.setCancelled(true);
+            item.remove();
+        }
     }
 }
