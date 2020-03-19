@@ -15,6 +15,7 @@ public class TrapPrimeEvent extends Event {
     private final Item item;
 
     public TrapPrimeEvent(Item item) {
+        super(true);
         this.item = item;
     }
 

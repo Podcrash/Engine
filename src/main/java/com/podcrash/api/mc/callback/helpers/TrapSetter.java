@@ -42,8 +42,6 @@ public final class TrapSetter {
      */
     public static boolean deleteTrap(Item item) {
         if(item == null) return false;
-        boolean remove = trapIds.remove(item.getEntityId());
-        if(remove && item.isValid()) item.remove();
-        return remove;
+        return trapIds.remove(item.getEntityId());
     }
 }
