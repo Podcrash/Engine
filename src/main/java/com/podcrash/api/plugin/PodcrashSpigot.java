@@ -194,6 +194,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             new StatusListener(this);
             new MobListeners(this);
             new ActionBlockListener(this);
+            new TrapListener(this);
             // TODO: Add more listeners here..
         });
     }
