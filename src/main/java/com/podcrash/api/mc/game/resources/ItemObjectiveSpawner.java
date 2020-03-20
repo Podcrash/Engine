@@ -1,6 +1,8 @@
 package com.podcrash.api.mc.game.resources;
 
+import com.podcrash.api.mc.events.ItemObjectiveSpawnEvent;
 import com.podcrash.api.mc.game.objects.ItemObjective;
+import org.bukkit.Bukkit;
 
 import java.util.List;
 
@@ -36,6 +38,8 @@ public class ItemObjectiveSpawner extends GameResource {
      * @param itemObjective
      */
     private void respawn(ItemObjective itemObjective) {
+        ItemObjectiveSpawnEvent e = new ItemObjectiveSpawnEvent(itemObjective);
+        Bukkit.getPluginManager().callEvent(e);
         itemObjective.respawn();
         itemObjective.spawnFirework();
     }
