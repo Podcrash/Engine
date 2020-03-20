@@ -387,6 +387,7 @@ public class StatusApplier {
                 }
             }
         });
+        if(this.player.getFireTicks() > 0) statuses.add(Status.FIRE);
         if (isCloaked()) statuses.add(Status.CLOAK);
         if (isMarked()) statuses.add(Status.MARKED);
         if (isShocked()) statuses.add(Status.SHOCK);
