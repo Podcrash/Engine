@@ -47,7 +47,7 @@ public class ItemObjectiveSpawner extends GameResource {
     public void task() {
         for(int i = 0; i < itemObjectives.length; i++) {
             ItemObjective itemObjective = itemObjectives[i];
-            if(!itemObjective.getItem().isValid() && System.currentTimeMillis() - itemTimes[i] >= 60000L) {
+            if(!itemObjective.getItem().isValid() && System.currentTimeMillis() - itemTimes[i] >= itemObjective.getDurationMilles()) {
                 respawn(itemObjective);
             }
         }

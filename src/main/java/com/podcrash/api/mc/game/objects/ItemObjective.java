@@ -91,4 +91,8 @@ public abstract class ItemObjective implements IObjective {
     public String toString(){//TODO use tellraw for these type of things (click on point to teleport to it)?
         return String.format("(%s:{%f, %f, %f})", getName(), this.vector.getX(), this.vector.getY(), this.vector.getZ());
     }
+
+    public long getDurationMilles() {
+        return 60000L;
+    }
 }

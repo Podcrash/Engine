@@ -34,4 +34,9 @@ public class Star extends ItemObjective {
         super.spawnFirework();
         SoundPlayer.sendSound(getLocation(), "fireworks.launch", 1, 63);
     }
+
+    @Override
+    public long getDurationMilles() {
+        return 90000L;
+    }
 }
