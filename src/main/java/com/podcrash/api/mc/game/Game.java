@@ -450,7 +450,7 @@ public abstract class Game implements IGame {
             Team newTeam = colorBoard.registerNewTeam(teamString);
             newTeam.setPrefix(gTeam.getChatColor().toString());
             newTeam.setCanSeeFriendlyInvisibles(true);
-            newTeam.setAllowFriendlyFire(false);
+            newTeam.setAllowFriendlyFire(true);
             newTeam.setNameTagVisibility(NameTagVisibility.ALWAYS);
 
         }
