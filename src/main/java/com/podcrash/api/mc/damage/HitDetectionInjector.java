@@ -12,6 +12,7 @@ import com.podcrash.api.plugin.Pluginizer;
 import com.podcrash.api.plugin.PodcrashSpigot;
 import net.minecraft.server.v1_8_R3.EntityLiving;
 import net.minecraft.server.v1_8_R3.GenericAttributes;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
@@ -40,20 +41,20 @@ public final class HitDetectionInjector {
     }
     public HitDetectionInjector(Player p) {
         this.player = p;
-        this.listener = new PacketAdapter(Pluginizer.getSpigotPlugin(), ListenerPriority.HIGH, PacketType.Play.Client.USE_ENTITY) {
+        this.listener = new PacketAdapter(Pluginizer.getSpigotPlugin(), ListenerPriority.NORMAL, PacketType.Play.Client.USE_ENTITY) {
             @Override
             public void onPacketReceiving(PacketEvent event) {
                 WrapperPlayClientUseEntity packet = new WrapperPlayClientUseEntity(event.getPacket());
                 EnumWrappers.EntityUseAction action = packet.getType();
                 Entity entity = packet.getTarget(player.getWorld());
+                Player attacker = event.getPlayer();
+                if(event.getPlayer() != player) return;
                 //if the action is not attack or a living thing, stop
                 if (!(action == EnumWrappers.EntityUseAction.ATTACK && entity instanceof LivingEntity)) return;
                 LivingEntity victim = (LivingEntity) entity;
-                Player attacker = event.getPlayer();
                 //if the player is in spectator mode, don't bother
-                if (attacker != player ||
-                        attacker.getGameMode() == GameMode.SPECTATOR ||
-                        (victim instanceof Player && ((Player) victim).getGameMode() == GameMode.SPECTATOR)) return;
+                if (attacker.getGameMode() == GameMode.SPECTATOR ||
+                    (victim instanceof Player && ((Player) victim).getGameMode() == GameMode.SPECTATOR)) return;
 
                 event.setCancelled(true);
                 //if there is still a delay, cancel
@@ -67,18 +68,22 @@ public final class HitDetectionInjector {
                 //the victim is invis
                 //if the attacker is blocking
                 //don't do anything
-                if(isDeathDelay(victim) || isInvis(victim) || player.isBlocking()) return;
+                if(/*isDeathDelay(victim) ||*/ isInvis(victim)) return;
 
                 //Find the base damage
                 double damage = findDamage(attacker);
                 //Put melee damage in the queue
                 DamageApplier.damage(victim, attacker, damage, true);
                 //if the player does die
-                if(victim instanceof Player && calculateIfDeath(damage, victim)) {
-                    Player playerVictim = (Player) victim;
-                    //Give both death delays to avoid hitting each other.
-                    manualDeathDelay(playerVictim);
-                    getHitDetection(playerVictim).manualDeathDelay(player);
+                if(victim instanceof Player) {
+                    if (calculateIfDeath(damage, victim)) {
+                        Player playerVictim = (Player) victim;
+                        //Give both death delays to avoid hitting each other.
+                        manualDeathDelay(playerVictim);
+                        getHitDetection(playerVictim).manualDeathDelay(player);
+                    }else {
+
+                    }
                 }
 
                 //Bukkit.broadcastMessage(String.format("Damager: %s Victim: %s", player.getName(), entityPlayer.getName()));
@@ -91,7 +96,7 @@ public final class HitDetectionInjector {
     /**
      * Inject the custom hit detection to any user
      */
-    public void injectHitDetection() {
+        public void injectHitDetection() {
         ProtocolLibrary.getProtocolManager().addPacketListener(listener);
         Pluginizer.getSpigotPlugin().getLogger().info(player.getName() + " injected with hit detection.");
     }
