@@ -88,6 +88,29 @@ public final class BlockUtil {
     };
 
 
+    public static boolean hasPlayersInArea(Location location, double radius, List<Player> players, Player user) {
+        double radiusSquared = radius * radius;
+        for(Player player : players) {
+            if(player == user) continue;
+            Location loc = player.getLocation();
+            double distanceSquared = loc.distanceSquared(location);
+            if(distanceSquared <= radiusSquared)
+                return true;
+        }
+        return false;
+    }
+
+    public static boolean hasPlayersInArea(Location location, double radius, List<Player> players) {
+        double radiusSquared = radius * radius;
+        for(Player player : players) {
+            Location loc = player.getLocation();
+            double distanceSquared = loc.distanceSquared(location);
+            if(distanceSquared <= radiusSquared)
+                return true;
+        }
+        return false;
+    }
+
     public static boolean isInWater(LivingEntity entity) {
         Material m = entity.getLocation().getBlock().getType();
         return (m.equals(Material.STATIONARY_WATER) || m.equals(Material.WATER));
