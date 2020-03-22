@@ -59,6 +59,7 @@ public class GameManager {
     }
 
     public static void destroyCurrentGame() {
+        if(currentGame == null) return;
         if(currentGame.getGameWorld() != null) Bukkit.unloadWorld(currentGame.getGameWorld(), false);
         currentGame = null;
     }

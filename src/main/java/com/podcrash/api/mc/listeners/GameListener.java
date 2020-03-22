@@ -22,6 +22,7 @@ import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.time.resources.SimpleTimeResource;
 import com.podcrash.api.mc.util.EntityUtil;
 import com.podcrash.api.mc.util.PrefixUtil;
+import com.podcrash.api.mc.world.WorldManager;
 import com.podcrash.api.plugin.Pluginizer;
 import com.podcrash.api.db.redis.Communicator;
 import org.bukkit.*;
@@ -146,7 +147,7 @@ public class GameListener extends ListenerBase {
             deadPeople.remove(player);
             player.sendMessage(builder.toString());
         }
-        //WorldManager.getInstance().deleteWorld(e.getGame().getGameWorld(), true);
+        WorldManager.getInstance().unloadWorld(e.getGame().getGameWorld().getName());
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -364,9 +365,11 @@ public class GameListener extends ListenerBase {
         if(GameManager.hasPlayer(player)) {
             e.setCancelled(true);
             Game game = GameManager.getGame();
+            String color = "";
+            if(!game.isSpectating(player)) color = game.getTeamEnum(player).getChatColor().toString();
             game.broadcast(String.format("%s%s%s" + ChatColor.RESET + " %s",
                     prefix,
-                    game.getTeamEnum(player).getChatColor(),
+                    color,
                     player.getName(),
                     e.getMessage())
             );
