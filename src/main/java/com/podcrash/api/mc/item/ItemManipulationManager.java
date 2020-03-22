@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.MaterialData;
 import org.bukkit.util.Vector;
 
 import java.util.Random;
@@ -78,6 +79,10 @@ public class ItemManipulationManager {
         return new CraftItem(craftWorld.getHandle().getServer(), entity);
     }
 
+    public static Item regular(MaterialData materialData, Location location, Vector vector) {
+        ItemStack itemStack = materialData.toItemStack();
+        return spawnItem(itemStack, location, vector);
+    }
     public static Item regular(Material material, Location location, Vector vector){
         return spawnItem(material,  location, vector);
     }
