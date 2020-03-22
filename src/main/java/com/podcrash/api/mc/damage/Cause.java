@@ -12,13 +12,15 @@ public enum Cause {
      */
     CUSTOM,
     FALL("FALL"),
-    FIRE("FIRE_TICK"),
+    FIRE_TICK("FIRE_TICK"),
+    FIRE("FIRE"),
     WITHER("WITHER"),
     SUICIDE,
     MELEE,
     MELEESKILL,
     PROJECTILE,
     POISON("POISON"),
+    SUFFOCATION("SUFFFOCATION"),
     NULL;
 
     private String bukkitName;
