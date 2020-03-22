@@ -55,7 +55,6 @@ public final class ActionBlockListener extends ListenerBase {
             long cd = cooldown.getOrDefault(event.getPlayer().getName(), -1L);
             if(cd >= System.currentTimeMillis()) return;
             Player player = event.getPlayer();
-            Bukkit.broadcastMessage(actionVector.vector.toString());
             switch (actionVector.actionType) {
                 case SLIME:
                     player.setVelocity(actionVector.vector);
