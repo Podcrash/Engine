@@ -4,6 +4,7 @@ import com.abstractpackets.packetwrapper.WrapperPlayServerEntityStatus;
 import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.WorldLoader;
+import com.podcrash.api.mc.damage.Cause;
 import com.podcrash.api.mc.damage.DamageQueue;
 import com.podcrash.api.mc.events.DamageApplyEvent;
 import com.podcrash.api.mc.sound.SoundPlayer;
@@ -147,22 +148,25 @@ public class MapMaintainListener extends ListenerBase {
                 EntityDamageEvent.DamageCause.FIRE_TICK,
                 EntityDamageEvent.DamageCause.FALL,
                 EntityDamageEvent.DamageCause.POISON,
-                EntityDamageEvent.DamageCause.WITHER
-        );
+                EntityDamageEvent.DamageCause.WITHER,
+                EntityDamageEvent.DamageCause.VOID
+                );
         //if the damage is one of the causes above
         //cancel it and set our own damage.
         //This is done because the types of damage above affects velocity
         if(poss.contains(event.getCause())) {
             event.setCancelled(true);
             damage(p, damage);
+
+            DamageQueue.artificialAddHistory(p, damage, Cause.findByEntityDamageCause(event.getCause()));
+            //if the player is about to die, cancel it
+            //Then call our own death event.
+            if(p instanceof Player && afterHealth <= 0D) {
+                DamageQueue.artificialDie((Player) p);
+                event.setCancelled(true);
+            }
         }
 
-        //if the player is about to die, cancel it
-        //Then call our own death event.
-        if(p instanceof Player && afterHealth <= 0D) {
-            DamageQueue.artificialDie((Player) p);
-            event.setCancelled(true);
-        }
     }
 
     /**

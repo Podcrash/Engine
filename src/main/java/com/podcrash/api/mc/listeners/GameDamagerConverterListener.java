@@ -38,7 +38,6 @@ public class GameDamagerConverterListener extends ListenerBase {
         if(!(event.getDamager() instanceof Arrow)) return;
         Arrow arrow = (Arrow) event.getDamager();
         if (arrow == null || !arrowDamageMap.containsKey(arrow.getEntityId())) return;
-        if (!(event.getDamager() instanceof Projectile || event.getDamager() instanceof Arrow)) return;
         if(System.currentTimeMillis() < delay.getOrDefault(event.getEntity().getName(), 0L))
             return;
         Disguise possDisguise = Disguiser.getSeenDisguises().get(event.getEntity().getEntityId());

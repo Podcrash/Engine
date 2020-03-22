@@ -78,7 +78,7 @@ public final class DamageQueue implements Runnable {
      * @param entity - the entity whose name will be extracted
      * @return the name of the entity as usage for a key
      */
-    private String getNameFor(Entity entity) {
+    private static String getNameFor(Entity entity) {
         if(entity instanceof Player) return entity.getName();
         else {
             String name = entity.getName();
@@ -368,6 +368,15 @@ public final class DamageQueue implements Runnable {
         }
         Bukkit.getPluginManager().callEvent(new DeathApplyEvent(damage, damages));
         if(a) damages.clear();
+    }
+
+    public static void artificialAddHistory(LivingEntity entity, double damage, Cause cause) {
+        String name = getNameFor(entity);
+        if(!damageHistory.containsKey(name)) {
+            damageHistory.put(name, new ArrayDeque<>());
+        }
+        Damage wrapper = new Damage(entity, null, damage, null, cause, null, (DamageSource) null, false);
+        damageHistory.get(name).add(wrapper);
     }
 
     public static Deque<Damage> getDamages() {

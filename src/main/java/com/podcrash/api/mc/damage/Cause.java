@@ -1,5 +1,7 @@
 package com.podcrash.api.mc.damage;
 
+import org.bukkit.event.entity.EntityDamageEvent;
+
 public enum Cause {
     /*
     MELEE - a regular melee hit
@@ -9,15 +11,32 @@ public enum Cause {
     NULL - for nothing
      */
     CUSTOM,
-    FALL,
-    FIRE,
-    WITHER,
+    FALL("FALL"),
+    FIRE("FIRE_TICK"),
+    WITHER("WITHER"),
     SUICIDE,
     MELEE,
     MELEESKILL,
     PROJECTILE,
+    POISON("POISON"),
     NULL;
-    Cause() {
 
+    private String bukkitName;
+
+    Cause() {
+        this(null);
+    }
+
+    Cause(String bukkitName) {
+        this.bukkitName = bukkitName;
+    }
+    private static Cause[] details = Cause.values();
+
+    public static Cause findByEntityDamageCause(EntityDamageEvent.DamageCause damageCause) {
+        for(Cause cause : details) {
+            if (damageCause.name().equals(cause.bukkitName))
+                return cause;
+        }
+        return NULL;
     }
 }

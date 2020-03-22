@@ -70,7 +70,6 @@ public abstract class GameScoreboard extends CustomScoreboard {
      */
     private List<String> createGameLines(String name, String mode, List<String> lines) {
         List<String> result = new ArrayList<String>();
-        result.add("");
         result.add(name);
         result.add(mode);
         result.add("");

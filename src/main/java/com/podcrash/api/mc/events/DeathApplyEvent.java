@@ -9,6 +9,7 @@ import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.TeamEnum;
 import net.jafama.FastMath;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Arrow;
@@ -48,21 +49,6 @@ public class DeathApplyEvent extends Event implements Cancellable {
         this.attacker = findAttacker();//findAttacker();
         //boolean combat12SecondsAgo = (damages != null && damages.size() != 0)
         //        && FastMath.abs(lastDamage.getTime() - damages.getLast().getTime()) > 1200;
-    }
-
-    private LivingEntity findAttacker() {
-        if(damage == null || history == null || history.size() == 0) return null;
-        List<Damage> damageList = new ArrayList<>(history);
-        //find the player who last damaged
-        Damage lastEntityDamage = null;
-        for(int i = damageList.size() - 1; i >= 0; i--) {
-            lastEntityDamage = damageList.get(i);
-            if(lastEntityDamage.getAttacker() != null) break;
-        }
-
-        if(lastEntityDamage == null) return null;
-        if(damage.getTime() - lastEntityDamage.getTime() > 1200) return null;
-        return lastEntityDamage.getAttacker();
     }
 
     public Player getPlayer() {
@@ -118,7 +104,8 @@ public class DeathApplyEvent extends Event implements Cancellable {
                 withMsg = ChatColor.DARK_PURPLE + "Magic?";
                 break;
             default:
-                throw new NullPointerException("deathapplyevent: 85");
+                withMsg = ChatColor.DARK_PURPLE + getCause().name();
+                break;
         }
 
         if(getSources().size() > 1) {
@@ -157,15 +144,7 @@ public class DeathApplyEvent extends Event implements Cancellable {
 
             builder.append(attackerName);
 
-            int i = 0;
-            if (history != null) {
-                for (Damage last : history) {
-                    if (System.currentTimeMillis() - last.getTime() >= 8000L) break;
-                    if (last.getAttacker() == null ||
-                            last.getAttacker().getName().equalsIgnoreCase(damage.getAttacker().getName())) continue;
-                    i++;
-                }
-            }
+            int i = findAssists();
 
             if (i != 0) builder.append(" + " + i);
             builder.append(ChatColor.GRAY);
@@ -185,6 +164,32 @@ public class DeathApplyEvent extends Event implements Cancellable {
 
     }
 
+    private LivingEntity findAttacker() {
+        if(damage == null) return null;
+        if(history == null || history.size() == 0) return damage.getAttacker();
+        List<Damage> damageList = new ArrayList<>(history);
+        //find the player who last damaged
+        Damage lastEntityDamage = null;
+        for(int i = damageList.size() - 1; i >= 0; i--) {
+            lastEntityDamage = damageList.get(i);
+            if(lastEntityDamage.getAttacker() != null) break;
+        }
+
+        if(lastEntityDamage == null) return null;
+        if(damage.getTime() - lastEntityDamage.getTime() > 12000) return null;
+        return lastEntityDamage.getAttacker();
+    }
+
+    public int findAssists() {
+        int i = 0;
+        for (Damage last : history) {
+            if (System.currentTimeMillis() - last.getTime() >= 8000L) break;
+            if (last.getAttacker() == null ||
+                    last.getAttacker().getName().equalsIgnoreCase(attacker.getName())) continue;
+            i++;
+        }
+        return i;
+    }
     public boolean wasUnsafe() {
         //Gradually add other stuff, maybe if  was stuck in a block?
         return player.getLocation().getY() <= 0;
