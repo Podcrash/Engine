@@ -1,9 +1,11 @@
 package com.podcrash.api.mc.listeners;
 
+import com.abstractpackets.packetwrapper.AbstractPacket;
 import com.podcrash.api.db.pojos.Rank;
 import com.podcrash.api.db.pojos.map.BaseMap;
 import com.podcrash.api.db.pojos.map.Point;
 import com.podcrash.api.db.pojos.map.Point2Point;
+import com.podcrash.api.mc.effect.particle.ParticleGenerator;
 import com.podcrash.api.mc.effect.status.Status;
 import com.podcrash.api.mc.effect.status.StatusApplier;
 import com.podcrash.api.mc.effect.status.StatusWrapper;
@@ -21,6 +23,7 @@ import com.podcrash.api.mc.item.ItemManipulationManager;
 import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.time.resources.SimpleTimeResource;
 import com.podcrash.api.mc.util.EntityUtil;
+import com.podcrash.api.mc.util.PacketUtil;
 import com.podcrash.api.mc.util.PrefixUtil;
 import com.podcrash.api.mc.world.WorldManager;
 import com.podcrash.api.plugin.Pluginizer;
@@ -195,25 +198,27 @@ public class GameListener extends ListenerBase {
     }
 
     private void deathAnimation(Location loc){
+
+        AbstractPacket healBurst = ParticleGenerator.createBlockEffect(loc, Material.WEB.getId());
+        PacketUtil.asyncSend(healBurst, loc.getWorld().getPlayers());
+
         List<Item> blood = new ArrayList<>();
+        int counter = 0;
 
         for(double x = -0.1; x <= 0.1; x += 0.1) {
             for(double z = -0.1; z <= 0.1; z += 0.1){
-                System.out.println(x + " 0.5 " + z);
                 Item singleBlood = ItemManipulationManager.spawnItem(new ItemStack(Material.INK_SACK, 1, (short)1), loc, new Vector(x, 0.5, z));
                 singleBlood.setCustomName("RITB");
                 ItemMeta meta = singleBlood.getItemStack().getItemMeta();
-                meta.setDisplayName("blood" + Long.toString(System.currentTimeMillis()));
+                meta.setDisplayName(counter + Long.toString(System.currentTimeMillis()));
                 singleBlood.getItemStack().setItemMeta(meta);
                 blood.add(singleBlood);
+                counter++;
             }
         }
-        TimeHandler.delayTime(17, new SimpleTimeResource() {
-            @Override
-            public void task() {
-                for(Item dye : blood){
-                    dye.remove();
-                }
+        TimeHandler.delayTime(17, () -> {
+            for(Item dye : blood){
+                dye.remove();
             }
         });
     }
