@@ -160,6 +160,7 @@ public final class HitDetectionInjector {
         if(mat == null || mat == Material.AIR) return 1D;
         double unfiltered = ((CraftLivingEntity) attacker).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).getValue();
         PodcrashSpigot.getInstance().getLogger().info(unfiltered + "");
+        if(unfiltered <= 0) return 0;
         for(PotionEffect effect : attacker.getActivePotionEffects()) {
             if(effect.getType().equals(PotionEffectType.INCREASE_DAMAGE)) unfiltered /= 1D + (1.3D * (effect.getAmplifier() + 1D));
             if(effect.getType().equals(PotionEffectType.WEAKNESS)) unfiltered += 0.5 * (effect.getAmplifier() + 1D);
