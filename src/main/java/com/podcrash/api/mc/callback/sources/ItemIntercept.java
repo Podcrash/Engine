@@ -1,6 +1,7 @@
 package com.podcrash.api.mc.callback.sources;
 
 import com.podcrash.api.mc.callback.CallbackAction;
+import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.util.EntityUtil;
 import com.podcrash.api.mc.world.BlockUtil;
 import org.bukkit.Location;
@@ -40,6 +41,10 @@ public class ItemIntercept extends CallbackAction<ItemIntercept> {
                 itemClone.setY(0);
                 locationClone.setY(0);
                 if((location.getY() <= item.getLocation().getY() && item.getLocation().getY() < location.getY() + 2) && itemClone.distanceSquared(locationClone) <= 1.1) {
+                    if(living instanceof Player) {
+                        if(!GameManager.getGame().isParticipating((Player) living) || GameManager.getGame().isRespawning((Player) living))
+                            return false;
+                    }
                     this.entity = living;
                     return true;
                 }else if(!BlockUtil.isPassable(item.getLocation().add(dir.multiply(1.5D)).getBlock())){
