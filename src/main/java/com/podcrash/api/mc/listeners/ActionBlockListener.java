@@ -58,6 +58,7 @@ public final class ActionBlockListener extends ListenerBase {
             switch (actionVector.actionType) {
                 case SLIME:
                     player.setVelocity(actionVector.vector);
+                    FallDamageHandler.guaranteeSafeFall(event.getPlayer());
                     break;
                 case TELEPORT:
                     Location teleportLoc = actionVector.vector.toLocation(location.getWorld());

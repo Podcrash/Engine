@@ -76,6 +76,20 @@ public class StatusApplier {
         } else {
             applyCustom(status, iduration, ipotency);
         }
+
+        //only work for vanilla effects.
+        if(override && status.isVanilla()) {
+            StatusWrapper wrapper = fromPotionEffect(status);// 30 seconds
+            Pluginizer.getLogger().info("statusppaplier wrapper: " + wrapper);
+            if(wrapper == null) return;
+            float newDuration = (wrapper.getDuration() - duration);
+            Pluginizer.getLogger().info("statusppaplier duration: " + newDuration);
+            if(newDuration < 0) return;
+            StatusWrapper newWrapper = new StatusWrapper(wrapper.getStatus(), newDuration, wrapper.getPotency(), wrapper.isAmbience(), wrapper.isOverride());
+
+            Pluginizer.getLogger().info("statusppaplier new wrapper: " + newWrapper);
+            TimeHandler.delayTime((long) (20L * (duration + 0.5)), () -> applyStatus(newWrapper));
+        }
     }
 
     public void applyStatus(Status status, float duration, int potency, boolean ambient) {
@@ -87,7 +101,7 @@ public class StatusApplier {
     }
 
     public void applyStatus(StatusWrapper statusWrapper) {
-        applyStatus(statusWrapper.getStatus(), statusWrapper.getDuration(), statusWrapper.getPotency(), statusWrapper.isAmbience());
+        applyStatus(statusWrapper.getStatus(), statusWrapper.getDuration(), statusWrapper.getPotency(), statusWrapper.isAmbience(), statusWrapper.isOverride());
     }
 
     public void applyStatus(StatusWrapper... statusWrappers) {
@@ -410,7 +424,17 @@ public class StatusApplier {
     public boolean has(Status status) {
         return getEffects().contains(status);
     }
-
+    private StatusWrapper fromPotionEffect(Status status) {
+        PotionEffect e = null;
+        for(PotionEffect effect : player.getActivePotionEffects()) {
+            if (effect.getType().hashCode() == status.getId()) {
+                e = effect;
+                break;
+            }
+        }
+        if(e == null) return null;
+        return new StatusWrapper(status, e.getDuration()/20F, e.getAmplifier(), e.isAmbient());
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

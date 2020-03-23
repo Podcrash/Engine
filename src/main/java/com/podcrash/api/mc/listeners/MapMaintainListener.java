@@ -146,10 +146,12 @@ public class MapMaintainListener extends ListenerBase {
 
         final List<EntityDamageEvent.DamageCause> poss = Arrays.asList(
                 EntityDamageEvent.DamageCause.FIRE_TICK,
+                EntityDamageEvent.DamageCause.FIRE,
                 EntityDamageEvent.DamageCause.FALL,
                 EntityDamageEvent.DamageCause.POISON,
                 EntityDamageEvent.DamageCause.WITHER,
-                EntityDamageEvent.DamageCause.VOID
+                EntityDamageEvent.DamageCause.VOID,
+                EntityDamageEvent.DamageCause.SUFFOCATION
                 );
         //if the damage is one of the causes above
         //cancel it and set our own damage.

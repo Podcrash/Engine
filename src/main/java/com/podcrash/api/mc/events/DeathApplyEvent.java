@@ -32,6 +32,8 @@ public class DeathApplyEvent extends Event implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
     private Player player;
     private LivingEntity attacker;
+
+    private Damage lastAttackerDamage;
     private Damage damage;
     private Deque<Damage> history;
     private boolean cancel;
@@ -87,26 +89,8 @@ public class DeathApplyEvent extends Event implements Cancellable {
      * @return the player dying message
      */
     public String getDeathMessage() {
-        String withMsg;
-        switch(getCause()) {
-            case PROJECTILE:
-                withMsg = ChatColor.YELLOW + "Archery";
-                break;
-            case MELEE:
-                if (getItemInHand() == null || getItemInHand().getItemMeta() == null) withMsg = "Fists";
-                else withMsg = getItemInHand().getItemMeta().getDisplayName();
-                break;
-            case CUSTOM:
-                DamageSource first = getSources().get(0);
-                withMsg =  first.getPrefix() + first.getName();
-                break;
-            case NULL:
-                withMsg = ChatColor.DARK_PURPLE + "Magic?";
-                break;
-            default:
-                withMsg = ChatColor.DARK_PURPLE + getCause().name();
-                break;
-        }
+        String withMsg = withMsgCause(damage);
+
 
         if(getSources().size() > 1) {
             StringBuilder builder = new StringBuilder(withMsg);
@@ -160,8 +144,31 @@ public class DeathApplyEvent extends Event implements Cancellable {
     private void finishAttacker(StringBuilder builder) {
 
     }
-    private void finishCause() {
+    private String withMsgCause(Damage damage) {
+        String withMsg;
+        Cause cause = damage.getCause();
+        switch(cause) {
+            case PROJECTILE:
+                withMsg = ChatColor.YELLOW + "Archery";
+                break;
+            case MELEE:
+                if (damage.getItem() == null || damage.getItem().getItemMeta() == null) withMsg = "Fists";
+                else withMsg = damage.getItem().getItemMeta().getDisplayName();
+                break;
+            case CUSTOM:
+                DamageSource first = damage.getSource().get(0);
+                withMsg =  first.getPrefix() + first.getName();
+                break;
+            case NULL:
+                withMsg = ChatColor.DARK_PURPLE + "Magic?";
+                break;
+            default:
 
+                withMsg = (lastAttackerDamage == null) ? ChatColor.DARK_PURPLE + cause.name() : withMsgCause(lastAttackerDamage);
+                break;
+        }
+
+        return withMsg;
     }
 
     private LivingEntity findAttacker() {
@@ -169,26 +176,31 @@ public class DeathApplyEvent extends Event implements Cancellable {
         if(history == null || history.size() == 0) return damage.getAttacker();
         List<Damage> damageList = new ArrayList<>(history);
         //find the player who last damaged
-        Damage lastEntityDamage = null;
+        Damage lastEntityDamage = damage;
         for(int i = damageList.size() - 1; i >= 0; i--) {
-            lastEntityDamage = damageList.get(i);
             if(lastEntityDamage.getAttacker() != null) break;
+            lastEntityDamage = damageList.get(i);
         }
 
         if(lastEntityDamage == null) return null;
         if(damage.getTime() - lastEntityDamage.getTime() > 12000) return null;
+        lastAttackerDamage = lastEntityDamage;
         return lastEntityDamage.getAttacker();
     }
 
     public int findAssists() {
-        int i = 0;
-        for (Damage last : history) {
-            if (System.currentTimeMillis() - last.getTime() >= 8000L) break;
+        int a = 0;
+        List<Damage> damageList = new ArrayList<>(history);
+        damageList.add(damage);
+        long time = System.currentTimeMillis();
+        for(int i = damageList.size() - 1; i >= 0; i--) {
+            Damage last = damageList.get(i);
+            if (time - last.getTime() >= 8000L) continue;
             if (last.getAttacker() == null ||
-                    last.getAttacker().getName().equalsIgnoreCase(attacker.getName())) continue;
-            i++;
+                    last.getAttacker().getName().equals(attacker.getName())) continue;
+            a++;
         }
-        return i;
+        return a;
     }
     public boolean wasUnsafe() {
         //Gradually add other stuff, maybe if  was stuck in a block?

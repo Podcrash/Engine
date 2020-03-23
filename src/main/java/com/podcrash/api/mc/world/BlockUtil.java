@@ -92,7 +92,7 @@ public final class BlockUtil {
         double radiusSquared = radius * radius;
         for(Player player : players) {
             if(player == user) continue;
-            Location loc = player.getLocation();
+            Location loc = player.getLocation().add(0, 1, 0);
             double distanceSquared = loc.distanceSquared(location);
             if(distanceSquared <= radiusSquared)
                 return true;

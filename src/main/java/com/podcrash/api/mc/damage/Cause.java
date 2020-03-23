@@ -21,6 +21,7 @@ public enum Cause {
     PROJECTILE,
     POISON("POISON"),
     SUFFOCATION("SUFFFOCATION"),
+    VOID("VOID"),
     NULL;
 
     private String bukkitName;

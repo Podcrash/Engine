@@ -32,6 +32,12 @@ public class GameDamagerConverterListener extends ListenerBase {
     }
 
     @EventHandler(
+            priority = EventPriority.LOWEST
+    )
+    public void cancelFireBalls(EntityDamageByEntityEvent event) {
+        if(event.getDamager() instanceof Fireball) event.setCancelled(true);
+    }
+    @EventHandler(
             priority = EventPriority.HIGHEST
     )
     public void damage(EntityDamageByEntityEvent event) {
