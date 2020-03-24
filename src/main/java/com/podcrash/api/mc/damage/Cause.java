@@ -20,7 +20,7 @@ public enum Cause {
     MELEESKILL,
     PROJECTILE,
     POISON("POISON"),
-    SUFFOCATION("SUFFFOCATION"),
+    SUFFOCATION("SUFFOCATION"),
     VOID("VOID"),
     NULL;
 

@@ -5,12 +5,15 @@ import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.WorldLoader;
 import com.podcrash.api.mc.damage.Cause;
+import com.podcrash.api.mc.damage.DamageApplier;
 import com.podcrash.api.mc.damage.DamageQueue;
 import com.podcrash.api.mc.events.DamageApplyEvent;
 import com.podcrash.api.mc.sound.SoundPlayer;
+import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.util.PacketUtil;
 import com.podcrash.api.mc.world.WorldManager;
 import com.podcrash.api.plugin.Pluginizer;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -32,7 +35,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Prevent dumb things from happening
@@ -157,6 +162,16 @@ public class MapMaintainListener extends ListenerBase {
         //cancel it and set our own damage.
         //This is done because the types of damage above affects velocity
         if(poss.contains(event.getCause())) {
+
+            Cause cause = Cause.findByEntityDamageCause(event.getCause());
+
+            if(cause == Cause.SUFFOCATION) {
+                if(p instanceof Player && afterHealth <= 0D) {
+                    DamageQueue.artificialDie((Player) p);
+                    event.setCancelled(true);
+                }
+                return;
+            }
             event.setCancelled(true);
             damage(p, damage);
 
@@ -175,19 +190,20 @@ public class MapMaintainListener extends ListenerBase {
      * Send animation packets as well as sound
      * (For some reason, the animation packet is also supposed to send sound as well
      * but it doesn't?)
-     * @param p
-     * @param damage
+     * @param victim The player that is taking the damage.
+     * @param damage How much damage the player must take
      */
-    private void damage(LivingEntity p, double damage) {
-        double health = p.getHealth() - damage;
-        p.setHealth((health < 0) ? 0 : health);
+    private void damage(LivingEntity victim, double damage) {
+
+        double health = victim.getHealth() - damage;
+        victim.setHealth((health < 0) ? 0 : health);
 
         WrapperPlayServerEntityStatus packet = new WrapperPlayServerEntityStatus();
-        packet.setEntityId(p.getEntityId());
+        packet.setEntityId(victim.getEntityId());
         packet.setEntityStatus(WrapperPlayServerEntityStatus.Status.ENTITY_HURT);
 
-        PacketUtil.syncSend(packet, p.getWorld().getPlayers());
-        SoundPlayer.sendSound(p.getLocation(), "game.player.hurt", 1, 63);
+        PacketUtil.syncSend(packet, victim.getWorld().getPlayers());
+        SoundPlayer.sendSound(victim.getLocation(), "game.player.hurt", 1, 63);
 
     }
 
