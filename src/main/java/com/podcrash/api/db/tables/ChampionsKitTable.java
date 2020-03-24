@@ -15,8 +15,12 @@ import com.podcrash.api.db.pojos.GameData;
 import com.podcrash.api.db.pojos.InvictaPlayer;
 import com.podcrash.api.db.pojos.PojoHelper;
 import com.podcrash.api.plugin.Pluginizer;
+import io.reactivex.Completable;
 import org.bson.conversions.Bson;
+
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
@@ -91,6 +95,14 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
             updateResult.complete(res);
         });
         futureGuaranteeGet(updateResult);
+    }
+
+    public void updateAllowedSkills(UUID uuid, String skill) {
+        String key = "gameData.conquest.allowedSkills";
+        updateSync(eq("uuid", uuid), Updates.push(key, skill));
+    }
+    public CompletableFuture<Set<String>> getAllowedSkillsFuture(UUID uuid) {
+        return getKitDocumentAsync(uuid).thenApplyAsync(document -> new HashSet<>(document.getAllowedSkills()), SERVICE);
     }
     public void set(UUID uuid, String clasz, int build_id, String data) {
         String key = "gameData.conquest.builds." + clasz + build_id;

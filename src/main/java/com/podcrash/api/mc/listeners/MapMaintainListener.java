@@ -156,7 +156,8 @@ public class MapMaintainListener extends ListenerBase {
                 EntityDamageEvent.DamageCause.POISON,
                 EntityDamageEvent.DamageCause.WITHER,
                 EntityDamageEvent.DamageCause.VOID,
-                EntityDamageEvent.DamageCause.SUFFOCATION
+                EntityDamageEvent.DamageCause.SUFFOCATION,
+                EntityDamageEvent.DamageCause.LAVA
                 );
         //if the damage is one of the causes above
         //cancel it and set our own damage.

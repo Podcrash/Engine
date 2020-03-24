@@ -22,6 +22,7 @@ public enum Cause {
     POISON("POISON"),
     SUFFOCATION("SUFFOCATION"),
     VOID("VOID"),
+    LAVA("LAVA"),
     NULL;
 
     private String bukkitName;

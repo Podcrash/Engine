@@ -47,12 +47,23 @@ public class EconomyTable extends MongoBaseTable {
         return future;
     }
 
+    public CompletableFuture<Boolean> hasItem(String item) {
+        item = ChatUtil.strip(item);
+        CompletableFuture<Boolean> bool = new CompletableFuture<>();
+        getCollection().find(Filters.eq("name", item)).first(((result, t) -> {
+            DBUtils.handleThrowables(t);
+            bool.complete(result != null);
+        }));
+
+        return bool;
+    }
     public CompletableFuture<Double> getCost(String item) {
         item = ChatUtil.strip(item);
         CompletableFuture<Double> costFuture = new CompletableFuture<>();
         getCollection().find(Filters.eq("name", item)).first((res, t) -> {
             DBUtils.handleThrowables(t);
-            costFuture.complete((Double) res.get("cost"));
+            if(res == null) costFuture.complete(0D);
+            else costFuture.complete((Double) res.get("cost"));
         });
 
         return costFuture;

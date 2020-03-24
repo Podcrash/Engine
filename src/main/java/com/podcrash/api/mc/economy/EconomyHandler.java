@@ -7,6 +7,7 @@ import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.EconomyTable;
 import com.podcrash.api.db.tables.PlayerTable;
 import com.podcrash.api.mc.events.econ.*;
+import com.podcrash.api.mc.util.ChatUtil;
 import com.podcrash.api.plugin.Pluginizer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -54,26 +55,37 @@ public class EconomyHandler implements IEconomyHandler {
         //event here
     }
 
-    public CompletableFuture<Boolean> buy(final Player player, final String item) {
+    public boolean containsItem(String item) {
+        item = ChatUtil.strip(item);
+        try {
+            return eco.hasItem(item).get(2, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public CompletableFuture<Boolean> buy(final Player player, String item) {
+        item = ChatUtil.strip(item);
         CompletableFuture<Double> costFuture = eco.getCost(item);
 
         UUID uuid = player.getUniqueId();
         CompletableFuture<Currency> currencyFuture = players.getCurrency(uuid);
 
         PluginManager pluginManager = Bukkit.getPluginManager();
+        String finalItem = item;
         return currencyFuture.thenCombineAsync(costFuture, (currency, oldCost) -> {
 
-            BuyAttemptEvent attempt = new BuyAttemptEvent(player, item, oldCost, currency.getGold());
+            BuyAttemptEvent attempt = new BuyAttemptEvent(player, finalItem, oldCost, currency.getGold());
             pluginManager.callEvent(attempt);
             double cost = attempt.getCost();
 
             boolean canPay = currency.getGold() > cost;
 
             if(canPay) {
-                BuySuccessEvent success = new BuySuccessEvent(player, item, cost, currency.getGold());
+                BuySuccessEvent success = new BuySuccessEvent(player, finalItem, cost, currency.getGold());
                 pluginManager.callEvent(success);
                 currentPlayerOrder.put(player.getName(), success);
-            } else pluginManager.callEvent(new BuyFaliureEvent(player, item, cost, currency.getGold()));
+            } else pluginManager.callEvent(new BuyFaliureEvent(player, finalItem, cost, currency.getGold()));
 
             return canPay;
         }).exceptionally(t -> {
@@ -82,10 +94,18 @@ public class EconomyHandler implements IEconomyHandler {
         });
     }
 
+    public boolean hasAttempted(Player player, String item) {
+        item = ChatUtil.strip(item);
+        BuySuccessEvent success = currentPlayerOrder.get(player.getName());
+        if(success == null) return false;
+        return success.getItem().equalsIgnoreCase(item);
+    }
     @Override
     public void confirm(Player player, String item) {
+        item = ChatUtil.strip(item);
         BuySuccessEvent success = currentPlayerOrder.get(player.getName());
         if(success == null) return;
+        if(!success.getItem().equalsIgnoreCase(item)) return;
         BuyConfirmEvent confirm  = new BuyConfirmEvent(success);
         Bukkit.getPluginManager().callEvent(confirm);
         pay(player, -confirm.getCost());
