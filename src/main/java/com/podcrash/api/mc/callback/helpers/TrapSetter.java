@@ -27,6 +27,7 @@ public final class TrapSetter {
         trapIds.add(item.getEntityId());
         item.setPickupDelay(100000);
         time.then(() -> {
+            if(!trapIds.contains(item.getEntityId())) return;
             item.setPickupDelay(0);
             TrapPrimeEvent primeEvent = new TrapPrimeEvent(item);
             Bukkit.getPluginManager().callEvent(primeEvent);
@@ -43,5 +44,11 @@ public final class TrapSetter {
     public static boolean deleteTrap(Item item) {
         if(item == null) return false;
         return trapIds.remove(item.getEntityId());
+    }
+
+    public static boolean destroyTrap(Item item) {
+        boolean delete = deleteTrap(item);
+        item.remove();
+        return delete;
     }
 }
