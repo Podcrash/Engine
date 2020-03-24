@@ -60,4 +60,12 @@ public final class ChatUtil {
         }
         return builder.toString();
     }
+
+    /**
+     * Strip the parametric string into only its alphabetical characters
+     * and lowercased.
+     */
+    public static String strip(String str) {
+        return str.replaceAll("/([^A-z]*)/g", str).replaceAll(" ", "").toLowerCase();
+    }
 }

@@ -1,13 +1,14 @@
 package com.podcrash.api.db.tables;
 
 import com.mongodb.async.SingleResultCallback;
+import com.mongodb.client.model.*;
+import com.mongodb.client.result.UpdateResult;
 import com.podcrash.api.db.DBUtils;
 import com.podcrash.api.db.MongoBaseTable;
 
 import static com.mongodb.client.model.Filters.*;
 
-import com.mongodb.client.model.IndexOptions;
-import com.mongodb.client.model.Indexes;
+import com.podcrash.api.db.pojos.Currency;
 import com.podcrash.api.db.pojos.InvictaPlayer;
 import com.podcrash.api.db.pojos.PojoHelper;
 import com.podcrash.api.plugin.Pluginizer;
@@ -60,5 +61,25 @@ public class PlayerTable extends MongoBaseTable {
         };
         getCollection(InvictaPlayer.class).find(eq("uuid", uuid)).first(callback);
         return future;
+    }
+
+    public CompletableFuture<UpdateResult> incrementMoney(UUID uuid, double value){
+        CompletableFuture<UpdateResult> res = new CompletableFuture<>();
+        getCollection().updateOne(eq("uuid", uuid), Updates.inc("currency.gold", value), ((result, t) -> {
+            DBUtils.handleThrowables(t);
+            res.complete(result);
+        }));
+
+        return res;
+    }
+
+    public CompletableFuture<Currency> getCurrency(UUID uuid) {
+        CompletableFuture<Currency> currencyCompletableFuture = new CompletableFuture<>();
+        getCollection(InvictaPlayer.class).find(eq("uuid", uuid)).projection(Projections.include("currency")).first((result, t) -> {
+            DBUtils.handleThrowables(t);
+            currencyCompletableFuture.complete(result.getCurrency());
+        });
+
+        return currencyCompletableFuture;
     }
 }
