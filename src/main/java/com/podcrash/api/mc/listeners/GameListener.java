@@ -366,7 +366,9 @@ public class GameListener extends ListenerBase {
         Rank rank = PrefixUtil.getPlayerRole(player);
         if(rank != null) {
             prefix = PrefixUtil.getPrefix(rank);
+            prefix += " ";
         }
+
         if(GameManager.hasPlayer(player)) {
             e.setCancelled(true);
             Game game = GameManager.getGame();
@@ -379,8 +381,14 @@ public class GameListener extends ListenerBase {
                     e.getMessage())
             );
         }else {
-            e.getRecipients().removeIf(GameManager::hasPlayer);
-            e.setFormat(prefix + ChatColor.RESET + "%s " + ChatColor.GRAY + "%s");
+            //e.getRecipients().removeIf(GameManager::hasPlayer);
+            e.setFormat(String.format("%s%s %s%s" + ChatColor.RESET + " %s",
+                    ChatColor.BOLD,
+                    prefix,
+                    ChatColor.RESET,
+                    player.getName(),
+                    e.getMessage())
+            );
 
         }
     }

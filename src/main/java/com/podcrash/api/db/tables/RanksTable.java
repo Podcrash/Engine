@@ -12,6 +12,7 @@ import com.podcrash.api.db.IPlayerDB;
 import com.podcrash.api.db.MongoBaseTable;
 import com.podcrash.api.db.pojos.InvictaPlayer;
 import com.podcrash.api.db.pojos.Rank;
+import org.bukkit.Bukkit;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -132,26 +133,34 @@ public class RanksTable extends MongoBaseTable implements IPlayerDB {
         }, SERVICE);
     }
 
-    public CompletableFuture<List<Rank>> getRanksAsync(UUID uuid) {
+    public CompletableFuture<Set<Rank>> getRanksAsync(UUID uuid) {
         return getPlayerDocumentAsync(uuid).thenApplyAsync(player -> {
+
+            Set<Rank> output = new HashSet<>();
+
             Set<String> ranks = player.getRanks();
             List<Rank> rankList = new ArrayList<>();
             Block<Rank> addRank = rankList::add;
             CompletableFuture<Void> future = new CompletableFuture<>();
-            getCollection(Rank.class).find(Filters.in("ranks", ranks)).forEach(addRank, (res, t) -> {
+            getCollection(Rank.class).find().forEach(addRank, (res, t) -> {
                 DBUtils.handleThrowables(t);
                 future.complete(res);
             });
             futureGuaranteeGet(future);
-            return rankList;
+
+            for(Rank r : rankList) {
+                if(ranks.contains(r.getName())) output.add(r);
+            }
+
+            return output;
         });
     }
-    public List<Rank> getRanksSync(UUID uuid) {
+    public Set<Rank> getRanksSync(UUID uuid) {
         return futureGuaranteeGet(getRanksAsync(uuid));
     }
     public void addRole(UUID uuid, String role) {
         CompletableFuture<UpdateResult> future = new CompletableFuture<>();
-        getCollection(InvictaPlayer.class).updateOne(Filters.eq("uuid", uuid), Updates.push("ranks", role), (res, t) -> {
+        getCollection("players").updateOne(Filters.eq("uuid", uuid), Updates.push("ranks", role), (res, t) -> {
             DBUtils.handleThrowables(t);
             future.complete(res);
         });
@@ -161,7 +170,7 @@ public class RanksTable extends MongoBaseTable implements IPlayerDB {
     public CompletableFuture<Boolean> hasRoleAsync(UUID uuid, final String role) {
         return getRanksAsync(uuid).thenApplyAsync(ranks -> {
             for(Rank r : ranks) {
-                if(r.getPermissions().contains(role)) return true;
+                if(r.getName().equals(role)) return true;
             }
             return false;
         });
@@ -172,7 +181,7 @@ public class RanksTable extends MongoBaseTable implements IPlayerDB {
 
     public void removeRole(UUID uuid, String role) {
         CompletableFuture<UpdateResult> future = new CompletableFuture<>();
-        getCollection(InvictaPlayer.class).updateOne(Filters.eq("uuid", uuid), Updates.pull("ranks", role), (res, t) -> {
+        getCollection("players").updateOne(Filters.eq("uuid", uuid), Updates.pull("ranks", role), (res, t) -> {
             DBUtils.handleThrowables(t);
             future.complete(res);
         });
