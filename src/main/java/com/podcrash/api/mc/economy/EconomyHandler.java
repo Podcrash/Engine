@@ -6,38 +6,47 @@ import com.podcrash.api.db.pojos.Currency;
 import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.EconomyTable;
 import com.podcrash.api.db.tables.PlayerTable;
+import com.podcrash.api.mc.events.econ.*;
 import com.podcrash.api.plugin.Pluginizer;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.PluginManager;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public final class EconomyHandler {
-    private EconomyHandler() {
+public class EconomyHandler implements IEconomyHandler {
+    private EconomyTable eco;
+    private PlayerTable players;
 
+    //this is used to track the orders as it is passing from event to event.
+    private Map<String, BuySuccessEvent> currentPlayerOrder;
+
+    /**
+     * Set up some of the variables
+     */
+    public EconomyHandler() {
+        eco = TableOrganizer.getTable(DataTableType.ECONOMY);
+        players = TableOrganizer.getTable(DataTableType.PLAYERS);
+
+        currentPlayerOrder = new HashMap<>();
     }
 
-    private static EconomyTable getEcoTable() {
-        return TableOrganizer.getTable(DataTableType.ECONOMY);
+
+    public void pay(Player player, double moneys) {
+        Bukkit.getPluginManager().callEvent(new PayEvent(player, moneys));
+        players.incrementMoney(player.getUniqueId(), moneys);
     }
 
-    private static PlayerTable getPlayerTable() {
-        return TableOrganizer.getTable(DataTableType.PLAYERS);
-    }
-
-    public static void pay(Player player, double moneys) {
-        Pluginizer.getLogger().info("you recieved " + moneys + " gold!");
-        getPlayerTable().incrementMoney(player.getUniqueId(), moneys);
-        //event here
-    }
-
-
-    public static double getMoney(Player player) {
+    public double getMoney(Player player) {
         try {
-            return getPlayerTable().getCurrency(player.getUniqueId()).get(5, TimeUnit.SECONDS).getGold();
+            return players.getCurrency(player.getUniqueId()).get(5, TimeUnit.SECONDS).getGold();
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             e.printStackTrace();
         }
@@ -45,22 +54,27 @@ public final class EconomyHandler {
         //event here
     }
 
-    public static CompletableFuture<Boolean> buy(Player player, String item) {
-        CompletableFuture<Double> costFuture = getEcoTable().getCost(item);
+    public CompletableFuture<Boolean> buy(final Player player, final String item) {
+        CompletableFuture<Double> costFuture = eco.getCost(item);
 
         UUID uuid = player.getUniqueId();
-        CompletableFuture<Currency> currencyFuture = getPlayerTable().getCurrency(uuid);
+        CompletableFuture<Currency> currencyFuture = players.getCurrency(uuid);
 
-        return currencyFuture.thenCombineAsync(costFuture, (currency, cost) -> {
+        PluginManager pluginManager = Bukkit.getPluginManager();
+        return currencyFuture.thenCombineAsync(costFuture, (currency, oldCost) -> {
+
+            BuyAttemptEvent attempt = new BuyAttemptEvent(player, item, oldCost, currency.getGold());
+            pluginManager.callEvent(attempt);
+            double cost = attempt.getCost();
+
             boolean canPay = currency.getGold() > cost;
-            if(canPay) {
-                Pluginizer.getLogger().info("you bought " + item);
-                getPlayerTable().incrementMoney(uuid, -cost);
-            } else {
-                Pluginizer.getLogger().info("you did not buy " + item);
-            }
 
-            //event that you bought something here
+            if(canPay) {
+                BuySuccessEvent success = new BuySuccessEvent(player, item, cost, currency.getGold());
+                pluginManager.callEvent(success);
+                currentPlayerOrder.put(player.getName(), success);
+            } else pluginManager.callEvent(new BuyFaliureEvent(player, item, cost, currency.getGold()));
+
             return canPay;
         }).exceptionally(t -> {
             DBUtils.handleThrowables(t);
@@ -68,4 +82,13 @@ public final class EconomyHandler {
         });
     }
 
+    @Override
+    public void confirm(Player player, String item) {
+        BuySuccessEvent success = currentPlayerOrder.get(player.getName());
+        if(success == null) return;
+        BuyConfirmEvent confirm  = new BuyConfirmEvent(success);
+        Bukkit.getPluginManager().callEvent(confirm);
+        pay(player, -confirm.getCost());
+        currentPlayerOrder.remove(player.getName());
+    }
 }

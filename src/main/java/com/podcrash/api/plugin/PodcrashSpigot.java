@@ -7,6 +7,8 @@ import com.grinderwolf.swm.api.loaders.SlimeLoader;
 import com.podcrash.api.db.tables.WorldLoader;
 import com.podcrash.api.mc.Configurator;
 import com.podcrash.api.mc.damage.DamageQueue;
+import com.podcrash.api.mc.economy.EconomyHandler;
+import com.podcrash.api.mc.economy.IEconomyHandler;
 import com.podcrash.api.mc.listeners.*;
 import com.podcrash.api.mc.tracker.CoordinateTracker;
 import com.podcrash.api.mc.tracker.Tracker;
@@ -42,6 +44,8 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
     private VectorTracker vectorTracker;
 
     private final Map<String, Configurator> configurators = new HashMap<>();
+
+    private IEconomyHandler economyHandler;
     @Override
     public void redis(RedissonClient client) {
 
@@ -118,6 +122,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             e.printStackTrace();
         }
 
+        economyHandler = new EconomyHandler();
         Communicator.readyGameLobby();
         if(Communicator.isGameLobby())
             gameStart();
@@ -211,5 +216,9 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
     public void reloadConfigurators() {
         CompletableFuture.runAsync(() ->
                 configurators.values().forEach(Configurator::reloadConfig));
+    }
+
+    public IEconomyHandler getEconomyHandler() {
+        return economyHandler;
     }
 }
