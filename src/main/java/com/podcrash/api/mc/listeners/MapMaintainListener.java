@@ -44,9 +44,11 @@ import java.util.Map;
  * Prevent dumb things from happening
  */
 public class MapMaintainListener extends ListenerBase {
+    private Map<String, Long> lastHit;
     private final JavaPlugin plugin = Pluginizer.getSpigotPlugin();
     public MapMaintainListener(JavaPlugin plugin) {
         super(plugin);
+        this.lastHit = new HashMap<>();
     }
 
     @EventHandler
@@ -172,29 +174,24 @@ public class MapMaintainListener extends ListenerBase {
         //if the damage is one of the causes above
         //cancel it and set our own damage.
         //This is done because the types of damage above affects velocity
-        if(poss.contains(event.getCause())) {
-
-            Cause cause = Cause.findByEntityDamageCause(event.getCause());
-
-            if(cause == Cause.SUFFOCATION) {
-                if(p instanceof Player && afterHealth <= 0D) {
-                    DamageQueue.artificialDie((Player) p);
-                    event.setCancelled(true);
-                }
-                return;
-            }
-            event.setCancelled(true);
-            damage(p, damage);
-
-            DamageQueue.artificialAddHistory(p, damage, Cause.findByEntityDamageCause(event.getCause()));
-            //if the player is about to die, cancel it
-            //Then call our own death event.
-            if(p instanceof Player && afterHealth <= 0D) {
-                DamageQueue.artificialDie((Player) p);
-                event.setCancelled(true);
-            }
+        if(!poss.contains(event.getCause())) return;
+        event.setCancelled(true);
+        Long last = lastHit.get(p.getName());
+        long curr = System.currentTimeMillis();
+        if(last != null) {
+            long ticksMilles = 600L;
+            if(curr - last <= ticksMilles) return;
         }
+        lastHit.put(p.getName(), curr);
+        Cause cause = Cause.findByEntityDamageCause(event.getCause());
+        damage(p, damage);
 
+        DamageQueue.artificialAddHistory(p, damage, cause);
+        //if the player is about to die, cancel it
+        //Then call our own death event.
+        if(p instanceof Player && afterHealth <= 0D) {
+            DamageQueue.artificialDie((Player) p);
+        }
     }
 
     /**
