@@ -85,7 +85,7 @@ public class MapMaintainListener extends ListenerBase {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlace(BlockPlaceEvent e){
         if (plugin.getConfig().getList("worlds").contains(e.getBlock().getWorld().getName()) || evaluate(e.getBlock().getWorld())) {
-            if (!e.getPlayer().hasPermission("invicta.map.modify")) {
+            if (!e.getPlayer().hasPermission("invicta.map")) {
                 e.setCancelled(true);
             }
         }
@@ -94,7 +94,7 @@ public class MapMaintainListener extends ListenerBase {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onBreak(BlockBreakEvent e) {
         if (plugin.getConfig().getList("worlds").contains(e.getBlock().getWorld().getName()) || evaluate(e.getBlock().getWorld())) {
-            if (!e.getPlayer().hasPermission("invicta.map.modify")) {
+            if (!e.getPlayer().hasPermission("invicta.map")) {
                 e.setCancelled(true);
             }
         }
