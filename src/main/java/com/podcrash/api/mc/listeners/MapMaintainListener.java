@@ -24,6 +24,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -82,9 +83,18 @@ public class MapMaintainListener extends ListenerBase {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlace(BlockPlaceEvent e){
+        if (plugin.getConfig().getList("worlds").contains(e.getBlock().getWorld().getName()) || evaluate(e.getBlock().getWorld())) {
+            if (!e.getPlayer().hasPermission("invicta.map.modify")) {
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onBreak(BlockBreakEvent e) {
         if (plugin.getConfig().getList("worlds").contains(e.getBlock().getWorld().getName()) || evaluate(e.getBlock().getWorld())) {
-            if (!e.getPlayer().hasPermission("champions.can.break.map")) {
+            if (!e.getPlayer().hasPermission("invicta.map.modify")) {
                 e.setCancelled(true);
             }
         }
