@@ -66,6 +66,7 @@ public final class ChatUtil {
      * and lowercased.
      */
     public static String strip(String str) {
+        str = ChatUtil.purge(str);
         return str.replaceAll("/([^A-z]*)/g", str).replaceAll(" ", "").toLowerCase();
     }
 }

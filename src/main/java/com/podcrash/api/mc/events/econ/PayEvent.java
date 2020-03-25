@@ -24,6 +24,14 @@ public class PayEvent extends Event {
         return Pluginizer.getSpigotPlugin().getEconomyHandler().getMoney(player);
     }
 
+    public Player getPlayer() {
+        return player;
+    }
+
+    public double getMoneys() {
+        return moneys;
+    }
+
     @Override
     public HandlerList getHandlers() {
         return handlers;
