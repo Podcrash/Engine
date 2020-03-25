@@ -199,8 +199,8 @@ public class GameListener extends ListenerBase {
 
     private void deathAnimation(Location loc){
 
-        AbstractPacket healBurst = ParticleGenerator.createBlockEffect(loc, Material.WEB.getId());
-        PacketUtil.asyncSend(healBurst, loc.getWorld().getPlayers());
+        AbstractPacket boneShatter = ParticleGenerator.createBlockEffect(loc, Material.WEB.getId());
+        PacketUtil.asyncSend(boneShatter, loc.getWorld().getPlayers());
 
         List<Item> blood = new ArrayList<>();
         int counter = 0;
