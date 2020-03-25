@@ -353,14 +353,12 @@ public class GameListener extends ListenerBase {
     public void chat(AsyncPlayerChatEvent e) {
         Player player = e.getPlayer();
 
-        /*
-        if(rank.getName().equalsIgnoreCase("muted")){
+        if(player.hasPermission("invicta.mute")){
             e.setCancelled(true);
-            player.sendMessage(String.format("%sChampions> %sYou are muted.", ChatColor.BLUE, ChatColor.GRAY));
+            player.sendMessage(String.format("%sConquest> %sYou are muted.", ChatColor.BLUE, ChatColor.GRAY));
             return;
         }
 
-         */
         String prefix = "";
 
         Rank rank = PrefixUtil.getPlayerRole(player);
@@ -382,11 +380,12 @@ public class GameListener extends ListenerBase {
             );
         }else {
             //e.getRecipients().removeIf(GameManager::hasPlayer);
-            e.setFormat(String.format("%s%s %s%s" + ChatColor.RESET + " %s",
+            e.setFormat(String.format("%s%s%s%s" + ChatColor.RESET + " %s%s",
                     ChatColor.BOLD,
                     prefix,
                     ChatColor.RESET,
                     player.getName(),
+                    ChatColor.GRAY,
                     e.getMessage())
             );
 
