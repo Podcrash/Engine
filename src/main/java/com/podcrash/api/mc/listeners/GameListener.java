@@ -126,9 +126,15 @@ public class GameListener extends ListenerBase {
         Game game = e.getGame();
         game.getTeams().forEach(team -> {
             team.allSpawn();
-            team.getBukkitPlayers().forEach(player -> player.setSpectator(false));
+            team.getBukkitPlayers().forEach(player -> {
+                player.setSpectator(false);
+                player.setGameMode(GameMode.SURVIVAL);
+            });
         });
-        game.getBukkitSpectators().forEach(player -> player.teleport(game.getSpawnLocation()));
+        game.getBukkitSpectators().forEach(player -> {
+            player.teleport(game.getSpawnLocation());
+            player.setGameMode(GameMode.SPECTATOR);
+        });
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -145,9 +151,7 @@ public class GameListener extends ListenerBase {
         for (Player player : game.getBukkitPlayers()) {
             player.teleport(e.getSpawnlocation());
             player.sendMessage(e.getMessage());
-            if(game.isSpectating(player)){
-                player.setGameMode(GameMode.ADVENTURE);
-            }
+            player.setGameMode(GameMode.ADVENTURE);
             deadPeople.remove(player);
             player.sendMessage(builder.toString());
         }
