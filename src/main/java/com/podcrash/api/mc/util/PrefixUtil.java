@@ -13,7 +13,7 @@ import java.util.Set;
 
 public class PrefixUtil {
     public static String getPrefix(Rank role){
-        return role.getColor() + role.getName();
+        return role.getColor() + role.getName() + ChatColor.RESET;
     }
 
     public static Rank getPlayerRole(Player player) {
