@@ -989,7 +989,7 @@ public abstract class Game implements IGame {
         StringBuilder result = new StringBuilder(ChatColor.YELLOW + "" + ChatColor.BOLD + "Spectators: ");
         result.append(ChatColor.RESET);
         for(UUID uuid : spectators) {
-            Player p = Bukkit.getPlayer(name);
+            Player p = Bukkit.getPlayer(uuid);
             result.append(p.getName());
             result.append(' ');
         }
