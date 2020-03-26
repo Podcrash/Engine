@@ -191,7 +191,7 @@ public final class CapturePoint extends WinObjective {
     /**
      * Recursive part of the function to make sure that the wool starts at the same color.
      * @param color
-     * @param times how many timese it will be ran.
+     * @param times how many times it will be ran.
      * @return
      */
     public TeamEnum capture(String color, int times){
@@ -222,28 +222,34 @@ public final class CapturePoint extends WinObjective {
     public TeamEnum capture(String color){// yeah we need enums
         TeamEnum team = TeamEnum.getByColor(color);
         if(team == null) throw new IllegalArgumentException("color cannot be " + color + ". Allowed: red, blue, white");
-        if(this.color.equalsIgnoreCase(color)) return null;
+        if(this.color.equalsIgnoreCase(color)) {
+            //Two cases:
+            // (a) Red on a full "red capture"
+            if (isFull) return null;
+            // (b) Red on a not-full "red capture"
+            restoreCapture();
+            return isFull ? team : null;
+        }
         if(isCaptured()) team = TeamEnum.WHITE;
         byte colorByte = team.getByteData();
         int row, col;
-        row = random.nextInt(blocks.length);
-        col = random.nextInt(blocks[0].length);
-        //change wool/blocks
-        byte current = this.blocks[row][col];
+        byte current;
+        do {
+            row = random.nextInt(blocks.length);
+            col = random.nextInt(blocks[0].length);
+        } while (this.blocks[row][col] == colorByte);
 
-        if(current == colorByte && progress != 25) return capture(color);
-        else {
-            isFull = false;
-            if(!isCaptured())
-                SoundPlayer.sendSound(getLocation(), "dig.stone", 1, 90);
-            progress++;
-            int deltaX = row - this.blocks.length/2;
-            int deltaZ = col - this.blocks[0].length/2;
-            Location loc = getLocation().clone();
-            loc.add(deltaX, 0, deltaZ);
-            replaceBlock(team, loc);
-            this.blocks[row][col] = team.getByteData();
+        isFull = false;
+        if(!isCaptured()) {
+            SoundPlayer.sendSound(getLocation(), "dig.stone", 1, 90);
         }
+        progress++;
+        int deltaX = row - this.blocks.length/2;
+        int deltaZ = col - this.blocks[0].length/2;
+        Location loc = getLocation().clone();
+        loc.add(deltaX, 0, deltaZ);
+        replaceBlock(team, loc);
+        this.blocks[row][col] = team.getByteData();
         //update world
         World world = getLocation().getWorld();
         List<Player> players = game == null ? world.getPlayers() : game.getBukkitPlayers();
@@ -257,15 +263,18 @@ public final class CapturePoint extends WinObjective {
         }
         return null;
     }
+
+    /*
     public void neutralize(int times){
         if(times <= 1) neutralize();
         else neutralize(times - 1);
     }
+    */
 
     /**
-     * Neutralize the capture point by gradually turning all of it into the same color.
+     * Restore the capture point to its original state (1 time)
      */
-    public void neutralize() {
+    public void restoreCapture() {
         if(isFull) return;
         progress--;
         TeamEnum team = TeamEnum.getByColor(getColor());
