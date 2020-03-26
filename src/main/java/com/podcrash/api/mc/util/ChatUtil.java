@@ -31,21 +31,21 @@ public final class ChatUtil {
     }
     /**
      * Converts a string to its color coded format
-     * @param s The string to convert
-     * @return
+     * @param message The string to convert
+     * @return the string properly formatted with minecraft color codes
      */
-    public static String chat(String s) {
-        char[] b = s.toCharArray();
-        String a = "0123456789AaBbCcDdEeFfKkLlMmNnOoRr";
-        int size = b.length - 1;
+    public static String chat(String message) {
+        char[] characters = message.toCharArray();
+        String validCodes = "0123456789AaBbCcDdEeFfKkLlMmNnOoRr";
+        int size = characters.length - 1;
         for(int i = 0; i < size; ++i) {
             int next = i + 1;
-            if (b[i] == '&' && a.indexOf(b[next]) > -1) {
-                b[i] = COLOR_CHAR;
-                b[next] = Character.toLowerCase(b[next]);
+            if (characters[i] == '&' && validCodes.indexOf(characters[next]) > -1) {
+                characters[i] = COLOR_CHAR;
+                characters[next] = Character.toLowerCase(characters[next]);
             }
         }
-        return new String(b);
+        return new String(characters);
     }
     public static String purge(String s) {
         char[] charAR = s.toCharArray();
