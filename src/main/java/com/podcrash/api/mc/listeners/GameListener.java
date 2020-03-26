@@ -5,6 +5,7 @@ import com.podcrash.api.db.pojos.Rank;
 import com.podcrash.api.db.pojos.map.BaseMap;
 import com.podcrash.api.db.pojos.map.Point;
 import com.podcrash.api.db.pojos.map.Point2Point;
+import com.podcrash.api.mc.damage.DamageApplier;
 import com.podcrash.api.mc.effect.particle.ParticleGenerator;
 import com.podcrash.api.mc.effect.status.Status;
 import com.podcrash.api.mc.effect.status.StatusApplier;
@@ -310,14 +311,14 @@ public class GameListener extends ListenerBase {
     public void status(StatusApplyEvent e) {
         if(!(e.getEntity() instanceof Player)) return;
         Player player = (Player) e.getEntity();
-        if(GameManager.isSpectating(player) || deadPeople.contains(player))
+        if(GameManager.isSpectating(player) || deadPeople.contains(player) || DamageApplier.getInvincibleEntities().contains(player))
             e.setCancelled(true);
     }
 
     @EventHandler
     public void velocity(PlayerVelocityEvent e) {
         Player player = e.getPlayer();
-        if(GameManager.isSpectating(player) || deadPeople.contains(player))
+        if(GameManager.isSpectating(player) || deadPeople.contains(player) || DamageApplier.getInvincibleEntities().contains(player))
             e.setCancelled(true);
     }
 
