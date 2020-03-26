@@ -177,7 +177,8 @@ public final class CapturePoint extends WinObjective {
         TeamEnum oppoTeam =  TeamEnum.getByColor(opposite);
         for(int x = 0; x < this.blocks.length; x++){
             for(int z = 0; z < this.blocks[0].length; z++){
-                if(this.blocks[x][z] == oppoTeam.getByteData()){
+                //If the block is the opposing color AND the block is not the middle block (unless progress is 24 i.e last block)
+                if(this.blocks[x][z] == oppoTeam.getByteData() && (progress != 1 == (x != 2 || z != 2))){
                     replaceBlock(TeamEnum.WHITE, getLocation().clone().add(x - this.blocks.length/2, 0, z - this.blocks[0].length/2));
                     progress--;
                     this.blocks[x][z] = TeamEnum.WHITE.getByteData();
@@ -195,20 +196,21 @@ public final class CapturePoint extends WinObjective {
      * @return
      */
     public TeamEnum capture(String color, int times){
-        boolean a = assure(color);
-        for(int i = 0; i < times; i++){
-            if(!a) a = assure(color);
+        boolean assured = false;
+        TeamEnum capturing;
+        while (times > 0) {
+            times--;
+            //Try to make capture point the correct color first (i.e blue wants to cap a point with red blocks still on)
+            assured = assure(color);
+            //If it changed a block, that means we have the scenario above ^^^
+            if (!assured) {
+                //Assure it once more because of restoring cap naturally (the previous one was b/c of player)
+                assured = assure(color);
+                continue;
+            };
+            capturing = capture(color);
+            if (capturing != null) return capturing;
         }
-        if(a) {
-            if (times <= 1) return capture(color);
-            else { //possibly do recursion instead
-                for (int i = 0; i < times; i++) {
-                    TeamEnum capturing = capture(color);
-                    if (capturing != null) return capturing;
-                }
-            }
-        }
-
         return null;
     }
 
@@ -239,7 +241,8 @@ public final class CapturePoint extends WinObjective {
         do {
             row = random.nextInt(blocks.length);
             col = random.nextInt(blocks[0].length);
-        } while (this.blocks[row][col] == colorByte);
+            //Do while block is not a good block OR (progress is not 24 and block is the middle block)
+        } while (this.blocks[row][col] == colorByte || ((progress == 24) == (row != 2 || col != 2)));
 
         isFull = false;
         if(!isCaptured()) {
@@ -330,7 +333,7 @@ public final class CapturePoint extends WinObjective {
      */
     private void replaceBlock(TeamEnum team, Location wool){
         if(!wool.getBlock().getType().equals(Material.BEACON)) BlockUtil.replaceBlock(wool, Material.WOOL, team.getData(), false);
-        BlockUtil.replaceBlock(wool.add(0, 1, 0), Material.STAINED_GLASS, team.getData(), false);
+        BlockUtil.replaceBlock(wool.add(0, 1, 0), Material.STAINED_GLASS, team.getData(), true);
     }
 
     /**
