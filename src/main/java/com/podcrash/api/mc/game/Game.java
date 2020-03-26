@@ -1,5 +1,6 @@
 package com.podcrash.api.mc.game;
 
+import com.podcrash.api.db.pojos.Rank;
 import com.podcrash.api.db.pojos.map.BaseMap;
 import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.MapTable;
@@ -14,6 +15,7 @@ import com.podcrash.api.mc.game.scoreboard.GameScoreboard;
 import com.podcrash.api.mc.ui.TeamSelectGUI;
 import com.podcrash.api.mc.util.ChatUtil;
 import com.podcrash.api.mc.util.ItemStackUtil;
+import com.podcrash.api.mc.util.PrefixUtil;
 import com.podcrash.api.plugin.Pluginizer;
 import com.podcrash.api.plugin.PodcrashSpigot;
 import org.bukkit.*;
@@ -515,10 +517,26 @@ public abstract class Game implements IGame {
         player.setScoreboard(scoreboard);
         bukkitTeam.addEntry(player.getName());
         team.addToTeam(player);
+
+        refreshTabColor(player, teamEnum.getChatColor().toString());
+
         if (player.getOpenInventory().getTitle().equals(TeamSelectGUI.inventory_name)) { player.openInventory(TeamSelectGUI.selectTeam(this, player)); }
         return true;
     }
 
+    public void refreshTabColor(Player player, String color) {
+        Rank rank = PrefixUtil.getPlayerRole(player);
+        if(rank != null) {
+            player.setPlayerListName(String.format("%s %s%s",
+                    PrefixUtil.getPrefix(rank),
+                    color,
+                    player.getName()));
+        } else {
+            player.setPlayerListName(String.format("%s%s",
+                    color,
+                    player.getName()));
+        }
+    }
 
     public boolean leaveTeam(Player player) {
         if (!contains(player) || !isOnTeam(player)) { return false; }
@@ -540,7 +558,7 @@ public abstract class Game implements IGame {
         spectators.add(player.getUniqueId());
         participants.remove(player.getUniqueId());
         leaveTeam(player);
-        player.setPlayerListName(ChatUtil.chat("&7&o" + player.getName()));
+        refreshTabColor(player, ChatUtil.chat("&7&o"));
         // If is ongoing, set them to spectator mode and send them to the spectator spawn.
         if (isOngoing()) {
             player.teleport(spectatorSpawn());
