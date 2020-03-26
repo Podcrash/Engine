@@ -19,7 +19,7 @@ public final class TrapSetter {
     /**
      *
      * @param item the item being used to make the trap
-     * @param elapsed how long the trap should remain until it is primed
+     * @param elapsed how long the trap should remain until it is primed (in milliseconds)
      */
     public static void spawnTrap(Item item, long elapsed) {
         HitGround ground = new HitGround(item);

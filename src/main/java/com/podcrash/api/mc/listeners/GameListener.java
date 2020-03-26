@@ -372,7 +372,7 @@ public class GameListener extends ListenerBase {
             prefix += " ";
         }
 
-        if(GameManager.hasPlayer(player)) {
+        if(GameManager.getGame().isParticipating(player)) {
             e.setCancelled(true);
             Game game = GameManager.getGame();
             String color = "";
@@ -385,12 +385,11 @@ public class GameListener extends ListenerBase {
             );
         }else {
             //e.getRecipients().removeIf(GameManager::hasPlayer);
-            e.setFormat(String.format("%s%s%s%s" + ChatColor.RESET + " %s%s",
-                    ChatColor.BOLD,
+            e.setFormat(String.format("%s%s%s" + ChatColor.RESET + " %s%s",
                     prefix,
-                    ChatColor.RESET,
+                    ChatColor.YELLOW,
                     player.getName(),
-                    ChatColor.GRAY,
+                    ChatColor.WHITE,
                     e.getMessage())
             );
 
