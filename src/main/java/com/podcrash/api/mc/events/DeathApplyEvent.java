@@ -20,9 +20,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
+import java.util.*;
 
 /**
  * Only for players
@@ -192,13 +190,18 @@ public class DeathApplyEvent extends Event implements Cancellable {
         int a = 0;
         List<Damage> damageList = new ArrayList<>(history);
         damageList.add(damage);
+
+        HashSet<UUID> attackers = new HashSet<>();
+        attackers.add(attacker.getUniqueId());
+
         long time = System.currentTimeMillis();
         for(int i = damageList.size() - 1; i >= 0; i--) {
             Damage last = damageList.get(i);
             if (time - last.getTime() >= 8000L) continue;
             if (last.getAttacker() == null ||
-                    last.getAttacker().getName().equals(attacker.getName())) continue;
+                    attackers.contains(last.getAttacker().getUniqueId())) continue;
             a++;
+            attackers.add(last.getAttacker().getUniqueId());
         }
         return a;
     }
