@@ -227,6 +227,7 @@ public final class CapturePoint extends WinObjective {
             // (a) Red on a full "red capture"
             if (isFull) return null;
             // (b) Red on a not-full "red capture"
+            restoreCapture(); // TWICE because of "natural" restoration + player induced restoration
             restoreCapture();
             return isFull ? team : null;
         }
