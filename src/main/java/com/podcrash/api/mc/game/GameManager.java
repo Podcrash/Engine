@@ -72,7 +72,7 @@ public class GameManager {
         if(GameManager.hasPlayer(p)) {
             game.removeSpectator(p);
             p.sendMessage(String.format(
-                    "%sChampions> %sYou are no longer spectating this game!",
+                    "%sConquest> %sYou are no longer spectating this game!",
                     ChatColor.BLUE,
                     ChatColor.GRAY));
             if(!p.getWorld().getName().equals("world")) {
@@ -84,7 +84,7 @@ public class GameManager {
             game.addSpectator(p);
             p.sendMessage(
                     String.format(
-                            "%sChampions> %sYou are now spectating %sGame %s%s.",
+                            "%sConquest> %sYou are now spectating %sGame %s%s.",
                             ChatColor.BLUE,
                             ChatColor.GRAY,
                             ChatColor.GREEN,
@@ -93,7 +93,7 @@ public class GameManager {
         } else {
             p.sendMessage(
                     String.format(
-                            "%sChampions> %sYou are already in this game.",
+                            "%sConquest> %sYou are already in this game.",
                             ChatColor.BLUE,
                             ChatColor.GRAY));
         }
@@ -107,7 +107,7 @@ public class GameManager {
         Game game = currentGame;
         if(GameManager.hasPlayer(p)) {
                 p.sendMessage(String.format(
-                        "%sChampions> %sYou are already in a game!",
+                        "%sConquest> %sYou are already in a game!",
                         ChatColor.BLUE,
                         ChatColor.GRAY));
                 return;
@@ -115,7 +115,7 @@ public class GameManager {
         if(!game.contains(p)) {
             p.sendMessage(
                     String.format(
-                            "%sChampions> %sYou were added to %sGame %s%s.",
+                            "%sConquest> %sYou were added to %sGame %s%s.",
                             ChatColor.BLUE,
                             ChatColor.GRAY,
                             ChatColor.GREEN,
@@ -140,7 +140,7 @@ public class GameManager {
             randomTeam(p);
         }else p.sendMessage(
                 String.format(
-                        "%sChampions> %sYou are already in the game.",
+                        "%sConquest> %sYou are already in the game.",
                         ChatColor.BLUE,
                         ChatColor.GRAY));
         if (game.getMaxPlayers() == game.getPlayerCount()) {
@@ -179,7 +179,7 @@ public class GameManager {
 
         if(game.getTeam(player) != null && game.getTeamEnum(player) == teamEnum) {
             player.sendMessage(String.format(
-                    "%sChampions> %sYou are already on this team%s!",
+                    "%sConquest> %sYou are already on this team%s!",
                     ChatColor.BLUE,
                     ChatColor.GRAY,
                     ChatColor.GRAY));
@@ -188,20 +188,12 @@ public class GameManager {
         for (GTeam team : game.getTeams()) {
             if (team.isPlayerOnTeam(player)) {
                 team.removeFromTeam(player.getUniqueId());
-                player.sendMessage(
-                        String.format(
-                                "%sChampions> %sYou left the %s%s Team%s.",
-                                ChatColor.BLUE,
-                                ChatColor.GRAY,
-                                team.getTeamEnum().getChatColor(),
-                                team.getTeamEnum().getName(),
-                                ChatColor.GRAY));
             }
         }
         game.joinTeam(player, teamEnum);
         player.sendMessage(
                 String.format(
-                        "%sChampions> %sYou joined the %s%s Team %sin %sGame %s%s.",
+                        "%sConquest> %sYou joined the %s%s Team %sin %sGame %s%s.",
                         ChatColor.BLUE,
                         ChatColor.GRAY,
                         teamEnum.getChatColor(),
