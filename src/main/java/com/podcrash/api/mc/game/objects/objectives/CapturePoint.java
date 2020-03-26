@@ -333,7 +333,7 @@ public final class CapturePoint extends WinObjective {
      */
     private void replaceBlock(TeamEnum team, Location wool){
         if(!wool.getBlock().getType().equals(Material.BEACON)) BlockUtil.replaceBlock(wool, Material.WOOL, team.getData(), false);
-        BlockUtil.replaceBlock(wool.add(0, 1, 0), Material.STAINED_GLASS, team.getData(), false);
+        BlockUtil.replaceBlock(wool.add(0, 1, 0), Material.STAINED_GLASS, team.getData(), true);
     }
 
     /**
