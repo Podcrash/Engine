@@ -30,7 +30,7 @@ public final class SpawnWorldSetter {
         }
 
         MapTable table = TableOrganizer.getTable(DataTableType.MAPS);
-        table.downloadWorld(worldName, "regular", BaseMap.class).thenAcceptAsync(map -> {
+        table.downloadWorld(worldName, "regular", BaseMap.class).thenAccept(map -> {
             if(map == null) return;
             this.currentWorldName = map.getName();
         });

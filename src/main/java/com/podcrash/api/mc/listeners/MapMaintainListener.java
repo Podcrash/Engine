@@ -68,7 +68,7 @@ public class MapMaintainListener extends ListenerBase {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onWeather(WeatherChangeEvent event){
-        if (plugin.getConfig().getList("worlds").contains(event.getWorld().getName()) || evaluate(event.getWorld())) {
+        if (evaluate(event.getWorld())) {
             event.getWorld().setWeatherDuration(0);
             event.setCancelled(true);
 
@@ -76,7 +76,7 @@ public class MapMaintainListener extends ListenerBase {
     }
     @EventHandler
     public void onSpawn(CreatureSpawnEvent event) {
-        if (plugin.getConfig().getList("worlds").contains(event.getEntity().getWorld().getName()) || evaluate(event.getEntity().getWorld())) {
+        if (evaluate(event.getEntity().getWorld())) {
             if (event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.CUSTOM)) {
                 return;
             }
@@ -86,7 +86,7 @@ public class MapMaintainListener extends ListenerBase {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlace(BlockPlaceEvent e){
-        if (plugin.getConfig().getList("worlds").contains(e.getBlock().getWorld().getName()) || evaluate(e.getBlock().getWorld())) {
+        if (evaluate(e.getBlock().getWorld())) {
             if (!e.getPlayer().hasPermission("invicta.map")) {
                 e.setCancelled(true);
             }
@@ -95,7 +95,7 @@ public class MapMaintainListener extends ListenerBase {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onBreak(BlockBreakEvent e) {
-        if (plugin.getConfig().getList("worlds").contains(e.getBlock().getWorld().getName()) || evaluate(e.getBlock().getWorld())) {
+        if (evaluate(e.getBlock().getWorld())) {
             if (!e.getPlayer().hasPermission("invicta.map")) {
                 e.setCancelled(true);
             }
@@ -104,14 +104,14 @@ public class MapMaintainListener extends ListenerBase {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onDrop(PlayerDropItemEvent e) {
-        if (plugin.getConfig().getList("worlds").contains(e.getPlayer().getWorld().getName()) || evaluate(e.getPlayer().getWorld())) {
+        if (evaluate(e.getPlayer().getWorld())) {
             e.setCancelled(true);
         }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onFood(FoodLevelChangeEvent e) {
-        if(e.getEntity().getWorld().getName().equalsIgnoreCase("world")) {
+        if(isSpawnWorld(e.getEntity().getWorld())) {
             e.setFoodLevel(20);
         }else e.setCancelled(true);
     }
@@ -147,7 +147,7 @@ public class MapMaintainListener extends ListenerBase {
         //or if the cause is null or custom
         // then cancel it
         if((!(event.getEntity() instanceof LivingEntity)) ||
-                (event.getEntity().getWorld().getName().equals("world")) ||
+                isSpawnWorld(event.getEntity().getWorld()) ||
                 (event.getCause() == null || event.getCause() == EntityDamageEvent.DamageCause.CUSTOM)) {
             event.setCancelled(true);
             return;
@@ -248,8 +248,19 @@ public class MapMaintainListener extends ListenerBase {
             event.setCancelled(true);
     }
 
+    /**
+     *
+     * @param world
+     * @return true if the world is restrictive, false if not
+     */
     private boolean evaluate(World world) {
         WorldLoader loader = TableOrganizer.getTable(DataTableType.WORLDS);
-        return loader.listWorlds().contains(world.getName());
+        return isSpawnWorld(world) || loader.listWorlds().contains(world.getName());
+    }
+
+    private boolean isSpawnWorld(World world) {
+        //if this is a world loaded by the spawn setter
+        String name = Pluginizer.getSpigotPlugin().getWorldSetter().getCurrentWorldName();
+        return world.getName().equalsIgnoreCase(name);
     }
 }
