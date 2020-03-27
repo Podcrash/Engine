@@ -4,7 +4,7 @@ import org.bukkit.ChatColor;
 
 public enum Currency {
 
-    COIN("coins", ChatColor.GOLD),
+    GOLD("gold", ChatColor.GOLD),
     //CRYSTAL("Crystals", ChatColor.LIGHT_PURPLE)
     ;
 
