@@ -22,6 +22,7 @@ public final class ActionBlockListener extends ListenerBase {
     }
 
     public static void setBlocks(World world, List<ActionBlock> blocksL) {
+        blocks.clear();
         for(ActionBlock block : blocksL) {
             ActionBlock.Type type = block.getType();
             Vector key = block.getVector1();
