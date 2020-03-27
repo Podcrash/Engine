@@ -33,4 +33,11 @@ public interface IEconomyHandler {
      * @param player
      */
     void confirm(Player player, String item);
+
+    /**
+     * Cancel an order
+     * @param player
+     * @param item
+     */
+    void cancel(Player player, String item);
 }

@@ -10,6 +10,7 @@ import com.podcrash.api.mc.events.econ.*;
 import com.podcrash.api.mc.util.ChatUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.PluginManager;
 
 import java.util.HashMap;
@@ -107,6 +108,16 @@ public class EconomyHandler implements IEconomyHandler {
         BuyConfirmEvent confirm  = new BuyConfirmEvent(success);
         Bukkit.getPluginManager().callEvent(confirm);
         pay(player, -confirm.getCost());
+        currentPlayerOrder.remove(player.getName());
+    }
+
+    @Override
+    public void cancel(Player player, String item) {
+        BuySuccessEvent success = currentPlayerOrder.get(player.getName());
+        if(success == null) return;
+        if(!success.getItem().equalsIgnoreCase(item)) return;
+        BuyCancelEvent cancel = new BuyCancelEvent(success);
+        Bukkit.getPluginManager().callEvent(cancel);
         currentPlayerOrder.remove(player.getName());
     }
 }
