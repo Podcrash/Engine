@@ -142,19 +142,12 @@ public class GameListener extends ListenerBase {
     public void onEnd(GameEndEvent e) {
         Game game = e.getGame();
         game.sendColorTab(true);
-        StringBuilder builder = new StringBuilder("Scores: \n");
-        game.getTeams().forEach(team -> {
-            builder.append(team.getName());
-            builder.append(": ");
-            builder.append(team.getScore());
-            builder.append("\n");
-        });
         for (Player player : game.getBukkitPlayers()) {
             player.teleport(e.getSpawnlocation());
             player.sendMessage(e.getMessage());
             player.setGameMode(GameMode.ADVENTURE);
             deadPeople.remove(player);
-            player.sendMessage(builder.toString());
+            player.sendMessage(game.getPresentableResult());
         }
         WorldManager.getInstance().unloadWorld(e.getGame().getGameWorld().getName());
     }
