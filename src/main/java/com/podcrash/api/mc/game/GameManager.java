@@ -220,7 +220,13 @@ public class GameManager {
     }
 
     public static void endGame(Game game) {
-        Location spawnLoc = Bukkit.getWorld("world").getSpawnLocation();
+        //use the default world if it doesn't exist
+        //otherwise, use the set spawn
+        String name = "world";
+        if(Pluginizer.getSpigotPlugin().getWorldSetter().getCurrentWorldName() != null) {
+            name = Pluginizer.getSpigotPlugin().getWorldSetter().getCurrentWorldName();
+        }
+        Location spawnLoc = Bukkit.getWorld(name).getSpawnLocation();
         game.setOngoing(false);
         game.optIn();
         GameEndEvent gameend = new GameEndEvent(game, spawnLoc);
