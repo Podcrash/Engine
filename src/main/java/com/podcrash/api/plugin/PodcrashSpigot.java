@@ -223,6 +223,15 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             getCommand("bal").setExecutor(new BalanceCommand());
             getCommand("buy").setExecutor(new BuyCommand());
             getCommand("confirm").setExecutor(new ConfirmCommand());
+            getCommand("tell").setExecutor(new TellCommand());
+            getCommand("endgame").setExecutor(new EndCommand());
+            getCommand("ping").setExecutor(new PingCommand());
+            getCommand("start").setExecutor(new StartCommand());
+            getCommand("view").setExecutor(new ViewCommand());
+            getCommand("spec").setExecutor(new SpecCommand());
+            getCommand("setmap").setExecutor(new SetMapCommand());
+            getCommand("team").setExecutor(new TeamCommand());
+            getCommand("kill").setExecutor(new KillCommand());
         });
     }
 

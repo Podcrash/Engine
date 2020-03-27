@@ -21,5 +21,31 @@ commands:
   confirm:
     description: Confirm the purchase of an item.
     usage: /confirm <Name of Item>
+  tell:
+    description: Currently unused messaging system.
+  endgame:
+    description: End a game.
+    usage: /endgame
+  ping:
+    description: Displays you or another player's ping.
+    usage: /ping (Player Name)
+  start:
+    description: Start a game.
+    usage: /start
+  view:
+    description: View information about a game.
+    usage: /view
+  spec:
+    description: Spectate a game.
+    usage: /spec
+  setmap:
+    description: Set a map for the game.
+    usage: /setmap <MapName>
+  team:
+    description: Join a team (red or blue).
+    usage: /team <color>
+  kill:
+    description: Kills your player if you are currently in a game.
+    usage: /kill
   pworld:
     description: use slime world
