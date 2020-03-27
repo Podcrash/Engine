@@ -11,6 +11,7 @@ import com.podcrash.api.db.tables.RanksTable;
 import com.podcrash.api.db.tables.WorldLoader;
 import com.podcrash.api.mc.Configurator;
 import com.podcrash.api.mc.commands.AddRoleCommand;
+import com.podcrash.api.mc.commands.BalanceCommand;
 import com.podcrash.api.mc.commands.SetRoleCommand;
 import com.podcrash.api.mc.damage.DamageQueue;
 import com.podcrash.api.mc.economy.EconomyHandler;
@@ -221,6 +222,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
         return CompletableFuture.runAsync(() -> {
             getCommand("setrole").setExecutor(new SetRoleCommand());
             getCommand("addrole").setExecutor(new AddRoleCommand());
+            getCommand("bal").setExecutor(new BalanceCommand());
         });
     }
 

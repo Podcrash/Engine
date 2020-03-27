@@ -7,10 +7,13 @@ softdepend: [SlimeWorldManager, ProtocolLib]
 
 commands:
   addrole:
-    description: Add a role to the game.
-    usage: /addrole <ROLE NAME> <COLOR> <POSITION>
+    description: Add a new role to the game.
+    usage: /addrole <Role Name> <Color> <Position>
   setrole:
-    description: Set a players role in the Champions plugin. Add the arguement "remove" to take away that player's role. Available roles are - Host, Developer.
+    description: Set a players role or take it away.
     usage: /setrole <Role> <PlayerName>
+  bal:
+    description: Check how much gold you currently have.
+    usage: /bal
   pworld:
     description: use slime world
