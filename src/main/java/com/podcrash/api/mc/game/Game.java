@@ -115,23 +115,6 @@ public abstract class Game implements IGame {
     }
 
     /**
-     * A cheap listener that allows us to listen on when worlds become loaded.
-     */
-    private static class WorldListener implements Listener {
-        private String mapName;
-        private CountDownLatch future;
-        public WorldListener(CountDownLatch future, String mapName) {
-            this.future = future;
-            this.mapName = mapName;
-        }
-
-        @EventHandler
-        public void load(WorldLoadEvent e) {
-            boolean loaded = e.getWorld().getName().equalsIgnoreCase(mapName);
-            if(loaded) future.countDown();
-        }
-    }
-    /**
      * Load the map method, uses a callback of a bukkit event for custom loading
      */
     public void loadMap()  {
@@ -139,27 +122,11 @@ public abstract class Game implements IGame {
         MapTable mapTable = TableOrganizer.getTable(DataTableType.MAPS);
 
         //TODO: this solution is not clever.... rework
-        CountDownLatch truth = new CountDownLatch(1);
-        WorldListener listener = new WorldListener(truth, gameWorldName);
-        Bukkit.getPluginManager().registerEvents(listener, Pluginizer.getSpigotPlugin());
         CompletableFuture<? extends GameMap> futureMap = mapTable.downloadWorld(gameWorldName, getMode(), getMapClass());
         futureMap.thenAcceptAsync(map -> {
-            try {
-                truth.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            if(map == null) return;
             this.map = map;
-            WorldLoadEvent.getHandlerList().unregister(listener);
-            Bukkit.getScheduler().runTask(Pluginizer.getSpigotPlugin(), () -> {
-                try {
-                Bukkit.getPluginManager().callEvent(new GameMapLoadEvent(this, this.map, Bukkit.getWorld(gameWorldName)));
-                }catch (Exception e) {
-                    Pluginizer.getLogger().log(Level.SEVERE, e.getMessage());
-                    e.printStackTrace();
-                    Pluginizer.getLogger().info(e.getMessage());
-                }
-            });
+            Bukkit.getPluginManager().callEvent(new GameMapLoadEvent(this, this.map, Bukkit.getWorld(gameWorldName)));
         });
     }
 

@@ -128,11 +128,13 @@ public class MapTable extends MongoBaseTable {
                 return map;
             }
             System.out.println("Loading " + slimeWorld.getName());
+            CountDownLatch latch = new CountDownLatch(1);
             long test = System.currentTimeMillis();
             Bukkit.getScheduler().runTaskLater(Pluginizer.getSpigotPlugin(), () -> {
                 try {
                     slimePlugin.generateWorld(slimeWorld);
                     long delta = System.currentTimeMillis() - test;
+                    latch.countDown();
                     Pluginizer.getLogger().info(delta + "");
                 }catch (Exception e) {
                     e.printStackTrace();
@@ -140,6 +142,11 @@ public class MapTable extends MongoBaseTable {
                 System.out.println("Generating " + slimeWorld.getName());
             }, 0L);
 
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             return map;
         } , SERVICE);
     }
