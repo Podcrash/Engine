@@ -2,6 +2,7 @@ package com.podcrash.api.mc.game;
 
 import com.podcrash.api.db.pojos.Rank;
 import com.podcrash.api.db.pojos.map.BaseMap;
+import com.podcrash.api.db.pojos.map.GameMap;
 import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.MapTable;
 import com.podcrash.api.db.TableOrganizer;
@@ -72,7 +73,7 @@ public abstract class Game implements IGame {
     private GameLobbyScoreboard lobby_board;
     private GameLobbyTimer lobby_timer;
 
-    private BaseMap map;
+    private GameMap map;
     /**
      * Constructor for the game.
      * @param id The ID of the game.
@@ -102,7 +103,7 @@ public abstract class Game implements IGame {
     public abstract Location spectatorSpawn();
     public abstract void leaveCheck();
 
-    public abstract Class<? extends BaseMap> getMapClass();
+    public abstract Class<? extends GameMap> getMapClass();
     public abstract TeamSettings getTeamSettings();
     public abstract String getMode();
 
@@ -141,7 +142,7 @@ public abstract class Game implements IGame {
         CountDownLatch truth = new CountDownLatch(1);
         WorldListener listener = new WorldListener(truth, gameWorldName);
         Bukkit.getPluginManager().registerEvents(listener, Pluginizer.getSpigotPlugin());
-        CompletableFuture<? extends BaseMap> futureMap = mapTable.downloadWorld(gameWorldName, getMode(), getMapClass());
+        CompletableFuture<? extends GameMap> futureMap = mapTable.downloadWorld(gameWorldName, getMode(), getMapClass());
         futureMap.thenAcceptAsync(map -> {
             try {
                 truth.await();

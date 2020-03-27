@@ -128,9 +128,12 @@ public class MapTable extends MongoBaseTable {
                 return map;
             }
             System.out.println("Loading " + slimeWorld.getName());
+            long test = System.currentTimeMillis();
             Bukkit.getScheduler().runTaskLater(Pluginizer.getSpigotPlugin(), () -> {
                 try {
                     slimePlugin.generateWorld(slimeWorld);
+                    long delta = System.currentTimeMillis() - test;
+                    Pluginizer.getLogger().info(delta + "");
                 }catch (Exception e) {
                     e.printStackTrace();
                 }

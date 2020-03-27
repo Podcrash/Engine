@@ -6,17 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 public class BaseMap {
-    private String name;
-    private List<String> authors;
-    /**
-     * for ex:
-     * @see org.bukkit.DyeColor#BLACK
-     * the "BLACK" part will serve as the key
-     */
-    private Map<String, List<Point>> spawns;
-
     //IE: islands, conquest, squadassault, etc
     private String gamemode;
+    private String name;
+    private List<String> authors;
 
     private Point defaultSpawn;
     private String environment;
@@ -30,7 +23,6 @@ public class BaseMap {
 
     public BaseMap() {
         this.authors = new ArrayList<>();
-        this.spawns = new HashMap<>();
         this.allowAnimals = true;
         this.allowPvP = true;
         this.allowMonsters = true;
@@ -63,14 +55,6 @@ public class BaseMap {
 
     public void setAuthors(List<String> authors) {
         this.authors = authors;
-    }
-
-    public Map<String, List<Point>> getSpawns() {
-        return spawns;
-    }
-
-    public void setSpawns(Map<String, List<Point>> spawns) {
-        this.spawns = spawns;
     }
 
     public Point getDefaultSpawn() {
@@ -142,14 +126,14 @@ public class BaseMap {
         final StringBuilder sb = new StringBuilder("BaseMap{");
         sb.append("name='").append(name).append('\'');
         sb.append(", authors=").append(authors);
-        sb.append(", spawns=").append(spawns);
-        sb.append(", gamemode='").append(gamemode).append('\'');
         sb.append(", defaultSpawn=").append(defaultSpawn);
         sb.append(", environment='").append(environment).append('\'');
         sb.append(", worldType='").append(worldType).append('\'');
         sb.append(", allowAnimals=").append(allowAnimals);
         sb.append(", allowPvP=").append(allowPvP);
         sb.append(", allowMonsters=").append(allowMonsters);
+        sb.append(", launchPads=").append(launchPads);
+        sb.append(", teleportPads=").append(teleportPads);
         sb.append('}');
         return sb.toString();
     }

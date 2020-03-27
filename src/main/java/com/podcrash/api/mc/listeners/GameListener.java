@@ -3,6 +3,7 @@ package com.podcrash.api.mc.listeners;
 import com.abstractpackets.packetwrapper.AbstractPacket;
 import com.podcrash.api.db.pojos.Rank;
 import com.podcrash.api.db.pojos.map.BaseMap;
+import com.podcrash.api.db.pojos.map.GameMap;
 import com.podcrash.api.db.pojos.map.Point;
 import com.podcrash.api.db.pojos.map.Point2Point;
 import com.podcrash.api.mc.damage.DamageApplier;
@@ -77,7 +78,7 @@ public class GameListener extends ListenerBase {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void mapLoad(GameMapLoadEvent event) {
         System.out.println("test MAP LOAD");
-        BaseMap map = event.getMap();
+        GameMap map = event.getMap();
         World world = event.getWorld();
         Game game = event.getGame();
 

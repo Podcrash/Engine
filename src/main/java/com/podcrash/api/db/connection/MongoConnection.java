@@ -43,6 +43,7 @@ public class MongoConnection implements IConnection<MongoClient> {
         ClassModel<Currency> currencyModel = getClassModel(Currency.class, false);
 
         ClassModel<BaseMap> baseMapModel = getClassModel(BaseMap.class, true);
+        ClassModel<GameMap> gameMapModel = getClassModel(GameMap.class, true);
         ClassModel<Point> pointModel = getClassModel(Point.class, true);
         ClassModel<Point2Point> point2Model = getClassModel(Point2Point.class, true);
         ClassModel<ConquestMap> conquestMapModel = getClassModel(ConquestMap.class, true);
@@ -50,7 +51,7 @@ public class MongoConnection implements IConnection<MongoClient> {
         ClassModel<?>[] models = new ClassModel[] {
             playerModel, rankModel, currencyModel,
             gameDataModel, conquestDataModel,
-            baseMapModel, pointModel, point2Model, conquestMapModel, capturePointModel
+            baseMapModel, gameMapModel, pointModel, point2Model, conquestMapModel, capturePointModel
         };
         return PojoCodecProvider.builder()
             .register(models)

@@ -1,9 +1,8 @@
 package com.podcrash.api.db.pojos.map;
 
-import javax.swing.text.Document;
 import java.util.*;
 
-public class ConquestMap extends BaseMap {
+public class ConquestMap extends GameMap {
     private List<CapturePointPojo> capturePointPojos;
     private List<Point> stars;
     private List<Point> diamonds;

@@ -13,6 +13,7 @@ import com.podcrash.api.mc.listeners.*;
 import com.podcrash.api.mc.tracker.CoordinateTracker;
 import com.podcrash.api.mc.tracker.Tracker;
 import com.podcrash.api.mc.tracker.VectorTracker;
+import com.podcrash.api.mc.world.SpawnWorldSetter;
 import com.podcrash.api.mc.world.WorldManager;
 import com.podcrash.api.db.redis.Communicator;
 import org.bukkit.Bukkit;
@@ -46,6 +47,8 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
     private final Map<String, Configurator> configurators = new HashMap<>();
 
     private IEconomyHandler economyHandler;
+    private SpawnWorldSetter worldSetter;
+
     @Override
     public void redis(RedissonClient client) {
 
@@ -123,6 +126,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
         }
 
         economyHandler = new EconomyHandler();
+        worldSetter = new SpawnWorldSetter();
         Communicator.readyGameLobby();
         if(Communicator.isGameLobby())
             gameStart();
@@ -220,5 +224,8 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
 
     public IEconomyHandler getEconomyHandler() {
         return economyHandler;
+    }
+    public SpawnWorldSetter getWorldSetter() {
+        return worldSetter;
     }
 }
