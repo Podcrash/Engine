@@ -236,7 +236,7 @@ public class MapMaintainListener extends ListenerBase {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void damage(DamageApplyEvent event) {
-        if(event.getVictim() instanceof Player && event.getVictim().getWorld().getName().equals("world"))
+        if(event.getVictim() instanceof Player && isSpawnWorld(event.getVictim().getWorld()))
             event.setCancelled(true);
     }
 
