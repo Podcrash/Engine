@@ -8,13 +8,11 @@ import com.podcrash.api.db.tables.EconomyTable;
 import com.podcrash.api.db.tables.PlayerTable;
 import com.podcrash.api.mc.events.econ.*;
 import com.podcrash.api.mc.util.ChatUtil;
-import com.podcrash.api.plugin.Pluginizer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -85,7 +83,7 @@ public class EconomyHandler implements IEconomyHandler {
                 BuySuccessEvent success = new BuySuccessEvent(player, finalItem, cost, currency.getGold());
                 pluginManager.callEvent(success);
                 currentPlayerOrder.put(player.getName(), success);
-            } else pluginManager.callEvent(new BuyFaliureEvent(player, finalItem, cost, currency.getGold()));
+            } else pluginManager.callEvent(new BuyFailureEvent(player, finalItem, cost, currency.getGold()));
 
             return canPay;
         }).exceptionally(t -> {
