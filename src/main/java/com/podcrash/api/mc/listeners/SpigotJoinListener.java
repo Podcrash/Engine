@@ -46,6 +46,8 @@ public class SpigotJoinListener extends ListenerBase {
         event.getPlayer().setWalkSpeed(0.2F);
         PodcrashSpigot.getInstance().getLogger().info(((CraftPlayer) event.getPlayer()).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).getValue() + "");
         PodcrashSpigot.getInstance().getLogger().info("join SPIGOTJOIN");
+
+        PodcrashSpigot.getInstance().setupPermissions(event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

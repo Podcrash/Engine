@@ -6,5 +6,11 @@ author: RainDance
 softdepend: [SlimeWorldManager, ProtocolLib]
 
 commands:
+  addrole:
+    description: Add a role to the game.
+    usage: /addrole <ROLE NAME> <COLOR> <POSITION>
+  setrole:
+    description: Set a players role in the Champions plugin. Add the arguement "remove" to take away that player's role. Available roles are - Host, Developer.
+    usage: /setrole <Role> <PlayerName>
   pworld:
     description: use slime world
