@@ -15,5 +15,11 @@ commands:
   bal:
     description: Check how much gold you currently have.
     usage: /bal
+  buy:
+    description: Purchase a new item with your gold.
+    usage: /buy <Name of Item>
+  confirm:
+    description: Confirm the purchase of an item.
+    usage: /confirm <Name of Item>
   pworld:
     description: use slime world
