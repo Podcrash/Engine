@@ -18,10 +18,7 @@ import com.podcrash.api.plugin.Pluginizer;
 import io.reactivex.Completable;
 import org.bson.conversions.Bson;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
@@ -49,22 +46,28 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
      * @param uuid
      */
     private void evaluate(UUID uuid) {
-        InvictaPlayer playerDoc = getPlayerDocumentSync(uuid);
+        InvictaPlayer playerDoc = getPlayerDocumentSync(uuid, "gameData.conquest");
 
         if(playerDoc.getGameData().containsKey("conquest")) return;
 
         ConquestGameData conquestData = PojoHelper.createConquestGameData();
 
         CompletableFuture<UpdateResult> future = new CompletableFuture<>();
-        getPlayerTable().getCollection(InvictaPlayer.class).updateOne(eq("uuid", uuid), Updates.set("gameData.conquest", conquestData), (res, t) -> {
+        getPlayerTable().getCollection(InvictaPlayer.class)
+            .updateOne(eq("uuid", uuid), Updates.set("gameData.conquest", conquestData), (res, t) -> {
             DBUtils.handleThrowables(t);
             future.complete(res);
         });
         futureGuaranteeGet(future);
     }
-    private CompletableFuture<ConquestGameData> getKitDocumentAsync(UUID uuid) {
+    private CompletableFuture<ConquestGameData> getKitDocumentAsync(UUID uuid, String... fields) {
         evaluate(uuid);
-        return getPlayerDocumentAsync(uuid).thenApplyAsync(player -> (ConquestGameData) player.getGameData().get("conquest"));
+        Pluginizer.getLogger().info(Arrays.toString(fields));
+        return getPlayerDocumentAsync(uuid, fields)
+                .thenApplyAsync(player -> (ConquestGameData) player.getGameData().get("conquest"));
+    }
+    private CompletableFuture<ConquestGameData> getKitDocumentAsync(UUID uuid) {
+        return getKitDocumentAsync(uuid, "gameData.conquest");
     }
     private ConquestGameData getKitDocumentSync(UUID uuid) {
         return futureGuaranteeGet(getKitDocumentAsync(uuid));
@@ -80,8 +83,11 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
      */
     public CompletableFuture<String> getJSONDataAsync(UUID uuid, String clasz, int build_id) {
         //TODO: Find out if this works
-        CompletableFuture<ConquestGameData> kitDocument = getKitDocumentAsync(uuid);
-        return kitDocument.thenApplyAsync((kits -> (String) kits.getBuilds().get(clasz + build_id)), SERVICE);
+        String key = clasz + build_id;
+        //we want to append builds + key but it unfortunately doesn't work?
+        String field = "gameData.conquest";
+        CompletableFuture<ConquestGameData> kitDocument = getKitDocumentAsync(uuid, field);
+        return kitDocument.thenApplyAsync((kits -> (String) kits.getBuilds().get(key)), SERVICE);
     }
     public String getJSONData(UUID uuid, String clasz, int build_id) {
         CompletableFuture<String> data = getJSONDataAsync(uuid, clasz, build_id);

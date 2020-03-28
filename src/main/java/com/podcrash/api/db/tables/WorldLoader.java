@@ -14,10 +14,7 @@ import com.mongodb.async.client.gridfs.GridFSBuckets;
 import com.mongodb.async.client.gridfs.helpers.AsyncStreamHelper;
 import com.mongodb.client.gridfs.model.GridFSDownloadOptions;
 import com.mongodb.client.gridfs.model.GridFSFile;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.IndexOptions;
-import com.mongodb.client.model.Indexes;
-import com.mongodb.client.model.Updates;
+import com.mongodb.client.model.*;
 import com.mongodb.client.result.UpdateResult;
 import com.podcrash.api.db.BaseTable;
 import com.podcrash.api.db.DBUtils;
@@ -96,7 +93,9 @@ public class WorldLoader extends MongoBaseTable implements SlimeLoader {// World
     @Override
     public boolean worldExists(String worldName) {
         CompletableFuture<Boolean> found = new CompletableFuture<>();
-        getCollection().find(Filters.eq("name", worldName)).first((res, t) -> {
+        getCollection().find(Filters.eq("name", worldName))
+            .projection(Projections.fields(Projections.include("name"), Projections.excludeId()))
+            .first((res, t) -> {
             DBUtils.handleThrowables(t);
             found.complete(res != null);
         });
@@ -112,7 +111,10 @@ public class WorldLoader extends MongoBaseTable implements SlimeLoader {// World
             list.add(name);
         };
         CompletableFuture<Void> done = new CompletableFuture<>();
-        getCollection().find().forEach(listBlock, (result, t) -> {
+        getCollection()
+            .find()
+            .projection(Projections.fields(Projections.include("name"), Projections.excludeId()))
+            .forEach(listBlock, (result, t) -> {
             DBUtils.handleThrowables(t);
             done.complete(result);
         });
@@ -187,7 +189,10 @@ public class WorldLoader extends MongoBaseTable implements SlimeLoader {// World
         if(lockedWorlds.containsKey(worldName)) return true;
 
         CompletableFuture<Boolean> truth = new CompletableFuture<>();
-        getCollection().find(Filters.eq("name", worldName)).first((result, t) -> {
+        getCollection()
+            .find(Filters.eq("name", worldName))
+            .projection(Projections.fields(Projections.include("locked"), Projections.excludeId()))
+            .first((result, t) -> {
             DBUtils.handleThrowables(t);
             if(result == null) truth.completeExceptionally(new UnknownWorldException(worldName));
             else truth.complete(System.currentTimeMillis() - result.getLong("locked") <= MAX_LOCK_TIME);

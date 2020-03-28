@@ -12,15 +12,10 @@ public interface IPlayerDB {
         return TableOrganizer.getTable(DataTableType.PLAYERS);
     }
 
-    default InvictaPlayer getPlayerDocumentSync(UUID uuid) {
-        return getPlayerTable().getPlayerDocumentSync(uuid);
+    default InvictaPlayer getPlayerDocumentSync(UUID uuid, String... fields) {
+        return getPlayerTable().getPlayerDocumentSync(uuid, fields);
     }
-    default CompletableFuture<InvictaPlayer> getPlayerDocumentAsync(UUID uuid) {
-        return getPlayerTable().getPlayerDocumentAsync(uuid);
-    }
-
-    @Deprecated
-    default long getID(UUID uuid) {
-        return 0;
+    default CompletableFuture<InvictaPlayer> getPlayerDocumentAsync(UUID uuid, String... fields) {
+        return getPlayerTable().getPlayerDocumentAsync(uuid, fields);
     }
 }
