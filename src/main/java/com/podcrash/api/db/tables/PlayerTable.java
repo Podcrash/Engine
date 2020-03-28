@@ -12,6 +12,8 @@ import com.podcrash.api.db.pojos.Currency;
 import com.podcrash.api.db.pojos.InvictaPlayer;
 import com.podcrash.api.db.pojos.PojoHelper;
 import com.podcrash.api.plugin.Pluginizer;
+import org.bson.conversions.Bson;
+
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -47,19 +49,24 @@ public class PlayerTable extends MongoBaseTable {
         return future;
     }
 
-    public InvictaPlayer getPlayerDocumentSync(UUID uuid) {
-        CompletableFuture<InvictaPlayer> future = getPlayerDocumentAsync(uuid);
+    public InvictaPlayer getPlayerDocumentSync(UUID uuid, String... fields) {
+        CompletableFuture<InvictaPlayer> future = getPlayerDocumentAsync(uuid, fields);
         return futureGuaranteeGet(future);
     }
 
-    public CompletableFuture<InvictaPlayer> getPlayerDocumentAsync(UUID uuid) {
+    public CompletableFuture<InvictaPlayer> getPlayerDocumentAsync(UUID uuid, String... fields) {
         CompletableFuture<InvictaPlayer> future = new CompletableFuture<>();
         SingleResultCallback<InvictaPlayer> callback = (invictaPlayer, t) -> {
             DBUtils.handleThrowables(t);
             Pluginizer.getLogger().info("returned invicta player: " + invictaPlayer);
             future.complete(invictaPlayer);
         };
-        getCollection(InvictaPlayer.class).find(eq("uuid", uuid)).first(callback);
+
+        Bson limit = Projections.fields(Projections.include(fields), Projections.excludeId());
+        getCollection(InvictaPlayer.class)
+            .find(eq("uuid", uuid))
+            .projection(limit)
+            .first(callback);
         return future;
     }
 
@@ -75,7 +82,9 @@ public class PlayerTable extends MongoBaseTable {
 
     public CompletableFuture<Currency> getCurrency(UUID uuid) {
         CompletableFuture<Currency> currencyCompletableFuture = new CompletableFuture<>();
-        getCollection(InvictaPlayer.class).find(eq("uuid", uuid)).projection(Projections.include("currency")).first((result, t) -> {
+        getCollection(InvictaPlayer.class).find(eq("uuid", uuid))
+            .projection(Projections.include("currency"))
+            .first((result, t) -> {
             DBUtils.handleThrowables(t);
             currencyCompletableFuture.complete(result.getCurrency());
         });

@@ -134,7 +134,7 @@ public class RanksTable extends MongoBaseTable implements IPlayerDB {
     }
 
     public CompletableFuture<Set<Rank>> getRanksAsync(UUID uuid) {
-        return getPlayerDocumentAsync(uuid).thenApplyAsync(player -> {
+        return getPlayerDocumentAsync(uuid, "ranks").thenApplyAsync(player -> {
 
             Set<Rank> output = new HashSet<>();
 

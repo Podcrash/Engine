@@ -1,9 +1,6 @@
 package com.podcrash.api.db.tables;
 
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.IndexOptions;
-import com.mongodb.client.model.Indexes;
-import com.mongodb.client.model.InsertManyOptions;
+import com.mongodb.client.model.*;
 import com.podcrash.api.db.DBUtils;
 import com.podcrash.api.db.MongoBaseTable;
 import com.podcrash.api.mc.util.ChatUtil;
@@ -50,7 +47,9 @@ public class EconomyTable extends MongoBaseTable {
     public CompletableFuture<Boolean> hasItem(String item) {
         item = ChatUtil.strip(item);
         CompletableFuture<Boolean> bool = new CompletableFuture<>();
-        getCollection().find(Filters.eq("name", item)).first(((result, t) -> {
+        getCollection().find(Filters.eq("name", item))
+            .projection(Projections.fields(Projections.include("name"), Projections.excludeId()))
+            .first(((result, t) -> {
             DBUtils.handleThrowables(t);
             bool.complete(result != null);
         }));
@@ -60,7 +59,10 @@ public class EconomyTable extends MongoBaseTable {
     public CompletableFuture<Double> getCost(String item) {
         item = ChatUtil.strip(item);
         CompletableFuture<Double> costFuture = new CompletableFuture<>();
-        getCollection().find(Filters.eq("name", item)).first((res, t) -> {
+        getCollection()
+            .find(Filters.eq("name", item))
+            .projection(Projections.fields(Projections.include("cost"), Projections.excludeId()))
+            .first((res, t) -> {
             DBUtils.handleThrowables(t);
             if(res == null) costFuture.complete(0D);
             else costFuture.complete((Double) res.get("cost"));
