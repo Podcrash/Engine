@@ -12,14 +12,13 @@ import org.bukkit.entity.Player;
 import java.util.HashSet;
 import java.util.Set;
 
-//TODO: refactor so that it applies to all games, not just conquest, and move to engine
 public class SetMapCommand extends CommandBase {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (sender instanceof Player && sender.hasPermission("invicta.host")) {
             Player player = (Player) sender;
             MapTable table = TableOrganizer.getTable(DataTableType.MAPS);
-            Set<String> validMaps = new HashSet<>(table.getWorlds("conquest"));
+            Set<String> validMaps = new HashSet<>(table.getWorlds(GameManager.getGame().getMode()));
             if (args.length == 0) {
                 sender.sendMessage("Require a mapname");
                 sender.sendMessage("List of the available maps: " + validMaps.toString());

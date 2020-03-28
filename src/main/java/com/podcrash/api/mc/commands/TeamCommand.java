@@ -7,7 +7,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-//TODO: allow /team to work for games with more than two teams, remove dependency on arguments "red" and blue"
 
 public class TeamCommand extends CommandBase {
     @Override
