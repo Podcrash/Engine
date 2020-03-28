@@ -175,8 +175,12 @@ public class GameManager {
     }
     public static void joinTeam(Player player, TeamEnum teamEnum) {
         Game game = currentGame;
+
+        // If the player is not actually in the yet game, do not allow them to join a team.
         if (!hasPlayer(player)) return;
 
+        // Make sure the player is actually on a team (so anyone who isn't spectating), and that the player
+        // is not already on the team them are trying to join.
         if(game.getTeam(player) != null && game.getTeamEnum(player) == teamEnum) {
             player.sendMessage(String.format(
                     "%sInvicta> %sYou are already on this team%s!",
@@ -185,23 +189,43 @@ public class GameManager {
                     ChatColor.GRAY));
             return;
         }
+
+        // Iterate through all of the teams that currently exist in the game and remove the player from them.
+        // This guarantees that people cannot accidentally be on multiple teams at the same time.
         for (GTeam team : game.getTeams()) {
             if (team.isPlayerOnTeam(player)) {
                 team.removeFromTeam(player.getUniqueId());
             }
         }
-        game.joinTeam(player, teamEnum);
-        player.sendMessage(
-                String.format(
-                        "%sInvicta> %sYou joined the %s%s Team %sin %sGame %s%s.",
-                        ChatColor.BLUE,
-                        ChatColor.GRAY,
-                        teamEnum.getChatColor(),
-                        teamEnum.getName(),
-                        ChatColor.GRAY,
-                        ChatColor.GREEN,
-                        game.getId(),
-                        ChatColor.GRAY));
+
+        // Now we try to send the player into the team; if the player successfully joins, then send the success message.
+        // Reasons for failure include: player is not online, game is ongoing, the player is not participating,
+        // there is no GTeam associated with the requested teamEnum, and if the team size is greater than or equal
+        // to the maximum amount of players per team.
+        if(game.joinTeam(player, teamEnum)) {
+            player.sendMessage(
+                    String.format(
+                            "%sInvicta> %sYou joined the %s%s Team %sin %sGame %s%s.",
+                            ChatColor.BLUE,
+                            ChatColor.GRAY,
+                            teamEnum.getChatColor(),
+                            teamEnum.getName(),
+                            ChatColor.GRAY,
+                            ChatColor.GREEN,
+                            game.getId(),
+                            ChatColor.GRAY));
+        } else {
+            // Now we know that for one of the above reasons, the player couldn't join the team they wanted. We now
+            // want to catch a couple of these failures and send a helpful chat message explaining what happened.
+            if(game.getTeam(teamEnum).teamSize() >= game.getTeam(teamEnum).getMaxPlayers()) {
+                player.sendMessage(
+                        String.format(
+                                "%sInvicta> %sThe team you are trying to join is full.",
+                                ChatColor.BLUE,
+                                ChatColor.GRAY));
+            }
+        }
+
     }
 
     public static void startGame() {
