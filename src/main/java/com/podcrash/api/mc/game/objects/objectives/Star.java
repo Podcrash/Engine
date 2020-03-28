@@ -11,7 +11,7 @@ import org.bukkit.util.Vector;
 
 public class Star extends ItemObjective {
     public Star(Vector vector) {
-        super(Material.NETHER_STAR, Material.ENDER_PORTAL_FRAME, vector);
+        super(Material.NETHER_STAR, Material.BEDROCK, vector);
         fireworkEffect = FireworkEffect.builder().withColor(Color.WHITE).with(FireworkEffect.Type.BALL_LARGE).build();
     }
     public Star(Point point) {

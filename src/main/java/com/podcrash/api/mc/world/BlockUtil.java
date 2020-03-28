@@ -1,5 +1,6 @@
 package com.podcrash.api.mc.world;
 
+import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.time.resources.BlockBreakThenRestore;
 import net.jafama.FastMath;
 import net.minecraft.server.v1_8_R3.BlockPosition;
@@ -91,7 +92,7 @@ public final class BlockUtil {
     public static boolean hasPlayersInArea(Location location, double radius, List<Player> players, Player user) {
         double radiusSquared = radius * radius;
         for(Player player : players) {
-            if(player == user) continue;
+            if(player == user || !GameManager.getGame().isParticipating(player) || GameManager.getGame().isRespawning(player)) continue;
             Location loc = player.getLocation().add(0, 1, 0);
             double distanceSquared = loc.distanceSquared(location);
             if(distanceSquared <= radiusSquared)
