@@ -139,18 +139,15 @@ public class RanksTable extends MongoBaseTable implements IPlayerDB {
             Set<Rank> output = new HashSet<>();
 
             Set<String> ranks = player.getRanks();
-            List<Rank> rankList = new ArrayList<>();
-            Block<Rank> addRank = rankList::add;
+            Block<Rank> addRank = (rank) -> {
+                if(ranks.contains(rank.getName())) output.add(rank);
+            };
             CompletableFuture<Void> future = new CompletableFuture<>();
             getCollection(Rank.class).find().forEach(addRank, (res, t) -> {
                 DBUtils.handleThrowables(t);
                 future.complete(res);
             });
             futureGuaranteeGet(future);
-
-            for(Rank r : rankList) {
-                if(ranks.contains(r.getName())) output.add(r);
-            }
 
             return output;
         });

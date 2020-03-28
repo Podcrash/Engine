@@ -14,7 +14,6 @@ public class EndCommand extends CommandBase {
             if (!(sender instanceof Player)) return false;
             Game game = GameManager.getGame();
             GameManager.endGame(game);
-            sender.sendMessage("attempting to end game " + game.getId());
             return true;
         } else {
             sender.sendMessage(String.format("%sInvicta> %sYou have insufficient permissions to use that command.", ChatColor.BLUE, ChatColor.GRAY));
