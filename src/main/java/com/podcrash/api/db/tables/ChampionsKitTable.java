@@ -5,6 +5,7 @@ package com.podcrash.api.db.tables;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Updates.set;
 
+import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.UpdateResult;
 import com.podcrash.api.db.DBUtils;
@@ -16,6 +17,7 @@ import com.podcrash.api.db.pojos.InvictaPlayer;
 import com.podcrash.api.db.pojos.PojoHelper;
 import com.podcrash.api.plugin.Pluginizer;
 import io.reactivex.Completable;
+import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import java.util.*;
@@ -85,9 +87,22 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
         //TODO: Find out if this works
         String key = clasz + build_id;
         //we want to append builds + key but it unfortunately doesn't work?
-        String field = "gameData.conquest";
-        CompletableFuture<ConquestGameData> kitDocument = getKitDocumentAsync(uuid, field);
-        return kitDocument.thenApplyAsync((kits -> (String) kits.getBuilds().get(key)), SERVICE);
+        String field = "gameData.conquest.builds." + key;
+
+        CompletableFuture<String> jsonFuture = new CompletableFuture<>();
+        getCollection("players")
+            .find(eq("uuid", uuid))
+            .projection(Projections.fields(Projections.excludeId(), Projections.include(field)))
+            .first((result, t) -> {
+                Pluginizer.getLogger().info("what: " + result);
+                Document gameDataDoc = (Document) result.get("gameData");
+                Document conquestDoc = (Document) gameDataDoc.get("conquest");
+                Document buildsDoc = (Document) conquestDoc.get("builds");
+                String actualJson = (String) buildsDoc.get(key);
+
+                jsonFuture.complete(actualJson);
+            });
+        return jsonFuture;
     }
     public String getJSONData(UUID uuid, String clasz, int build_id) {
         CompletableFuture<String> data = getJSONDataAsync(uuid, clasz, build_id);
