@@ -1,6 +1,7 @@
 package com.podcrash.api.mc.events.game;
 
 import com.podcrash.api.mc.game.Game;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.event.HandlerList;
 
@@ -9,7 +10,7 @@ public class GameEndEvent extends GameEvent {
     public Location spawnlocation;
 
     public GameEndEvent(Game game, Location spawnlocation) {
-        super(game, "Game " + game.getId() + " has ended\n" + "");
+        super(game, ChatColor.BOLD + "\nGame " + game.getId() + " has ended.\n" + "");
 //                "Red Team: " + game.getRedScore() + "\n" +
 //                "Blue Team: " + game.getBlueScore());
         this.spawnlocation = spawnlocation;
