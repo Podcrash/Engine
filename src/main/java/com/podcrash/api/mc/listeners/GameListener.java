@@ -179,9 +179,11 @@ public class GameListener extends ListenerBase {
         StatusApplier.getOrNew(victim).removeStatus(Status.values());
         //StatusApplier.getOrNew(victim).applyStatus(Status.INEPTITUDE, 9, 1);
         TimeHandler.delayTime(200L, () -> {
-            GTeam team = game.getTeam(victim);
-            victim.teleport(team.getSpawn(victim));
-            Bukkit.getPluginManager().callEvent(new GameResurrectEvent(game, victim));
+            if(game.isOngoing()) {
+                GTeam team = game.getTeam(victim);
+                victim.teleport(team.getSpawn(victim));
+                Bukkit.getPluginManager().callEvent(new GameResurrectEvent(game, victim));
+            }
         });
     }
 
