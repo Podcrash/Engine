@@ -137,7 +137,6 @@ public class GameManager {
             inventory.setItem(1, red);
             inventory.setItem(2, blue);
             game.add(p);
-            randomTeam(p);
         }else p.sendMessage(
                 String.format(
                         "%sInvicta> %sYou are already in the game.",
