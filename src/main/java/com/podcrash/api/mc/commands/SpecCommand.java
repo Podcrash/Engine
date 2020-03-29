@@ -22,19 +22,6 @@ public class SpecCommand extends CommandBase {
                 return true;
             }
             GameManager.getGame().toggleSpec(player);
-            if(GameManager.getGame().isSpectating(player)) {
-                sender.sendMessage(String.format(
-                        "%sInvicta> %sYou joined the %sSpectators %sin %sGame %s%s.",
-                        ChatColor.BLUE,
-                        ChatColor.GRAY,
-                        ChatColor.YELLOW,
-                        ChatColor.GRAY,
-                        ChatColor.GREEN,
-                        GameManager.getGame().getId(),
-                        ChatColor.GRAY));
-            } else {
-                GameManager.randomTeam(player);
-            }
             return true;
         }
         return false;

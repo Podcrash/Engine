@@ -537,6 +537,15 @@ public abstract class Game implements IGame {
         } else {
             updateLobbyInventory(player);
         }
+        player.sendMessage(String.format(
+                "%sInvicta> %sYou joined the %sSpectators %sin %sGame %s%s.",
+                ChatColor.BLUE,
+                ChatColor.GRAY,
+                ChatColor.YELLOW,
+                ChatColor.GRAY,
+                ChatColor.GREEN,
+                GameManager.getGame().getId(),
+                ChatColor.GRAY));
     }
 
     /**
@@ -547,6 +556,7 @@ public abstract class Game implements IGame {
         spectators.remove(player.getUniqueId());
         participants.add(player.getUniqueId());
         if (!isOngoing()) { updateLobbyInventory(player); }
+        GameManager.randomTeam(player);
     }
 
     public void addParticipant(Player player) {
