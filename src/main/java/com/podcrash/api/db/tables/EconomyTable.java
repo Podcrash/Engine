@@ -38,7 +38,7 @@ public class EconomyTable extends MongoBaseTable {
         }
         System.out.println(converted);
         getCollection().insertMany(converted, new InsertManyOptions().ordered(false), (result, t) -> {
-            DBUtils.handleThrowables(t);
+            DBUtils.handleDuplicateKeyException(t);
             future.complete(result);
         });
         return future;
