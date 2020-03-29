@@ -128,6 +128,7 @@ public class GameListener extends ListenerBase {
         game.getTeams().forEach(team -> {
             team.allSpawn();
             team.getBukkitPlayers().forEach(player -> {
+                player.setHealth(player.getMaxHealth());
                 player.setSpectator(false);
                 player.setGameMode(GameMode.SURVIVAL);
             });
