@@ -942,18 +942,17 @@ public abstract class Game implements IGame {
      * @param player The player.
      */
     public void removePlayer(Player player) {
-        getTeam(player).removeFromTeam(player.getUniqueId());
-        remove(player);
+        //getTeam(player).removeFromTeam(player.getUniqueId());
+        //remove(player);
         if (participants.contains(player.getUniqueId())) {
             remove(player);
             GTeam gteam = getTeam(player);
-            if (gteam == null) {
-                spectators.remove(player.getUniqueId());
-            }
-            gteam.removeFromTeam(player.getUniqueId());
-            Team team = getGameScoreboard().getBoard().getTeam(id + gteam.getTeamEnum().getName() + "Team");
-            if (team != null) {
-                team.removeEntry(name);
+            if (gteam != null) {
+                gteam.removeFromTeam(player.getUniqueId());
+                Team team = getGameScoreboard().getBoard().getTeam(id + gteam.getTeamEnum().getName() + "Team");
+                if (team != null) {
+                    team.removeEntry(name);
+                }
             }
             player.sendMessage(
                     String.format(
@@ -961,6 +960,8 @@ public abstract class Game implements IGame {
                             ChatColor.BLUE,
                             ChatColor.GRAY));
             //player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+        } else if(isSpectating(player)) {
+            spectators.remove(player.getUniqueId());
         }
     }
 

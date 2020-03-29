@@ -42,7 +42,7 @@ public class PlayerTable extends MongoBaseTable {
 
         CompletableFuture<Void> future = new CompletableFuture<>();
         getCollection(InvictaPlayer.class).insertOne(player, (res, t) -> {
-            DBUtils.handleThrowables(t);
+            DBUtils.handleDuplicateKeyException(t);
             future.complete(res);
         });
 
