@@ -53,9 +53,6 @@ public final class TrapSetter {
     public static boolean destroyTrap(Item item) {
         boolean delete = deleteTrap(item);
         item.remove();
-        WrapperPlayServerWorldParticles packet = ParticleGenerator.createParticle(
-                item.getLocation().clone().add(0, 1, 0).toVector(), EnumWrappers.Particle.EXPLOSION_NORMAL, 5, 0, 0, 0);
-        PacketUtil.syncSend(packet, item.getWorld().getPlayers());
         return delete;
     }
 }
