@@ -15,7 +15,7 @@ public class GroundStatus extends CustomStatus {
     public GroundStatus(Player player) {
         super(player, Status.GROUND);
         player.setFoodLevel(4);
-        StatusApplier.getOrNew(player).applyStatus(Status.JUMP_BOOST, 90, 128);
+        StatusApplier.getOrNew(player).applyStatus(Status.JUMP_BOOST, 90, 128, true);
     }
 
     @Override

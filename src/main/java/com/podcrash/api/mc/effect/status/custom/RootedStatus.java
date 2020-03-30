@@ -14,7 +14,7 @@ public class RootedStatus extends CustomStatus {
         super(player, Status.ROOTED);
         getPlayer().setFoodLevel(3);
         getPlayer().setWalkSpeed(0);
-        StatusApplier.getOrNew(player).applyStatus(Status.JUMP_BOOST, 90, 128);
+        StatusApplier.getOrNew(player).applyStatus(Status.JUMP_BOOST, 90, 128, true);
     }
 
     @Override
