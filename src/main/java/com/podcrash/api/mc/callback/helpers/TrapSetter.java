@@ -1,9 +1,13 @@
 package com.podcrash.api.mc.callback.helpers;
 
+import com.abstractpackets.packetwrapper.WrapperPlayServerWorldParticles;
 import com.comphenix.net.sf.cglib.asm.$ClassWriter;
+import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.podcrash.api.mc.callback.sources.AwaitTime;
 import com.podcrash.api.mc.callback.sources.HitGround;
+import com.podcrash.api.mc.effect.particle.ParticleGenerator;
 import com.podcrash.api.mc.events.TrapPrimeEvent;
+import com.podcrash.api.mc.util.PacketUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Item;
 
@@ -49,6 +53,9 @@ public final class TrapSetter {
     public static boolean destroyTrap(Item item) {
         boolean delete = deleteTrap(item);
         item.remove();
+        WrapperPlayServerWorldParticles packet = ParticleGenerator.createParticle(
+                item.getLocation().clone().add(0, 1, 0).toVector(), EnumWrappers.Particle.EXPLOSION_NORMAL, 5, 0, 0, 0);
+        PacketUtil.syncSend(packet, item.getWorld().getPlayers());
         return delete;
     }
 }
