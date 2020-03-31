@@ -358,10 +358,13 @@ public final class DamageQueue implements Runnable {
         Deque<Damage> damages = damageHistory.get(player.getName());
         player.getInventory().clear();
         Damage damage;
-        final Damage nullDamage = new Damage(player, player, -99, null, Cause.NULL, null, (DamageSource) null,false);
+        final Damage nullDamage = new Damage(player, null, -99, null, Cause.NULL, null, (DamageSource) null,false);
         boolean a = false;
         if(damages == null ||
-           damages.size() == 0) damage = nullDamage;
+           damages.size() == 0) {
+            damage = nullDamage;
+            player.getInventory().setArmorContents(new ItemStack[]{null, null, null, null});
+        }
         else {
             damage = damages.removeLast();
             a = true;

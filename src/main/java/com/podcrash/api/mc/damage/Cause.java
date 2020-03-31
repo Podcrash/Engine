@@ -43,4 +43,28 @@ public enum Cause {
         }
         return NULL;
     }
+
+    public String getDisplayName() {
+        switch (this) {
+            case FALL:
+                return "Fall";
+            case FIRE:
+            case FIRE_TICK:
+                return "Fire";
+            case WITHER:
+                return "Wither";
+            case POISON:
+                return "Poison";
+            case SUFFOCATION:
+                return "Suffocation";
+            case VOID:
+                return "Void";
+            case LAVA:
+                return "Lava";
+            case NULL:
+                return "Magic";
+            default:
+                return "CUSTOM";
+        }
+    }
 }

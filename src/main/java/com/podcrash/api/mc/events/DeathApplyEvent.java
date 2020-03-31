@@ -116,7 +116,7 @@ public class DeathApplyEvent extends Event implements Cancellable {
 
         //TODO: This needs refactor and testing
         if(attacker == null) {
-            builder.append(getCause().name());
+            builder.append(getCause().getDisplayName()).append(".");
         }else {
             String attackerName;
             if (attacker instanceof Player) {
@@ -163,10 +163,10 @@ public class DeathApplyEvent extends Event implements Cancellable {
                 withMsg =  first.getPrefix() + first.getName();
                 break;
             case NULL:
-                withMsg = ChatColor.DARK_PURPLE + "Magic?";
+                withMsg = ChatColor.DARK_PURPLE + "Magic";
                 break;
             default:
-                withMsg = (lastAttackerDamage == null) ? ChatColor.DARK_PURPLE + cause.name() : withMsgCause(lastAttackerDamage);
+                withMsg = (lastAttackerDamage == null) ? ChatColor.DARK_PURPLE + cause.getDisplayName() : withMsgCause(lastAttackerDamage);
                 break;
         }
         return withMsg;
@@ -208,13 +208,15 @@ public class DeathApplyEvent extends Event implements Cancellable {
     private HashMap<LivingEntity, ArrayList<Damage>> getHistoryByPlayers() {
         HashMap<LivingEntity, ArrayList<Damage>> playerMap= new HashMap<>();
         long time = System.currentTimeMillis();
-        for (Damage dmg : history) {
-            if (time - dmg.getTime() >= 8000L) continue;
-            LivingEntity attacker = dmg.getAttacker();
-            if (!playerMap.containsKey(attacker)) {
-                playerMap.put(attacker, new ArrayList<>());
+        if (history != null) {
+            for (Damage dmg : history) {
+                if (time - dmg.getTime() >= 8000L) continue;
+                LivingEntity attacker = dmg.getAttacker();
+                if (!playerMap.containsKey(attacker)) {
+                    playerMap.put(attacker, new ArrayList<>());
+                }
+                playerMap.get(attacker).add(dmg);
             }
-            playerMap.get(attacker).add(dmg);
         }
         return playerMap;
     }
