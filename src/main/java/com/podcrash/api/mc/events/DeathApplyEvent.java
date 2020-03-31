@@ -9,6 +9,7 @@ import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.TeamEnum;
 import net.jafama.FastMath;
+import net.md_5.bungee.protocol.packet.Chat;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -20,6 +21,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -189,26 +191,86 @@ public class DeathApplyEvent extends Event implements Cancellable {
 
     public int findAssists() {
         int a = 0;
-        List<Damage> damageList = new ArrayList<>(history);
-        damageList.add(damage);
-
-        HashSet<UUID> attackers = new HashSet<>();
-        attackers.add(attacker.getUniqueId());
-
-        long time = System.currentTimeMillis();
-        for(int i = damageList.size() - 1; i >= 0; i--) {
-            Damage last = damageList.get(i);
-            if (time - last.getTime() >= 8000L) continue;
-            if (last.getAttacker() == null ||
-                    attackers.contains(last.getAttacker().getUniqueId())) continue;
-            a++;
-            attackers.add(last.getAttacker().getUniqueId());
+        HashMap<LivingEntity, ArrayList<Damage>> sources = getHistoryByPlayers();
+        for (LivingEntity entity : sources.keySet()) {
+            if (entity != null && entity.getUniqueId() != attacker.getUniqueId()) {
+                a++;
+            }
         }
         return a;
     }
+
     public boolean wasUnsafe() {
         //Gradually add other stuff, maybe if  was stuck in a block?
         return player.getLocation().getY() <= 0;
+    }
+
+    private HashMap<LivingEntity, ArrayList<Damage>> getHistoryByPlayers() {
+        HashMap<LivingEntity, ArrayList<Damage>> playerMap= new HashMap<>();
+        long time = System.currentTimeMillis();
+        for (Damage dmg : history) {
+            if (time - dmg.getTime() >= 8000L) continue;
+            LivingEntity attacker = dmg.getAttacker();
+            if (!playerMap.containsKey(attacker)) {
+                playerMap.put(attacker, new ArrayList<>());
+            }
+            playerMap.get(attacker).add(dmg);
+        }
+        return playerMap;
+    }
+
+    public String getCausesMessage() {
+        Game game = GameManager.getGame();
+        StringBuilder builder = new StringBuilder();
+        HashMap<LivingEntity, ArrayList<Damage>> sources = getHistoryByPlayers();
+
+        builder.append(ChatColor.BLUE).append("Reasons>\n").append(ChatColor.WHITE); // Prompt
+
+        boolean hasSomething = false;
+
+        for (LivingEntity entity : sources.keySet()) {
+            ArrayList<Damage> damages = sources.get(entity);
+            if (entity == null) {
+                continue;
+            } else {
+                String attackerName;
+                if (entity instanceof Player) {
+                    Player attackerCast = ((Player) entity);
+                    TeamEnum attackerT = game.getTeamEnum(attackerCast);
+                    attackerName = attackerT.getChatColor() + attackerCast.getDisplayName();
+                } else attackerName = entity.getName();
+                builder.append(formatDeathCause(attackerName, damages));
+                hasSomething = true;
+            }
+        }
+        if (!hasSomething) return null;
+        return builder.toString();
+    }
+
+    /**
+     *
+     * @param attackerName
+     * @param damages
+     * @return The stringbuilder for a single reason of death ex. " -  [20] - Trishula (Longshot, Frost Arrows)"
+     */
+    private StringBuilder formatDeathCause(String attackerName, ArrayList<Damage> damages) {
+        int totalDamage = 0;
+        HashSet<String> causes = new HashSet<>();
+        for (Damage dmg : damages) {
+            totalDamage += (int) dmg.getDamage();
+            String withMsg = withMsgCause(dmg);
+            if (!causes.contains(withMsg)) {
+                causes.add(withMsg);
+            }
+        }
+
+        StringBuilder builder = new StringBuilder();
+        builder.append(" -  ").append("[").append(totalDamage).append("] - ")
+                .append(attackerName).append(ChatColor.GRAY).append(" (")
+                .append(String.join(", ", causes))
+                .append(ChatColor.GRAY).append(")\n");
+
+        return builder;
     }
 
     public Deque<Damage> getHistory() {

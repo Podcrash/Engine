@@ -173,7 +173,13 @@ public class GameListener extends ListenerBase {
                 player.sendMessage(finalMsg);
                 if(player != victim && player.canSee(victim)) player.hidePlayer(victim);
             });
+
+            String causes = e.getDeathCausesMessage();
+            if (causes != null) {
+                e.getWho().sendMessage(causes);
+            }
         }, 1L);
+
         Vector vector = victim.getVelocity();
         victim.setVelocity(vector.add(new Vector(0, 0.75D, 0)));
         deadPeople.add(victim);
@@ -301,7 +307,7 @@ public class GameListener extends ListenerBase {
         if(e.wasUnsafe())
             p.teleport(game.getGameWorld().getSpawnLocation());
         game.getRespawning().add(p.getUniqueId());
-        Bukkit.getServer().getPluginManager().callEvent(new GameDeathEvent(game, p, killer, e.getDeathMessage()));
+        Bukkit.getServer().getPluginManager().callEvent(new GameDeathEvent(game, p, killer, e.getDeathMessage(), e.getCausesMessage()));
     }
 
     /**

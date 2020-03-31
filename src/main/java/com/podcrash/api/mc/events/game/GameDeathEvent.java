@@ -10,20 +10,23 @@ public class GameDeathEvent extends GamePlayerEvent implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
     private LivingEntity killer;
     private boolean cancelled;
+    private String causesMessage;
 
-
-    public GameDeathEvent(Game game, Player who, LivingEntity killer, String message) {
+    public GameDeathEvent(Game game, Player who, LivingEntity killer, String message, String causesMessage) {
         super(game, who, message);
         this.killer = killer;
+        this.causesMessage = causesMessage;
     }
 
     public GameDeathEvent(Game game, Player who, Player killer) {
-        this(game, who, killer, String.format("Death> %s was killed by %s using %s", who.getName(), "uh oh", "idk"));
+        this(game, who, killer, String.format("Death> %s was killed by %s.", who.getName(), killer.getName()), null);
     }
 
     public LivingEntity getKiller() {
         return killer;
     }
+
+    public String getDeathCausesMessage() {return causesMessage;}
 
     public boolean isCancelled() {
         return cancelled;
