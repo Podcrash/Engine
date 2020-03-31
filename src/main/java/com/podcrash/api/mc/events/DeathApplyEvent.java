@@ -231,6 +231,7 @@ public class DeathApplyEvent extends Event implements Cancellable {
         for (LivingEntity entity : sources.keySet()) {
             ArrayList<Damage> damages = sources.get(entity);
             if (entity == null) {
+                //TODO: add cases for void and fall and fire
                 continue;
             } else {
                 String attackerName;
