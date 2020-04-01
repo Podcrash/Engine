@@ -91,17 +91,6 @@ public class DeathApplyEvent extends Event implements Cancellable {
     public String getDeathMessage() {
         String withMsg = withMsgCause(damage);
 
-
-        if(getSources().size() > 1) {
-            StringBuilder builder = new StringBuilder(withMsg);
-            for (int i = 1; i < getSources().size(); i++) {
-                DamageSource source = getSources().get(i);
-                builder.append(", ");
-                builder.append(source.getPrefix());
-                builder.append(source.getName());
-            }
-            withMsg = builder.toString();
-        }
         Game game = GameManager.getGame();
         TeamEnum victimT = game.getTeamEnum(player);
 
@@ -145,13 +134,15 @@ public class DeathApplyEvent extends Event implements Cancellable {
 
     }
     private String withMsgCause(Damage damage) {
-        String withMsg;
+        String withMsg = "";
         Cause cause = damage.getCause();
         switch(cause) {
             case PROJECTILE:
+                if (getSources().size() > 1) break; //Show the CUSTOM sources over the default ones
                 withMsg = ChatColor.YELLOW + "Archery";
                 break;
             case MELEE:
+                if (getSources().size() > 1) break; //Show the CUSTOM sources over the default ones
                 if (damage.getItem() == null || damage.getItem().getItemMeta() == null) withMsg = "Fists";
                 else withMsg = damage.getItem().getItemMeta().getDisplayName();
                 break;
@@ -168,6 +159,18 @@ public class DeathApplyEvent extends Event implements Cancellable {
             default:
                 withMsg = (lastAttackerDamage == null) ? ChatColor.DARK_PURPLE + cause.getDisplayName() : withMsgCause(lastAttackerDamage);
                 break;
+        }
+        if(getSources().size() > 1) {
+            StringBuilder builder = new StringBuilder(withMsg);
+            for (int i = 1; i < getSources().size(); i++) {
+                DamageSource source = getSources().get(i);
+                if (!builder.toString().equals("")) {
+                    builder.append(", ");
+                }
+                builder.append(source.getPrefix());
+                builder.append(source.getName());
+            }
+            withMsg = builder.toString();
         }
         return withMsg;
     }
