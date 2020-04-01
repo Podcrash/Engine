@@ -92,7 +92,7 @@ public final class BlockUtil {
     public static boolean hasPlayersInArea(Location location, double radius, List<Player> players, Player user) {
         double radiusSquared = radius * radius;
         for(Player player : players) {
-            if(player == user || !GameManager.getGame().isParticipating(player) || GameManager.getGame().isRespawning(player)) continue;
+            if(player == user || !GameManager.getGame().isParticipating(player) || GameManager.getGame().isRespawning(player) || GameManager.getGame().isSpectating(player)) continue;
             Location loc = player.getLocation().add(0, 1, 0);
             double distanceSquared = loc.distanceSquared(location);
             if(distanceSquared <= radiusSquared)
@@ -322,13 +322,14 @@ public final class BlockUtil {
     public static List<Player> getPlayersInArea(Location curLoc, int radius, List<Player> players) {
         List<Player> result = new ArrayList<>();
         if(players == null) players = curLoc.getWorld().getPlayers();
-        double radiusSquared = FastMath.pow(radius, 2D);
+        double radiusSquared = radius * radius;
         //distance formula way
         for(Player p: players) {
-            if(p.getLocation().distanceSquared(curLoc) <= radiusSquared) {
+            if(p.getLocation().add(0,1,0).distanceSquared(curLoc) <= radiusSquared) {
                 result.add(p);
             }
         }
+
         /*potato farmer way
         for(Player p: players) {
             for(int x = -radius; x <= radius; x++) {
