@@ -244,7 +244,7 @@ public final class DamageQueue implements Runnable {
         Deque<Damage> history = damageHistory.get(name);
         if(history.size() == 0) return false;
         addDeath((Player) victim);
-        Damage damage = history.removeLast();
+        Damage damage = history.getLast();
 
         DeathApplyEvent deathEvent = new DeathApplyEvent(damage, history);
         Bukkit.getPluginManager().callEvent(deathEvent);
@@ -357,18 +357,20 @@ public final class DamageQueue implements Runnable {
         if(hasDeath(player)) return;
         Deque<Damage> damages = damageHistory.get(player.getName());
         player.getInventory().clear();
+        player.getInventory().setArmorContents(new ItemStack[]{null, null, null, null});
+
         Damage damage;
         final Damage nullDamage = new Damage(player, null, -99, null, Cause.NULL, null, (DamageSource) null,false);
         boolean a = false;
         if(damages == null ||
            damages.size() == 0) {
             damage = nullDamage;
-            player.getInventory().setArmorContents(new ItemStack[]{null, null, null, null});
         }
         else {
-            damage = damages.removeLast();
+            damage = damages.getLast();
             a = true;
         }
+
         Bukkit.getPluginManager().callEvent(new DeathApplyEvent(damage, damages));
         if(a) damages.clear();
     }

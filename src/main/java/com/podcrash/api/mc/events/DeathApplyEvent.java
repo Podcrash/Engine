@@ -221,19 +221,37 @@ public class DeathApplyEvent extends Event implements Cancellable {
         return playerMap;
     }
 
+    private HashMap<Cause, Double> getDamagesByCause(ArrayList<Damage> damages) {
+        HashMap<Cause, Double> causeMap= new HashMap<>();
+        for (Damage dmg : damages) {
+            if (causeMap.containsKey(dmg.getCause())) {
+                causeMap.replace(dmg.getCause(), causeMap.get(dmg.getCause()) + dmg.getDamage());
+            } else {
+                causeMap.put(dmg.getCause(),dmg.getDamage());
+            }
+        }
+        return causeMap;
+    }
+
     public String getCausesMessage() {
         Game game = GameManager.getGame();
         StringBuilder builder = new StringBuilder();
         HashMap<LivingEntity, ArrayList<Damage>> sources = getHistoryByPlayers();
-
-        builder.append(ChatColor.BLUE).append("Reasons>\n").append(ChatColor.WHITE); // Prompt
 
         boolean hasSomething = false;
 
         for (LivingEntity entity : sources.keySet()) {
             ArrayList<Damage> damages = sources.get(entity);
             if (entity == null) {
-                //TODO: add cases for void and fall and fire
+                HashMap<Cause, Double> dmgsByCause = getDamagesByCause(damages);
+                for (Cause cause : dmgsByCause.keySet()) {
+                    builder.append(ChatColor.GRAY).append(" -  ")
+                            .append(cause.getDisplayName()).append(" dealt [")
+                            .append(dmgsByCause.get(cause))
+                            .append(ChatColor.GRAY).append("]\n");
+                    hasSomething = true;
+                }
+
                 continue;
             } else {
                 String attackerName;
@@ -268,8 +286,8 @@ public class DeathApplyEvent extends Event implements Cancellable {
         }
 
         StringBuilder builder = new StringBuilder();
-        builder.append(" -  ").append("[").append(totalDamage).append("] - ")
-                .append(attackerName).append(ChatColor.GRAY).append(" (")
+        builder.append(" -  ").append(attackerName).append(ChatColor.GRAY)
+                .append(" dealt [").append(totalDamage).append("] using (")
                 .append(String.join(", ", causes))
                 .append(ChatColor.GRAY).append(")\n");
 
