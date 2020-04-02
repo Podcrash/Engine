@@ -146,9 +146,6 @@ public class DeathApplyEvent extends Event implements Cancellable {
                 if (damage.getItem() == null || damage.getItem().getItemMeta() == null) withMsg = "Fists";
                 else withMsg = damage.getItem().getItemMeta().getDisplayName();
                 break;
-            case VOID:
-                withMsg = ChatColor.DARK_PURPLE + "Void";
-                break;
             case CUSTOM:
                 DamageSource first = damage.getSource().get(0);
                 withMsg =  first.getPrefix() + first.getName();
@@ -157,7 +154,7 @@ public class DeathApplyEvent extends Event implements Cancellable {
                 withMsg = ChatColor.DARK_PURPLE + "Magic";
                 break;
             default:
-                withMsg = (lastAttackerDamage == null) ? ChatColor.DARK_PURPLE + cause.getDisplayName() : withMsgCause(lastAttackerDamage);
+                withMsg = cause.getDisplayName();
                 break;
         }
         if(getSources().size() > 1) {

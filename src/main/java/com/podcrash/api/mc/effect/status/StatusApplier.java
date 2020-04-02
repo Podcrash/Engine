@@ -318,7 +318,7 @@ public class StatusApplier {
         cloaked = 0;
         List<Player> players = this.player.getWorld().getPlayers();
         for (Player player : players) {
-            if (this.player != player) {
+            if (this.player != player && !player.canSee(this.player)) {
                 player.showPlayer(this.player);
             }
         }

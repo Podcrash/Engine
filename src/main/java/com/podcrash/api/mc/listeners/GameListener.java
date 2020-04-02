@@ -181,10 +181,12 @@ public class GameListener extends ListenerBase {
 
 
         e.getWho().sendMessage(String.format("%sRespawn>%s You will respawn in 9 seconds.",ChatColor.BLUE, ChatColor.GRAY));
+
         Bukkit.getScheduler().runTaskLater(Pluginizer.getSpigotPlugin(), () -> {
             deathAnimation(victim.getLocation());
             victim.setAllowFlight(true);
             victim.setFlying(true);
+            StatusApplier.getOrNew(victim).removeStatus(Status.values());
             e.getGame().consumeBukkitPlayer(player -> {
                 player.sendMessage(finalMsg);
                 if(player != victim && player.canSee(victim)) player.hidePlayer(victim);
@@ -199,7 +201,8 @@ public class GameListener extends ListenerBase {
         Vector vector = victim.getVelocity();
         victim.setVelocity(vector.add(new Vector(0, 0.75D, 0)));
         deadPeople.add(victim);
-        StatusApplier.getOrNew(victim).removeStatus(Status.values());
+
+
         //StatusApplier.getOrNew(victim).applyStatus(Status.INEPTITUDE, 9, 1);
         TimeHandler.delayTime(200L, () -> {
             if(game.isOngoing()) {
