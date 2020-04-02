@@ -340,7 +340,10 @@ public final class DamageQueue implements Runnable {
         Bukkit.getPluginManager().callEvent(damageEvent);
 
         if(damageEvent.isCancelled() || damageEvent.getAttacker() == damageEvent.getVictim()) return;
-        if(damageEvent.isModified()) damage = damageEvent.getDamage();
+        if(damageEvent.isModified()) {
+            damageWrapper.setDamage(damageEvent.getDamage());
+        }
+        damage = damageEvent.getDamage();
         addHistory(victim, damageWrapper);
         double armorValue = damageEvent.getArmorValue();
         playSound(victim, attacker, cause);
