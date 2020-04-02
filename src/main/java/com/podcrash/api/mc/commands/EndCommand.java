@@ -12,6 +12,10 @@ public class EndCommand extends CommandBase {
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (sender.hasPermission("invicta.host")) {
             if (!(sender instanceof Player)) return false;
+            if(!GameManager.getGame().isOngoing()) {
+                sender.sendMessage(String.format("%sInvicta> %sThe game has not started yet.", ChatColor.BLUE, ChatColor.GRAY));
+                return true;
+            }
             Game game = GameManager.getGame();
             GameManager.endGame(game);
             return true;
