@@ -72,6 +72,22 @@ public class BoundingBox {
         return max.add(min).multiply(0.5);
     }
 
+    public BoundingBox grow(double s) {
+        return grow(s, s, s);
+    }
+    public BoundingBox grow(double x, double y, double z) {
+        double ax = this.min.getX() - x;
+        double ay = this.min.getY() - y;
+        double az = this.min.getZ() - z;
+
+        double bx = this.max.getX() + x;
+        double by = this.max.getY() + y;
+        double bz = this.max.getZ() + z;
+
+        Vector newMin = new Vector(ax, ay, az);
+        Vector newMax = new Vector(bx, by, bz);
+        return new BoundingBox(newMin, newMax);
+    }
     public String toString() {
         return String.format("box={%f-%f, %f=%f, %f-%f}", min.getX(), max.getX(), min.getY(), max.getY(), min.getZ(), max.getZ());
     }

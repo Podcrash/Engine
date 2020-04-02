@@ -13,6 +13,7 @@ import com.podcrash.api.mc.effect.status.StatusApplier;
 import com.podcrash.api.mc.effect.status.StatusWrapper;
 import com.podcrash.api.mc.events.DamageApplyEvent;
 import com.podcrash.api.mc.events.DeathApplyEvent;
+import com.podcrash.api.mc.events.ItemCollideEvent;
 import com.podcrash.api.mc.events.StatusApplyEvent;
 import com.podcrash.api.mc.events.game.*;
 import com.podcrash.api.mc.game.GTeam;
@@ -115,6 +116,21 @@ public class GameListener extends ListenerBase {
         }
     }
 
+    /**
+     * EventPriority of LOW will ensure it will run before most things
+     * @param e
+     */
+    @EventHandler(priority = EventPriority.LOW)
+    public void collideItem(ItemCollideEvent e) {
+        Game game = GameManager.getGame();
+        if(game == null) return;
+        if(!(e.getCollisionVictim() instanceof Player)) return;
+        Player p = (Player) e.getCollisionVictim();
+        //if the player is not participating (spectator) or is respawning, then let the item pass through them.
+        if(!game.isParticipating(p) || game.isRespawning(p))
+            e.setCancelled(true);
+
+    }
     //--------------------------------------
     //GameEvents
     //--------------------------------------

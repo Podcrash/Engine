@@ -7,13 +7,16 @@ import org.bukkit.util.Vector;
 
 public class RayTracer {
     public static double DEFAULT_ESTIMATE = 0.12;
+    //TODO: remove all the classes that use a bukkit Vector
     private Vector origin, direction;
 
+    private Coordinate original, dir;
+
+    @Deprecated
     public RayTracer(Vector origin, Vector direction) {
         this.origin = origin;
         this.direction = direction;
     }
-
     /**
      * This smoothens it
      * @param box

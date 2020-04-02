@@ -11,6 +11,7 @@ import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftItem;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
@@ -87,17 +88,30 @@ public class ItemManipulationManager {
         return spawnItem(material,  location, vector);
     }
 
-    public static Item intercept(Player owner, Material material, Location location, Vector vector, InterceptCallback callback) {
+    public static Item intercept(Material material, Location location, Vector vector, InterceptCallback callback) {
         Item item = spawnItem(material, location, vector);
-        ItemIntercept intercept = new ItemIntercept(owner, item);
+        ItemIntercept intercept = new ItemIntercept(item, 1.5);
         if(callback != null) intercept.then(() -> callback.dorun(item, intercept.getIntercepted()));
         intercept.run();
         return item;
     }
 
-    public static Item interceptWithCooldown(Player owner, Material material, Location location, Vector vector, float delay, InterceptCallback callback) {
+    /**
+     *
+     * @param item generate this from the assorted regular/spawnItem methods
+     * @return
+     */
+
+    public static Item intercept(Item item, double radius, InterceptCallback callback) {
+        ItemIntercept intercept = new ItemIntercept(item, radius);
+        if(callback != null) intercept.then(() -> callback.dorun(item, intercept.getIntercepted()));
+        intercept.run();
+        return item;
+    }
+
+    public static Item interceptWithCooldown(Material material, Location location, Vector vector, float delay, InterceptCallback callback) {
         Item item = spawnItem(material, location, vector);
-        ItemIntercept intercept = new DelayItemIntercept(owner, item, delay);
+        ItemIntercept intercept = new DelayItemIntercept(item, delay);
         if(callback != null) intercept.then(() -> callback.dorun(item, intercept.getIntercepted()));
         intercept.run();
         return item;
