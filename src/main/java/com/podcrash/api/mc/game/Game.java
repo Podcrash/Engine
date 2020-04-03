@@ -88,6 +88,8 @@ public abstract class Game implements IGame {
         this.ongoing = false;
         this.type = type;
         this.gameResources = new ArrayList<>();
+        this.lobby_board = new GameLobbyScoreboard(this);
+        lobby_board.run();
 
         this.participants = new HashSet<>();
         this.spectators = new HashSet<>();
