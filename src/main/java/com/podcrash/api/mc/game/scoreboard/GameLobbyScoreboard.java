@@ -56,8 +56,7 @@ public class GameLobbyScoreboard extends CustomScoreboard{
     private void updateLobbyScoreboard() {
         List<String> lines = new ArrayList<String>();
 
-        lines.add("");
-        lines.add(game.getName());
+        lines.add("&c&lGame");
         lines.add(game.getMode());
         lines.add("");
         lines.add("&b&lServer");
@@ -67,7 +66,7 @@ public class GameLobbyScoreboard extends CustomScoreboard{
         lines.add("&f" + game.getPlayerCount() + "/" + game.getCapacity());
         lines.add("");
         lines.add("&d&lMap");
-        lines.add("Map Name");
+        lines.add(game.getMapName());
         lines.add("");
         lines.add("&a&lStatus");
         lines.add("Waiting for players...");

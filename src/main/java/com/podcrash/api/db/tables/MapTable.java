@@ -196,7 +196,7 @@ public class MapTable extends MongoBaseTable {
         };
         CountDownLatch latch = new CountDownLatch(1);
         getCollection(BaseMap.class)
-            .find(Filters.eq("gamemode", mode))
+            .find(Filters.eq("gamemode", mode.toLowerCase()))
             .projection(select)
             .forEach(addToList, (result, t) -> {
                 DBUtils.handleThrowables(t);
