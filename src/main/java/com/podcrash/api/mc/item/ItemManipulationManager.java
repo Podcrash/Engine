@@ -91,7 +91,7 @@ public class ItemManipulationManager {
     public static Item intercept(Material material, Location location, Vector vector, InterceptCallback callback) {
         Item item = spawnItem(material, location, vector);
         ItemIntercept intercept = new ItemIntercept(item, 1.5);
-        if(callback != null) intercept.then(() -> callback.dorun(item, intercept.getIntercepted()));
+        if(callback != null) intercept.then(() -> callback.dorun(item, intercept.getIntercepted(), intercept.getInterceptLocation()));
         intercept.run();
         return item;
     }
@@ -104,7 +104,7 @@ public class ItemManipulationManager {
 
     public static Item intercept(Item item, double radius, InterceptCallback callback) {
         ItemIntercept intercept = new ItemIntercept(item, radius);
-        if(callback != null) intercept.then(() -> callback.dorun(item, intercept.getIntercepted()));
+        if(callback != null) intercept.then(() -> callback.dorun(item, intercept.getIntercepted(), intercept.getInterceptLocation()));
         intercept.run();
         return item;
     }
@@ -112,7 +112,7 @@ public class ItemManipulationManager {
     public static Item interceptWithCooldown(Material material, Location location, Vector vector, float delay, InterceptCallback callback) {
         Item item = spawnItem(material, location, vector);
         ItemIntercept intercept = new DelayItemIntercept(item, delay);
-        if(callback != null) intercept.then(() -> callback.dorun(item, intercept.getIntercepted()));
+        if(callback != null) intercept.then(() -> callback.dorun(item, intercept.getIntercepted(), intercept.getInterceptLocation()));
         intercept.run();
         return item;
     }
