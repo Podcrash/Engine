@@ -9,6 +9,7 @@ import com.podcrash.api.mc.world.BlockUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.Vector;
@@ -25,6 +26,8 @@ public class ItemIntercept extends CallbackAction<ItemIntercept> {
     private Set<Integer> avoids;
 
     protected LivingEntity entity;
+    private Location interceptLocation;
+
     protected Item item;
     protected double radius;
 
@@ -60,16 +63,23 @@ public class ItemIntercept extends CallbackAction<ItemIntercept> {
 
             Vector itemVector = itemLocation.toVector();
             BoundingBox box = new BoundingBox(living);
+
+            Block block = itemLocation.add(dir).getBlock();
+            BoundingBox blockBox = new BoundingBox(block);
             //0.3 is the default for arrows.
-            if (projectile2DHit(0.3, radius, item.getVelocity(), itemVector, box)) {
+            Vector intercept;
+            if ((intercept = projectile2DHit(0.3, radius, item.getVelocity(), itemVector, box)) != null) {
                 /** Deprecated, replaced by the above.
                  if(living instanceof Player) {
                  if(!GameManager.getGame().isParticipating((Player) living) || GameManager.getGame().isRespawning((Player) living))
                  return false;
                  }**/
                 this.entity = living;
+                this.interceptLocation = intercept.toLocation(living.getWorld());
                 return true;
-            } else if (!BlockUtil.isPassable(itemLocation.add(dir).getBlock())) {
+            } else if (!BlockUtil.isPassable(block)) {
+                Vector v = projectile2DHit(0.1, 10, item.getVelocity(), itemVector, box);
+                this.interceptLocation = v.toLocation(item.getWorld());
                 this.entity = null;
                 return true;
             }
@@ -86,14 +96,15 @@ public class ItemIntercept extends CallbackAction<ItemIntercept> {
      * @param projLoc the location of the entity
      * @return if the projectile has hit.
      */
-    private boolean projectile2DHit(double expectedGrowth, double distance, Vector projVelo, Vector projLoc, BoundingBox box) {
+    private Vector projectile2DHit(double expectedGrowth, double distance, Vector projVelo, Vector projLoc, BoundingBox box) {
         //grow the box
         box = box.grow(expectedGrowth);
 
         RayTracer tracer = new RayTracer(projLoc, projVelo);
         //the accuracy by default is 0.8, there is no need to make it lower to have an extremely fine detection for hitboxes
         //that are basically 1 block wide
-        return tracer.intersectsBoundingBox(box, distance, 0.8);
+        Vector v = tracer.positionOfIntersection(box, distance, 0.8);
+        return v;
     }
     @Override
     public void cleanup() {
@@ -101,6 +112,9 @@ public class ItemIntercept extends CallbackAction<ItemIntercept> {
         this.avoids.clear();
     }
 
+    public Location getInterceptLocation() {
+        return interceptLocation;
+    }
     public LivingEntity getIntercepted() {
         return entity;
     }
