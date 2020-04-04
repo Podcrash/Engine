@@ -78,8 +78,9 @@ public class ItemIntercept extends CallbackAction<ItemIntercept> {
                 this.interceptLocation = intercept.toLocation(living.getWorld());
                 return true;
             } else if (!BlockUtil.isPassable(block)) {
-                Vector v = projectile2DHit(0.1, 10, item.getVelocity(), itemVector, box);
-                this.interceptLocation = v.toLocation(item.getWorld());
+                Vector v = projectile2DHit(0.1, 10, item.getVelocity(), itemVector, blockBox);
+                if(v != null) this.interceptLocation = v.toLocation(item.getWorld());
+                else this.interceptLocation = item.getLocation(); //this should not be possible
                 this.entity = null;
                 return true;
             }
