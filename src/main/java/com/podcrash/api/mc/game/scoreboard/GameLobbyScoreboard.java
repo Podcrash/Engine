@@ -1,5 +1,6 @@
 package com.podcrash.api.mc.game.scoreboard;
 
+import com.podcrash.api.db.redis.Communicator;
 import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.GameType;
@@ -60,7 +61,7 @@ public class GameLobbyScoreboard extends CustomScoreboard{
         lines.add(game.getMode());
         lines.add("");
         lines.add("&b&lServer");
-        lines.add("&f" + Bukkit.getServerName());
+        lines.add("&f" + Communicator.getCode());
         lines.add("");
         lines.add("&e&lPlayers");
         lines.add("&f" + game.getPlayerCount() + "/" + game.getCapacity());
