@@ -58,7 +58,7 @@ public abstract class CustomStatus implements TimeResource {
     @Override
     public void cleanup() {
         removeEffect();
-        if(status != Status.INEPTITUDE && status != Status.SHOCK) player.sendMessage(String.format("%sCondition> %sYou have been cleared of %s.", ChatColor.BLUE, ChatColor.GRAY, status.getName()));
+        if(status != Status.INEPTITUDE && status != Status.SHOCK && status != Status.CLOAK) player.sendMessage(String.format("%sCondition> %sYou have been cleared of %s.", ChatColor.BLUE, ChatColor.GRAY, status.getName()));
     }
 
     @Override

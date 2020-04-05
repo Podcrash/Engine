@@ -146,7 +146,7 @@ public final class DamageQueue implements Runnable {
             if(entity instanceof Player) {
                 PlayerInventory inventory = ((Player) entity).getInventory();
                 inventory.clear();
-                inventory.setArmorContents(new ItemStack[]{null, null, null, null});
+                //inventory.setArmorContents(new ItemStack[]{null, null, null, null});
             }
             SoundPlayer.sendSound(entity.getLocation(), "game.neutral.die", 1, 75);
             die(entity);
@@ -360,7 +360,7 @@ public final class DamageQueue implements Runnable {
         if(hasDeath(player)) return;
         Deque<Damage> damages = damageHistory.get(player.getName());
         player.getInventory().clear();
-        player.getInventory().setArmorContents(new ItemStack[]{null, null, null, null});
+        //player.getInventory().setArmorContents(new ItemStack[]{null, null, null, null});
 
         Damage damage;
         final Damage nullDamage = new Damage(player, null, -99, null, Cause.NULL, null, (DamageSource) null,false);

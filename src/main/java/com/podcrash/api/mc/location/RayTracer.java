@@ -81,7 +81,7 @@ public class RayTracer {
             Vector addVector = direction.clone();
 
             originClone.add(addVector.multiply(i));
-            if(intersectsBox(originClone, box)) return originClone;
+            if(intersectsBox(originClone, box) && originClone.distanceSquared(originClone) < distance * distance) return originClone;
         }
         return null;
     }

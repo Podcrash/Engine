@@ -88,6 +88,8 @@ public abstract class Game implements IGame {
         this.ongoing = false;
         this.type = type;
         this.gameResources = new ArrayList<>();
+        this.lobby_board = new GameLobbyScoreboard(this);
+        lobby_board.run();
 
         this.participants = new HashSet<>();
         this.spectators = new HashSet<>();
@@ -123,7 +125,7 @@ public abstract class Game implements IGame {
         MapTable mapTable = TableOrganizer.getTable(DataTableType.MAPS);
 
         //TODO: this solution is not clever.... rework
-        CompletableFuture<? extends GameMap> futureMap = mapTable.downloadWorld(gameWorldName, getMode(), getMapClass());
+        CompletableFuture<? extends GameMap> futureMap = mapTable.downloadWorld(gameWorldName, getMode().toLowerCase(), getMapClass());
         futureMap.thenAcceptAsync(map -> {
             if(map == null) return;
             this.map = map;
@@ -206,7 +208,11 @@ public abstract class Game implements IGame {
      * @return The map name.
      */
     public String getMapName(){
-        return gameWorldName;
+        if(gameWorldName == null) {
+            return "None";
+        } else {
+            return gameWorldName;
+        }
     }
 
     /**
