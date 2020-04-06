@@ -47,5 +47,11 @@ commands:
   kill:
     description: Kills your player if you are currently in a game.
     usage: /kill
+  hitreg:
+    description: Put a new hitreg
+    usage: /hitreg <integer>
+    kb:
+      description: Modify the KB values
+      usage: /kb ...
   pworld:
     description: use slime world
