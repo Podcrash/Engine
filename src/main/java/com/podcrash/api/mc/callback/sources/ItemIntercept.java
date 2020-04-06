@@ -46,7 +46,7 @@ public class ItemIntercept extends CallbackAction<ItemIntercept> {
     public boolean cancel() {
         World world = item.getWorld();
         if(!item.isValid() || EntityUtil.onGround(item)) return true;
-        Vector dir = item.getVelocity();
+        Vector dir = item.getVelocity().normalize().multiply(0.25);
         Location itemLocation = item.getLocation();
         for(LivingEntity living : world.getLivingEntities()){
             int entityID = living.getEntityId();
