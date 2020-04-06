@@ -13,9 +13,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Singleton - Handles games
@@ -143,7 +140,7 @@ public class GameManager {
                         ChatColor.BLUE,
                         ChatColor.GRAY));
         if (game.getMaxPlayers() == game.getPlayerCount()) {
-            startGame();
+            game.getTimer().start();
         }
     }
     public static void removePlayer(Player p) {
