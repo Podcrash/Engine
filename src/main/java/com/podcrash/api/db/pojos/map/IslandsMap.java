@@ -1,11 +1,34 @@
 package com.podcrash.api.db.pojos.map;
 
+import org.bukkit.Location;
+
+import java.util.LinkedList;
+import java.util.List;
+
 public class IslandsMap extends GameMap {
 
     private int waterDmg;
+    List<Location> bridgePoints;
 
-    public IslandsMap(int waterDmg) {
+    public IslandsMap() {
         super();
+        this.bridgePoints = new LinkedList<>();
+    }
+
+    public void addBridgePoint(Location location) {
+        this.bridgePoints.add(location);
+    }
+
+    public void removeBridgePoint(Location location) {
+        this.bridgePoints.remove(location);
+    }
+
+    public List<Location> getBridgePoints() {
+        return bridgePoints;
+    }
+
+
+    public void setWaterDmg(int waterDmg) {
         this.waterDmg = waterDmg;
     }
 
