@@ -70,7 +70,7 @@ public class GameLobbyScoreboard extends CustomScoreboard{
         lines.add(game.getMapName());
         lines.add("");
         lines.add("&a&lStatus");
-        lines.add("Waiting for players...");
+        lines.add(game.getTimer().getStatus());
 
         setLines(lines);
     }

@@ -90,6 +90,7 @@ public abstract class Game implements IGame {
         this.gameResources = new ArrayList<>();
         this.lobby_board = new GameLobbyScoreboard(this);
         lobby_board.run();
+        this.lobby_timer = new GameLobbyTimer();
 
         this.participants = new HashSet<>();
         this.spectators = new HashSet<>();
@@ -131,6 +132,13 @@ public abstract class Game implements IGame {
             this.map = map;
             Bukkit.getPluginManager().callEvent(new GameMapLoadEvent(this, this.map, Bukkit.getWorld(gameWorldName)));
         });
+    }
+
+    /**
+     * @return The lobby timer attached to this game.
+     */
+    public GameLobbyTimer getTimer() {
+        return lobby_timer;
     }
 
     /**

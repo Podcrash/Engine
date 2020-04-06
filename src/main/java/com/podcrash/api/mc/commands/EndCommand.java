@@ -1,6 +1,7 @@
 package com.podcrash.api.mc.commands;
 
 import com.podcrash.api.mc.game.Game;
+import com.podcrash.api.mc.game.GameLobbyTimer;
 import com.podcrash.api.mc.game.GameManager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -11,8 +12,13 @@ public class EndCommand extends CommandBase {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (sender.hasPermission("invicta.host")) {
-            if (!(sender instanceof Player)) return false;
+            if (!(sender instanceof Player) || GameManager.getGame() == null) return false;
             if(!GameManager.getGame().isOngoing()) {
+                if(!GameManager.getGame().getTimer().getStatus().equals(GameManager.getGame().getTimer().getDefaultStatus())) {
+                    GameManager.getGame().getTimer().stop(false);
+                    sender.sendMessage(String.format("%sInvicta> %sStopping the countdown.", ChatColor.BLUE, ChatColor.GRAY));
+                    return true;
+                }
                 sender.sendMessage(String.format("%sInvicta> %sThe game has not started yet.", ChatColor.BLUE, ChatColor.GRAY));
                 return true;
             }
