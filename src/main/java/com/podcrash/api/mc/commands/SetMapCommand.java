@@ -25,8 +25,12 @@ public class SetMapCommand extends CommandBase {
             } else if(args.length == 1){
                 boolean valid = isValidMap(validMaps, args[0]);
                 if (GameManager.hasPlayer(player) && valid) {
-                    GameManager.setGameMap(args[0]);
-                    player.sendMessage("You selected " + args[0]);
+                    if(GameManager.getGame().getMapName().equalsIgnoreCase(args[0])) {
+                        sender.sendMessage("You already have that map selected.");
+                    } else {
+                        GameManager.setGameMap(args[0]);
+                        player.sendMessage("You selected " + args[0]);
+                    }
                 } else if(!valid) {
                     player.sendMessage("That is not a valid map: available maps are " + validMaps.toString());
                 }else player.sendMessage("You are currently not in a game");
