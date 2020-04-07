@@ -18,7 +18,7 @@ public class Diamond extends ItemObjective {
     }
     public Diamond(Vector spawnVector){
         super(Material.DIAMOND, Material.DIAMOND_BLOCK, spawnVector);
-        this.fireworkEffect = FireworkEffect.builder().withColor(Color.BLUE).with(FireworkEffect.Type.BALL_LARGE).build();
+        this.fireworkEffect = FireworkEffect.builder().withColor(Color.AQUA).with(FireworkEffect.Type.BURST).build();
     }
     public Diamond(Point point) {
         this(PojoHelper.convertPoint2Vector(point));
