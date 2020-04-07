@@ -295,6 +295,7 @@ public class GameListener extends ListenerBase {
     @EventHandler(priority = EventPriority.LOWEST)
     public void hit(DamageApplyEvent e) {
         Game game = GameManager.getGame();
+        if(game == null) return;
         if(!game.isOngoing()) return;
         if(!(e.getAttacker() instanceof Player) && !(e.getVictim() instanceof Player)) return;
         boolean sameTeam = game.isOnSameTeam((Player) e.getAttacker(), (Player) e.getVictim());
@@ -394,7 +395,7 @@ public class GameListener extends ListenerBase {
             prefix += " ";
         }
 
-        if(GameManager.getGame().isParticipating(player)) {
+        if(GameManager.getGame() != null && GameManager.getGame().isParticipating(player)) {
             e.setCancelled(true);
             Game game = GameManager.getGame();
             String color = "";

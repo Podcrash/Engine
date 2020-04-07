@@ -175,7 +175,7 @@ public final class DamageQueue implements Runnable {
         Game game = GameManager.getGame();
         //if there's no game, then it's fine to process the damage
         //if it isn't ongoing, return false;
-        if(game == null) return false;
+        if(game == null) return true;
         if(!game.isOngoing()) return true;
         //if the entities involved aren't players, then process the damage
         if(!(victim instanceof Player) || !(attacker instanceof Player)) return false;

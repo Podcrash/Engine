@@ -50,8 +50,8 @@ commands:
   hitreg:
     description: Put a new hitreg
     usage: /hitreg <integer>
-    kb:
-      description: Modify the KB values
-      usage: /kb ...
+  kb:
+    description: Modify the KB values
+    usage: /kb ...
   pworld:
     description: use slime world

@@ -232,8 +232,10 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             getCommand("setmap").setExecutor(new SetMapCommand());
             getCommand("team").setExecutor(new TeamCommand());
             getCommand("kill").setExecutor(new KillCommand());
+            getCommand("kb").setExecutor(new KnockbackCommand());
+            getCommand("hitreg").setExecutor(new HitRegCommand());
         });
-    }
+}
 
     public Configurator getConfigurator(String identifier) {
         return configurators.get(identifier);

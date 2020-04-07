@@ -1,6 +1,9 @@
 package com.podcrash.api.mc.listeners;
 
+import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.db.pojos.map.GameMap;
+import com.podcrash.api.db.tables.DataTableType;
+import com.podcrash.api.db.tables.PlayerTable;
 import com.podcrash.api.mc.callback.sources.AwaitTime;
 import com.podcrash.api.mc.damage.HitDetectionInjector;
 import com.podcrash.api.mc.game.Game;
@@ -13,12 +16,15 @@ import net.minecraft.server.v1_8_R3.GenericAttributes;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerInitialSpawnEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.UUID;
 
 public class SpigotJoinListener extends ListenerBase {
     public SpigotJoinListener(JavaPlugin plugin) {
@@ -38,16 +44,23 @@ public class SpigotJoinListener extends ListenerBase {
         e.setSpawnLocation(spawnWorld.getSpawnLocation());
     }
 
+    private void putPlayerDB(UUID uuid) {
+        PlayerTable players = TableOrganizer.getTable(DataTableType.PLAYERS);
+        players.insert(uuid);
+    }
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void join(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
         if(Communicator.isGameLobby())
-            new HitDetectionInjector(event.getPlayer()).injectHitDetection();
-        ((CraftPlayer) event.getPlayer()).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).setValue(1);
-        event.getPlayer().setWalkSpeed(0.2F);
-        PodcrashSpigot.getInstance().getLogger().info(((CraftPlayer) event.getPlayer()).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).getValue() + "");
+            new HitDetectionInjector(player).injectHitDetection();
+        ((CraftPlayer) player).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).setValue(1);
+        player.setWalkSpeed(0.2F);
+        PodcrashSpigot.getInstance().getLogger().info(((CraftPlayer) player).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).getValue() + "");
         PodcrashSpigot.getInstance().getLogger().info("join SPIGOTJOIN");
 
-        PodcrashSpigot.getInstance().setupPermissions(event.getPlayer());
+        putPlayerDB(player.getUniqueId());
+        PodcrashSpigot.getInstance().setupPermissions(player);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

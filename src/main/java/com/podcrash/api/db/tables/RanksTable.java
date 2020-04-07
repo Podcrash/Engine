@@ -135,10 +135,11 @@ public class RanksTable extends MongoBaseTable implements IPlayerDB {
 
     public CompletableFuture<Set<Rank>> getRanksAsync(UUID uuid) {
         return getPlayerDocumentAsync(uuid, "ranks").thenApplyAsync(player -> {
-
             Set<Rank> output = new HashSet<>();
 
+            if(player == null) return output;
             Set<String> ranks = player.getRanks();
+            if(ranks == null) return output;
             Block<Rank> addRank = (rank) -> {
                 if(ranks.contains(rank.getName())) output.add(rank);
             };
