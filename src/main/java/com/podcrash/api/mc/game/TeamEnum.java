@@ -12,30 +12,32 @@ import org.bukkit.DyeColor;
 public enum TeamEnum {
 
     // TODO: Fill the rest of the colours out appropriately for byteData and protocolData.
-    RED("Red", 14,(byte) 1, ChatColor.RED, DyeColor.RED, 57379),
-    BLUE("Blue", 11, (byte) -1,  ChatColor.BLUE, DyeColor.BLUE, 45091),
-    GOLD("Gold", 4, (byte) 1,  ChatColor.YELLOW, DyeColor.YELLOW, 0),
-    GREEN("Green", 5, (byte) 1,  ChatColor.GREEN, DyeColor.LIME, 0),
-    GRAPE("Grape", 2, (byte) 1,  ChatColor.DARK_PURPLE, DyeColor.PURPLE, 0),
-    ORANGE("Orange", 1, (byte) 1,  ChatColor.GOLD, DyeColor.ORANGE, 0),
-    VANILLA("Vanilla", 0, (byte) 0,  ChatColor.WHITE, DyeColor.WHITE, 35),
-    WHITE("White", 0, (byte) 0,  ChatColor.WHITE, DyeColor.WHITE, 35),
-    NULL(null, -1, (byte) 0,  ChatColor.GRAY, null, 0);
+    RED("Red", 14,(byte) 1, ChatColor.RED, ChatColor.RED, DyeColor.RED, 57379),
+    BLUE("Blue", 11, (byte) -1,  ChatColor.BLUE, ChatColor.AQUA, DyeColor.BLUE, 45091),
+    GOLD("Gold", 4, (byte) 1,  ChatColor.YELLOW, ChatColor.YELLOW, DyeColor.YELLOW, 0),
+    GREEN("Green", 5, (byte) 1,  ChatColor.GREEN, ChatColor.GREEN, DyeColor.LIME, 0),
+    GRAPE("Grape", 2, (byte) 1,  ChatColor.DARK_PURPLE, ChatColor.DARK_PURPLE, DyeColor.PURPLE, 0),
+    ORANGE("Orange", 1, (byte) 1,  ChatColor.GOLD, ChatColor.GOLD, DyeColor.ORANGE, 0),
+    VANILLA("Vanilla", 0, (byte) 0,  ChatColor.WHITE, ChatColor.WHITE, DyeColor.WHITE, 35),
+    WHITE("White", 0, (byte) 0,  ChatColor.WHITE, ChatColor.WHITE, DyeColor.WHITE, 35),
+    NULL(null, -1, (byte) 0,  ChatColor.GRAY, ChatColor.GRAY,null, 0);
 
     private final String name;
     private final int data;
     private final byte byteData;
     private final int intData;
     private final ChatColor chatColor;
+    private final ChatColor scoreboardColor;
     private final DyeColor dyeColor;
     private final int protocolData;
 
-    TeamEnum(String name, int data, byte byteData, ChatColor chatColor, DyeColor dyeColor, int protocolData) {
+    TeamEnum(String name, int data, byte byteData, ChatColor chatColor, ChatColor scoreboardColor, DyeColor dyeColor, int protocolData) {
         this.name = name;
         this.data = data;
         this.byteData = byteData;
         this.intData = (int) byteData;
         this.chatColor = chatColor;
+        this.scoreboardColor = scoreboardColor;
         this.dyeColor = dyeColor;
         this.protocolData = protocolData;
     }
@@ -75,6 +77,12 @@ public enum TeamEnum {
         return chatColor;
     }
 
+    /**
+     * @return The scoreboard color
+     */
+    public ChatColor getScoreboardColor() {
+        return scoreboardColor;
+    }
     /**
      * @return The DyeColor
      */
