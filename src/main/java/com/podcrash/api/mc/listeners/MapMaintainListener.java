@@ -8,6 +8,7 @@ import com.podcrash.api.mc.damage.Cause;
 import com.podcrash.api.mc.damage.DamageApplier;
 import com.podcrash.api.mc.damage.DamageQueue;
 import com.podcrash.api.mc.events.DamageApplyEvent;
+import com.podcrash.api.mc.events.DamageEvent;
 import com.podcrash.api.mc.sound.SoundPlayer;
 import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.util.PacketUtil;
@@ -180,7 +181,9 @@ public class MapMaintainListener extends ListenerBase {
                 EntityDamageEvent.DamageCause.WITHER,
                 EntityDamageEvent.DamageCause.VOID,
                 EntityDamageEvent.DamageCause.SUFFOCATION,
-                EntityDamageEvent.DamageCause.LAVA
+                EntityDamageEvent.DamageCause.DROWNING,
+                EntityDamageEvent.DamageCause.LAVA,
+                EntityDamageEvent.DamageCause.CONTACT
                 );
         //if the damage is one of the causes above
         //cancel it and set our own damage.
@@ -195,6 +198,9 @@ public class MapMaintainListener extends ListenerBase {
         }
         lastHit.put(p.getName(), curr);
         Cause cause = Cause.findByEntityDamageCause(event.getCause());
+        DamageEvent event2 = new DamageEvent(p, damage, cause);
+        Bukkit.getPluginManager().callEvent(event2);
+        if(event2.isCancelled()) return;
         damage(p, damage);
 
         DamageQueue.artificialAddHistory(p, damage, cause);
