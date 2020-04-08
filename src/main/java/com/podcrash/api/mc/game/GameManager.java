@@ -67,12 +67,15 @@ public class GameManager {
         int i = 0;
         for(String map : validMaps) {
             if (i == item) {
-                setGameMap(map);
-                break;
+                if(map == null) {
+                    item = new Random().nextInt(size);
+                } else {
+                    setGameMap(map);
+                    break;
+                }
             }
             i++;
         }
-
     }
 
     public static void destroyCurrentGame() {
