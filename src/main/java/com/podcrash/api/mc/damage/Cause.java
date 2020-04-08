@@ -11,28 +11,32 @@ public enum Cause {
     NULL - for nothing
      */
     CUSTOM,
-    FALL("FALL"),
-    FIRE_TICK("FIRE_TICK"),
-    FIRE("FIRE"),
-    WITHER("WITHER"),
+    FALL("FALL", "Fall"),
+    FIRE_TICK("FIRE_TICK", "Fire"),
+    FIRE("FIRE", "Fire"),
+    WITHER("WITHER", "Wither"),
     SUICIDE,
     MELEE,
     MELEESKILL,
     PROJECTILE,
-    POISON("POISON"),
-    SUFFOCATION("SUFFOCATION"),
-    VOID("VOID"),
-    LAVA("LAVA"),
+    DROWNING("DROWNING", "Drowning"),
+    CONTACT("CONTACT", "Spiking XD"),
+    POISON("POISON", "Poison"),
+    SUFFOCATION("SUFFOCATION", "Suffocation"),
+    VOID("VOID", "Void"),
+    LAVA("LAVA", "Lava"),
     NULL;
 
     private String bukkitName;
+    private String displayName;
 
     Cause() {
-        this(null);
+        this(null, "CUSTOM");
     }
 
-    Cause(String bukkitName) {
+    Cause(String bukkitName, String displayName) {
         this.bukkitName = bukkitName;
+        this.displayName = displayName;
     }
     private static Cause[] details = Cause.values();
 
@@ -45,26 +49,6 @@ public enum Cause {
     }
 
     public String getDisplayName() {
-        switch (this) {
-            case FALL:
-                return "Fall";
-            case FIRE:
-            case FIRE_TICK:
-                return "Fire";
-            case WITHER:
-                return "Wither";
-            case POISON:
-                return "Poison";
-            case SUFFOCATION:
-                return "Suffocation";
-            case VOID:
-                return "Void";
-            case LAVA:
-                return "Lava";
-            case NULL:
-                return "Magic";
-            default:
-                return "CUSTOM";
-        }
+        return displayName;
     }
 }
