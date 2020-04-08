@@ -1,5 +1,8 @@
 package com.podcrash.api.mc.game;
 
+import com.podcrash.api.db.TableOrganizer;
+import com.podcrash.api.db.tables.DataTableType;
+import com.podcrash.api.db.tables.MapTable;
 import com.podcrash.api.mc.events.game.GameEndEvent;
 import com.podcrash.api.mc.events.game.GameStartEvent;
 import com.podcrash.api.mc.game.resources.GameResource;
@@ -12,7 +15,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scoreboard.Scoreboard;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 /**
  * Singleton - Handles games
@@ -53,6 +59,20 @@ public class GameManager {
 
         game.makeTeams();
         game.createScoreboard();
+
+        MapTable table = TableOrganizer.getTable(DataTableType.MAPS);
+        Set<String> validMaps = new HashSet<>(table.getWorlds(game.getMode()));
+        int size = validMaps.size();
+        int item = new Random().nextInt(size);
+        int i = 0;
+        for(String map : validMaps) {
+            if (i == item) {
+                setGameMap(map);
+                break;
+            }
+            i++;
+        }
+
     }
 
     public static void destroyCurrentGame() {
