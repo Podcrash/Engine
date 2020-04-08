@@ -1,5 +1,7 @@
 package com.podcrash.api.mc.game;
 
+import com.podcrash.api.mc.sound.SoundPlayer;
+import com.podcrash.api.mc.sound.SoundWrapper;
 import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.time.resources.TimeResource;
 import org.bukkit.ChatColor;
@@ -39,8 +41,8 @@ public class GameLobbyTimer {
             @Override
             public boolean cancel() {
                 if(currentTime < 0) {
-                    GameManager.startGame();
                     status = "Starting...";
+                    GameManager.startGame();
                     return true;
                 }
                 return !isRunning;
@@ -54,7 +56,10 @@ public class GameLobbyTimer {
     }
 
     private ChatColor timeColor() {
-        if(currentTime <= 5) return ChatColor.RED;
+        if(currentTime <= 5) {
+            SoundPlayer.sendSound(GameManager.getGame().getBukkitPlayers(), "note.pling", 1, 63);
+            return ChatColor.RED;
+        }
         return ChatColor.WHITE;
     }
 
