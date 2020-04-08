@@ -247,6 +247,7 @@ public class DeathApplyEvent extends Event implements Cancellable {
                 for (Cause cause : dmgsByCause.keySet()) {
                     builder.append(ChatColor.GRAY).append(" -  ")
                             .append(cause.getDisplayName()).append(" dealt [")
+                            .append(ChatColor.YELLOW)
                             .append(dmgsByCause.get(cause))
                             .append(ChatColor.GRAY).append("]\n");
                     hasSomething = true;
@@ -286,8 +287,13 @@ public class DeathApplyEvent extends Event implements Cancellable {
         }
 
         StringBuilder builder = new StringBuilder();
-        builder.append(" -  ").append(attackerName).append(ChatColor.GRAY)
-                .append(" dealt [").append(totalDamage).append("] using (")
+        builder.append(" -  ").append(attackerName)
+                .append(ChatColor.GRAY)
+                .append(" dealt [")
+                .append(ChatColor.YELLOW)
+                .append(totalDamage)
+                .append(ChatColor.GRAY)
+                .append("] using (")
                 .append(String.join(", ", causes))
                 .append(ChatColor.GRAY).append(")\n");
 
