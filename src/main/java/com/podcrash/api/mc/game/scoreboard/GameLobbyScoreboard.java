@@ -3,6 +3,7 @@ package com.podcrash.api.mc.game.scoreboard;
 import com.podcrash.api.db.redis.Communicator;
 import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
+import com.podcrash.api.mc.game.GameState;
 import com.podcrash.api.mc.game.GameType;
 import com.podcrash.api.mc.scoreboard.CustomScoreboard;
 import com.podcrash.api.mc.time.TimeHandler;
@@ -41,7 +42,7 @@ public class GameLobbyScoreboard extends CustomScoreboard{
 
             @Override
             public boolean cancel() {
-                return game.isOngoing();
+                return game.getGameState() == GameState.STARTED;
             }
 
             @Override

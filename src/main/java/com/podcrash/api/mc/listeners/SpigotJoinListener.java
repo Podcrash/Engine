@@ -8,6 +8,7 @@ import com.podcrash.api.mc.callback.sources.AwaitTime;
 import com.podcrash.api.mc.damage.HitDetectionInjector;
 import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
+import com.podcrash.api.mc.game.GameState;
 import com.podcrash.api.mc.world.SpawnWorldSetter;
 import com.podcrash.api.plugin.Pluginizer;
 import com.podcrash.api.plugin.PodcrashSpigot;
@@ -36,7 +37,7 @@ public class SpigotJoinListener extends ListenerBase {
         Game game;
         //if the game is currently running, don't do anything with the spawn location
         if((game = GameManager.getGame()) != null) {
-            if(game.isOngoing()) return;
+            if(game.getGameState() == GameState.STARTED) return;
         }
         SpawnWorldSetter worldSetter = Pluginizer.getSpigotPlugin().getWorldSetter();
         if(worldSetter.getCurrentWorldName() == null) return;

@@ -250,7 +250,7 @@ public class GameManager {
     public static void startGame() {
         if(currentGame == null) return;
         Game game = currentGame;
-        if(game.isOngoing()) {
+        if(game.getGameState() == GameState.STARTED) {
             return;
         }
         Pluginizer.getSpigotPlugin().getLogger().info("Attempting to start game " + game.getId());
@@ -258,7 +258,7 @@ public class GameManager {
             game.broadcast("There is no map selected for this game.");
         }
         GameStartEvent gamestart = new GameStartEvent(game);
-        game.setOngoing(true);
+        game.setState(GameState.STARTED);
         Pluginizer.getSpigotPlugin().getServer().getPluginManager().callEvent(gamestart);
     }
 
@@ -270,7 +270,7 @@ public class GameManager {
             name = Pluginizer.getSpigotPlugin().getWorldSetter().getCurrentWorldName();
         }
         Location spawnLoc = Bukkit.getWorld(name).getSpawnLocation();
-        game.setOngoing(false);
+        game.setState(GameState.LOBBY);
         game.optIn();
         GameEndEvent gameend = new GameEndEvent(game, spawnLoc);
         //currentGame = null;
