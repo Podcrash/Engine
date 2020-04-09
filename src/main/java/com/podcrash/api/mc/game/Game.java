@@ -930,7 +930,7 @@ public abstract class Game implements IGame {
         } else {
             spectate = ItemStackUtil.createItem(374, 1, ChatUtil.chat("&7&lToggle Spectator Mode"));
         }
-        inv.setItem(25, spectate);
+        inv.setItem(25 - 1, spectate); //-1 because here we are using inventory's method (begins at 0)
     }
 
     /*
