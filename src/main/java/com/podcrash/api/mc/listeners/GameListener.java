@@ -76,7 +76,7 @@ public class GameListener extends ListenerBase {
         //Communicator.publish(e.getGame().getGameCount());
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST) //ensures that this happens first
     public void mapLoad(GameMapLoadEvent event) {
         System.out.println("test MAP LOAD");
         GameMap map = event.getMap();
