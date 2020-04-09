@@ -85,25 +85,7 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
      * @return
      */
     public CompletableFuture<String> getJSONDataAsync(UUID uuid, String clasz, int build_id) {
-        evaluate(uuid);
-        //TODO: Find out if this works
-        String key = clasz + build_id;
-        //we want to append builds + key but it unfortunately doesn't work?
-        String field = "gameData.conquest.builds." + key;
-
-        CompletableFuture<String> jsonFuture = new CompletableFuture<>();
-        getCollection("players")
-            .find(eq("uuid", uuid))
-            .projection(Projections.fields(Projections.excludeId(), Projections.include(field)))
-            .first((result, t) -> {
-                Document gameDataDoc = (Document) result.get("gameData");
-                Document conquestDoc = (Document) gameDataDoc.get("conquest");
-                Document buildsDoc = (Document) conquestDoc.get("builds");
-                String actualJson = (String) buildsDoc.get(key);
-
-                jsonFuture.complete(actualJson);
-            });
-        return jsonFuture;
+        return getKitDocumentAsync(uuid).thenApplyAsync(data -> (String) data.getBuilds().get(clasz + build_id), SERVICE);
     }
     public String getJSONData(UUID uuid, String clasz, int build_id) {
         CompletableFuture<String> data = getJSONDataAsync(uuid, clasz, build_id);
