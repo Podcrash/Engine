@@ -3,6 +3,7 @@ package com.podcrash.api.db.tables;
 //static imports are recommended to make the code look cleaner
 
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.regex;
 import static com.mongodb.client.model.Updates.set;
 
 import com.mongodb.client.model.Projections;
@@ -84,6 +85,7 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
      * @return
      */
     public CompletableFuture<String> getJSONDataAsync(UUID uuid, String clasz, int build_id) {
+        evaluate(uuid);
         //TODO: Find out if this works
         String key = clasz + build_id;
         //we want to append builds + key but it unfortunately doesn't work?
@@ -94,7 +96,6 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
             .find(eq("uuid", uuid))
             .projection(Projections.fields(Projections.excludeId(), Projections.include(field)))
             .first((result, t) -> {
-                Pluginizer.getLogger().info("what: " + result);
                 Document gameDataDoc = (Document) result.get("gameData");
                 Document conquestDoc = (Document) gameDataDoc.get("conquest");
                 Document buildsDoc = (Document) conquestDoc.get("builds");
@@ -118,12 +119,29 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
         futureGuaranteeGet(updateResult);
     }
 
-    public void updateAllowedSkills(UUID uuid, String skill) {
+    public void updateAllowedSkills(UUID uuid, String... skill) {
         String key = "gameData.conquest.allowedSkills";
         updateSync(eq("uuid", uuid), Updates.push(key, skill));
     }
+
+    @SuppressWarnings("deprecation")
     public CompletableFuture<Set<String>> getAllowedSkillsFuture(UUID uuid) {
-        return getKitDocumentAsync(uuid).thenApplyAsync(document -> new HashSet<>(document.getAllowedSkills()), SERVICE);
+        String field = "gameData.conquest.allowedSkills";
+
+        CompletableFuture<Set<String>> jsonFuture = new CompletableFuture<>();
+        getCollection("players")
+                .find(eq("uuid", uuid))
+                .projection(Projections.fields(Projections.excludeId(), Projections.include(field)))
+                .first((result, t) -> {
+                    Pluginizer.getLogger().info("what: " + result);
+                    Document gameDataDoc = (Document) result.get("gameData");
+                    Document conquestDoc = (Document) gameDataDoc.get("conquest");
+                    List<String> allowedSkills = (List<String>) conquestDoc.get("allowedSkills");
+
+                    jsonFuture.complete(new HashSet<>(allowedSkills));
+                });
+
+        return jsonFuture;
     }
     public void set(UUID uuid, String clasz, int build_id, String data) {
         String key = "gameData.conquest.builds." + clasz + build_id;

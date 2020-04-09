@@ -7,10 +7,7 @@ import org.bson.Document;
 import org.bukkit.Bukkit;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Utility class to help with other logic that cannot be contained within the pojo getters/setters
@@ -32,8 +29,11 @@ public final class PojoHelper {
     }
 
     public static ConquestGameData createConquestGameData() {
+        return createConquestGameData(new ArrayList<>());
+    }
+    public static ConquestGameData createConquestGameData(List<String> allowedSkills) {
         ConquestGameData conquestData = new ConquestGameData();
-        conquestData.setAllowedSkills(new ArrayList<>());
+        conquestData.setAllowedSkills(allowedSkills);
         conquestData.setBuilds(new Document());
         return conquestData;
     }
