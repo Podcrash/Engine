@@ -16,11 +16,17 @@ public class GameCaptureEvent extends GamePlayerEvent {
     public GameCaptureEvent(Game game, Player who, IObjective iObjective, String message) {
         super(game, who, message);
         this.iObjective = iObjective;
+        this.who = who;
+        this.game = game;
     }
 
     public GameCaptureEvent(Game game, Player who, IObjective iObjective){
         this(game, who, iObjective, String.format(ChatColor.BOLD + "You captured %s", iObjective.getName()));
     }
+
+    public Player getWho() {return who;}
+
+    public Game getGame() {return game;}
 
     public IObjective getObjective() {
         return iObjective;

@@ -73,6 +73,8 @@ public abstract class Game implements IGame {
     private GameLobbyScoreboard lobby_board;
     private GameLobbyTimer lobby_timer;
 
+    private Map<Player, Double> playerRewards = new HashMap<>();
+
     private GameMap map;
     /**
      * Constructor for the game.
@@ -132,6 +134,24 @@ public abstract class Game implements IGame {
             this.map = map;
             Bukkit.getPluginManager().callEvent(new GameMapLoadEvent(this, this.map, Bukkit.getWorld(gameWorldName)));
         });
+    }
+
+    /**
+     *
+     * @param player who received the money
+     * @param reward how much money they earned
+     * @return whether the player was successfully given the money
+     */
+    public boolean addReward(Player player, double reward) {
+        if (playerRewards.containsKey(player)) {
+            playerRewards.put(player, playerRewards.get(player) + reward);
+            return true;
+        }
+        return false;
+    }
+
+    public double getReward(Player player) {
+        return playerRewards.get(player);
     }
 
     /**
@@ -601,6 +621,9 @@ public abstract class Game implements IGame {
         } else {
             addParticipant(player);
         }
+
+        playerRewards.put(player, 0.0);
+
         // Call event.
         Bukkit.getServer().getPluginManager().callEvent(new GameJoinEvent(this, player));
     }
