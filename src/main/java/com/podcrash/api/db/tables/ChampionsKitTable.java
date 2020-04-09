@@ -101,7 +101,7 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
         futureGuaranteeGet(updateResult);
     }
 
-    public void updateAllowedSkills(UUID uuid, String... skill) {
+    public void updateAllowedSkills(UUID uuid, String skill) {
         String key = "gameData.conquest.allowedSkills";
         updateSync(eq("uuid", uuid), Updates.push(key, skill));
     }
