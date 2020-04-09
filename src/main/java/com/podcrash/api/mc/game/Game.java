@@ -900,12 +900,12 @@ public abstract class Game implements IGame {
         Inventory inv = p.getInventory();
         // Setting items in the player's inventory
         // TODO: Remove the Force Start Item.
-        ItemStackUtil.createItem(inv, 388, 1, 1, "&a&lForce-Start Game &7(Temporary for testing)");
+        //ItemStackUtil.createItem(inv, 388, 1, 1, "&a&lForce-Start Game &7(Temporary for testing)");
         ItemStackUtil.createItem(inv, 355, 1, 9, "&d&lReturn to Lobby");
 
-        ItemStackUtil.createItem(inv, 145, 1, 20, ChatUtil.chat("&6&lSelect Kit"));
-        ItemStackUtil.createItem(inv, 421, 1, 22, ChatUtil.chat("&6&lSelect Team"));
-        ItemStackUtil.createItem(inv, 95, 7, 1, 24, ChatUtil.chat("&7&lLeave Team Queue"));
+        ItemStackUtil.createItem(inv, 145, 1, 21, ChatUtil.chat("&6&lSelect Kit"));
+        ItemStackUtil.createItem(inv, 421, 1, 23, ChatUtil.chat("&6&lSelect Team"));
+        //ItemStackUtil.createItem(inv, 95, 7, 1, 24, ChatUtil.chat("&7&lLeave Team Queue"));
         ItemStack spectate;
         if (isSpectating(p)) {
             spectate = ItemStackUtil.createItem(373, 8270, 1, ChatUtil.chat("&7&lToggle Spectator Mode"));
