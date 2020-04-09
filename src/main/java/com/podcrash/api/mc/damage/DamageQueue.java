@@ -9,6 +9,7 @@ import com.podcrash.api.mc.events.SoundApplyEvent;
 import com.podcrash.api.mc.events.game.GameDamageEvent;
 import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
+import com.podcrash.api.mc.game.GameState;
 import com.podcrash.api.mc.sound.SoundPlayer;
 import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.time.resources.SimpleTimeResource;
@@ -176,7 +177,7 @@ public final class DamageQueue implements Runnable {
         //if there's no game, then it's fine to process the damage
         //if it isn't ongoing, return false;
         if(game == null) return true;
-        if(!game.isOngoing()) return true;
+        if(game.getGameState() == GameState.LOBBY) return true;
         //if the entities involved aren't players, then process the damage
         if(!(victim instanceof Player) || !(attacker instanceof Player)) return false;
         GameDamageEvent event = new GameDamageEvent(game, (Player) victim, (Player) attacker);
@@ -289,7 +290,7 @@ public final class DamageQueue implements Runnable {
             velocity[0] *= multiplier;
             velocity[2] *= multiplier;
         }else if ((cause == Cause.MELEE || cause == Cause.MELEESKILL)) {
-            double multiplier = .05 * damage + 0.65;
+            double multiplier = .05 * damage + 0.60;
             velocity[0] *= multiplier;
             velocity[1] *= multiplier;
             velocity[2] *= multiplier;

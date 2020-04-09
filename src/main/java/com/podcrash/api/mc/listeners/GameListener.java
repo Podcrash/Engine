@@ -16,10 +16,7 @@ import com.podcrash.api.mc.events.DeathApplyEvent;
 import com.podcrash.api.mc.events.ItemCollideEvent;
 import com.podcrash.api.mc.events.StatusApplyEvent;
 import com.podcrash.api.mc.events.game.*;
-import com.podcrash.api.mc.game.GTeam;
-import com.podcrash.api.mc.game.Game;
-import com.podcrash.api.mc.game.GameManager;
-import com.podcrash.api.mc.game.TeamEnum;
+import com.podcrash.api.mc.game.*;
 import com.podcrash.api.mc.game.objects.ItemObjective;
 import com.podcrash.api.mc.game.objects.action.ActionBlock;
 import com.podcrash.api.mc.item.ItemManipulationManager;
@@ -73,10 +70,11 @@ public class GameListener extends ListenerBase {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onLeave(GameLeaveEvent e) {
         Communicator.putLobbyMap("size", e.getGame().size());
+        if(e.getPlayerCount() == 1) GameManager.endGame(e.getGame());
         //Communicator.publish(e.getGame().getGameCount());
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST) //ensures that this happens first
     public void mapLoad(GameMapLoadEvent event) {
         System.out.println("test MAP LOAD");
         GameMap map = event.getMap();
@@ -153,6 +151,13 @@ public class GameListener extends ListenerBase {
             player.teleport(game.getSpawnLocation());
             player.setGameMode(GameMode.SPECTATOR);
         });
+        BaseMap map = game.getMap();
+        if(map == null) return;
+        StringBuilder authorBuilder = new StringBuilder();
+        map.getAuthors().forEach(authorBuilder::append);
+        String message = ChatColor.BOLD + "Map: " + ChatColor.RESET + "" + ChatColor.YELLOW + map.getName() + "\n" +
+            ChatColor.RESET + "" + ChatColor.GRAY +  "Built by: " + ChatColor.RESET + "" + ChatColor.BOLD + ""  + ChatColor.GOLD + authorBuilder.toString();
+        game.consumeBukkitPlayer(player -> player.sendMessage(message));
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -205,7 +210,7 @@ public class GameListener extends ListenerBase {
 
         //StatusApplier.getOrNew(victim).applyStatus(Status.INEPTITUDE, 9, 1);
         TimeHandler.delayTime(200L, () -> {
-            if(game.isOngoing()) {
+            if(game.getGameState() == GameState.STARTED) {
                 GTeam team = game.getTeam(victim);
                 victim.teleport(team.getSpawn(victim));
                 Bukkit.getPluginManager().callEvent(new GameResurrectEvent(game, victim));
@@ -277,7 +282,7 @@ public class GameListener extends ListenerBase {
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void gameDamage(GameDamageEvent e) {
         Game game = e.getGame();
-        if(!game.isOngoing()) return;
+        if(game.getGameState() == GameState.LOBBY) return;
 
         if(e.getWho() == null || e.getKiller() == null) return;
         Player victim = e.getWho();
@@ -296,7 +301,7 @@ public class GameListener extends ListenerBase {
     public void hit(DamageApplyEvent e) {
         Game game = GameManager.getGame();
         if(game == null) return;
-        if(!game.isOngoing()) return;
+        if(game.getGameState() == GameState.LOBBY) return;
         if(!(e.getAttacker() instanceof Player) && !(e.getVictim() instanceof Player)) return;
         boolean sameTeam = game.isOnSameTeam((Player) e.getAttacker(), (Player) e.getVictim());
         System.out.println(e.getCause() + " sameTeam clause: " + sameTeam + " attacker: " + e.getAttacker() + " victim: " + e.getVictim());
@@ -322,7 +327,7 @@ public class GameListener extends ListenerBase {
         Player p = e.getPlayer();
         Game game = GameManager.getGame();
         LivingEntity killer = e.getAttacker();
-        if (game == null || !game.isOngoing()) return;
+        if (game == null || game.getGameState() == GameState.LOBBY) return;
         p.setHealth(p.getMaxHealth()); //heal right away
         if(e.wasUnsafe())
             p.teleport(game.getGameWorld().getSpawnLocation());

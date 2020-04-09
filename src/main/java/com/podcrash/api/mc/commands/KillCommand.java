@@ -2,6 +2,7 @@ package com.podcrash.api.mc.commands;
 
 import com.podcrash.api.mc.damage.DamageQueue;
 import com.podcrash.api.mc.game.GameManager;
+import com.podcrash.api.mc.game.GameState;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -13,7 +14,7 @@ public class KillCommand extends CommandBase {
         if(args.length == 0) {
             if(sender instanceof Player) {
                 Player player = (Player) sender;
-                if(!GameManager.hasPlayer(player) || !GameManager.getGame().isOngoing()){
+                if(!GameManager.hasPlayer(player) || GameManager.getGame().getGameState() == GameState.LOBBY){
                     sender.sendMessage(String.format("%sInvicta> %sYou must be in a game to use this command!", ChatColor.BLUE, ChatColor.GRAY));
                     return true;
                 }

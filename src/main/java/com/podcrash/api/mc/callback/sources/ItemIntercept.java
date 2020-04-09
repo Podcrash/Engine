@@ -45,9 +45,12 @@ public class ItemIntercept extends CallbackAction<ItemIntercept> {
     @Override
     public boolean cancel() {
         World world = item.getWorld();
-        if(!item.isValid() || EntityUtil.onGround(item)) return true;
-        Vector dir = item.getVelocity().normalize().multiply(0.25);
+        Vector dir = item.getVelocity();
+        dir.normalize().multiply(0.25);
+
         Location itemLocation = item.getLocation();
+        Vector itemVector = itemLocation.toVector();
+        //check for entity collisions (First)
         for(LivingEntity living : world.getLivingEntities()){
             int entityID = living.getEntityId();
             if(avoids.contains(entityID)) continue;
@@ -58,14 +61,10 @@ public class ItemIntercept extends CallbackAction<ItemIntercept> {
             Bukkit.getPluginManager().callEvent(event);
             if (event.isCancelled()) {
                 avoids.add(entityID);
-                return false;
+                continue;
             }
 
-            Vector itemVector = itemLocation.toVector();
             BoundingBox box = new BoundingBox(living);
-
-            Block block = itemLocation.add(dir).getBlock();
-            BoundingBox blockBox = new BoundingBox(block);
             //0.3 is the default for arrows.
             Vector intercept;
             if ((intercept = projectile2DHit(0.3, radius, item.getVelocity(), itemVector, box)) != null) {
@@ -77,15 +76,27 @@ public class ItemIntercept extends CallbackAction<ItemIntercept> {
                 this.entity = living;
                 this.interceptLocation = intercept.toLocation(living.getWorld());
                 return true;
-            } else if (!BlockUtil.isPassable(block)) {
-                Vector v = projectile2DHit(0.1, 10, item.getVelocity(), itemVector, blockBox);
-                if(v != null) this.interceptLocation = v.toLocation(item.getWorld());
-                else this.interceptLocation = item.getLocation(); //this should not be possible
-                this.entity = null;
-                return true;
             }
         }
-        return false;
+
+        Block block = itemLocation.add(dir).getBlock();
+        BoundingBox blockBox = new BoundingBox(block);
+
+        //check for collision with blocks and if it's on the ground.
+        boolean onGround = EntityUtil.onGround(item);
+        if (!BlockUtil.isPassable(block) || onGround) {
+            if(onGround) dir = new Vector(0, -0.25, 0);
+            Vector v = projectile2DHit(0.2, 10, dir, itemVector, blockBox);
+            //safe check
+            if(v != null) this.interceptLocation = v.toLocation(item.getWorld());
+            else this.interceptLocation = item.getLocation();
+            this.entity = null;
+            return true;
+        }
+
+
+        //if the item doesn't exist, or the item is on the ground, return true.
+        return !item.isValid();
     }
 
     /**
@@ -104,7 +115,7 @@ public class ItemIntercept extends CallbackAction<ItemIntercept> {
         RayTracer tracer = new RayTracer(projLoc, projVelo);
         //the accuracy by default is 0.8, there is no need to make it lower to have an extremely fine detection for hitboxes
         //that are basically 1 block wide
-        Vector v = tracer.positionOfIntersection(box, distance, 0.8);
+        Vector v = tracer.positionOfIntersection(box, distance, 0.95);
         return v;
     }
     @Override

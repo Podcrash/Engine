@@ -3,6 +3,7 @@ package com.podcrash.api.mc.commands;
 import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameLobbyTimer;
 import com.podcrash.api.mc.game.GameManager;
+import com.podcrash.api.mc.game.GameState;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -18,7 +19,7 @@ public class StartCommand extends CommandBase {
                 Player player = (Player) sender;
                 if (GameManager.hasPlayer(player)) {
                     Game game = GameManager.getGame();
-                    if(game == null || game.isOngoing()) {
+                    if(game == null || game.getGameState() == GameState.STARTED) {
                         sender.sendMessage("Game has started already!");
                         return true;
                     }

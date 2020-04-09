@@ -1,6 +1,7 @@
 package com.podcrash.api.mc.commands;
 
 import com.podcrash.api.mc.game.GameManager;
+import com.podcrash.api.mc.game.GameState;
 import com.podcrash.api.mc.game.TeamEnum;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -39,7 +40,7 @@ public class TeamCommand extends CommandBase {
                 }
 
                 // Check to make sure the game has not already started; if it has, do not allow the player to change teams.
-                if (!GameManager.getGame().isOngoing()) {
+                if (GameManager.getGame().getGameState() == GameState.LOBBY) {
                     GameManager.joinTeam(player, TeamEnum.getByColor(team));
                 } else {
                     player.sendMessage(

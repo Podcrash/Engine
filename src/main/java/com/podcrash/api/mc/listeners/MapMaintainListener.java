@@ -47,10 +47,11 @@ import java.util.Map;
  */
 public class MapMaintainListener extends ListenerBase {
     private Map<String, Long> lastHit;
-    private final JavaPlugin plugin = Pluginizer.getSpigotPlugin();
+    private final Map<String, Boolean> checkCache;
     public MapMaintainListener(JavaPlugin plugin) {
         super(plugin);
         this.lastHit = new HashMap<>();
+        this.checkCache = new HashMap<>();
     }
 
     @EventHandler
@@ -272,7 +273,14 @@ public class MapMaintainListener extends ListenerBase {
      */
     private boolean evaluate(World world) {
         WorldLoader loader = TableOrganizer.getTable(DataTableType.WORLDS);
-        return isSpawnWorld(world) || loader.listWorlds().contains(world.getName());
+        if(isSpawnWorld(world)) return true;
+        Boolean contains;
+        if((contains = checkCache.get(world.getName())) != null) {
+            return contains;
+        }
+        boolean containsDB = loader.listWorlds().contains(world.getName());
+        checkCache.put(world.getName(), true);
+        return containsDB;
     }
 
     private boolean isSpawnWorld(World world) {
