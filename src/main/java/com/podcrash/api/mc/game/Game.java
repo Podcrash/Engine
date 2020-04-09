@@ -219,7 +219,13 @@ public abstract class Game implements IGame {
         if(gameWorldName == null) {
             return "None";
         } else {
-            return gameWorldName;
+            String[] splitName = gameWorldName.split("(?=\\p{Upper})");
+            StringBuilder result = new StringBuilder();
+            for(String word: splitName) {
+                result.append(word);
+                result.append(" ");
+            }
+            return result.toString();
         }
     }
 
