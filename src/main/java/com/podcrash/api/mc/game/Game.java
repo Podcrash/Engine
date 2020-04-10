@@ -146,6 +146,7 @@ public abstract class Game implements IGame {
     }
 
     public double getReward(Player player) {
+        if(playerRewards.get(player) == null) return 0;
         return playerRewards.get(player);
     }
 
