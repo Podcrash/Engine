@@ -79,7 +79,7 @@ public class SpigotJoinListener extends ListenerBase {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void leave(PlayerQuitEvent event) {
         HitDetectionInjector.getHitDetection(event.getPlayer()).deinject();
         StringBuilder builder = new StringBuilder();
@@ -92,5 +92,21 @@ public class SpigotJoinListener extends ListenerBase {
         for (Player player : Bukkit.getOnlinePlayers()){
             player.sendMessage(quitMessage);
         }
+
+        if(GameManager.getGame() == null) return;
+        Game game = GameManager.getGame();
+        GameState state = game.getGameState();
+        switch (state) {
+            case STARTED:
+                if(Bukkit.getOnlinePlayers().size() == 0)
+                    GameManager.endGame(game);
+                break;
+            case LOBBY:
+                GameManager.removePlayer(event.getPlayer());
+                break;
+            default:
+                break;
+        }
+
     }
 }

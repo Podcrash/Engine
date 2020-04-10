@@ -70,7 +70,6 @@ public class GameListener extends ListenerBase {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onLeave(GameLeaveEvent e) {
         Communicator.putLobbyMap("size", e.getGame().size());
-        if(e.getPlayerCount() == 1) GameManager.endGame(e.getGame());
         //Communicator.publish(e.getGame().getGameCount());
     }
 
