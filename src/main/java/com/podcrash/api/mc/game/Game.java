@@ -106,6 +106,7 @@ public abstract class Game implements IGame {
     public abstract TeamSettings getTeamSettings();
     public abstract String getMode();
     public abstract String getPresentableResult();
+    public abstract List<String> getValidMaps();
 
     @Override
     public void increment(TeamEnum team, int score) {
