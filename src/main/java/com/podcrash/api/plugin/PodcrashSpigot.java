@@ -235,6 +235,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             getCommand("kill").setExecutor(new KillCommand());
             getCommand("kb").setExecutor(new KnockbackCommand());
             getCommand("hitreg").setExecutor(new HitRegCommand());
+            getCommand("mute").setExecutor(new MuteCommand());
         });
 }
 
@@ -273,7 +274,8 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
                     "invicta.host",
                     "invicta.developer",
                     "invicta.testing",
-                    "invicta.mute"
+                    "invicta.mute",
+                    "invicta.mod"
             };
             getInstance().getLogger().info("Disabling bad permissions");
             for(String disallowed : disallowedPerms)
