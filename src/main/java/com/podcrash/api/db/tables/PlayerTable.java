@@ -30,7 +30,7 @@ public class PlayerTable extends MongoBaseTable {
     @Override
     public void createTable() {
         CompletableFuture<String> future = new CompletableFuture<>();
-        getCollection().createIndex(Indexes.compoundIndex(Indexes.descending("uuid"), Indexes.ascending("currency.gold")), new IndexOptions().unique(true), (res, t) -> {
+        getCollection().createIndex(Indexes.compoundIndex(Indexes.descending("uuid")), new IndexOptions().unique(true), (res, t) -> {
             DBUtils.handleThrowables(t);
             future.complete(res);
         });

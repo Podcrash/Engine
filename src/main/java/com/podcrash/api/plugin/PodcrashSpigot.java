@@ -85,7 +85,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
         getLogger().info("This Server is a game lobby with code" + Communicator.getCode());
         Future future = CompletableFuture.allOf(
                 setKnockback(),
-                registerListeners()
+                registerGameListeners()
         );
 
         DamageQueue.active = true;
@@ -125,7 +125,8 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
 
         Future future = CompletableFuture.allOf(
                 enableWrap(),
-                registerCommands());
+                registerCommands(),
+                registerListeners());
         //WorldManager.getInstance().loadWorlds();
         try {
             future.get();
@@ -134,7 +135,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
         }
 
         economyHandler = new EconomyHandler();
-        worldSetter = new SpawnWorldSetter();
+        worldSetter = new SpawnWorldSetter(); // this is a special cookie
         Communicator.readyGameLobby();
         if(Communicator.isGameLobby())
             gameStart();
@@ -203,18 +204,26 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
     }
     private CompletableFuture<Void> registerListeners() {
         return CompletableFuture.runAsync(() -> {
-            new GameListener(this);
-            new GameDamagerConverterListener(this);
             new MapMaintainListener(this);
-            new SpigotJoinListener(this);
             new PlayerInventoryListener(this);
+            new SpigotJoinListener(this);
             new StatusListener(this);
             new MobListeners(this);
             new ActionBlockListener(this);
             new FallDamageHandler(this);
-            new TrapListener(this);
             new MOTDHandler(this);
             new CmdPreprocessHandler(this);
+            new BaseChatListener(this);
+
+            // TODO: Add more listeners here..
+        });
+    }
+
+    private CompletableFuture<Void> registerGameListeners() {
+        return CompletableFuture.runAsync(() -> {
+            new GameListener(this);
+            new GameDamagerConverterListener(this);
+            new TrapListener(this);
 
             // TODO: Add more listeners here..
         });

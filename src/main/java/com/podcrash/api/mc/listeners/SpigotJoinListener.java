@@ -27,6 +27,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.UUID;
+import java.util.logging.Logger;
 
 public class SpigotJoinListener extends ListenerBase {
     public SpigotJoinListener(JavaPlugin plugin) {
@@ -51,11 +52,15 @@ public class SpigotJoinListener extends ListenerBase {
         players.insert(uuid);
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void join(PlayerJoinEvent event) {
+        Logger log = PodcrashSpigot.getInstance().getLogger();
         Player player = event.getPlayer();
-        if(Communicator.isGameLobby())
+        log.info("34ewrf");
+        if(Communicator.isGameLobby()) {
             new HitDetectionInjector(player).injectHitDetection();
+        }
+        log.info("test123");
         ((CraftPlayer) player).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).setValue(1);
         player.setWalkSpeed(0.2F);
         PodcrashSpigot.getInstance().getLogger().info(((CraftPlayer) player).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).getValue() + "");
@@ -81,7 +86,8 @@ public class SpigotJoinListener extends ListenerBase {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void leave(PlayerQuitEvent event) {
-        HitDetectionInjector.getHitDetection(event.getPlayer()).deinject();
+        HitDetectionInjector injector = HitDetectionInjector.getHitDetection(event.getPlayer());
+        if(injector != null) injector.deinject();
         StringBuilder builder = new StringBuilder();
         builder.append(ChatColor.DARK_GRAY).append('[')
                 .append(ChatColor.GRAY).append("Leave")

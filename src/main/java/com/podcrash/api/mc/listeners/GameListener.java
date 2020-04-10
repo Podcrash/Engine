@@ -381,45 +381,19 @@ public class GameListener extends ListenerBase {
         Bukkit.getServer().getPluginManager().callEvent(new GamePickUpEvent(game, who, itemObj, remaining));
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void chat(AsyncPlayerChatEvent e) {
+        if(e.isCancelled()) return;
         Player player = e.getPlayer();
-
-        if(player.hasPermission("invicta.mute")){
-            e.setCancelled(true);
-            player.sendMessage(String.format("%sConquest> %sYou are muted.", ChatColor.BLUE, ChatColor.GRAY));
-            return;
-        }
-
-        String prefix = "";
-
-        Rank rank = PrefixUtil.getPlayerRole(player);
-        if(rank != null) {
-            prefix = PrefixUtil.getPrefix(rank);
-            prefix += " ";
-        }
 
         if(GameManager.getGame() != null && GameManager.getGame().isParticipating(player)) {
             e.setCancelled(true);
             Game game = GameManager.getGame();
             String color = "";
             if(!game.isSpectating(player)) color = game.getTeamEnum(player).getChatColor().toString();
-            game.broadcast(String.format("%s%s%s" + ChatColor.RESET + " %s",
-                    prefix,
-                    color,
-                    player.getName(),
-                    e.getMessage())
-            );
-        }else {
-            //e.getRecipients().removeIf(GameManager::hasPlayer);
-            e.setFormat(String.format("%s%s%s" + ChatColor.RESET + " %s%s",
-                    prefix,
-                    ChatColor.YELLOW,
-                    player.getName(),
-                    ChatColor.WHITE,
-                    e.getMessage())
-            );
-
+            String name = player.getName();
+            String replace = ChatColor.RESET + color + name;
+            game.broadcast(e.getFormat().replace(name, replace));
         }
     }
 
