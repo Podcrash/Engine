@@ -1,6 +1,8 @@
 package com.podcrash.api.mc.game;
 
+import com.podcrash.api.db.pojos.Rank;
 import com.podcrash.api.db.pojos.map.BaseMap;
+import com.podcrash.api.db.pojos.map.GameMap;
 import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.MapTable;
 import com.podcrash.api.db.TableOrganizer;
@@ -14,19 +16,15 @@ import com.podcrash.api.mc.game.scoreboard.GameScoreboard;
 import com.podcrash.api.mc.ui.TeamSelectGUI;
 import com.podcrash.api.mc.util.ChatUtil;
 import com.podcrash.api.mc.util.ItemStackUtil;
+import com.podcrash.api.mc.util.PrefixUtil;
 import com.podcrash.api.plugin.Pluginizer;
-import com.podcrash.api.plugin.PodcrashSpigot;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Scoreboard;
@@ -52,7 +50,7 @@ public abstract class Game implements IGame {
     private String name;
     private List<GTeam> teams;
     private volatile boolean isLoadedMap;
-    private boolean ongoing;                            // TODO: May replace this with an Enum with a more specific state for the game.
+    private GameState state;                            // TODO: May replace this with an Enum with a more specific state for the game.
     protected String gameWorldName;
     private List<GameResource> gameResources;
 
@@ -69,7 +67,9 @@ public abstract class Game implements IGame {
     private GameLobbyScoreboard lobby_board;
     private GameLobbyTimer lobby_timer;
 
-    private BaseMap map;
+    private Map<Player, Double> playerRewards = new HashMap<>();
+
+    private GameMap map;
     /**
      * Constructor for the game.
      * @param id The ID of the game.
@@ -81,9 +81,12 @@ public abstract class Game implements IGame {
         this.name = name;
         this.teams = new ArrayList<>();
         this.isLoadedMap = false;
-        this.ongoing = false;
+        this.state = GameState.LOBBY;
         this.type = type;
         this.gameResources = new ArrayList<>();
+        this.lobby_board = new GameLobbyScoreboard(this);
+        lobby_board.run();
+        this.lobby_timer = new GameLobbyTimer();
 
         this.participants = new HashSet<>();
         this.spectators = new HashSet<>();
@@ -99,9 +102,10 @@ public abstract class Game implements IGame {
     public abstract Location spectatorSpawn();
     public abstract void leaveCheck();
 
-    public abstract Class<? extends BaseMap> getMapClass();
+    public abstract Class<? extends GameMap> getMapClass();
     public abstract TeamSettings getTeamSettings();
     public abstract String getMode();
+    public abstract String getPresentableResult();
 
     @Override
     public void increment(TeamEnum team, int score) {
@@ -111,23 +115,6 @@ public abstract class Game implements IGame {
     }
 
     /**
-     * A cheap listener that allows us to listen on when worlds become loaded.
-     */
-    private static class WorldListener implements Listener {
-        private String mapName;
-        private CountDownLatch future;
-        public WorldListener(CountDownLatch future, String mapName) {
-            this.future = future;
-            this.mapName = mapName;
-        }
-
-        @EventHandler
-        public void load(WorldLoadEvent e) {
-            boolean loaded = e.getWorld().getName().equalsIgnoreCase(mapName);
-            if(loaded) future.countDown();
-        }
-    }
-    /**
      * Load the map method, uses a callback of a bukkit event for custom loading
      */
     public void loadMap()  {
@@ -135,21 +122,37 @@ public abstract class Game implements IGame {
         MapTable mapTable = TableOrganizer.getTable(DataTableType.MAPS);
 
         //TODO: this solution is not clever.... rework
-        CountDownLatch truth = new CountDownLatch(1);
-        WorldListener listener = new WorldListener(truth, gameWorldName);
-        Bukkit.getPluginManager().registerEvents(listener, Pluginizer.getSpigotPlugin());
-        CompletableFuture<? extends BaseMap> futureMap = mapTable.downloadWorld(gameWorldName, getMode(), getMapClass());
+        CompletableFuture<? extends GameMap> futureMap = mapTable.downloadWorld(gameWorldName, getMode().toLowerCase(), getMapClass());
         futureMap.thenAcceptAsync(map -> {
-            try {
-                truth.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            if(map == null) return;
             this.map = map;
-            WorldLoadEvent.getHandlerList().unregister(listener);
-            Bukkit.getScheduler().runTask(Pluginizer.getSpigotPlugin(), () ->
-            Bukkit.getPluginManager().callEvent(new GameMapLoadEvent(this, this.map, Bukkit.getWorld(gameWorldName))));
+            Bukkit.getPluginManager().callEvent(new GameMapLoadEvent(this, this.map, Bukkit.getWorld(gameWorldName)));
         });
+    }
+
+    /**
+     *
+     * @param player who received the money
+     * @param reward how much money they earned
+     * @return whether the player was successfully given the money
+     */
+    public boolean addReward(Player player, double reward) {
+        if (playerRewards.containsKey(player)) {
+            playerRewards.put(player, playerRewards.get(player) + reward);
+            return true;
+        }
+        return false;
+    }
+
+    public double getReward(Player player) {
+        return playerRewards.get(player);
+    }
+
+    /**
+     * @return The lobby timer attached to this game.
+     */
+    public GameLobbyTimer getTimer() {
+        return lobby_timer;
     }
 
     /**
@@ -193,13 +196,13 @@ public abstract class Game implements IGame {
     /**
      * @return Whether the game is ongoing.
      */
-    public boolean isOngoing() { return ongoing; }
+    public GameState getGameState() { return state; }
 
     /**
      * Set whether the game is ongoing.
-     * @param ongoing The ongoing boolean.
+     * @param state The ongoing boolean.
      */
-    public void setOngoing(boolean ongoing) { this.ongoing = ongoing; }
+    public void setState(GameState state) { this.state = state; }
 
     /**
      * @return The Game World.
@@ -227,7 +230,17 @@ public abstract class Game implements IGame {
      * @return The map name.
      */
     public String getMapName(){
-        return gameWorldName;
+        if(gameWorldName == null) {
+            return "None";
+        } else {
+            String[] splitName = gameWorldName.split("(?=\\p{Upper})");
+            StringBuilder result = new StringBuilder();
+            for(String word: splitName) {
+                result.append(word);
+                result.append(" ");
+            }
+            return result.toString();
+        }
     }
 
     /**
@@ -441,8 +454,8 @@ public abstract class Game implements IGame {
 
             Team newTeam = colorBoard.registerNewTeam(teamString);
             newTeam.setPrefix(gTeam.getChatColor().toString());
-            newTeam.setAllowFriendlyFire(false);
             newTeam.setCanSeeFriendlyInvisibles(true);
+            newTeam.setAllowFriendlyFire(true);
             newTeam.setNameTagVisibility(NameTagVisibility.ALWAYS);
 
         }
@@ -461,7 +474,7 @@ public abstract class Game implements IGame {
      * @param player The player.
      */
     public void toggleSpec(Player player) {
-        if (isOngoing()) {
+        if (state == GameState.STARTED) {
             optIn.add(player.getUniqueId());
             return;
         }
@@ -496,7 +509,7 @@ public abstract class Game implements IGame {
      * @return If the join was successful.
      */
     public boolean joinTeam(Player player, TeamEnum teamEnum) {
-        if (!player.isOnline() || isOngoing() || !isParticipating(player)) return false;
+        if (!player.isOnline() || state == GameState.STARTED || !isParticipating(player)) return false;
         leaveTeam(player);
 
         GTeam team = getTeam(teamEnum);
@@ -507,10 +520,26 @@ public abstract class Game implements IGame {
         player.setScoreboard(scoreboard);
         bukkitTeam.addEntry(player.getName());
         team.addToTeam(player);
+
+        refreshTabColor(player, teamEnum.getChatColor().toString());
+
         if (player.getOpenInventory().getTitle().equals(TeamSelectGUI.inventory_name)) { player.openInventory(TeamSelectGUI.selectTeam(this, player)); }
         return true;
     }
 
+    public void refreshTabColor(Player player, String color) {
+        Rank rank = PrefixUtil.getPlayerRole(player);
+        if(rank != null) {
+            player.setPlayerListName(String.format("%s %s%s",
+                    PrefixUtil.getPrefix(rank),
+                    color,
+                    player.getName()));
+        } else {
+            player.setPlayerListName(String.format("%s%s",
+                    color,
+                    player.getName()));
+        }
+    }
 
     public boolean leaveTeam(Player player) {
         if (!contains(player) || !isOnTeam(player)) { return false; }
@@ -532,15 +561,25 @@ public abstract class Game implements IGame {
         spectators.add(player.getUniqueId());
         participants.remove(player.getUniqueId());
         leaveTeam(player);
-        player.setPlayerListName(ChatUtil.chat("&7&o" + player.getName()));
+        refreshTabColor(player, ChatUtil.chat("&7&o"));
         // If is ongoing, set them to spectator mode and send them to the spectator spawn.
-        if (isOngoing()) {
+        if (state == GameState.STARTED) {
             player.teleport(spectatorSpawn());
             player.setGameMode(GameMode.SPECTATOR);
             player.setScoreboard(getGameScoreboard().getBoard());
+            player.setSpectator(true);
         } else {
             updateLobbyInventory(player);
         }
+        player.sendMessage(String.format(
+                "%sInvicta> %sYou joined the %sSpectators %sin %sGame %s%s.",
+                ChatColor.BLUE,
+                ChatColor.GRAY,
+                ChatColor.YELLOW,
+                ChatColor.GRAY,
+                ChatColor.GREEN,
+                GameManager.getGame().getId(),
+                ChatColor.GRAY));
     }
 
     /**
@@ -550,7 +589,8 @@ public abstract class Game implements IGame {
     public void removeSpectator(Player player) {
         spectators.remove(player.getUniqueId());
         participants.add(player.getUniqueId());
-        if (!isOngoing()) { updateLobbyInventory(player); }
+        if (state == GameState.LOBBY) { updateLobbyInventory(player); }
+        GameManager.randomTeam(player);
     }
 
     public void addParticipant(Player player) {
@@ -568,13 +608,16 @@ public abstract class Game implements IGame {
      */
     public void add(Player player) {
         // If ongoing, add to spectators. Else, add to participants.
-        if (isOngoing()) {
+        if (state == GameState.STARTED) {
             addSpectator(player);
             optIn.add(player.getUniqueId());
             resetPlayer(player, GameMode.ADVENTURE, false, true, true);
         } else {
             addParticipant(player);
         }
+
+        playerRewards.put(player, 0.0);
+
         // Call event.
         Bukkit.getServer().getPluginManager().callEvent(new GameJoinEvent(this, player));
     }
@@ -772,8 +815,8 @@ public abstract class Game implements IGame {
      * @return If they are on the same team.
      */
     public boolean isOnSameTeam(Player p1, Player p2) {
-        if (!(isOnTeam(p1) && isOnTeam(p2))) { return false; }
-        return (getTeam(p1).isPlayerOnTeam(p2));
+        if (!(isOnTeam(p1) && isOnTeam(p2)))  return false;
+        return getTeam(p1).isPlayerOnTeam(p2);
     }
 
     /**
@@ -874,12 +917,12 @@ public abstract class Game implements IGame {
         Inventory inv = p.getInventory();
         // Setting items in the player's inventory
         // TODO: Remove the Force Start Item.
-        ItemStackUtil.createItem(inv, 388, 1, 1, "&a&lForce-Start Game &7(Temporary for testing)");
+        //ItemStackUtil.createItem(inv, 388, 1, 1, "&a&lForce-Start Game &7(Temporary for testing)");
         ItemStackUtil.createItem(inv, 355, 1, 9, "&d&lReturn to Lobby");
 
-        ItemStackUtil.createItem(inv, 145, 1, 20, ChatUtil.chat("&6&lSelect Kit"));
-        ItemStackUtil.createItem(inv, 421, 1, 22, ChatUtil.chat("&6&lSelect Team"));
-        ItemStackUtil.createItem(inv, 95, 7, 1, 24, ChatUtil.chat("&7&lLeave Team Queue"));
+        ItemStackUtil.createItem(inv, 145, 1, 21, ChatUtil.chat("&6&lSelect Kit"));
+        ItemStackUtil.createItem(inv, 421, 1, 23, ChatUtil.chat("&6&lSelect Team"));
+        //ItemStackUtil.createItem(inv, 95, 7, 1, 24, ChatUtil.chat("&7&lLeave Team Queue"));
         ItemStack spectate;
         if (isSpectating(p)) {
             spectate = ItemStackUtil.createItem(373, 8270, 1, ChatUtil.chat("&7&lToggle Spectator Mode"));
@@ -887,7 +930,7 @@ public abstract class Game implements IGame {
         } else {
             spectate = ItemStackUtil.createItem(374, 1, ChatUtil.chat("&7&lToggle Spectator Mode"));
         }
-        inv.setItem(25, spectate);
+        inv.setItem(25 - 1, spectate); //-1 because here we are using inventory's method (begins at 0)
     }
 
     /*
@@ -936,18 +979,17 @@ public abstract class Game implements IGame {
      * @param player The player.
      */
     public void removePlayer(Player player) {
-        getTeam(player).removeFromTeam(player.getUniqueId());
-        remove(player);
+        //getTeam(player).removeFromTeam(player.getUniqueId());
+        //remove(player);
         if (participants.contains(player.getUniqueId())) {
             remove(player);
             GTeam gteam = getTeam(player);
-            if (gteam == null) {
-                spectators.remove(player.getUniqueId());
-            }
-            gteam.removeFromTeam(player.getUniqueId());
-            Team team = getGameScoreboard().getBoard().getTeam(id + gteam.getTeamEnum().getName() + "Team");
-            if (team != null) {
-                team.removeEntry(name);
+            if (gteam != null) {
+                gteam.removeFromTeam(player.getUniqueId());
+                Team team = getGameScoreboard().getBoard().getTeam(id + gteam.getTeamEnum().getName() + "Team");
+                if (team != null) {
+                    team.removeEntry(name);
+                }
             }
             player.sendMessage(
                     String.format(
@@ -955,13 +997,15 @@ public abstract class Game implements IGame {
                             ChatColor.BLUE,
                             ChatColor.GRAY));
             //player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+        } else if(isSpectating(player)) {
+            spectators.remove(player.getUniqueId());
         }
     }
 
     // TODO: Change this to work with more than 2 teams.
     @Override
     public String toString() {
-        return String.format("%s{Game %d}%s[%d/%d]%s:\n %s\n %s\n %s",ChatColor.GREEN, id, ChatColor.WHITE, getPlayerCount(), getMaxPlayers(), ChatColor.GRAY, niceLookingTeam(TeamEnum.RED), niceLookingTeam(TeamEnum.BLUE), niceLookingSpec());
+        return String.format("%s{Game %d}%s[%d/%d]%s:\n %s\n %s\n %s\n %s",ChatColor.GREEN, id, ChatColor.WHITE, getPlayerCount(), getMaxPlayers(), ChatColor.GRAY, niceLookingTeam(TeamEnum.RED), niceLookingTeam(TeamEnum.BLUE), niceLookingSpec(), optIn);
     }
 
     /**
@@ -980,7 +1024,7 @@ public abstract class Game implements IGame {
         StringBuilder result = new StringBuilder(ChatColor.YELLOW + "" + ChatColor.BOLD + "Spectators: ");
         result.append(ChatColor.RESET);
         for(UUID uuid : spectators) {
-            Player p = Bukkit.getPlayer(name);
+            Player p = Bukkit.getPlayer(uuid);
             result.append(p.getName());
             result.append(' ');
         }
@@ -999,72 +1043,6 @@ public abstract class Game implements IGame {
     protected final void log(String msg){
         Pluginizer.getSpigotPlugin().getLogger().info(String.format("%s: %s", toString(), msg));
     }
-
-    /**
-     * Give an item that gives the details of a game.
-     * The item will give:
-     * - The id
-     * - The map
-     * - The current scores
-     * - The players and spectators
-     * Its status of ongoing or not will show in the form of its itemtype (redstone = ongoing, emerald = hasn't started)
-     * @return the item that will represent the game
-     */
-    public ItemStack getItemInfo() {
-        ItemStack info = isOngoing() ? new ItemStack(Material.REDSTONE) : new ItemStack(Material.EMERALD);
-        ItemMeta meta = info.getItemMeta();
-        ChatColor color = isOngoing() ? ChatColor.RED : ChatColor.GREEN;
-        meta.setDisplayName(color.toString() + ChatColor.BOLD + "Game " + id + ": " + type.getName());
-        List<String> desc = new ArrayList<>();
-
-        int remainder = getMaxPlayers() - getPlayerCount();
-        desc.add(ChatColor.WHITE.toString() + getPlayerCount() + "/" + getMaxPlayers() + ": " + ChatColor.BOLD + Integer.toString(remainder) + " needed!");
-        desc.add(ChatColor.YELLOW + "Map: " + getMapName());
-        desc.add(ChatColor.WHITE + "Scores: ");
-        for (GTeam team : teams) {
-            desc.add(ChatColor.BOLD + team.getTeamEnum().getChatColor().toString() + team.getTeamEnum().getName() + ":" + team.getScore());
-        }
-
-        desc.add("");
-        desc.add(ChatColor.YELLOW + "Players:");
-        for(UUID uuid : participants) {
-            if(spectators.contains(name)) continue;
-            TeamEnum team = getTeamEnum(Bukkit.getPlayer(uuid));
-            desc.add(team.getChatColor() + name);
-        }
-
-        desc.add(" ");
-        desc.add(ChatColor.WHITE + "Spectators: ");
-        for(UUID uuid : spectators) {
-            desc.add(ChatColor.YELLOW + name);
-        }
-
-        if(participants.size() > 0) {
-            info.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 1);
-        }
-        meta.setLore(desc);
-        info.setItemMeta(meta);
-        return info;
-    }
-
-    /**
-     * If you left click a game item (the emeralds), it will do the following actions.
-     * if ongoing, spectate
-     * else join, if already in, leave
-     * @param player
-     */
-    public void leftClickAction(Player player) {
-        if(isOngoing())
-            GameManager.addSpectator(player);
-        else if(participants.contains(player.getUniqueId()))
-                GameManager.removePlayer(player);
-            else
-                GameManager.addPlayer(player);
-    }
-    public void rightClickAction(Player player) {
-        GameManager.addSpectator(player);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -12,7 +12,7 @@ public final class Damage {
     private final LivingEntity victim;
     private final LivingEntity attacker;
 
-    private final double damage;
+    private double damage;
 
     private final ItemStack item;
     private final Cause damageCause;
@@ -62,6 +62,9 @@ public final class Damage {
 
     public double getDamage() {
         return damage;
+    }
+    public void setDamage(double damage) {
+        this.damage = damage;
     }
 
     public ItemStack getItem() {

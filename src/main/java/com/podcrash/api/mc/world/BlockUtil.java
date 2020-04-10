@@ -1,5 +1,6 @@
 package com.podcrash.api.mc.world;
 
+import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.time.resources.BlockBreakThenRestore;
 import net.jafama.FastMath;
 import net.minecraft.server.v1_8_R3.BlockPosition;
@@ -88,11 +89,38 @@ public final class BlockUtil {
     };
 
 
+    public static boolean hasPlayersInArea(Location location, double radius, List<Player> players, Player user) {
+        double radiusSquared = radius * radius;
+        for(Player player : players) {
+            if(player == user || !GameManager.getGame().isParticipating(player) || GameManager.getGame().isRespawning(player) || GameManager.getGame().isSpectating(player)) continue;
+            Location loc = player.getLocation().add(0, 1, 0);
+            double distanceSquared = loc.distanceSquared(location);
+            if(distanceSquared <= radiusSquared)
+                return true;
+        }
+        return false;
+    }
+
+    public static boolean hasPlayersInArea(Location location, double radius, List<Player> players) {
+        double radiusSquared = radius * radius;
+        for(Player player : players) {
+            Location loc = player.getLocation();
+            double distanceSquared = loc.distanceSquared(location);
+            if(distanceSquared <= radiusSquared)
+                return true;
+        }
+        return false;
+    }
+
     public static boolean isInWater(LivingEntity entity) {
         Material m = entity.getLocation().getBlock().getType();
         return (m.equals(Material.STATIONARY_WATER) || m.equals(Material.WATER));
     }
 
+    public static boolean isSign(Block block) {
+        Material signType = block.getType();
+        return signType == Material.WALL_SIGN || signType == Material.SIGN_POST;
+    }
     public static boolean isPassable(Block block) {
         if (Arrays.stream(passables).anyMatch(material -> material.equals(block.getType()))) {
             return true;
@@ -294,13 +322,14 @@ public final class BlockUtil {
     public static List<Player> getPlayersInArea(Location curLoc, int radius, List<Player> players) {
         List<Player> result = new ArrayList<>();
         if(players == null) players = curLoc.getWorld().getPlayers();
-        double radiusSquared = FastMath.pow(radius, 2D);
+        double radiusSquared = radius * radius;
         //distance formula way
         for(Player p: players) {
-            if(p.getLocation().distanceSquared(curLoc) <= radiusSquared) {
+            if(p.getLocation().add(0,1,0).distanceSquared(curLoc) <= radiusSquared) {
                 result.add(p);
             }
         }
+
         /*potato farmer way
         for(Player p: players) {
             for(int x = -radius; x <= radius; x++) {

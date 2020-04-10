@@ -1,6 +1,7 @@
 package com.podcrash.api.db.pojos;
 
 import org.bson.types.ObjectId;
+import org.bukkit.ChatColor;
 
 import java.util.HashSet;
 import java.util.List;
@@ -34,7 +35,7 @@ public final class Rank {
     }
 
     public String getColor() {
-        return color;
+        return color + ChatColor.BOLD.toString();
     }
 
     public void setColor(String color) {

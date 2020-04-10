@@ -1,6 +1,7 @@
 package com.podcrash.api.mc.events.game;
 
 import com.podcrash.api.db.pojos.map.BaseMap;
+import com.podcrash.api.db.pojos.map.GameMap;
 import com.podcrash.api.mc.game.Game;
 import org.bukkit.World;
 import org.bukkit.event.HandlerList;
@@ -10,16 +11,16 @@ import org.bukkit.event.HandlerList;
  */
 public class GameMapLoadEvent extends GameEvent {
     private static HandlerList handlers = new HandlerList();
-    private BaseMap map;
+    private GameMap map;
     private World world;
 
-    public GameMapLoadEvent(Game game, BaseMap map, World world) {
+    public GameMapLoadEvent(Game game, GameMap map, World world) {
         super(game, "loading the map " + map.getName());
         this.map = map;
         this.world = world;
     }
 
-    public BaseMap getMap() {
+    public GameMap getMap() {
         return map;
     }
 

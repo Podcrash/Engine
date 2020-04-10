@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 public class Communicator {
     private static final String CACHE_CHANNEL = "PC-CACHE";
     private static RedissonClient client;
-    private static String code;
+    private static String code = "game123";
     private static RTopic controllerMessages;
 
     public static CompletableFuture<Void> setup(Executor executor) {

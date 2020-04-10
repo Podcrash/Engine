@@ -2,6 +2,7 @@ package com.podcrash.api.mc.game.resources;
 
 import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
+import com.podcrash.api.mc.game.GameState;
 import com.podcrash.api.mc.time.resources.TimeResource;
 import com.podcrash.api.plugin.Pluginizer;
 
@@ -17,7 +18,7 @@ public abstract class GameResource implements TimeResource {
 
     @Override //default: feel free to override
     public boolean cancel() {
-        return (getGame() == null) || !getGame().isOngoing();
+        return (getGame() == null) || getGame().getGameState() == GameState.LOBBY;
     }
 
     public GameResource(int gameID, int ticks, int delayTicks){

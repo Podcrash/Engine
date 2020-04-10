@@ -1,24 +1,31 @@
 package com.podcrash.api.mc.listeners;
 
+import com.abstractpackets.packetwrapper.AbstractPacket;
+import com.podcrash.api.db.pojos.Rank;
 import com.podcrash.api.db.pojos.map.BaseMap;
+import com.podcrash.api.db.pojos.map.GameMap;
 import com.podcrash.api.db.pojos.map.Point;
+import com.podcrash.api.db.pojos.map.Point2Point;
+import com.podcrash.api.mc.damage.DamageApplier;
+import com.podcrash.api.mc.effect.particle.ParticleGenerator;
 import com.podcrash.api.mc.effect.status.Status;
 import com.podcrash.api.mc.effect.status.StatusApplier;
 import com.podcrash.api.mc.effect.status.StatusWrapper;
 import com.podcrash.api.mc.events.DamageApplyEvent;
 import com.podcrash.api.mc.events.DeathApplyEvent;
+import com.podcrash.api.mc.events.ItemCollideEvent;
 import com.podcrash.api.mc.events.StatusApplyEvent;
 import com.podcrash.api.mc.events.game.*;
-import com.podcrash.api.mc.game.GTeam;
-import com.podcrash.api.mc.game.Game;
-import com.podcrash.api.mc.game.GameManager;
-import com.podcrash.api.mc.game.TeamEnum;
+import com.podcrash.api.mc.game.*;
 import com.podcrash.api.mc.game.objects.ItemObjective;
+import com.podcrash.api.mc.game.objects.action.ActionBlock;
 import com.podcrash.api.mc.item.ItemManipulationManager;
 import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.time.resources.SimpleTimeResource;
 import com.podcrash.api.mc.util.EntityUtil;
+import com.podcrash.api.mc.util.PacketUtil;
 import com.podcrash.api.mc.util.PrefixUtil;
+import com.podcrash.api.mc.world.WorldManager;
 import com.podcrash.api.plugin.Pluginizer;
 import com.podcrash.api.db.redis.Communicator;
 import org.bukkit.*;
@@ -63,13 +70,14 @@ public class GameListener extends ListenerBase {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onLeave(GameLeaveEvent e) {
         Communicator.putLobbyMap("size", e.getGame().size());
+        if(e.getPlayerCount() == 1) GameManager.endGame(e.getGame());
         //Communicator.publish(e.getGame().getGameCount());
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST) //ensures that this happens first
     public void mapLoad(GameMapLoadEvent event) {
         System.out.println("test MAP LOAD");
-        BaseMap map = event.getMap();
+        GameMap map = event.getMap();
         World world = event.getWorld();
         Game game = event.getGame();
 
@@ -87,8 +95,40 @@ public class GameListener extends ListenerBase {
             }
             team.setSpawns(spawnLocs);
         }
+
+        List<Point2Point> launchPads = map.getLaunchPads();
+        List<Point2Point> teleportPads = map.getTeleportPads();
+
+        List<ActionBlock> blocks = new ArrayList<>();
+        addActionBlocks(blocks, ActionBlock.Type.SLIME, launchPads);
+        addActionBlocks(blocks, ActionBlock.Type.TELEPORT, teleportPads);
+
+        ActionBlockListener.setBlocks(world, blocks);
     }
 
+    private void addActionBlocks(List<ActionBlock> list, ActionBlock.Type type, List<Point2Point> points) {
+        for(Point2Point p : points) {
+            ActionBlock block = new ActionBlock(p);
+            block.setType(type);
+            list.add(block);
+        }
+    }
+
+    /**
+     * EventPriority of LOW will ensure it will run before most things
+     * @param e
+     */
+    @EventHandler(priority = EventPriority.LOW)
+    public void collideItem(ItemCollideEvent e) {
+        Game game = GameManager.getGame();
+        if(game == null) return;
+        if(!(e.getCollisionVictim() instanceof Player)) return;
+        Player p = (Player) e.getCollisionVictim();
+        //if the player is not participating (spectator) or is respawning, then let the item pass through them.
+        if(!game.isParticipating(p) || game.isRespawning(p))
+            e.setCancelled(true);
+
+    }
     //--------------------------------------
     //GameEvents
     //--------------------------------------
@@ -99,31 +139,39 @@ public class GameListener extends ListenerBase {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onStart(GameStartEvent e) {
         Game game = e.getGame();
-        game.getTeams().forEach(GTeam::allSpawn);
-        game.getBukkitSpectators().forEach(player -> player.teleport(game.getSpawnLocation()));
+        game.getTeams().forEach(team -> {
+            team.allSpawn();
+            team.getBukkitPlayers().forEach(player -> {
+                player.setHealth(player.getMaxHealth());
+                player.setSpectator(false);
+                player.setGameMode(GameMode.SURVIVAL);
+            });
+        });
+        game.getBukkitSpectators().forEach(player -> {
+            player.teleport(game.getSpawnLocation());
+            player.setGameMode(GameMode.SPECTATOR);
+        });
+        BaseMap map = game.getMap();
+        if(map == null) return;
+        StringBuilder authorBuilder = new StringBuilder();
+        map.getAuthors().forEach(authorBuilder::append);
+        String message = ChatColor.BOLD + "Map: " + ChatColor.RESET + "" + ChatColor.YELLOW + map.getName() + "\n" +
+            ChatColor.RESET + "" + ChatColor.GRAY +  "Built by: " + ChatColor.RESET + "" + ChatColor.BOLD + ""  + ChatColor.GOLD + authorBuilder.toString();
+        game.consumeBukkitPlayer(player -> player.sendMessage(message));
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onEnd(GameEndEvent e) {
         Game game = e.getGame();
         game.sendColorTab(true);
-        StringBuilder builder = new StringBuilder("Scores: \n");
-        game.getTeams().forEach(team -> {
-            builder.append(team.getName());
-            builder.append(": ");
-            builder.append(team.getScore());
-            builder.append("\n");
-        });
         for (Player player : game.getBukkitPlayers()) {
             player.teleport(e.getSpawnlocation());
             player.sendMessage(e.getMessage());
-            if(game.isSpectating(player)){
-                player.setGameMode(GameMode.ADVENTURE);
-            }
+            player.setGameMode(GameMode.ADVENTURE);
             deadPeople.remove(player);
-            player.sendMessage(builder.toString());
+            player.sendMessage(game.getPresentableResult());
         }
-        //WorldManager.getInstance().deleteWorld(e.getGame().getGameWorld(), true);
+        WorldManager.getInstance().unloadWorld(e.getGame().getGameWorld().getName());
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -138,24 +186,35 @@ public class GameListener extends ListenerBase {
 
 
         e.getWho().sendMessage(String.format("%sRespawn>%s You will respawn in 9 seconds.",ChatColor.BLUE, ChatColor.GRAY));
+
         Bukkit.getScheduler().runTaskLater(Pluginizer.getSpigotPlugin(), () -> {
             deathAnimation(victim.getLocation());
             victim.setAllowFlight(true);
             victim.setFlying(true);
+            StatusApplier.getOrNew(victim).removeStatus(Status.values());
             e.getGame().consumeBukkitPlayer(player -> {
                 player.sendMessage(finalMsg);
                 if(player != victim && player.canSee(victim)) player.hidePlayer(victim);
             });
+
+            String causes = e.getDeathCausesMessage();
+            if (causes != null) {
+                e.getWho().sendMessage(causes);
+            }
         }, 1L);
+
         Vector vector = victim.getVelocity();
         victim.setVelocity(vector.add(new Vector(0, 0.75D, 0)));
         deadPeople.add(victim);
-        StatusApplier.getOrNew(victim).removeStatus(Status.values());
+
+
         //StatusApplier.getOrNew(victim).applyStatus(Status.INEPTITUDE, 9, 1);
         TimeHandler.delayTime(200L, () -> {
-            GTeam team = game.getTeam(victim);
-            victim.teleport(team.getSpawn(victim));
-            Bukkit.getPluginManager().callEvent(new GameResurrectEvent(game, victim));
+            if(game.getGameState() == GameState.STARTED) {
+                GTeam team = game.getTeam(victim);
+                victim.teleport(team.getSpawn(victim));
+                Bukkit.getPluginManager().callEvent(new GameResurrectEvent(game, victim));
+            }
         });
     }
 
@@ -171,25 +230,27 @@ public class GameListener extends ListenerBase {
     }
 
     private void deathAnimation(Location loc){
+
+        AbstractPacket boneShatter = ParticleGenerator.createBlockEffect(loc, Material.WEB.getId());
+        PacketUtil.asyncSend(boneShatter, loc.getWorld().getPlayers());
+
         List<Item> blood = new ArrayList<>();
+        int counter = 0;
 
         for(double x = -0.1; x <= 0.1; x += 0.1) {
             for(double z = -0.1; z <= 0.1; z += 0.1){
-                System.out.println(x + " 0.5 " + z);
                 Item singleBlood = ItemManipulationManager.spawnItem(new ItemStack(Material.INK_SACK, 1, (short)1), loc, new Vector(x, 0.5, z));
                 singleBlood.setCustomName("RITB");
                 ItemMeta meta = singleBlood.getItemStack().getItemMeta();
-                meta.setDisplayName("blood" + Long.toString(System.currentTimeMillis()));
+                meta.setDisplayName(counter + Long.toString(System.currentTimeMillis()));
                 singleBlood.getItemStack().setItemMeta(meta);
                 blood.add(singleBlood);
+                counter++;
             }
         }
-        TimeHandler.delayTime(17, new SimpleTimeResource() {
-            @Override
-            public void task() {
-                for(Item dye : blood){
-                    dye.remove();
-                }
+        TimeHandler.delayTime(17, () -> {
+            for(Item dye : blood){
+                dye.remove();
             }
         });
     }
@@ -221,10 +282,10 @@ public class GameListener extends ListenerBase {
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void gameDamage(GameDamageEvent e) {
         Game game = e.getGame();
-        if(!game.isOngoing()) return;
+        if(game.getGameState() == GameState.LOBBY) return;
 
-        if(!(e.getWho() instanceof Player) || !(e.getKiller() instanceof Player)) return;
-        Player victim = (Player) e.getWho();
+        if(e.getWho() == null || e.getKiller() == null) return;
+        Player victim = e.getWho();
         if(deadPeople.contains(victim) || deadPeople.contains(e.getKiller())|| GameManager.isSpectating(victim))
             e.setCancelled(true);
         else if(game.getTeam(e.getWho()) == null)
@@ -239,12 +300,15 @@ public class GameListener extends ListenerBase {
     @EventHandler(priority = EventPriority.LOWEST)
     public void hit(DamageApplyEvent e) {
         Game game = GameManager.getGame();
-        if(!game.isOngoing()) return;
+        if(game == null) return;
+        if(game.getGameState() == GameState.LOBBY) return;
         if(!(e.getAttacker() instanceof Player) && !(e.getVictim() instanceof Player)) return;
-        if(game.isOnSameTeam((Player) e.getAttacker(), (Player) e.getVictim()))
-        e.setCancelled(true);
+        boolean sameTeam = game.isOnSameTeam((Player) e.getAttacker(), (Player) e.getVictim());
+        System.out.println(e.getCause() + " sameTeam clause: " + sameTeam + " attacker: " + e.getAttacker() + " victim: " + e.getVictim());
+        if(sameTeam)
+            e.setCancelled(true);
     }
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.NORMAL)
     public void damage(EntityDamageEvent e) {
         if(e.getEntity() instanceof Player) {
             if (deadPeople.contains(e.getEntity()) || GameManager.isSpectating((Player) e.getEntity()))
@@ -263,12 +327,12 @@ public class GameListener extends ListenerBase {
         Player p = e.getPlayer();
         Game game = GameManager.getGame();
         LivingEntity killer = e.getAttacker();
-        if (game == null || !game.isOngoing()) return;
+        if (game == null || game.getGameState() == GameState.LOBBY) return;
         p.setHealth(p.getMaxHealth()); //heal right away
         if(e.wasUnsafe())
             p.teleport(game.getGameWorld().getSpawnLocation());
         game.getRespawning().add(p.getUniqueId());
-        Bukkit.getServer().getPluginManager().callEvent(new GameDeathEvent(game, p, killer, e.getDeathMessage()));
+        Bukkit.getServer().getPluginManager().callEvent(new GameDeathEvent(game, p, killer, e.getDeathMessage(), e.getCausesMessage()));
     }
 
     /**
@@ -279,14 +343,14 @@ public class GameListener extends ListenerBase {
     public void status(StatusApplyEvent e) {
         if(!(e.getEntity() instanceof Player)) return;
         Player player = (Player) e.getEntity();
-        if(GameManager.isSpectating(player) || deadPeople.contains(player))
+        if(GameManager.isSpectating(player) || deadPeople.contains(player) || DamageApplier.getInvincibleEntities().contains(player))
             e.setCancelled(true);
     }
 
     @EventHandler
     public void velocity(PlayerVelocityEvent e) {
         Player player = e.getPlayer();
-        if(GameManager.isSpectating(player) || deadPeople.contains(player))
+        if(GameManager.isSpectating(player) || deadPeople.contains(player) || DamageApplier.getInvincibleEntities().contains(player))
             e.setCancelled(true);
     }
 
@@ -305,7 +369,9 @@ public class GameListener extends ListenerBase {
         e.setCancelled(true);
         org.bukkit.entity.Item item = e.getItem();
         ItemObjective itemObj = null;
-        for(ItemObjective itemObjective : game.getItemObjectives()) {
+        List<ItemObjective> objectives = game.getItemObjectives();
+        if(objectives == null) return;
+        for(ItemObjective itemObjective : objectives) {
             if(itemObjective.getItem().getEntityId() == item.getEntityId()) {
                 itemObj = itemObjective;
             }
@@ -319,23 +385,41 @@ public class GameListener extends ListenerBase {
     @EventHandler
     public void chat(AsyncPlayerChatEvent e) {
         Player player = e.getPlayer();
-        if(player.hasPermission("Champions.mute")){
+
+        if(player.hasPermission("invicta.mute")){
             e.setCancelled(true);
-            player.sendMessage(String.format("%sChampions> %sYou are muted.", ChatColor.BLUE, ChatColor.GRAY));
+            player.sendMessage(String.format("%sConquest> %sYou are muted.", ChatColor.BLUE, ChatColor.GRAY));
             return;
         }
-        if(GameManager.hasPlayer(player)) {
+
+        String prefix = "";
+
+        Rank rank = PrefixUtil.getPlayerRole(player);
+        if(rank != null) {
+            prefix = PrefixUtil.getPrefix(rank);
+            prefix += " ";
+        }
+
+        if(GameManager.getGame() != null && GameManager.getGame().isParticipating(player)) {
             e.setCancelled(true);
             Game game = GameManager.getGame();
+            String color = "";
+            if(!game.isSpectating(player)) color = game.getTeamEnum(player).getChatColor().toString();
             game.broadcast(String.format("%s%s%s" + ChatColor.RESET + " %s",
-                    PrefixUtil.getPrefix(PrefixUtil.getPlayerRole(player)),
-                    game.getTeamEnum(player).getChatColor(),
+                    prefix,
+                    color,
                     player.getName(),
                     e.getMessage())
             );
         }else {
-            e.getRecipients().removeIf(GameManager::hasPlayer);
-            e.setFormat(PrefixUtil.getPrefix(PrefixUtil.getPlayerRole(player)) + ChatColor.RESET + "%s " + ChatColor.GRAY + "%s");
+            //e.getRecipients().removeIf(GameManager::hasPlayer);
+            e.setFormat(String.format("%s%s%s" + ChatColor.RESET + " %s%s",
+                    prefix,
+                    ChatColor.YELLOW,
+                    player.getName(),
+                    ChatColor.WHITE,
+                    e.getMessage())
+            );
 
         }
     }

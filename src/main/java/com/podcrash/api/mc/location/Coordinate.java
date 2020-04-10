@@ -147,6 +147,15 @@ public class Coordinate {
         return ground;
     }
 
+    public Coordinate normalize() {
+        double length = this.length();
+
+        double newX = x/length;
+        double newY = y/length;
+        double newZ = z/length;
+
+        return new Coordinate(newX, newY, newZ);
+    }
     /**
      * From Location#getDirection()
      * @return

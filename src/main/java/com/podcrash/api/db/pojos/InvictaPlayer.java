@@ -10,6 +10,8 @@ import java.util.UUID;
 
 public final class InvictaPlayer {
     private ObjectId objectId;
+
+    private int discordID;
     private UUID uuid;
     private String lastUsername;
 
@@ -29,6 +31,14 @@ public final class InvictaPlayer {
 
     public void setObjectId(ObjectId objectId) {
         this.objectId = objectId;
+    }
+
+    public int getDiscordID() {
+        return discordID;
+    }
+
+    public void setDiscordID(int discordID) {
+        this.discordID = discordID;
     }
 
     public UUID getUuid() {

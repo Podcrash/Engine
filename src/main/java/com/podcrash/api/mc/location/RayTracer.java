@@ -7,13 +7,16 @@ import org.bukkit.util.Vector;
 
 public class RayTracer {
     public static double DEFAULT_ESTIMATE = 0.12;
+    //TODO: remove all the classes that use a bukkit Vector
     private Vector origin, direction;
 
+    private Coordinate original, dir;
+
+    @Deprecated
     public RayTracer(Vector origin, Vector direction) {
         this.origin = origin;
         this.direction = direction;
     }
-
     /**
      * This smoothens it
      * @param box
@@ -42,9 +45,7 @@ public class RayTracer {
 
             originClone.add(addVector.multiply(i));
             lastV = originClone;
-            particles(Bukkit.getWorld("Gulley"), originClone);
             if(intersectsBox(originClone, box)) {
-                particles(Bukkit.getWorld("Gulley"), lastV);
                 return lastV.distance(origin) < distance;
             }
         }
@@ -80,7 +81,7 @@ public class RayTracer {
             Vector addVector = direction.clone();
 
             originClone.add(addVector.multiply(i));
-            if(intersectsBox(originClone, box)) return originClone;
+            if(intersectsBox(originClone, box) && originClone.distanceSquared(originClone) < distance * distance) return originClone;
         }
         return null;
     }

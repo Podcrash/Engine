@@ -9,6 +9,7 @@ import com.podcrash.api.mc.events.SoundApplyEvent;
 import com.podcrash.api.mc.events.game.GameDamageEvent;
 import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
+import com.podcrash.api.mc.game.GameState;
 import com.podcrash.api.mc.sound.SoundPlayer;
 import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.time.resources.SimpleTimeResource;
@@ -78,7 +79,7 @@ public final class DamageQueue implements Runnable {
      * @param entity - the entity whose name will be extracted
      * @return the name of the entity as usage for a key
      */
-    private String getNameFor(Entity entity) {
+    private static String getNameFor(Entity entity) {
         if(entity instanceof Player) return entity.getName();
         else {
             String name = entity.getName();
@@ -175,8 +176,8 @@ public final class DamageQueue implements Runnable {
         Game game = GameManager.getGame();
         //if there's no game, then it's fine to process the damage
         //if it isn't ongoing, return false;
-        if(game == null) return false;
-        if(!game.isOngoing()) return true;
+        if(game == null) return true;
+        if(game.getGameState() == GameState.LOBBY) return true;
         //if the entities involved aren't players, then process the damage
         if(!(victim instanceof Player) || !(attacker instanceof Player)) return false;
         GameDamageEvent event = new GameDamageEvent(game, (Player) victim, (Player) attacker);
@@ -218,6 +219,7 @@ public final class DamageQueue implements Runnable {
      * @param damageEvent the event
      */
     private void damage(LivingEntity entity, double damage, double armorValue, DamageApplyEvent damageEvent) {
+        if(damage < 0) damage = 0;
         double damageFormula = damage * (1D - 0.04D * armorValue);
         //Bukkit.broadcastMessage("AV: " + armorValue  + " " + damage + " --> " + damageFormula);
         if(damageEntity(entity, damageFormula)) return;
@@ -243,7 +245,7 @@ public final class DamageQueue implements Runnable {
         Deque<Damage> history = damageHistory.get(name);
         if(history.size() == 0) return false;
         addDeath((Player) victim);
-        Damage damage = history.removeLast();
+        Damage damage = history.getLast();
 
         DeathApplyEvent deathEvent = new DeathApplyEvent(damage, history);
         Bukkit.getPluginManager().callEvent(deathEvent);
@@ -288,7 +290,7 @@ public final class DamageQueue implements Runnable {
             velocity[0] *= multiplier;
             velocity[2] *= multiplier;
         }else if ((cause == Cause.MELEE || cause == Cause.MELEESKILL)) {
-            double multiplier = .05 * damage + 0.65;
+            double multiplier = .05 * damage + 0.60;
             velocity[0] *= multiplier;
             velocity[1] *= multiplier;
             velocity[2] *= multiplier;
@@ -339,7 +341,10 @@ public final class DamageQueue implements Runnable {
         Bukkit.getPluginManager().callEvent(damageEvent);
 
         if(damageEvent.isCancelled() || damageEvent.getAttacker() == damageEvent.getVictim()) return;
-        if(damageEvent.isModified()) damage = damageEvent.getDamage();
+        if(damageEvent.isModified()) {
+            damageWrapper.setDamage(damageEvent.getDamage());
+        }
+        damage = damageEvent.getDamage();
         addHistory(victim, damageWrapper);
         double armorValue = damageEvent.getArmorValue();
         playSound(victim, attacker, cause);
@@ -356,17 +361,31 @@ public final class DamageQueue implements Runnable {
         if(hasDeath(player)) return;
         Deque<Damage> damages = damageHistory.get(player.getName());
         player.getInventory().clear();
+        player.getInventory().setArmorContents(new ItemStack[]{null, null, null, null});
+
         Damage damage;
-        final Damage nullDamage = new Damage(player, player, -99, null, Cause.NULL, null, (DamageSource) null,false);
+        final Damage nullDamage = new Damage(player, null, -99, null, Cause.NULL, null, (DamageSource) null,false);
         boolean a = false;
         if(damages == null ||
-           damages.size() == 0) damage = nullDamage;
+           damages.size() == 0) {
+            damage = nullDamage;
+        }
         else {
-            damage = damages.removeLast();
+            damage = damages.getLast();
             a = true;
         }
+
         Bukkit.getPluginManager().callEvent(new DeathApplyEvent(damage, damages));
         if(a) damages.clear();
+    }
+
+    public static void artificialAddHistory(LivingEntity entity, double damage, Cause cause) {
+        String name = getNameFor(entity);
+        if(!damageHistory.containsKey(name)) {
+            damageHistory.put(name, new ArrayDeque<>());
+        }
+        Damage wrapper = new Damage(entity, null, damage, null, cause, null, (DamageSource) null, false);
+        damageHistory.get(name).add(wrapper);
     }
 
     public static Deque<Damage> getDamages() {

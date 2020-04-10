@@ -4,28 +4,36 @@ import com.grinderwolf.swm.api.SlimePlugin;
 import com.grinderwolf.swm.api.exceptions.UnknownWorldException;
 import com.grinderwolf.swm.api.exceptions.WorldInUseException;
 import com.grinderwolf.swm.api.loaders.SlimeLoader;
+import com.podcrash.api.db.TableOrganizer;
+import com.podcrash.api.db.pojos.Rank;
+import com.podcrash.api.db.tables.DataTableType;
+import com.podcrash.api.db.tables.RanksTable;
 import com.podcrash.api.db.tables.WorldLoader;
 import com.podcrash.api.mc.Configurator;
+import com.podcrash.api.mc.commands.*;
 import com.podcrash.api.mc.damage.DamageQueue;
+import com.podcrash.api.mc.economy.EconomyHandler;
+import com.podcrash.api.mc.economy.IEconomyHandler;
 import com.podcrash.api.mc.listeners.*;
 import com.podcrash.api.mc.tracker.CoordinateTracker;
 import com.podcrash.api.mc.tracker.Tracker;
 import com.podcrash.api.mc.tracker.VectorTracker;
+import com.podcrash.api.mc.world.SpawnWorldSetter;
 import com.podcrash.api.mc.world.WorldManager;
 import com.podcrash.api.db.redis.Communicator;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
+import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.redisson.api.RedissonClient;
 import org.spigotmc.SpigotConfig;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
 
@@ -34,6 +42,9 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
     public static PodcrashSpigot getInstance() {
         return INSTANCE;
     }
+
+    private Map<UUID, PermissionAttachment> playerPermissions = new HashMap<>();
+
     private ExecutorService service = Executors.newCachedThreadPool();
     private int dQInt;
 
@@ -42,6 +53,10 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
     private VectorTracker vectorTracker;
 
     private final Map<String, Configurator> configurators = new HashMap<>();
+
+    private IEconomyHandler economyHandler;
+    private SpawnWorldSetter worldSetter;
+
     @Override
     public void redis(RedissonClient client) {
 
@@ -88,43 +103,6 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             e.printStackTrace();
         }
 
-        SlimePlugin slimePlugin = (SlimePlugin) Bukkit.getPluginManager().getPlugin("SlimeWorldManager");
-        slimePlugin.registerLoader("postgres", new SlimeLoader() {
-            @Override
-            public byte[] loadWorld(String s, boolean b) throws UnknownWorldException, WorldInUseException, IOException {
-                return new byte[0];
-            }
-
-            @Override
-            public boolean worldExists(String s) throws IOException {
-                return false;
-            }
-
-            @Override
-            public List<String> listWorlds() throws IOException {
-                return null;
-            }
-
-            @Override
-            public void saveWorld(String s, byte[] bytes, boolean b) throws IOException {
-
-            }
-
-            @Override
-            public void unlockWorld(String s) throws UnknownWorldException, IOException {
-
-            }
-
-            @Override
-            public boolean isWorldLocked(String s) throws UnknownWorldException, IOException {
-                return false;
-            }
-
-            @Override
-            public void deleteWorld(String s) throws UnknownWorldException, IOException {
-
-            }
-        });
     }
 
     public void gameDisable() {
@@ -155,6 +133,8 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             e.printStackTrace();
         }
 
+        economyHandler = new EconomyHandler();
+        worldSetter = new SpawnWorldSetter();
         Communicator.readyGameLobby();
         if(Communicator.isGameLobby())
             gameStart();
@@ -230,14 +210,33 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             new PlayerInventoryListener(this);
             new StatusListener(this);
             new MobListeners(this);
+            new ActionBlockListener(this);
+            new FallDamageHandler(this);
+            new TrapListener(this);
+            new MOTDHandler(this);
             // TODO: Add more listeners here..
         });
     }
     private CompletableFuture<Void> registerCommands() {
         return CompletableFuture.runAsync(() -> {
-
+            getCommand("setrole").setExecutor(new SetRoleCommand());
+            getCommand("addrole").setExecutor(new AddRoleCommand());
+            getCommand("bal").setExecutor(new BalanceCommand());
+            getCommand("buy").setExecutor(new BuyCommand());
+            getCommand("confirm").setExecutor(new ConfirmCommand());
+            getCommand("tell").setExecutor(new TellCommand());
+            getCommand("endgame").setExecutor(new EndCommand());
+            getCommand("ping").setExecutor(new PingCommand());
+            getCommand("start").setExecutor(new StartCommand());
+            getCommand("view").setExecutor(new ViewCommand());
+            getCommand("spec").setExecutor(new SpecCommand());
+            getCommand("setmap").setExecutor(new SetMapCommand());
+            getCommand("team").setExecutor(new TeamCommand());
+            getCommand("kill").setExecutor(new KillCommand());
+            getCommand("kb").setExecutor(new KnockbackCommand());
+            getCommand("hitreg").setExecutor(new HitRegCommand());
         });
-    }
+}
 
     public Configurator getConfigurator(String identifier) {
         return configurators.get(identifier);
@@ -245,5 +244,49 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
     public void reloadConfigurators() {
         CompletableFuture.runAsync(() ->
                 configurators.values().forEach(Configurator::reloadConfig));
+    }
+
+    public IEconomyHandler getEconomyHandler() {
+        return economyHandler;
+    }
+    public SpawnWorldSetter getWorldSetter() {
+        return worldSetter;
+    }
+
+    public void setupPermissions(Player player) {
+        PermissionAttachment attachment = player.addAttachment(this);
+        this.playerPermissions.put(player.getUniqueId(), attachment);
+        permissionsSetter(player);
+    }
+    private void permissionsSetter(Player player) {
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+
+            PermissionAttachment attachment = this.playerPermissions.get(player.getUniqueId());
+            String[] disallowedPerms = new String[] {
+                    "bukkit.command.reload",
+                    "bukkit.command.timings",
+                    "bukkit.command.plugins",
+                    "bukkit.command.help",
+                    "bukkit.command.ban-ip",
+                    "bukkit.command.stop",
+                    "invicta.map",
+                    "invicta.host",
+                    "invicta.developer",
+                    "invicta.testing",
+                    "invicta.mute"
+            };
+            getInstance().getLogger().info("Disabling bad permissions");
+            for(String disallowed : disallowedPerms)
+                attachment.setPermission(disallowed, false);
+
+            RanksTable table = TableOrganizer.getTable(DataTableType.PERMISSIONS);
+            Set<Rank> ranks =  table.getRanksSync(player.getUniqueId());
+            for(Rank r : ranks) {
+                player.sendMessage(String.format("%s%sYou have been assigned the %s role!", ChatColor.GREEN, ChatColor.BOLD, r.getName()));
+                for(String permission : r.getPermissions()) {
+                    attachment.setPermission(permission, true);
+                }
+            }
+        });
     }
 }

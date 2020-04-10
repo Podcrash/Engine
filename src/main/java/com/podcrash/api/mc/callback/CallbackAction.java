@@ -76,13 +76,9 @@ public abstract class CallbackAction<T extends CallbackAction> implements TimeRe
 
     @Override
     public void cleanup() {
-        try {
-            if (runOnce) {
-                listener.run();
-                runOnce = false;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (runOnce) {
+            listener.run();
+            runOnce = false;
         }
     }
 }

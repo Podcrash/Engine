@@ -143,7 +143,9 @@ public class DamageApplyEvent extends Event implements Cancellable {
     public void addSource(DamageSource source) {
         sources.add(source);
     }
-
+    public boolean containsSource(DamageSource source) {
+        return sources.contains(source);
+    }
     public boolean isDoKnockback() {
         return doKnockback;
     }

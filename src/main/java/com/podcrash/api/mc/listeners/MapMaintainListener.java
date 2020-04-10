@@ -1,42 +1,57 @@
 package com.podcrash.api.mc.listeners;
 
 import com.abstractpackets.packetwrapper.WrapperPlayServerEntityStatus;
+import com.podcrash.api.db.TableOrganizer;
+import com.podcrash.api.db.tables.DataTableType;
+import com.podcrash.api.db.tables.WorldLoader;
+import com.podcrash.api.mc.damage.Cause;
+import com.podcrash.api.mc.damage.DamageApplier;
 import com.podcrash.api.mc.damage.DamageQueue;
 import com.podcrash.api.mc.events.DamageApplyEvent;
+import com.podcrash.api.mc.events.DamageEvent;
 import com.podcrash.api.mc.sound.SoundPlayer;
+import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.util.PacketUtil;
 import com.podcrash.api.mc.world.WorldManager;
 import com.podcrash.api.plugin.Pluginizer;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Painting;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.event.painting.PaintingBreakEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Prevent dumb things from happening
  */
 public class MapMaintainListener extends ListenerBase {
-    private final JavaPlugin plugin = Pluginizer.getSpigotPlugin();
+    private Map<String, Long> lastHit;
+    private final Map<String, Boolean> checkCache;
     public MapMaintainListener(JavaPlugin plugin) {
         super(plugin);
+        this.lastHit = new HashMap<>();
+        this.checkCache = new HashMap<>();
     }
 
     @EventHandler
@@ -54,9 +69,19 @@ public class MapMaintainListener extends ListenerBase {
         }
     }
 
+    @EventHandler
+    public void onPlayerInteractEntity(PlayerInteractAtEntityEvent e) {
+        if(e.getRightClicked() instanceof ArmorStand) e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onPaintingBreak(PaintingBreakEvent e){
+        e.setCancelled(true);
+    }
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void onWeather(WeatherChangeEvent event){
-        if (plugin.getConfig().getList("worlds").contains(event.getWorld().getName()) || evaluate(event.getWorld())) {
+        if (evaluate(event.getWorld())) {
             event.getWorld().setWeatherDuration(0);
             event.setCancelled(true);
 
@@ -64,7 +89,7 @@ public class MapMaintainListener extends ListenerBase {
     }
     @EventHandler
     public void onSpawn(CreatureSpawnEvent event) {
-        if (plugin.getConfig().getList("worlds").contains(event.getEntity().getWorld().getName()) || evaluate(event.getEntity().getWorld())) {
+        if (evaluate(event.getEntity().getWorld())) {
             if (event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.CUSTOM)) {
                 return;
             }
@@ -73,9 +98,18 @@ public class MapMaintainListener extends ListenerBase {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlace(BlockPlaceEvent e){
+        if (evaluate(e.getBlock().getWorld())) {
+            if (!e.getPlayer().hasPermission("invicta.map")) {
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onBreak(BlockBreakEvent e) {
-        if (plugin.getConfig().getList("worlds").contains(e.getBlock().getWorld().getName()) || evaluate(e.getBlock().getWorld())) {
-            if (!e.getPlayer().hasPermission("champions.can.break.map")) {
+        if (evaluate(e.getBlock().getWorld())) {
+            if (!e.getPlayer().hasPermission("invicta.map")) {
                 e.setCancelled(true);
             }
         }
@@ -83,14 +117,14 @@ public class MapMaintainListener extends ListenerBase {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onDrop(PlayerDropItemEvent e) {
-        if (plugin.getConfig().getList("worlds").contains(e.getPlayer().getWorld().getName()) || evaluate(e.getPlayer().getWorld())) {
+        if (evaluate(e.getPlayer().getWorld())) {
             e.setCancelled(true);
         }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onFood(FoodLevelChangeEvent e) {
-        if(e.getEntity().getWorld().getName().equalsIgnoreCase("world")) {
+        if(isSpawnWorld(e.getEntity().getWorld())) {
             e.setFoodLevel(20);
         }else e.setCancelled(true);
     }
@@ -119,14 +153,14 @@ public class MapMaintainListener extends ListenerBase {
      * Remove default death mechanics.
      * @param event
      */
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGH)
     public void statusDamage(EntityDamageEvent event) {
+        if(event.isCancelled()) return;
         //if the event was cancelled, or the entity isn't living, or if it's in the og world,
         //or if the cause is null or custom
         // then cancel it
-        if((event.isCancelled() ||
-                !(event.getEntity() instanceof LivingEntity)) ||
-                (event.getEntity().getWorld().getName().equals("world")) ||
+        if((!(event.getEntity() instanceof LivingEntity)) ||
+                isSpawnWorld(event.getEntity().getWorld()) ||
                 (event.getCause() == null || event.getCause() == EntityDamageEvent.DamageCause.CUSTOM)) {
             event.setCancelled(true);
             return;
@@ -142,23 +176,39 @@ public class MapMaintainListener extends ListenerBase {
 
         final List<EntityDamageEvent.DamageCause> poss = Arrays.asList(
                 EntityDamageEvent.DamageCause.FIRE_TICK,
+                EntityDamageEvent.DamageCause.FIRE,
                 EntityDamageEvent.DamageCause.FALL,
                 EntityDamageEvent.DamageCause.POISON,
-                EntityDamageEvent.DamageCause.WITHER
-        );
+                EntityDamageEvent.DamageCause.WITHER,
+                EntityDamageEvent.DamageCause.VOID,
+                EntityDamageEvent.DamageCause.SUFFOCATION,
+                EntityDamageEvent.DamageCause.DROWNING,
+                EntityDamageEvent.DamageCause.LAVA,
+                EntityDamageEvent.DamageCause.CONTACT
+                );
         //if the damage is one of the causes above
         //cancel it and set our own damage.
         //This is done because the types of damage above affects velocity
-        if(poss.contains(event.getCause())) {
-            event.setCancelled(true);
-            damage(p, damage);
+        if(!poss.contains(event.getCause())) return;
+        event.setCancelled(true);
+        Long last = lastHit.get(p.getName());
+        long curr = System.currentTimeMillis();
+        if(last != null) {
+            long ticksMilles = 600L;
+            if(curr - last <= ticksMilles) return;
         }
+        lastHit.put(p.getName(), curr);
+        Cause cause = Cause.findByEntityDamageCause(event.getCause());
+        DamageEvent event2 = new DamageEvent(p, damage, cause);
+        Bukkit.getPluginManager().callEvent(event2);
+        if(event2.isCancelled()) return;
+        damage(p, damage);
 
+        DamageQueue.artificialAddHistory(p, damage, cause);
         //if the player is about to die, cancel it
         //Then call our own death event.
         if(p instanceof Player && afterHealth <= 0D) {
             DamageQueue.artificialDie((Player) p);
-            event.setCancelled(true);
         }
     }
 
@@ -166,19 +216,20 @@ public class MapMaintainListener extends ListenerBase {
      * Send animation packets as well as sound
      * (For some reason, the animation packet is also supposed to send sound as well
      * but it doesn't?)
-     * @param p
-     * @param damage
+     * @param victim The player that is taking the damage.
+     * @param damage How much damage the player must take
      */
-    private void damage(LivingEntity p, double damage) {
-        double health = p.getHealth() - damage;
-        p.setHealth((health < 0) ? 0 : health);
+    private void damage(LivingEntity victim, double damage) {
+
+        double health = victim.getHealth() - damage;
+        victim.setHealth((health < 0) ? 0 : health);
 
         WrapperPlayServerEntityStatus packet = new WrapperPlayServerEntityStatus();
-        packet.setEntityId(p.getEntityId());
+        packet.setEntityId(victim.getEntityId());
         packet.setEntityStatus(WrapperPlayServerEntityStatus.Status.ENTITY_HURT);
 
-        PacketUtil.syncSend(packet, p.getWorld().getPlayers());
-        SoundPlayer.sendSound(p.getLocation(), "game.player.hurt", 1, 63);
+        PacketUtil.syncSend(packet, victim.getWorld().getPlayers());
+        SoundPlayer.sendSound(victim.getLocation(), "game.player.hurt", 1, 63);
 
     }
 
@@ -203,7 +254,7 @@ public class MapMaintainListener extends ListenerBase {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void damage(DamageApplyEvent event) {
-        if(event.getVictim() instanceof Player && event.getVictim().getWorld().getName().equals("world"))
+        if(event.getVictim() instanceof Player && isSpawnWorld(event.getVictim().getWorld()))
             event.setCancelled(true);
     }
 
@@ -215,7 +266,26 @@ public class MapMaintainListener extends ListenerBase {
             event.setCancelled(true);
     }
 
+    /**
+     *
+     * @param world
+     * @return true if the world is restrictive, false if not
+     */
     private boolean evaluate(World world) {
-        return WorldManager.getInstance().getWorlds().contains(world.getName());
+        WorldLoader loader = TableOrganizer.getTable(DataTableType.WORLDS);
+        if(isSpawnWorld(world)) return true;
+        Boolean contains;
+        if((contains = checkCache.get(world.getName())) != null) {
+            return contains;
+        }
+        boolean containsDB = loader.listWorlds().contains(world.getName());
+        checkCache.put(world.getName(), true);
+        return containsDB;
+    }
+
+    private boolean isSpawnWorld(World world) {
+        //if this is a world loaded by the spawn setter
+        String name = Pluginizer.getSpigotPlugin().getWorldSetter().getCurrentWorldName();
+        return world.getName().equalsIgnoreCase(name);
     }
 }

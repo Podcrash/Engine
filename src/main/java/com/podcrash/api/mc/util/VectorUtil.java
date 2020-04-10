@@ -1,6 +1,8 @@
 package com.podcrash.api.mc.util;
 
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.Vector;
 
 public final class VectorUtil {
@@ -32,5 +34,9 @@ public final class VectorUtil {
         b = b.clone().normalize().setY(0);
         float angle = a.angle(b);
         return Math.toDegrees((double) angle) <= degreesBased180;
+    }
+
+    public static void conserveDirection(Location location, Entity entity) {
+        location.setDirection(entity.getLocation().getDirection());
     }
 }

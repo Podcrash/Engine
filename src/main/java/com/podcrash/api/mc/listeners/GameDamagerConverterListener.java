@@ -32,13 +32,18 @@ public class GameDamagerConverterListener extends ListenerBase {
     }
 
     @EventHandler(
+            priority = EventPriority.LOWEST
+    )
+    public void cancelFireBalls(EntityDamageByEntityEvent event) {
+        if(event.getDamager() instanceof Fireball) event.setCancelled(true);
+    }
+    @EventHandler(
             priority = EventPriority.HIGHEST
     )
     public void damage(EntityDamageByEntityEvent event) {
         if(!(event.getDamager() instanceof Arrow)) return;
         Arrow arrow = (Arrow) event.getDamager();
         if (arrow == null || !arrowDamageMap.containsKey(arrow.getEntityId())) return;
-        if (!(event.getDamager() instanceof Projectile || event.getDamager() instanceof Arrow)) return;
         if(System.currentTimeMillis() < delay.getOrDefault(event.getEntity().getName(), 0L))
             return;
         Disguise possDisguise = Disguiser.getSeenDisguises().get(event.getEntity().getEntityId());

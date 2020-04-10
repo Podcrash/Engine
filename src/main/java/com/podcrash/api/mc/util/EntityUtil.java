@@ -30,6 +30,6 @@ public final class EntityUtil  {
      * @return
      */
     public static boolean isBelow(LivingEntity entity, double health) {
-        return health >= entity.getHealth()/entity.getMaxHealth();
+        return entity.getMaxHealth() * health >= entity.getHealth();
     }
 }

@@ -1,16 +1,19 @@
 package com.podcrash.api.db.tables;
 
 import com.mongodb.async.SingleResultCallback;
+import com.mongodb.client.model.*;
+import com.mongodb.client.result.UpdateResult;
 import com.podcrash.api.db.DBUtils;
 import com.podcrash.api.db.MongoBaseTable;
 
 import static com.mongodb.client.model.Filters.*;
 
-import com.mongodb.client.model.IndexOptions;
-import com.mongodb.client.model.Indexes;
+import com.podcrash.api.db.pojos.Currency;
 import com.podcrash.api.db.pojos.InvictaPlayer;
 import com.podcrash.api.db.pojos.PojoHelper;
 import com.podcrash.api.plugin.Pluginizer;
+import org.bson.conversions.Bson;
+
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -27,7 +30,7 @@ public class PlayerTable extends MongoBaseTable {
     @Override
     public void createTable() {
         CompletableFuture<String> future = new CompletableFuture<>();
-        getCollection().createIndex(Indexes.descending("uuid"), new IndexOptions().unique(true), (res, t) -> {
+        getCollection().createIndex(Indexes.compoundIndex(Indexes.descending("uuid"), Indexes.ascending("currency.gold")), new IndexOptions().unique(true), (res, t) -> {
             DBUtils.handleThrowables(t);
             future.complete(res);
         });
@@ -39,26 +42,45 @@ public class PlayerTable extends MongoBaseTable {
 
         CompletableFuture<Void> future = new CompletableFuture<>();
         getCollection(InvictaPlayer.class).insertOne(player, (res, t) -> {
-            DBUtils.handleThrowables(t);
+            DBUtils.handleDuplicateKeyException(t);
             future.complete(res);
         });
 
         return future;
     }
 
-    public InvictaPlayer getPlayerDocumentSync(UUID uuid) {
-        CompletableFuture<InvictaPlayer> future = getPlayerDocumentAsync(uuid);
+    public InvictaPlayer getPlayerDocumentSync(UUID uuid, String... fields) {
+        CompletableFuture<InvictaPlayer> future = getPlayerDocumentAsync(uuid, fields);
         return futureGuaranteeGet(future);
     }
 
-    public CompletableFuture<InvictaPlayer> getPlayerDocumentAsync(UUID uuid) {
+    public CompletableFuture<InvictaPlayer> getPlayerDocumentAsync(UUID uuid, String... fields) {
         CompletableFuture<InvictaPlayer> future = new CompletableFuture<>();
         SingleResultCallback<InvictaPlayer> callback = (invictaPlayer, t) -> {
             DBUtils.handleThrowables(t);
             Pluginizer.getLogger().info("returned invicta player: " + invictaPlayer);
             future.complete(invictaPlayer);
         };
-        getCollection(InvictaPlayer.class).find(eq("uuid", uuid)).first(callback);
+
+        Bson limit = Projections.fields(Projections.include(fields), Projections.excludeId());
+        getCollection(InvictaPlayer.class)
+            .find(eq("uuid", uuid))
+            .projection(limit)
+            .first(callback);
         return future;
+    }
+
+    public CompletableFuture<UpdateResult> incrementMoney(UUID uuid, double value){
+        CompletableFuture<UpdateResult> res = new CompletableFuture<>();
+        getCollection().updateOne(eq("uuid", uuid), Updates.inc("currency.gold", value), ((result, t) -> {
+            DBUtils.handleThrowables(t);
+            res.complete(result);
+        }));
+
+        return res;
+    }
+
+    public CompletableFuture<Currency> getCurrency(UUID uuid) {
+        return getPlayerDocumentAsync(uuid, "currency").thenApplyAsync(InvictaPlayer::getCurrency);
     }
 }

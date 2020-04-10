@@ -23,21 +23,21 @@ import java.util.function.Consumer;
 public class StatusApplier {
     private Player player;
     private static Map<String, StatusApplier> appliers = new HashMap<>();
-    private static HashMap<String, Long> cloakMap = new HashMap<>();//dis gotta be refactored into long
-    private static HashMap<String, Long> markedMap = new HashMap<>();
-    private static HashMap<String, Long> silenceMap = new HashMap<>();
-    private static HashMap<String, Long> shockMap = new HashMap<>();
-    private static HashMap<String, Long> rootMap = new HashMap<>();
-    private static HashMap<String, Long> groundMap = new HashMap<>();
-    private static HashMap<String, Long> ineptMap = new HashMap<>();
-    private static HashMap<String, Long> bleedMap = new HashMap<>();
+    private long cloaked;
+    private long marked;
+    private long silenced;
+    private long shocked;
+    private long rooted;
+    private long grounded;
+    private long inept;
+    private long bleeded;
 
     private StatusApplier(Player p) {
         this.player = p;
     }
 
     public static StatusApplier getOrNew(Player player) {
-        if (appliers.get(player.getName()) == null) {
+        if (!appliers.containsKey(player.getName())) {
             appliers.put(player.getName(), new StatusApplier(player));
         }
         return appliers.get(player.getName());
@@ -76,6 +76,20 @@ public class StatusApplier {
         } else {
             applyCustom(status, iduration, ipotency);
         }
+
+        //only work for vanilla effects.
+        if(override && status.isVanilla()) {
+            StatusWrapper wrapper = fromPotionEffect(status);// 30 seconds
+            Pluginizer.getLogger().info("statusppaplier wrapper: " + wrapper);
+            if(wrapper == null) return;
+            float newDuration = (wrapper.getDuration() - duration);
+            Pluginizer.getLogger().info("statusppaplier duration: " + newDuration);
+            if(newDuration < 0) return;
+            StatusWrapper newWrapper = new StatusWrapper(wrapper.getStatus(), newDuration, wrapper.getPotency(), wrapper.isAmbience(), wrapper.isOverride());
+
+            Pluginizer.getLogger().info("statusppaplier new wrapper: " + newWrapper);
+            TimeHandler.delayTime((long) (20L * (duration + 0.5)), () -> applyStatus(newWrapper));
+        }
     }
 
     public void applyStatus(Status status, float duration, int potency, boolean ambient) {
@@ -87,7 +101,7 @@ public class StatusApplier {
     }
 
     public void applyStatus(StatusWrapper statusWrapper) {
-        applyStatus(statusWrapper.getStatus(), statusWrapper.getDuration(), statusWrapper.getPotency(), statusWrapper.isAmbience());
+        applyStatus(statusWrapper.getStatus(), statusWrapper.getDuration(), statusWrapper.getPotency(), statusWrapper.isAmbience(), statusWrapper.isOverride());
     }
 
     public void applyStatus(StatusWrapper... statusWrappers) {
@@ -218,171 +232,160 @@ public class StatusApplier {
         });
         //player.sendMessage(String.format("You are now invisible for %d seconds!", (duration/1000)));
         player.sendMessage(String.format("%sCondition> %sYou are now invisible.", ChatColor.BLUE, ChatColor.GRAY));
-        cloakMap.put(player.getName(), System.currentTimeMillis() + duration);
+        cloaked = System.currentTimeMillis() + duration;
         TimeHandler.repeatedTime(1L, 0, new CloakStatus(player));
     }
 
     private void applyMarked(int duration, int potency) {
         removeMark();
-        markedMap.put(player.getName(), System.currentTimeMillis() + duration);
+        marked = System.currentTimeMillis() + duration;
         player.sendMessage(String.format("%sCondition> %sYou are now marked for %s%d %sseconds!",ChatColor.BLUE, ChatColor.GRAY, ChatColor.GREEN, (duration / 1000), ChatColor.GRAY));
         TimeHandler.repeatedTime(1, 0, new MarkedStatus(player));
     }
 
     private void applySilence(int duration) {
         removeSilence();
-        silenceMap.put(player.getName(), System.currentTimeMillis() + duration);
+        silenced = System.currentTimeMillis() + duration;
         player.sendMessage(String.format("%sCondition> %sYou are now silenced for %s%d %sseconds!",ChatColor.BLUE, ChatColor.GRAY, ChatColor.GREEN, (duration / 1000), ChatColor.GRAY));
         TimeHandler.repeatedTime(1, 0, new SilenceStatus(player));
     }
 
     private void applyShock(int duration) {
         removeShock();
-        shockMap.put(player.getName(), System.currentTimeMillis() + duration);
+        shocked = System.currentTimeMillis() + duration;
         //player.sendMessage(String.format("%sCondition> %sYou are now shocked for %s%d %sseconds!",ChatColor.BLUE, ChatColor.GRAY, ChatColor.GREEN, (duration / 1000), ChatColor.GRAY));
         TimeHandler.repeatedTime(1, 0, new ShockStatus(player));
     }
 
     private void applyRoot(int duration) {
         if (isRooted()) removeRoot();
-        rootMap.put(player.getName(), System.currentTimeMillis() + duration);
+        rooted = System.currentTimeMillis() + duration;
         player.sendMessage(String.format("%sCondition> %sYou are now rooted for %s%d %sseconds!", ChatColor.BLUE, ChatColor.GRAY, ChatColor.GREEN, (duration / 1000), ChatColor.GRAY));
         TimeHandler.repeatedTime(1, 1, new RootedStatus(player));
     }
 
     private void applyGround(int duration) {
         if (isGrounded()) removeGround();
-        groundMap.put(player.getName(), System.currentTimeMillis() + duration);
+        grounded = System.currentTimeMillis() + duration;
         TimeHandler.repeatedTime(1, 1, new GroundStatus(player));
     }
 
     private void applyInept(int duration) {
         if (isInept()) removeInept();
-        ineptMap.put(player.getName(), System.currentTimeMillis() + duration);
+        inept = System.currentTimeMillis() + duration;
         TimeHandler.repeatedTime(1, 1, new IneptStatus(player));
     }
 
     private void applyBleed(int duration) {
         if(isBleeding()) removeBleed();
-        bleedMap.put(player.getName(), System.currentTimeMillis() + duration);
+        bleeded = System.currentTimeMillis() + duration;
         TimeHandler.repeatedTime(1, 1, new BleedStatus(player));
     }
 
     public boolean isCloaked() {
-        return cloakMap.containsKey(this.player.getName());
+        return cloaked > System.currentTimeMillis();
     }
 
     public boolean isMarked() {
-        return markedMap.containsKey(this.player.getName());
+        return marked > System.currentTimeMillis();
     }
 
     public boolean isSilenced() {
-        return silenceMap.containsKey(this.player.getName());
+        return silenced > System.currentTimeMillis();
     }
 
     public boolean isShocked() {
-        return shockMap.containsKey(this.player.getName());
+        return shocked  > System.currentTimeMillis();
     }
 
     public boolean isRooted() {
-        return rootMap.containsKey(this.player.getName());
+        return rooted  > System.currentTimeMillis();
     }
 
     public boolean isGrounded() {
-        return groundMap.containsKey(player.getName());
+        return grounded > System.currentTimeMillis();
     }
 
     public boolean isInept() {
-        return ineptMap.containsKey(player.getName());
+        return inept > System.currentTimeMillis();
     }
 
     public boolean isBleeding() {
-        return bleedMap.containsKey(player.getName());
+        return bleeded > System.currentTimeMillis();
     }
 
     public void removeCloak() {
-        if (isCloaked()) {
-            cloakMap.remove(this.player.getName());
-        }
+        cloaked = 0;
         List<Player> players = this.player.getWorld().getPlayers();
-        Bukkit.getScheduler().runTask(Pluginizer.getSpigotPlugin(), () -> {
-            for (Player player : players) {
-                if (this.player != player) {
-                    player.showPlayer(this.player);
-                }
+        for (Player player : players) {
+            if (this.player != player && !player.canSee(this.player)) {
+                player.showPlayer(this.player);
             }
-        });
+        }
     }
 
     public void removeMark() {
-        if (isMarked()) {
-            markedMap.remove(this.player.getName());
-        }
+        marked = 0;
     }
 
     public void removeSilence() {
-        if (isSilenced()) {
-            silenceMap.remove(this.player.getName());
-        }
+        silenced = 0;
+
     }
 
     public void removeShock() {
-        if (isShocked()) {
-            shockMap.remove(this.player.getName());
-        }
+        shocked = 0;
     }
 
     public void removeRoot() {
-        if (isRooted()) {
-            rootMap.remove(this.player.getName());
-            this.player.setSaturation(20);
-        }
+        rooted = 0;
+        this.player.setSaturation(20);
     }
 
     public void removeGround() {
-        if (isGrounded()) groundMap.remove(player.getName());
+        grounded = 0;
     }
 
     public void removeInept() {
-        if (isInept()) ineptMap.remove(player.getName());
+        inept = 0;
     }
 
     public void removeBleed() {
-        if (isBleeding()) bleedMap.remove(player.getName());
+        bleeded = 0;
     }
     /**
      * @param status the status in question
      * @return the duration of a custom effect
      */
     public float getRemainingDuration(Status status) {
-        HashMap<String, Long> map = null;
+        long dura = 0;
         switch (status) {
             case CLOAK:
-                if (isCloaked()) map = cloakMap;
+                if (isCloaked()) dura = cloaked;
                 break;
             case SHOCK:
-                if (isShocked()) map = shockMap;
+                if (isShocked()) dura = shocked;
                 break;
             case MARKED:
-                if (isMarked()) map = markedMap;
+                if (isMarked()) dura = marked;
                 break;
             case SILENCE:
-                if (isSilenced()) map = silenceMap;
+                if (isSilenced()) dura = silenced;
                 break;
             case ROOTED:
-                if (isRooted()) map = rootMap;
+                if (isRooted()) dura = rooted;
                 break;
             case GROUND:
-                if (isGrounded()) map = groundMap;
+                if (isGrounded()) dura = grounded;
                 break;
             case INEPTITUDE:
-                if (isInept()) map = ineptMap;
+                if (isInept()) dura = inept;
                 break;
             case BLEED:
-                if(isBleeding()) map = bleedMap;
+                if(isBleeding()) dura = bleeded;
                 break;
         }
-        return (map != null) ? map.get(player.getName()) - System.currentTimeMillis() : 0;
+        return (dura != 0) ? dura - System.currentTimeMillis() : 0;
     }
 
     public float getRemainingDurationSeconds(Status status) {
@@ -398,6 +401,7 @@ public class StatusApplier {
                 }
             }
         });
+        if(this.player.getFireTicks() > 0) statuses.add(Status.FIRE);
         if (isCloaked()) statuses.add(Status.CLOAK);
         if (isMarked()) statuses.add(Status.MARKED);
         if (isShocked()) statuses.add(Status.SHOCK);
@@ -420,7 +424,17 @@ public class StatusApplier {
     public boolean has(Status status) {
         return getEffects().contains(status);
     }
-
+    private StatusWrapper fromPotionEffect(Status status) {
+        PotionEffect e = null;
+        for(PotionEffect effect : player.getActivePotionEffects()) {
+            if (effect.getType().hashCode() == status.getId()) {
+                e = effect;
+                break;
+            }
+        }
+        if(e == null) return null;
+        return new StatusWrapper(status, e.getDuration()/20F, e.getAmplifier(), e.isAmbient());
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

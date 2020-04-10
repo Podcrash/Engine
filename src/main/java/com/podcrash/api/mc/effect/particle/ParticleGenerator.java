@@ -7,6 +7,7 @@ import com.abstractpackets.packetwrapper.WrapperPlayServerWorldParticles;
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.podcrash.api.mc.sound.SoundWrapper;
+import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.util.PacketUtil;
 import com.podcrash.api.mc.util.VectorUtil;
 import com.podcrash.api.mc.world.BlockUtil;
@@ -93,10 +94,11 @@ public final class ParticleGenerator {
     }
 
     public static void generateProjectile(Projectile proj, ILocationPacket packet) {
-        ParticleRunnable.particleRunnable.getWrappers().add(new ProjectileParticleWrapper(proj, packet));
+        TimeHandler.delayTime(2, () -> ParticleRunnable.particleRunnable.getWrappers().add(new ProjectileParticleWrapper(proj, packet)));
+
     }
     public static void generateEntity(Entity entity, ILocationPacket packet, SoundWrapper sound){
-        ParticleRunnable.particleRunnable.getWrappers().add(new EntityParticleWrapper(entity, packet, sound));
+        TimeHandler.delayTime(2, () -> ParticleRunnable.particleRunnable.getWrappers().add(new EntityParticleWrapper(entity, packet, sound)));
     }
 
     //for stuff like seismic slam

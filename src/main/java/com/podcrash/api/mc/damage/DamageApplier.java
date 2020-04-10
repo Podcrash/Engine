@@ -14,10 +14,30 @@ import org.bukkit.event.player.PlayerVelocityEvent;
 import org.bukkit.util.Vector;
 import org.spigotmc.SpigotConfig;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Main class that you will use to apply custom damages
  */
 public final class DamageApplier {
+
+    private static Set<LivingEntity> invincibleEntities = new HashSet<>();
+
+    public static Set<LivingEntity> getInvincibleEntities() {
+        return invincibleEntities;
+    }
+
+    public static void addInvincibleEntity(LivingEntity entity) {
+       invincibleEntities.add(entity);
+    }
+
+    public static void removeInvincibleEntity(LivingEntity entity) {
+        invincibleEntities.remove(entity);
+    }
+
     /**
      * Deal knockback, but with no multipliers
      * @see this#nativeApplyKnockback(LivingEntity, LivingEntity)
@@ -107,7 +127,7 @@ public final class DamageApplier {
      * @param applyKb
      */
     public static void damage(LivingEntity victim, LivingEntity attacker, double damage, Arrow arrow, DamageSource source, Cause cause, boolean applyKb) {
-        if(victim.isDead() || attacker.isDead()) return; //prevent bs hits from dying
+        if(victim.isDead() || attacker.isDead() || invincibleEntities.contains(victim)) return; //prevent bs hits from dying
         //TODO: change to our own death system (ex: spectators)
         DamageQueue.getDamages().push(new Damage(victim, attacker, damage,
                 attacker.getEquipment().getItemInHand(), cause, arrow, source, applyKb));

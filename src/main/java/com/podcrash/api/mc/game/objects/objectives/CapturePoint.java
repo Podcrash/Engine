@@ -177,7 +177,8 @@ public final class CapturePoint extends WinObjective {
         TeamEnum oppoTeam =  TeamEnum.getByColor(opposite);
         for(int x = 0; x < this.blocks.length; x++){
             for(int z = 0; z < this.blocks[0].length; z++){
-                if(this.blocks[x][z] == oppoTeam.getByteData()){
+                //If the block is the opposing color AND the block is not the middle block (unless progress is 24 i.e last block)
+                if(this.blocks[x][z] == oppoTeam.getByteData() && (progress != 1 == (x != 2 || z != 2))){
                     replaceBlock(TeamEnum.WHITE, getLocation().clone().add(x - this.blocks.length/2, 0, z - this.blocks[0].length/2));
                     progress--;
                     this.blocks[x][z] = TeamEnum.WHITE.getByteData();
@@ -191,24 +192,25 @@ public final class CapturePoint extends WinObjective {
     /**
      * Recursive part of the function to make sure that the wool starts at the same color.
      * @param color
-     * @param times how many timese it will be ran.
+     * @param times how many times it will be ran.
      * @return
      */
     public TeamEnum capture(String color, int times){
-        boolean a = assure(color);
-        for(int i = 0; i < times; i++){
-            if(!a) a = assure(color);
+        boolean assured = false;
+        TeamEnum capturing;
+        while (times > 0) {
+            times--;
+            //Try to make capture point the correct color first (i.e blue wants to cap a point with red blocks still on)
+            assured = assure(color);
+            //If it changed a block, that means we have the scenario above ^^^
+            if (!assured) {
+                //Assure it once more because of restoring cap naturally (the previous one was b/c of player)
+                assured = assure(color);
+                continue;
+            };
+            capturing = capture(color);
+            if (capturing != null) return capturing;
         }
-        if(a) {
-            if (times <= 1) return capture(color);
-            else { //possibly do recursion instead
-                for (int i = 0; i < times; i++) {
-                    TeamEnum capturing = capture(color);
-                    if (capturing != null) return capturing;
-                }
-            }
-        }
-
         return null;
     }
 
@@ -222,28 +224,37 @@ public final class CapturePoint extends WinObjective {
     public TeamEnum capture(String color){// yeah we need enums
         TeamEnum team = TeamEnum.getByColor(color);
         if(team == null) throw new IllegalArgumentException("color cannot be " + color + ". Allowed: red, blue, white");
-        if(this.color.equalsIgnoreCase(color)) return null;
+        if(this.color.equalsIgnoreCase(color)) {
+            //Two cases:
+            // (a) Red on a full "red capture" <= do nothing
+            if (!isFull) {
+                // (b) Red on a not-full "red capture"
+                restoreCapture(); // TWICE because of "natural" restoration + player induced restoration
+                restoreCapture();
+            }
+            return null;
+        }
         if(isCaptured()) team = TeamEnum.WHITE;
         byte colorByte = team.getByteData();
         int row, col;
-        row = random.nextInt(blocks.length);
-        col = random.nextInt(blocks[0].length);
-        //change wool/blocks
-        byte current = this.blocks[row][col];
+        byte current;
+        do {
+            row = random.nextInt(blocks.length);
+            col = random.nextInt(blocks[0].length);
+            //Do while block is not a good block OR (progress is not 24 and block is the middle block)
+        } while (this.blocks[row][col] == colorByte || ((progress == 24) == (row != 2 || col != 2)));
 
-        if(current == colorByte && progress != 25) return capture(color);
-        else {
-            isFull = false;
-            if(!isCaptured())
-                SoundPlayer.sendSound(getLocation(), "dig.stone", 1, 90);
-            progress++;
-            int deltaX = row - this.blocks.length/2;
-            int deltaZ = col - this.blocks[0].length/2;
-            Location loc = getLocation().clone();
-            loc.add(deltaX, 0, deltaZ);
-            replaceBlock(team, loc);
-            this.blocks[row][col] = team.getByteData();
+        isFull = false;
+        if(!isCaptured()) {
+            SoundPlayer.sendSound(getLocation(), "dig.stone", 1, 90);
         }
+        progress++;
+        int deltaX = row - this.blocks.length/2;
+        int deltaZ = col - this.blocks[0].length/2;
+        Location loc = getLocation().clone();
+        loc.add(deltaX, 0, deltaZ);
+        replaceBlock(team, loc);
+        this.blocks[row][col] = team.getByteData();
         //update world
         World world = getLocation().getWorld();
         List<Player> players = game == null ? world.getPlayers() : game.getBukkitPlayers();
@@ -257,15 +268,18 @@ public final class CapturePoint extends WinObjective {
         }
         return null;
     }
+
+    /*
     public void neutralize(int times){
         if(times <= 1) neutralize();
         else neutralize(times - 1);
     }
+    */
 
     /**
-     * Neutralize the capture point by gradually turning all of it into the same color.
+     * Restore the capture point to its original state (1 time)
      */
-    public void neutralize() {
+    public void restoreCapture() {
         if(isFull) return;
         progress--;
         TeamEnum team = TeamEnum.getByColor(getColor());
@@ -319,7 +333,7 @@ public final class CapturePoint extends WinObjective {
      */
     private void replaceBlock(TeamEnum team, Location wool){
         if(!wool.getBlock().getType().equals(Material.BEACON)) BlockUtil.replaceBlock(wool, Material.WOOL, team.getData(), false);
-        BlockUtil.replaceBlock(wool.add(0, 1, 0), Material.STAINED_GLASS, team.getData(), false);
+        BlockUtil.replaceBlock(wool.add(0, 1, 0), Material.STAINED_GLASS, team.getData(), true);
     }
 
     /**

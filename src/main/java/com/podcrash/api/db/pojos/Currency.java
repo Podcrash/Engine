@@ -10,6 +10,7 @@ public final class Currency {
 
 
     public Currency() {
+        gold = 3000;            // default starting gold for new players
     }
 
     public ObjectId getObjectId() {

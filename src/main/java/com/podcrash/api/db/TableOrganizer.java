@@ -49,6 +49,7 @@ public final class TableOrganizer {
                 new ChampionsKitTable(),
                 new RanksTable(),
                 new MapTable(),
+                new EconomyTable(),
                 loader
         };
         process(tables);

@@ -12,6 +12,6 @@ import org.bukkit.ChatColor;
 public interface DamageSource {
     String getName();
     default String getPrefix() {
-        return ChatColor.DARK_AQUA.toString();
+        return ChatColor.GREEN.toString();
     }
 }
