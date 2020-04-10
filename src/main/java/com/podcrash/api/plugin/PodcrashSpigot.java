@@ -214,6 +214,8 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             new FallDamageHandler(this);
             new TrapListener(this);
             new MOTDHandler(this);
+            new CmdPreprocessHandler(this);
+
             // TODO: Add more listeners here..
         });
     }
