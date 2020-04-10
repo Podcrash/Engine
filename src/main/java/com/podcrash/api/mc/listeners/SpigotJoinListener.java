@@ -15,6 +15,7 @@ import com.podcrash.api.plugin.PodcrashSpigot;
 import com.podcrash.api.db.redis.Communicator;
 import net.minecraft.server.v1_8_R3.GenericAttributes;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -64,8 +65,32 @@ public class SpigotJoinListener extends ListenerBase {
         PodcrashSpigot.getInstance().setupPermissions(player);
     }
 
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void joinMessage(PlayerJoinEvent event) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(ChatColor.DARK_GRAY).append('[')
+                .append(ChatColor.GRAY).append("Join")
+                .append(ChatColor.DARK_GRAY).append("] ")
+                .append(ChatColor.YELLOW).append(event.getPlayer().getDisplayName());
+        event.setJoinMessage(null);
+        String joinMessage = builder.toString();
+        for (Player player : Bukkit.getOnlinePlayers()){
+            player.sendMessage(joinMessage);
+        }
+    }
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void leave(PlayerQuitEvent event) {
         HitDetectionInjector.getHitDetection(event.getPlayer()).deinject();
+        StringBuilder builder = new StringBuilder();
+        builder.append(ChatColor.DARK_GRAY).append('[')
+                .append(ChatColor.GRAY).append("Leave")
+                .append(ChatColor.DARK_GRAY).append("] ")
+                .append(ChatColor.YELLOW).append(event.getPlayer().getDisplayName());
+        event.setQuitMessage(null);
+        String quitMessage = builder.toString();
+        for (Player player : Bukkit.getOnlinePlayers()){
+            player.sendMessage(quitMessage);
+        }
     }
 }
