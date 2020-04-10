@@ -60,7 +60,9 @@ public class GameManager {
         game.makeTeams();
         game.createScoreboard();
 
-        Set<String> validMaps = new HashSet<>(game.getValidMaps());
+        MapTable table = TableOrganizer.getTable(DataTableType.MAPS);
+        Set<String> validMaps = new HashSet<>(table.getWorlds(game.getMode()));
+
         int size = validMaps.size();
         int item = new Random().nextInt(size);
         int i = 0;
