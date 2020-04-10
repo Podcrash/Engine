@@ -98,7 +98,8 @@ public class SpigotJoinListener extends ListenerBase {
         GameState state = game.getGameState();
         switch (state) {
             case STARTED:
-                if(Bukkit.getOnlinePlayers().size() == 1)
+                int size = Bukkit.getOnlinePlayers().size();
+                if(size == 1)
                     GameManager.endGame(game);
                 break;
             case LOBBY:
