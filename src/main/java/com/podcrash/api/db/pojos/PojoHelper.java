@@ -40,7 +40,9 @@ public final class PojoHelper {
 
     public static InvictaPlayer createInvictaPlayer(UUID uuid) {
         InvictaPlayer player = new InvictaPlayer();
-        player.setCurrency(new Currency());
+        Currency currency = new Currency();
+        currency.setGold(3000);
+        player.setCurrency(currency);
         player.setExtraPerms(new HashSet<>());
         player.setRanks(new HashSet<>());
         player.setUuid(uuid);
