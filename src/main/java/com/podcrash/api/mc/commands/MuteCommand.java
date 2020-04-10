@@ -25,18 +25,20 @@ public class MuteCommand extends CommandBase{
                     return true;
                 }
                 RanksTable table = TableOrganizer.getTable(DataTableType.PERMISSIONS);
-                if(table.hasRoleSync(playerUUID, "MUTED")) {
-                    table.removeRole(playerUUID, "MUTED");
-                    sender.sendMessage("Successful unmuted " + args[0] + ".");
-                }else{
-                    table.addRole(playerUUID, "MUTED");
-                    sender.sendMessage("Successful muted " + args[0] + ".");
-                }
-                Player p;
-                if((p = Bukkit.getPlayer(playerUUID)) != null) {
-                    PodcrashSpigot.getInstance().setupPermissions(p);
-                }
-                return true;
+                table.hasRoleAsync(playerUUID, "MUTED").thenApply(hasRole-> {
+                    if(hasRole) {
+                        table.removeRole(playerUUID, "MUTED");
+                        sender.sendMessage("Successful unmuted " + args[0] + ".");
+                    } else {
+                        table.addRole(playerUUID, "MUTED");
+                        sender.sendMessage("Successful muted " + args[0] + ".");
+                    }
+                    Player p;
+                    if((p = Bukkit.getPlayer(playerUUID)) != null) {
+                        PodcrashSpigot.getInstance().setupPermissions(p);
+                    }
+                    return true;
+                });
             }
         } else {
             sender.sendMessage(String.format("%sInvicta> %sYou have insufficient permissions to use that command.", ChatColor.BLUE, ChatColor.GRAY));
