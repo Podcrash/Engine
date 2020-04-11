@@ -290,10 +290,13 @@ public final class DamageQueue implements Runnable {
             velocity[0] *= multiplier;
             velocity[2] *= multiplier;
         }else if ((cause == Cause.MELEE || cause == Cause.MELEESKILL)) {
+            /*
             double multiplier = .05 * damage + 0.60;
             velocity[0] *= multiplier;
             velocity[1] *= multiplier;
             velocity[2] *= multiplier;
+            
+             */
         }
         return velocity;
     }
