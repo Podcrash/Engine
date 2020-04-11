@@ -34,8 +34,10 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerVelocityEvent;
 import org.bukkit.inventory.ItemStack;
@@ -217,7 +219,7 @@ public class GameListener extends ListenerBase {
         });
     }
 
-    private String editMessage(String msg, Game game, Player victim, LivingEntity killer) {
+    public static String editMessage(String msg, Game game, Player victim, LivingEntity killer) {
         TeamEnum victimTeam = game.getTeamEnum(victim);
         if(killer != null) {
             TeamEnum enemyTeam = game.getTeamEnum((Player) killer);
@@ -281,7 +283,7 @@ public class GameListener extends ListenerBase {
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void gameDamage(GameDamageEvent e) {
         Game game = e.getGame();
-        if(game.getGameState() == GameState.LOBBY) return;
+        //if(game.getGameState() == GameState.LOBBY) return;
 
         if(e.getWho() == null || e.getKiller() == null) return;
         Player victim = e.getWho();
@@ -300,7 +302,7 @@ public class GameListener extends ListenerBase {
     public void hit(DamageApplyEvent e) {
         Game game = GameManager.getGame();
         if(game == null) return;
-        if(game.getGameState() == GameState.LOBBY) return;
+        //if(game.getGameState() == GameState.LOBBY) return;
         if(!(e.getAttacker() instanceof Player) && !(e.getVictim() instanceof Player)) return;
         boolean sameTeam = game.isOnSameTeam((Player) e.getAttacker(), (Player) e.getVictim());
         System.out.println(e.getCause() + " sameTeam clause: " + sameTeam + " attacker: " + e.getAttacker() + " victim: " + e.getVictim());
@@ -323,6 +325,7 @@ public class GameListener extends ListenerBase {
      */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onDeath(DeathApplyEvent e) {
+        if (e.isCancelled()) return;
         Player p = e.getPlayer();
         Game game = GameManager.getGame();
         LivingEntity killer = e.getAttacker();
@@ -332,6 +335,15 @@ public class GameListener extends ListenerBase {
             p.teleport(game.getGameWorld().getSpawnLocation());
         game.getRespawning().add(p.getUniqueId());
         Bukkit.getServer().getPluginManager().callEvent(new GameDeathEvent(game, p, killer, e.getDeathMessage(), e.getCausesMessage()));
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onLobbyDeath(DeathApplyEvent e) {
+        Game game = GameManager.getGame();
+        Player player = e.getPlayer();
+        if (game.getGameState() != GameState.LOBBY) return;
+        game.removePlayerLobbyPVPing(player);
+        game.updateLobbyInventory(player);
     }
 
     /**
