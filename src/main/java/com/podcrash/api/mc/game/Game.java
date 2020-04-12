@@ -953,7 +953,7 @@ public abstract class Game implements IGame {
                 inv.setItem(i, hotbarSave[i]);
             }
         } else {
-            ItemStackUtil.createItem(inv, 388, 1, 1, "&a&lEnable Lobby PVP");
+            ItemStackUtil.createItem(inv, 388, 1, 2, "&a&lEnable Lobby PVP");
         }
         // Setting items in the player's inventory
         // TODO: Remove the Force Start Item.

@@ -1,7 +1,6 @@
 package com.podcrash.api.mc.listeners;
 
 import com.abstractpackets.packetwrapper.AbstractPacket;
-import com.podcrash.api.db.pojos.Rank;
 import com.podcrash.api.db.pojos.map.BaseMap;
 import com.podcrash.api.db.pojos.map.GameMap;
 import com.podcrash.api.db.pojos.map.Point;
@@ -20,12 +19,11 @@ import com.podcrash.api.mc.game.*;
 import com.podcrash.api.mc.game.objects.ItemObjective;
 import com.podcrash.api.mc.game.objects.action.ActionBlock;
 import com.podcrash.api.mc.item.ItemManipulationManager;
+import com.podcrash.api.mc.sound.SoundPlayer;
 import com.podcrash.api.mc.time.TimeHandler;
-import com.podcrash.api.mc.time.resources.SimpleTimeResource;
 import com.podcrash.api.mc.util.EntityUtil;
 import com.podcrash.api.mc.util.ItemStackUtil;
 import com.podcrash.api.mc.util.PacketUtil;
-import com.podcrash.api.mc.util.PrefixUtil;
 import com.podcrash.api.mc.world.WorldManager;
 import com.podcrash.api.plugin.Pluginizer;
 import com.podcrash.api.db.redis.Communicator;
@@ -358,7 +356,7 @@ public class GameListener extends ListenerBase {
                 game.removePlayerLobbyPVPing(player);
                 game.updateLobbyInventory(player);
             } else {    // AKA if we are in a general lobby
-                ItemStackUtil.createItem(player.getInventory(), 388, 1, 1, "&a&lEnable Lobby PVP");
+                ItemStackUtil.createItem(player.getInventory(), 388, 1, 2, "&a&lEnable Lobby PVP");
             }
             // For ALL lobbies, make the player invincible again
             DamageApplier.addInvincibleEntity(player);
@@ -436,21 +434,22 @@ public class GameListener extends ListenerBase {
     }
 
     @EventHandler
-    public void enableLobbyPVP(PlayerInteractEvent event) {
+    public void enableGeneralLobbyPVP(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         // Only run this code if there is no game going on; this will work even if engine is the only plugin present
         if(GameManager.getGame() != null || player.getItemInHand().getType().equals(Material.AIR)) { return;}
 
-        if ((event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)
-                && (player.getItemInHand().getItemMeta().hasDisplayName() &&
-                player.getItemInHand().getItemMeta().getDisplayName().contains("Enable Lobby PVP"))) {
+        if ((event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK ||
+                event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK)
+                && (player.getItemInHand().getItemMeta().hasDisplayName() && player.getItemInHand().getItemMeta().getDisplayName().contains("Enable Lobby PVP"))) {
 
+            SoundPlayer.sendSound(player, "random.pop", 1F, 63);
             DamageApplier.removeInvincibleEntity(player);
-            setGeneralInventory(player);
+            applyGeneralPVPGear(player);
         }
     }
 
-    private void setGeneralInventory(Player player) {
+    private void applyGeneralPVPGear(Player player) {
         ItemStack sword = new ItemStack(Material.DIAMOND_SWORD);
         ItemMeta meta = sword.getItemMeta();
         meta.spigot().setUnbreakable(true);
