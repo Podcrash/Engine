@@ -5,10 +5,12 @@ import com.podcrash.api.db.pojos.map.GameMap;
 import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.PlayerTable;
 import com.podcrash.api.mc.callback.sources.AwaitTime;
+import com.podcrash.api.mc.damage.DamageApplier;
 import com.podcrash.api.mc.damage.HitDetectionInjector;
 import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.GameState;
+import com.podcrash.api.mc.util.ItemStackUtil;
 import com.podcrash.api.mc.world.SpawnWorldSetter;
 import com.podcrash.api.plugin.Pluginizer;
 import com.podcrash.api.plugin.PodcrashSpigot;
@@ -24,6 +26,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerInitialSpawnEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.UUID;
@@ -59,6 +62,12 @@ public class SpigotJoinListener extends ListenerBase {
         log.info("34ewrf");
         if(Communicator.isGameLobby()) {
             new HitDetectionInjector(player).injectHitDetection();
+        }
+        if(GameManager.getGame() == null || GameManager.getGame().getGameState().equals(GameState.LOBBY)) {
+            DamageApplier.addInvincibleEntity(player);
+            player.getInventory().clear();
+            player.getInventory().setArmorContents(new ItemStack[]{null, null, null, null});
+            ItemStackUtil.createItem(player.getInventory(), 388, 1, 1, "&a&lEnable Lobby PVP");
         }
         log.info("test123");
         ((CraftPlayer) player).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).setValue(1);
