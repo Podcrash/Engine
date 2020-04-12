@@ -29,4 +29,6 @@ public enum Currency {
      */
     public String getFormatting() {return "" + color + ChatColor.BOLD;}
 
+    public String getColor() {return "" + color;}
+
 }
