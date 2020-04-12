@@ -44,7 +44,7 @@ public class FallDamageHandler extends ListenerBase {
     @EventHandler(priority = EventPriority.NORMAL)
     public void fall(EntityDamageEvent event) {
         if(event.getCause() != EntityDamageEvent.DamageCause.FALL) return;
-        event.setDamage(event.getDamage() - 1);//mini breakfall.
+        event.setDamage(event.getDamage() - 3);//mini breakfall.
 
         String entry = event.getEntity().getName();
         if(guaranteeNullFall.contains(entry)) {
