@@ -135,7 +135,7 @@ public class GameListener extends ListenerBase {
      * @see com.podcrash.api.mc.game.GameManager#startGame
      * @param e event callback
      */
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler
     public void onStart(GameStartEvent e) {
         Game game = e.getGame();
         game.getTeams().forEach(team -> {
@@ -154,9 +154,12 @@ public class GameListener extends ListenerBase {
         if(map == null) return;
         StringBuilder authorBuilder = new StringBuilder();
         map.getAuthors().forEach(authorBuilder::append);
-        String message = ChatColor.BOLD + "Map: " + ChatColor.RESET + "" + ChatColor.YELLOW + map.getName() + "\n" +
-            ChatColor.RESET + "" + ChatColor.GRAY +  "Built by: " + ChatColor.RESET + "" + ChatColor.BOLD + ""  + ChatColor.GOLD + authorBuilder.toString();
+        String message = ChatColor.GRAY + "\n ==================== \n \n " + ChatColor.RESET + "" +
+                ChatColor.BOLD + "Map: " + ChatColor.RESET + "" + ChatColor.YELLOW + map.getName() + "\n" +
+                ChatColor.RESET + "" + ChatColor.GRAY +  " Built by: " + ChatColor.RESET + "" + ChatColor.BOLD + ""  + ChatColor.GOLD + authorBuilder.toString() +
+                ChatColor.GRAY + "\n \n ==================== \n ";
         game.consumeBukkitPlayer(player -> player.sendMessage(message));
+        SoundPlayer.sendSound(game.getBukkitPlayers(), "fireworks.blast", 1F, 63);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -169,6 +172,7 @@ public class GameListener extends ListenerBase {
             player.setGameMode(GameMode.ADVENTURE);
             deadPeople.remove(player);
             player.sendMessage(game.getPresentableResult());
+            SoundPlayer.sendSound(player, "fireworks.launch", 1F, 63);
         }
         WorldManager.getInstance().unloadWorld(e.getGame().getGameWorld().getName());
     }
