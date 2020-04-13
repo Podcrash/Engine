@@ -31,7 +31,7 @@ public class GameLobbyTimer {
         if(isRunning) return;
         isRunning = true;
 
-        Bukkit.broadcastMessage("" + ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "Countdown for a match on " + GameManager.getGame().getMapName() + "has started!");
+        Bukkit.broadcastMessage("" + ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "The match on " + GameManager.getGame().getMapName() + "will start in 10 seconds.");
 
         TimeHandler.repeatedTimeSeconds(1, 0, new TimeResource() {
             @Override
