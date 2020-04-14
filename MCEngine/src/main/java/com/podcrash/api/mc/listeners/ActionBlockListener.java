@@ -31,7 +31,6 @@ public final class ActionBlockListener extends ListenerBase {
                 case TELEPORT:
                     Vector up = new Vector(0, 1, 0);
                     addBlock(world, value, key.clone().add(up), type);
-                    addBlock(world, key, value.clone().add(up), type);
                     break;
                 case SLIME:
                     addBlock(world, key, value, type);
