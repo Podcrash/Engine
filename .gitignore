@@ -4,14 +4,7 @@
 .project
 .settings/
 
-# help whitelisting
-!build/generated-src/
-build/classes/
-build/libs/
-build/resources/
-build/tmp/
-build/reports
-build/test-results
+*/build/*
 
 /out
 # Ignore Gradle GUI config
