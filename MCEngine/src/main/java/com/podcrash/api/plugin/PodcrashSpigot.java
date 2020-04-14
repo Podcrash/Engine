@@ -3,6 +3,7 @@ package com.podcrash.api.plugin;
 import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.db.pojos.Rank;
 import com.podcrash.api.db.tables.DataTableType;
+import com.podcrash.api.db.tables.MapTable;
 import com.podcrash.api.db.tables.RanksTable;
 import com.podcrash.api.mc.Configurator;
 import com.podcrash.api.mc.commands.*;
@@ -122,6 +123,9 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
+
+        MapTable table = TableOrganizer.getTable(DataTableType.MAPS);
+        table.setPlugin(this); //this is required
 
         economyHandler = new EconomyHandler();
         worldSetter = new SpawnWorldSetter(); // this is a special cookie
