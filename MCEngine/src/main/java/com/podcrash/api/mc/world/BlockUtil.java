@@ -175,6 +175,20 @@ public final class BlockUtil {
         return loc;
     }
 
+    public static Location getHighestUnderneath(Location loc, int range) {
+        Block block = loc.getBlock();
+        int counter = 0;
+        while (isPassable(block)) {
+            if(loc.getY() < 0) return loc;
+            loc.subtract(0, 1, 0);
+            counter++;
+            block = loc.getBlock();
+            if(counter >= range) return loc;
+        }
+
+        return loc;
+    }
+
     public static double get2dDistanceSquared(Vector location1, Vector location2) {
         double x1 = location1.getX();
         double x2 = location2.getX();

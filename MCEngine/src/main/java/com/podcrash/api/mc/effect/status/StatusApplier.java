@@ -146,6 +146,7 @@ public class StatusApplier {
         PotionEffect effect = status.getPotionEffectType().createEffect(0, 0);
         StatusRemoveEvent removeEvent = new StatusRemoveEvent(this.player, status);
         Bukkit.getPluginManager().callEvent(removeEvent);
+        if (removeEvent.isCancelled()) return;
         
         if (player.hasPotionEffect(status.getPotionEffectType())) {
             new BukkitRunnable() {
