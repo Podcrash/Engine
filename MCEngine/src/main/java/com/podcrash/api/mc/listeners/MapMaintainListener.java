@@ -9,6 +9,9 @@ import com.podcrash.api.mc.damage.DamageApplier;
 import com.podcrash.api.mc.damage.DamageQueue;
 import com.podcrash.api.mc.events.DamageApplyEvent;
 import com.podcrash.api.mc.events.DamageEvent;
+import com.podcrash.api.mc.game.Game;
+import com.podcrash.api.mc.game.GameManager;
+import com.podcrash.api.mc.game.GameState;
 import com.podcrash.api.mc.sound.SoundPlayer;
 import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.util.PacketUtil;
@@ -37,10 +40,7 @@ import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Prevent dumb things from happening
@@ -48,10 +48,13 @@ import java.util.Map;
 public class MapMaintainListener extends ListenerBase {
     private Map<String, Long> lastHit;
     private final Map<String, Boolean> checkCache;
+
+
     public MapMaintainListener(JavaPlugin plugin) {
         super(plugin);
         this.lastHit = new HashMap<>();
         this.checkCache = new HashMap<>();
+
     }
 
     @EventHandler
@@ -160,7 +163,7 @@ public class MapMaintainListener extends ListenerBase {
         //or if the cause is null or custom
         // then cancel it
         if((!(event.getEntity() instanceof LivingEntity)) ||
-                isSpawnWorld(event.getEntity().getWorld()) ||
+                DamageApplier.getInvincibleEntities().contains(event.getEntity()) ||
                 (event.getCause() == null || event.getCause() == EntityDamageEvent.DamageCause.CUSTOM)) {
             event.setCancelled(true);
             return;
@@ -252,11 +255,21 @@ public class MapMaintainListener extends ListenerBase {
         if(cancel) e.setCancelled(true);
     }
 
+
     @EventHandler(priority = EventPriority.MONITOR)
     public void damage(DamageApplyEvent event) {
-        if(event.getVictim() instanceof Player && isSpawnWorld(event.getVictim().getWorld()))
-            event.setCancelled(true);
+        Game game = GameManager.getGame();
+
+        if (game == null || game.getGameState() != GameState.STARTED) {
+            if (event.getAttacker() instanceof Player && DamageApplier.getInvincibleEntities().contains(event.getAttacker())) {
+                event.setCancelled(true);
+            }
+        }
+        //if(event.getVictim() instanceof Player) && isSpawnWorld(event.getVictim().getWorld()))
+            //event.setCancelled(true);
     }
+
+
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void preventCraft(InventoryClickEvent event) {

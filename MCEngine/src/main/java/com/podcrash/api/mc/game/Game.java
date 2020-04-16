@@ -70,6 +70,8 @@ public abstract class Game implements IGame {
     private Map<Player, Double> playerRewards = new HashMap<>();
 
     private GameMap map;
+
+    private Set<Player> isLobbyPVPing;
     /**
      * Constructor for the game.
      * @param id The ID of the game.
@@ -92,7 +94,7 @@ public abstract class Game implements IGame {
         this.spectators = new HashSet<>();
         this.optIn = new HashSet<>();
         this.respawning = new HashSet<>();
-
+        this.isLobbyPVPing = new HashSet<>();
 //        this.lobby_board = new GameLobbyScoreboard(15, 0, this);
 //        this.lobby_timer = new GameLobbyTimer();
     }
@@ -209,6 +211,34 @@ public abstract class Game implements IGame {
      * @return The Game World.
      */
     public World getGameWorld() { return Bukkit.getWorld(gameWorldName); }
+
+    /**
+     *
+     * @return The set of players enabled pvp in the lobby
+     */
+    public Set<Player> getPlayersLobbyPVPing() {
+        return isLobbyPVPing;
+    }
+
+    /**
+     * Removes the player from the set of lobby pvpers if able
+     * @param p - The player
+     */
+    public void removePlayerLobbyPVPing(Player p) {
+        if (isLobbyPVPing.contains(p)) {
+            isLobbyPVPing.remove(p);
+        }
+    }
+
+    /**
+     * Adds the player to the set of lobby pvpers if able
+     * @param p - The player
+     */
+    public void addPlayerLobbyPVPing(Player p) {
+        if (!isLobbyPVPing.contains(p)) {
+            isLobbyPVPing.add(p);
+        }
+    }
 
     /**
      * Set the Game World.
@@ -914,8 +944,17 @@ public abstract class Game implements IGame {
     }
 
     public void updateLobbyInventory(Player p) {
+        ItemStack[] hotbarSave = p.getInventory().getContents();
         p.getInventory().clear();
         Inventory inv = p.getInventory();
+
+        if (isLobbyPVPing.contains(p)) {
+            for (int i = 0; i < 9; i++) {
+                inv.setItem(i, hotbarSave[i]);
+            }
+        } else {
+            ItemStackUtil.createItem(inv, 388, 1, 2, "&a&lEnable Lobby PVP");
+        }
         // Setting items in the player's inventory
         // TODO: Remove the Force Start Item.
         //ItemStackUtil.createItem(inv, 388, 1, 1, "&a&lForce-Start Game &7(Temporary for testing)");
