@@ -224,6 +224,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
     private CompletableFuture<Void> registerCommands() {
         return CompletableFuture.runAsync(() -> {
             getCommand("setrole").setExecutor(new SetRoleCommand());
+            getCommand("f").setExecutor(new FriendCommand());
             getCommand("addrole").setExecutor(new AddRoleCommand());
             getCommand("bal").setExecutor(new BalanceCommand());
             getCommand("buy").setExecutor(new BuyCommand());

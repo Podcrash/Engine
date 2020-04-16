@@ -58,3 +58,6 @@ commands:
   mute:
     description: Mute a player.
     usage: /mute <Player Name>
+  f:
+    description: Manage your friends.
+    usage: /f (Player Name) (remove)
