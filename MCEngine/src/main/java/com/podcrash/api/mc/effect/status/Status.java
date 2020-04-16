@@ -19,6 +19,7 @@ public enum Status {
     RESISTANCE("Resistance", PotionEffectType.DAMAGE_RESISTANCE, true, false, 11),
     REGENERATION("Regeneration", PotionEffectType.REGENERATION, true, false, 10),
     ABSORPTION("Absorption", PotionEffectType.ABSORPTION, true, false, 22),
+    HEALTH_BOOST("HEALTH BOOST", PotionEffectType.HEALTH_BOOST, true, false, 21),
 
     FIRE("FIRE", null, false, true, 100),
     CLOAK("Cloak", null, false, false, 101),
