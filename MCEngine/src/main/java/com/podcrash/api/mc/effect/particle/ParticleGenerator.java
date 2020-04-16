@@ -102,7 +102,7 @@ public final class ParticleGenerator {
     }
 
     //for stuff like seismic slam
-    public static void generateRangeParticles(final Location center, final double radius, final boolean under) {
+    public static void generateRangeParticles(final Location center, final double radius, final boolean under, int verticalRange) {
         double radius2 = radius / 2d;
         double startX = center.getX() - radius2;
         double startZ = center.getZ() - radius2;
@@ -111,7 +111,7 @@ public final class ParticleGenerator {
         List<Player> players = center.getWorld().getPlayers();
         for (double x = startX; x <= endX; x += 1D) {
             for (double z = startZ; z <= endZ; z += 1D) {
-                Location test = BlockUtil.getHighestUnderneath(new Location(center.getWorld(), x, center.getY(), z));
+                Location test = BlockUtil.getHighestUnderneath(new Location(center.getWorld(), x, center.getY(), z), verticalRange);
                 if(test.getBlock().getType() == Material.AIR) continue;
                 AbstractPacket particle = createBlockEffect(test.toVector(), test.getBlock().getTypeId());
                 PacketUtil.asyncSend(particle, players);
