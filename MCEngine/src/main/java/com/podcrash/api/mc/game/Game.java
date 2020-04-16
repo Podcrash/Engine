@@ -953,7 +953,7 @@ public abstract class Game implements IGame {
                 inv.setItem(i, hotbarSave[i]);
             }
         } else {
-            ItemStackUtil.createItem(inv, 388, 1, 1, "&a&lEnable Lobby PVP");
+            ItemStackUtil.createItem(inv, 388, 1, 2, "&a&lEnable Lobby PVP");
         }
         // Setting items in the player's inventory
         // TODO: Remove the Force Start Item.
@@ -1045,7 +1045,7 @@ public abstract class Game implements IGame {
     // TODO: Change this to work with more than 2 teams.
     @Override
     public String toString() {
-        return String.format("%s{Game %d}%s[%d/%d]%s:\n %s\n %s\n %s\n %s",ChatColor.GREEN, id, ChatColor.WHITE, getPlayerCount(), getMaxPlayers(), ChatColor.GRAY, niceLookingTeam(TeamEnum.RED), niceLookingTeam(TeamEnum.BLUE), niceLookingSpec(), optIn);
+        return String.format("%s{Game %d}%s[%d/%d]%s:\n %s\n %s\n %s",ChatColor.GREEN, id, ChatColor.WHITE, getPlayerCount(), getMaxPlayers(), ChatColor.GRAY, niceLookingTeam(TeamEnum.RED), niceLookingTeam(TeamEnum.BLUE), niceLookingSpec());
     }
 
     /**

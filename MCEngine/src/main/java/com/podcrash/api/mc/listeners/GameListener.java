@@ -1,7 +1,6 @@
 package com.podcrash.api.mc.listeners;
 
 import com.abstractpackets.packetwrapper.AbstractPacket;
-import com.podcrash.api.db.pojos.Rank;
 import com.podcrash.api.db.pojos.map.BaseMap;
 import com.podcrash.api.db.pojos.map.GameMap;
 import com.podcrash.api.db.pojos.map.Point;
@@ -22,14 +21,15 @@ import com.podcrash.api.mc.game.objects.action.ActionBlock;
 import com.podcrash.api.mc.item.ItemManipulationManager;
 import com.podcrash.api.mc.sound.SoundPlayer;
 import com.podcrash.api.mc.time.TimeHandler;
-import com.podcrash.api.mc.time.resources.SimpleTimeResource;
 import com.podcrash.api.mc.util.EntityUtil;
+import com.podcrash.api.mc.util.ItemStackUtil;
 import com.podcrash.api.mc.util.PacketUtil;
-import com.podcrash.api.mc.util.PrefixUtil;
 import com.podcrash.api.mc.world.WorldManager;
 import com.podcrash.api.plugin.Pluginizer;
 import com.podcrash.api.db.redis.Communicator;
+import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import org.bukkit.*;
+import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -138,18 +138,23 @@ public class GameListener extends ListenerBase {
      * @see com.podcrash.api.mc.game.GameManager#startGame
      * @param e event callback
      */
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler
     public void onStart(GameStartEvent e) {
         Game game = e.getGame();
         game.getTeams().forEach(team -> {
             team.allSpawn();
             team.getBukkitPlayers().forEach(player -> {
+                DamageApplier.removeInvincibleEntity(player);
+                game.removePlayerLobbyPVPing(player);
                 player.setHealth(player.getMaxHealth());
                 player.setSpectator(false);
                 player.setGameMode(GameMode.SURVIVAL);
             });
         });
         game.getBukkitSpectators().forEach(player -> {
+            DamageApplier.removeInvincibleEntity(player);
+            game.removePlayerLobbyPVPing(player);
+            player.setHealth(player.getMaxHealth());
             player.teleport(game.getSpawnLocation());
             player.setGameMode(GameMode.SPECTATOR);
         });
@@ -157,9 +162,12 @@ public class GameListener extends ListenerBase {
         if(map == null) return;
         StringBuilder authorBuilder = new StringBuilder();
         map.getAuthors().forEach(authorBuilder::append);
-        String message = ChatColor.BOLD + "Map: " + ChatColor.RESET + "" + ChatColor.YELLOW + map.getName() + "\n" +
-            ChatColor.RESET + "" + ChatColor.GRAY +  "Built by: " + ChatColor.RESET + "" + ChatColor.BOLD + ""  + ChatColor.GOLD + authorBuilder.toString();
+        String message = ChatColor.GRAY + "\n ==================== \n \n " + ChatColor.RESET + "" +
+                ChatColor.BOLD + "Map: " + ChatColor.RESET + "" + ChatColor.YELLOW + map.getName() + "\n" +
+                ChatColor.RESET + "" + ChatColor.GRAY +  " Built by: " + ChatColor.RESET + "" + ChatColor.BOLD + ""  + ChatColor.GOLD + authorBuilder.toString() +
+                ChatColor.GRAY + "\n \n ==================== \n ";
         game.consumeBukkitPlayer(player -> player.sendMessage(message));
+        SoundPlayer.sendSound(game.getBukkitPlayers(), "fireworks.blast", 1F, 63);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -167,11 +175,14 @@ public class GameListener extends ListenerBase {
         Game game = e.getGame();
         game.sendColorTab(true);
         for (Player player : game.getBukkitPlayers()) {
+            DamageApplier.addInvincibleEntity(player);
+            player.setHealth(player.getMaxHealth());
             player.teleport(e.getSpawnlocation());
             player.sendMessage(e.getMessage());
             player.setGameMode(GameMode.ADVENTURE);
             deadPeople.remove(player);
             player.sendMessage(game.getPresentableResult());
+            SoundPlayer.sendSound(player, "fireworks.launch", 1F, 63);
         }
         WorldManager.getInstance().unloadWorld(e.getGame().getGameWorld().getName());
     }
@@ -343,17 +354,24 @@ public class GameListener extends ListenerBase {
         Game game = GameManager.getGame();
         Player player = e.getPlayer();
 
-        if (game.getGameState() != GameState.LOBBY) return;
+        if (game == null || game.getGameState() != GameState.STARTED) {
+            // AKA if we are in a game lobby
+            if(game != null ) {
+                game.removePlayerLobbyPVPing(player);
+                game.updateLobbyInventory(player);
+            } else {    // AKA if we are in a general lobby
+                ItemStackUtil.createItem(player.getInventory(), 388, 1, 2, "&a&lEnable Lobby PVP");
+            }
+            // For ALL lobbies, make the player invincible again
+            DamageApplier.addInvincibleEntity(player);
 
-        Bukkit.getScheduler().runTaskLater(Pluginizer.getSpigotPlugin(), () -> {
-            deathAnimation(player.getLocation());
-            StatusApplier.getOrNew(player).removeStatus(Status.values());
-            player.setHealth(player.getMaxHealth());
-            player.teleport(player.getWorld().getSpawnLocation());
-        }, 1L);
-
-        game.removePlayerLobbyPVPing(player);
-        game.updateLobbyInventory(player);
+            Bukkit.getScheduler().runTaskLater(Pluginizer.getSpigotPlugin(), () -> {
+                deathAnimation(player.getLocation());
+                StatusApplier.getOrNew(player).removeStatus(Status.values());
+                player.setHealth(player.getMaxHealth());
+                player.teleport(player.getWorld().getSpawnLocation());
+            }, 1L);
+        }
     }
 
     /**
@@ -380,7 +398,7 @@ public class GameListener extends ListenerBase {
      */
     @EventHandler
     public void onPickUp(PlayerPickupItemEvent e) {
-        if(!EntityUtil.onGround(e.getItem()) || deadPeople.contains(e.getPlayer())) {
+        if(!EntityUtil.onGround(e.getItem()) || deadPeople.contains(e.getPlayer()) || DamageApplier.getInvincibleEntities().contains(e.getPlayer())) {
             e.setCancelled(true);
             return;
         }
@@ -419,6 +437,42 @@ public class GameListener extends ListenerBase {
         }
     }
 
+    @EventHandler
+    public void enableGeneralLobbyPVP(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        // Only run this code if there is no game going on; this will work even if engine is the only plugin present
+        if(GameManager.getGame() != null || player.getItemInHand().getType().equals(Material.AIR)) { return;}
+
+        if ((event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK ||
+                event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK)
+                && (player.getItemInHand().getItemMeta().hasDisplayName() && player.getItemInHand().getItemMeta().getDisplayName().contains("Enable Lobby PVP"))) {
+
+            SoundPlayer.sendSound(player, "random.pop", 1F, 63);
+            DamageApplier.removeInvincibleEntity(player);
+            applyGeneralPVPGear(player);
+        }
+    }
+
+    private void applyGeneralPVPGear(Player player) {
+        ItemStack sword = new ItemStack(Material.DIAMOND_SWORD);
+        ItemMeta meta = sword.getItemMeta();
+        meta.spigot().setUnbreakable(true);
+        sword.setItemMeta(meta);
+        player.setItemInHand(sword);
+
+        Material[] armor = {Material.IRON_BOOTS, Material.IRON_LEGGINGS, Material.IRON_CHESTPLATE , Material.IRON_HELMET};
+        ItemStack[] armors = new ItemStack[4];
+        for(int i = 0; i < armor.length; i++){
+            Material mat = armor[i];
+            net.minecraft.server.v1_8_R3.ItemStack nmsStack = CraftItemStack.asNMSCopy(new ItemStack(mat));
+            NBTTagCompound tag = new NBTTagCompound();
+            tag.setBoolean("Unbreakable", true);
+            nmsStack.setTag(tag);
+
+            armors[i] = new ItemStack(CraftItemStack.asBukkitCopy(nmsStack));
+        }
+        player.getEquipment().setArmorContents(armors);
+    }
     // TODO: The following are invalid now? Turf Wars requires block placement.
 
 //    @EventHandler(priority = EventPriority.HIGHEST)

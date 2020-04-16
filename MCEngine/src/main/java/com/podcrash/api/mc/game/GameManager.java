@@ -134,7 +134,7 @@ public class GameManager {
                 return;
         }
         if(!game.contains(p)) {
-            p.sendMessage(
+            /*p.sendMessage(
                     String.format(
                             "%sInvicta> %sYou were added to %sGame %s%s.",
                             ChatColor.BLUE,
@@ -142,6 +142,8 @@ public class GameManager {
                             ChatColor.GREEN,
                             game.getId(),
                             ChatColor.GRAY));
+                            \
+             */
 
             ItemStack red = new ItemStack(Material.WOOL, 1, DyeColor.RED.getData());
             ItemStack blue = new ItemStack(Material.WOOL, 1, DyeColor.BLUE.getData());

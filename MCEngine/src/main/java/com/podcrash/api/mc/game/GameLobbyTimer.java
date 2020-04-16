@@ -4,6 +4,7 @@ import com.podcrash.api.mc.sound.SoundPlayer;
 import com.podcrash.api.mc.sound.SoundWrapper;
 import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.time.resources.TimeResource;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
 public class GameLobbyTimer {
@@ -29,6 +30,10 @@ public class GameLobbyTimer {
     public void start() {
         if(isRunning) return;
         isRunning = true;
+
+        Bukkit.broadcastMessage("" + ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "The match on " + GameManager.getGame().getMapName() + "will start in " + currentTime + " seconds.");
+        SoundPlayer.sendSound(GameManager.getGame().getBukkitPlayers(), "random.orb", 1F, 30);
+
         TimeHandler.repeatedTimeSeconds(1, 0, new TimeResource() {
             @Override
             public void task() {

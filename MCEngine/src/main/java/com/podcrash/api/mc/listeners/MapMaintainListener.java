@@ -163,7 +163,7 @@ public class MapMaintainListener extends ListenerBase {
         //or if the cause is null or custom
         // then cancel it
         if((!(event.getEntity() instanceof LivingEntity)) ||
-                //isSpawnWorld(event.getEntity().getWorld()) ||
+                DamageApplier.getInvincibleEntities().contains(event.getEntity()) ||
                 (event.getCause() == null || event.getCause() == EntityDamageEvent.DamageCause.CUSTOM)) {
             event.setCancelled(true);
             return;
@@ -255,18 +255,21 @@ public class MapMaintainListener extends ListenerBase {
         if(cancel) e.setCancelled(true);
     }
 
+
     @EventHandler(priority = EventPriority.MONITOR)
     public void damage(DamageApplyEvent event) {
         Game game = GameManager.getGame();
-        if (game.getGameState() != GameState.LOBBY) return;
-        Set<Player> lobbyPVPing = game.getPlayersLobbyPVPing();
-        if ((event.getVictim() instanceof Player && !lobbyPVPing.contains((Player) event.getVictim()))
-                || (event.getAttacker() instanceof Player && !lobbyPVPing.contains((Player) event.getAttacker()))) {
-            event.setCancelled(true);
+
+        if (game == null || game.getGameState() != GameState.STARTED) {
+            if (event.getAttacker() instanceof Player && DamageApplier.getInvincibleEntities().contains(event.getAttacker())) {
+                event.setCancelled(true);
+            }
         }
         //if(event.getVictim() instanceof Player) && isSpawnWorld(event.getVictim().getWorld()))
             //event.setCancelled(true);
     }
+
+
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void preventCraft(InventoryClickEvent event) {
