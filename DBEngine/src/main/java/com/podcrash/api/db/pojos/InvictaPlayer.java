@@ -16,12 +16,20 @@ public final class InvictaPlayer {
     private Set<String> ranks;
     private Set<String> extraPerms;
 
+    private Set<UUID> friends;
+
     private Currency currency;
 
     private Map<String, GameData> gameData;
 
     public InvictaPlayer() {
     }
+
+    public Set<UUID> getFriends() {
+        return friends;
+    }
+
+    public void setFriends(Set<UUID> friends) {this.friends = friends;}
 
     public ObjectId getObjectId() {
         return objectId;
@@ -97,6 +105,7 @@ public final class InvictaPlayer {
         sb.append(", extraPerms=").append(extraPerms);
         sb.append(", currency=").append(currency);
         sb.append(", gameData=").append(gameData);
+        sb.append(", friends=").append(friends);
         sb.append('}');
         return sb.toString();
     }

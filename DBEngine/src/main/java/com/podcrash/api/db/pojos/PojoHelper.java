@@ -45,6 +45,7 @@ public final class PojoHelper {
         player.setCurrency(currency);
         player.setExtraPerms(new HashSet<>());
         player.setRanks(new HashSet<>());
+        player.setFriends(new HashSet<>());
         player.setUuid(uuid);
         player.setDiscordID(-1);
         player.setGameData(new HashMap<>());

@@ -1,5 +1,6 @@
 package com.podcrash.api.db.tables;
 
+import com.mongodb.Block;
 import com.mongodb.async.SingleResultCallback;
 import com.mongodb.client.model.*;
 import com.mongodb.client.result.UpdateResult;
@@ -13,6 +14,8 @@ import com.podcrash.api.db.pojos.InvictaPlayer;
 import com.podcrash.api.db.pojos.PojoHelper;
 import org.bson.conversions.Bson;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -80,5 +83,27 @@ public class PlayerTable extends MongoBaseTable {
 
     public CompletableFuture<Currency> getCurrency(UUID uuid) {
         return getPlayerDocumentAsync(uuid, "currency").thenApplyAsync(InvictaPlayer::getCurrency);
+    }
+
+    public CompletableFuture<Set<UUID>> getFriendsAsync(UUID uuid) {
+        return getPlayerDocumentAsync(uuid, "friends").thenApplyAsync(InvictaPlayer::getFriends);
+    }
+
+    public void addFriend(UUID uuid) {
+        CompletableFuture<UpdateResult> future = new CompletableFuture<>();
+        getCollection("players").updateOne(Filters.eq("uuid", uuid), Updates.push("friends", uuid), (res, t) -> {
+            DBUtils.handleThrowables(t);
+            future.complete(res);
+        });
+        futureGuaranteeGet(future);
+    }
+
+    public void removeFriend(UUID uuid) {
+        CompletableFuture<UpdateResult> future = new CompletableFuture<>();
+        getCollection("players").updateOne(Filters.eq("uuid", uuid), Updates.pull("friends", uuid), (res, t) -> {
+            DBUtils.handleThrowables(t);
+            future.complete(res);
+        });
+        futureGuaranteeGet(future);
     }
 }
