@@ -2,6 +2,7 @@ package com.podcrash.api.mc.effect.status;
 
 import com.podcrash.api.mc.effect.status.custom.*;
 import com.podcrash.api.mc.events.StatusApplyEvent;
+import com.podcrash.api.mc.events.StatusRemoveEvent;
 import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.plugin.Pluginizer;
 import net.md_5.bungee.api.ChatColor;
@@ -142,8 +143,11 @@ public class StatusApplier {
 
     public void removeVanilla(Status status) {
         if(status == null) return;
+        PotionEffect effect = status.getPotionEffectType().createEffect(0, 0);
+        StatusRemoveEvent removeEvent = new StatusRemoveEvent(this.player, status);
+        Bukkit.getPluginManager().callEvent(removeEvent);
+        
         if (player.hasPotionEffect(status.getPotionEffectType())) {
-            PotionEffect effect = status.getPotionEffectType().createEffect(0, 0);
             new BukkitRunnable() {
                 @Override
                 public void run() {
@@ -154,6 +158,9 @@ public class StatusApplier {
     }
 
     public void removeCustom(Status status) {
+        StatusRemoveEvent removeEvent = new StatusRemoveEvent(this.player, status);
+        Bukkit.getPluginManager().callEvent(removeEvent);
+        if (removeEvent.isCancelled()) return;
         switch (status) {
             case FIRE:
                 this.player.setFireTicks(0);
