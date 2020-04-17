@@ -360,7 +360,11 @@ public class GameListener extends ListenerBase {
                 game.removePlayerLobbyPVPing(player);
                 game.updateLobbyInventory(player);
             } else {    // AKA if we are in a general lobby
-                ItemStackUtil.createItem(player.getInventory(), 388, 1, 2, "&a&lEnable Lobby PVP");
+                ItemStack diamondsword = new ItemStack(Material.DIAMOND_SWORD);
+                player.getInventory().setItem(0, diamondsword);
+                TimeHandler.delayTime(1L, () -> {
+                    ItemStackUtil.createItem(player.getInventory(), 276, 1, 1, "&a&lEnable Lobby PVP");
+                });
             }
             // For ALL lobbies, make the player invincible again
             DamageApplier.addInvincibleEntity(player);
@@ -437,8 +441,9 @@ public class GameListener extends ListenerBase {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.NORMAL)
     public void enableGeneralLobbyPVP(PlayerInteractEvent event) {
+        if (event.isCancelled()) return;
         Player player = event.getPlayer();
         // Only run this code if there is no game going on; this will work even if engine is the only plugin present
         if(GameManager.getGame() != null || player.getItemInHand().getType().equals(Material.AIR)) { return;}

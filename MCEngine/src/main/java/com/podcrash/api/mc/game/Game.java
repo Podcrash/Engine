@@ -13,6 +13,7 @@ import com.podcrash.api.mc.events.game.GameMapLoadEvent;
 import com.podcrash.api.mc.game.resources.GameResource;
 import com.podcrash.api.mc.game.scoreboard.GameLobbyScoreboard;
 import com.podcrash.api.mc.game.scoreboard.GameScoreboard;
+import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.ui.TeamSelectGUI;
 import com.podcrash.api.mc.util.ChatUtil;
 import com.podcrash.api.mc.util.ItemStackUtil;
@@ -953,7 +954,11 @@ public abstract class Game implements IGame {
                 inv.setItem(i, hotbarSave[i]);
             }
         } else {
-            ItemStackUtil.createItem(inv, 388, 1, 2, "&a&lEnable Lobby PVP");
+            ItemStack diamondsword = new ItemStack(Material.DIAMOND_SWORD);
+            inv.setItem(0, diamondsword);
+            TimeHandler.delayTime(1L, () -> {
+                ItemStackUtil.createItem(inv, 276, 1, 1, "&a&lEnable Lobby PVP");
+            });
         }
         // Setting items in the player's inventory
         // TODO: Remove the Force Start Item.
