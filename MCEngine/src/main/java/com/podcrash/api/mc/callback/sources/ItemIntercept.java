@@ -6,6 +6,7 @@ import com.podcrash.api.mc.location.BoundingBox;
 import com.podcrash.api.mc.location.RayTracer;
 import com.podcrash.api.mc.util.EntityUtil;
 import com.podcrash.api.mc.world.BlockUtil;
+import com.podcrash.api.plugin.Pluginizer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -79,13 +80,14 @@ public class ItemIntercept extends CallbackAction<ItemIntercept> {
             }
         }
 
+        boolean onGround = EntityUtil.onGround(item);
+        if(onGround) dir = new Vector(0, -0.5, 0);
+
         Block block = itemLocation.add(dir).getBlock();
         BoundingBox blockBox = new BoundingBox(block);
 
         //check for collision with blocks and if it's on the ground.
-        boolean onGround = EntityUtil.onGround(item);
         if (!BlockUtil.isPassable(block) || onGround) {
-            if(onGround) dir = new Vector(0, -0.25, 0);
             Vector v = projectile2DHit(0.2, 10, dir, itemVector, blockBox);
             //safe check
             if(v != null) this.interceptLocation = v.toLocation(item.getWorld());
@@ -94,9 +96,12 @@ public class ItemIntercept extends CallbackAction<ItemIntercept> {
             return true;
         }
 
-
+        Pluginizer.getLogger().info(dir.toString());
+        //if nothing else works, just avoid the NPE
+        this.interceptLocation = item.getLocation();
         //if the item doesn't exist, or the item is on the ground, return true.
-        return !item.isValid();
+        //if the item is on fire
+        return !item.isValid() || item.getFireTicks() > 2;
     }
 
     /**
