@@ -675,6 +675,9 @@ public abstract class Game implements IGame {
         //player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         // Call event.
         Bukkit.getServer().getPluginManager().callEvent(new GameLeaveEvent(this, player));
+        
+        if(lobby_timer.isRunning() && participants.size() < getMaxPlayers())
+            lobby_timer.stop(false);
     }
 
     /**
