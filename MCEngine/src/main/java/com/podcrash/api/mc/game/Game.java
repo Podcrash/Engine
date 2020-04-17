@@ -89,7 +89,7 @@ public abstract class Game implements IGame {
         this.gameResources = new ArrayList<>();
         this.lobby_board = new GameLobbyScoreboard(this);
         lobby_board.run();
-        this.lobby_timer = new GameLobbyTimer();
+        this.lobby_timer = new GameLobbyTimer(this);
 
         this.participants = new HashSet<>();
         this.spectators = new HashSet<>();
@@ -602,9 +602,6 @@ public abstract class Game implements IGame {
             player.setSpectator(true);
         } else {
             updateLobbyInventory(player);
-
-            if(lobby_timer.isRunning() && participants.size() < getMaxPlayers())
-                lobby_timer.stop(false);
         }
         player.sendMessage(String.format(
                 "%sInvicta> %sYou joined the %sSpectators %sin %sGame %s%s.",
@@ -675,9 +672,6 @@ public abstract class Game implements IGame {
         //player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         // Call event.
         Bukkit.getServer().getPluginManager().callEvent(new GameLeaveEvent(this, player));
-        
-        if(lobby_timer.isRunning() && participants.size() < getMaxPlayers())
-            lobby_timer.stop(false);
     }
 
     /**

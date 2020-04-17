@@ -10,15 +10,17 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 public class GameLobbyTimer {
-
+    private final Game game;
     private final int maxTime;
     private int currentTime;
     private String status;
     private boolean isRunning;
     private String defaultStatus;
 
-    public GameLobbyTimer() {
+    public GameLobbyTimer(Game game) {
         this.maxTime = 20;
+        this.game = game;
+        
         this.currentTime = maxTime;
         this.defaultStatus = "Waiting for Players...";
         this.status = defaultStatus;
@@ -33,12 +35,12 @@ public class GameLobbyTimer {
         if(isRunning) return;
         isRunning = true;
 
-        Bukkit.broadcastMessage("" + ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "The match on " + GameManager.getGame().getMapName() + "will start in " + currentTime + " seconds.");
-        SoundPlayer.sendSound(GameManager.getGame().getBukkitPlayers(), "random.orb", 1F, 30);
+        Bukkit.broadcastMessage("" + ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "The match on " + game.getMapName() + "will start in " + currentTime + " seconds.");
+        SoundPlayer.sendSound(game.getBukkitPlayers(), "random.orb", 1F, 30);
 
-        for (Player p : GameManager.getGame().getBukkitPlayers()) {
-            GameManager.getGame().removePlayerLobbyPVPing(p);
-            GameManager.getGame().updateLobbyInventory(p);
+        for (Player p : game.getBukkitPlayers()) {
+            game.removePlayerLobbyPVPing(p);
+            game.updateLobbyInventory(p);
             DamageApplier.addInvincibleEntity(p);
         }
 
@@ -48,6 +50,10 @@ public class GameLobbyTimer {
                 if (isRunning) {
                     status = String.format("Starting in %s%s seconds", timeColor(), currentTime);
                     currentTime--;
+                    if(game.getPlayerCount() < game.getMaxPlayers()) {
+                        System.out.println("dead game, so stopped");
+                        stop(false);
+                    }
                 }
             }
 
@@ -70,7 +76,7 @@ public class GameLobbyTimer {
 
     private ChatColor timeColor() {
         if(currentTime <= 5) {
-            SoundPlayer.sendSound(GameManager.getGame().getBukkitPlayers(), "note.pling", 1, 63);
+            SoundPlayer.sendSound(game.getBukkitPlayers(), "note.pling", 1, 63);
             return ChatColor.RED;
         }
         return ChatColor.WHITE;
@@ -86,8 +92,8 @@ public class GameLobbyTimer {
             currentTime = maxTime;
             status = defaultStatus;
         }
-        for (Player p : GameManager.getGame().getBukkitPlayers()) {
-            GameManager.getGame().updateLobbyInventory(p);
+        for (Player p : game.getBukkitPlayers()) {
+            game.updateLobbyInventory(p);
         }
     }
 
