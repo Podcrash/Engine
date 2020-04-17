@@ -46,7 +46,7 @@ public final class PojoHelper {
         player.setExtraPerms(new HashSet<>());
         player.setRanks(new HashSet<>());
         player.setUuid(uuid);
-        player.setDiscordID(-1);
+        player.setDiscordID("");
         player.setGameData(new HashMap<>());
         player.setLastUsername(Bukkit.getPlayer(uuid).getName());
 

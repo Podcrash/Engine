@@ -9,7 +9,7 @@ import java.util.UUID;
 public final class InvictaPlayer {
     private ObjectId objectId;
 
-    private int discordID;
+    private String discordID;
     private UUID uuid;
     private String lastUsername;
 
@@ -31,11 +31,11 @@ public final class InvictaPlayer {
         this.objectId = objectId;
     }
 
-    public int getDiscordID() {
+    public String getDiscordID() {
         return discordID;
     }
 
-    public void setDiscordID(int discordID) {
+    public void setDiscordID(String discordID) {
         this.discordID = discordID;
     }
 

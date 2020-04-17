@@ -81,4 +81,14 @@ public class PlayerTable extends MongoBaseTable {
     public CompletableFuture<Currency> getCurrency(UUID uuid) {
         return getPlayerDocumentAsync(uuid, "currency").thenApplyAsync(InvictaPlayer::getCurrency);
     }
+
+    public CompletableFuture<UpdateResult> updateDiscordID(UUID uuid, String id) {
+        CompletableFuture<UpdateResult> res = new CompletableFuture<>();
+        getCollection().updateOne(eq("uuid", uuid), Updates.set("discordID", id), (result, t) -> {
+            DBUtils.handleThrowables(t);
+            res.complete(result);
+        });
+        return res;
+    }
+
 }
