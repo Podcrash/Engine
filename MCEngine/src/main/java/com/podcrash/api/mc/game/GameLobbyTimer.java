@@ -18,7 +18,7 @@ public class GameLobbyTimer {
     private String defaultStatus;
 
     public GameLobbyTimer() {
-        this.maxTime = 10;
+        this.maxTime = 20;
         this.currentTime = maxTime;
         this.defaultStatus = "Waiting for Players...";
         this.status = defaultStatus;
