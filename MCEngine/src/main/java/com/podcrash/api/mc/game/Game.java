@@ -602,6 +602,9 @@ public abstract class Game implements IGame {
             player.setSpectator(true);
         } else {
             updateLobbyInventory(player);
+
+            if(lobby_timer.isRunning() && participants.size() < getMaxPlayers())
+                lobby_timer.stop(false);
         }
         player.sendMessage(String.format(
                 "%sInvicta> %sYou joined the %sSpectators %sin %sGame %s%s.",
@@ -627,6 +630,7 @@ public abstract class Game implements IGame {
 
     public void addParticipant(Player player) {
         removeSpectator(player);
+
         // TODO: Set the lobby scoreboard, etc...
     }
 
