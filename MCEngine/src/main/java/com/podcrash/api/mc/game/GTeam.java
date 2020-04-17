@@ -4,6 +4,7 @@ import com.comphenix.protocol.PacketType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -248,7 +249,7 @@ public class GTeam {
         StringBuilder result = new StringBuilder(teamEnum.getChatColor() + "" + ChatColor.BOLD + teamEnum.getName() + " Team: ");
         result.append(ChatColor.RESET);
         for (UUID uuid : players) {
-            Player p = Bukkit.getPlayer(uuid);
+            OfflinePlayer p = Bukkit.getOfflinePlayer(uuid);
             result.append(p.getName());
             result.append(' ');
         }
