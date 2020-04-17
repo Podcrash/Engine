@@ -196,6 +196,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
         }, getExecutorService());
     }
     private CompletableFuture<Void> registerListeners() {
+        new BaseChatListener(this);
         return CompletableFuture.runAsync(() -> {
             new MapMaintainListener(this);
             new PlayerInventoryListener(this);
@@ -206,7 +207,6 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             new FallDamageHandler(this);
             new MOTDHandler(this);
             new CmdPreprocessHandler(this);
-            new BaseChatListener(this);
             new GeneralLobbyListener(this);
 
             // TODO: Add more listeners here..
