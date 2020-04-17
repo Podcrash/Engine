@@ -207,6 +207,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             new MOTDHandler(this);
             new CmdPreprocessHandler(this);
             new BaseChatListener(this);
+            new GeneralLobbyListener(this);
 
             // TODO: Add more listeners here..
         });

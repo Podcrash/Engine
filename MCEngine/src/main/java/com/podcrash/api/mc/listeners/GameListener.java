@@ -440,44 +440,6 @@ public class GameListener extends ListenerBase {
             game.broadcast(e.getFormat().replace(name, replace));
         }
     }
-
-    @EventHandler(priority = EventPriority.NORMAL)
-    public void enableGeneralLobbyPVP(PlayerInteractEvent event) {
-        if (event.isCancelled()) return;
-        Player player = event.getPlayer();
-        // Only run this code if there is no game going on; this will work even if engine is the only plugin present
-        if(GameManager.getGame() != null || player.getItemInHand().getType().equals(Material.AIR)) { return;}
-
-        if ((event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK ||
-                event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK)
-                && (player.getItemInHand().getItemMeta().hasDisplayName() && player.getItemInHand().getItemMeta().getDisplayName().contains("Enable Lobby PVP"))) {
-
-            SoundPlayer.sendSound(player, "random.pop", 1F, 63);
-            DamageApplier.removeInvincibleEntity(player);
-            applyGeneralPVPGear(player);
-        }
-    }
-
-    private void applyGeneralPVPGear(Player player) {
-        ItemStack sword = new ItemStack(Material.DIAMOND_SWORD);
-        ItemMeta meta = sword.getItemMeta();
-        meta.spigot().setUnbreakable(true);
-        sword.setItemMeta(meta);
-        player.setItemInHand(sword);
-
-        Material[] armor = {Material.IRON_BOOTS, Material.IRON_LEGGINGS, Material.IRON_CHESTPLATE , Material.IRON_HELMET};
-        ItemStack[] armors = new ItemStack[4];
-        for(int i = 0; i < armor.length; i++){
-            Material mat = armor[i];
-            net.minecraft.server.v1_8_R3.ItemStack nmsStack = CraftItemStack.asNMSCopy(new ItemStack(mat));
-            NBTTagCompound tag = new NBTTagCompound();
-            tag.setBoolean("Unbreakable", true);
-            nmsStack.setTag(tag);
-
-            armors[i] = new ItemStack(CraftItemStack.asBukkitCopy(nmsStack));
-        }
-        player.getEquipment().setArmorContents(armors);
-    }
     // TODO: The following are invalid now? Turf Wars requires block placement.
 
 //    @EventHandler(priority = EventPriority.HIGHEST)
