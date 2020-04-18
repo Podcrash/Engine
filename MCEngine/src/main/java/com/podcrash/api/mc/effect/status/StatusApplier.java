@@ -231,63 +231,86 @@ public class StatusApplier {
     }
 
     private void applyCloak(final int duration) {
-        removeCloak();
-        Bukkit.getScheduler().runTask(Pluginizer.getSpigotPlugin(), () -> {
-            for (Player p : player.getWorld().getPlayers()) {
-                p.hidePlayer(player);
-            }
+        if (!isCloaked()) {
+            Bukkit.getScheduler().runTask(Pluginizer.getSpigotPlugin(), () -> {
+                for (Player p : player.getWorld().getPlayers()) {
+                    p.hidePlayer(player);
+                }
 
-        });
-        //player.sendMessage(String.format("You are now invisible for %d seconds!", (duration/1000)));
-        player.sendMessage(String.format("%sCondition> %sYou are now invisible.", ChatColor.BLUE, ChatColor.GRAY));
-        cloaked = System.currentTimeMillis() + duration;
-        TimeHandler.repeatedTime(1L, 0, new CloakStatus(player));
+            });
+            cloaked = System.currentTimeMillis() + duration; //Duplicating code b/c it needs to happen after isCloaked check, but before cloakstatus creation
+            player.sendMessage(String.format("%sCondition> %sYou are now invisible.", ChatColor.BLUE, ChatColor.GRAY));
+            TimeHandler.repeatedTime(1L, 0, new CloakStatus(player));
+        } else {
+            cloaked = System.currentTimeMillis() + duration;
+        }
     }
 
     private void applyMarked(int duration, int potency) {
-        removeMark();
-        marked = System.currentTimeMillis() + duration;
-        player.sendMessage(String.format("%sCondition> %sYou are now marked for %s%d %sseconds!",ChatColor.BLUE, ChatColor.GRAY, ChatColor.GREEN, (duration / 1000), ChatColor.GRAY));
-        TimeHandler.repeatedTime(1, 0, new MarkedStatus(player));
+        player.sendMessage(String.format("%sCondition> %sYou are now marked for %s%d %sseconds!", ChatColor.BLUE, ChatColor.GRAY, ChatColor.GREEN, (duration / 1000), ChatColor.GRAY));
+        if (!isMarked()) {
+            marked = System.currentTimeMillis() + duration;
+            TimeHandler.repeatedTime(1, 0, new MarkedStatus(player));
+        } else {
+            marked = System.currentTimeMillis() + duration;
+        }
     }
 
     private void applySilence(int duration) {
-        removeSilence();
-        silenced = System.currentTimeMillis() + duration;
-        player.sendMessage(String.format("%sCondition> %sYou are now silenced for %s%d %sseconds!",ChatColor.BLUE, ChatColor.GRAY, ChatColor.GREEN, (duration / 1000), ChatColor.GRAY));
-        TimeHandler.repeatedTime(1, 0, new SilenceStatus(player));
+        player.sendMessage(String.format("%sCondition> %sYou are now silenced for %s%d %sseconds!", ChatColor.BLUE, ChatColor.GRAY, ChatColor.GREEN, (duration / 1000), ChatColor.GRAY));
+        if (!isSilenced()) {
+            silenced = System.currentTimeMillis() + duration;
+            TimeHandler.repeatedTime(1, 0, new SilenceStatus(player));
+        } else {
+            silenced = System.currentTimeMillis() + duration;
+        }
     }
 
     private void applyShock(int duration) {
-        removeShock();
-        shocked = System.currentTimeMillis() + duration;
-        //player.sendMessage(String.format("%sCondition> %sYou are now shocked for %s%d %sseconds!",ChatColor.BLUE, ChatColor.GRAY, ChatColor.GREEN, (duration / 1000), ChatColor.GRAY));
-        TimeHandler.repeatedTime(1, 0, new ShockStatus(player));
+        if (!isShocked()) {
+            shocked = System.currentTimeMillis() + duration;
+            //player.sendMessage(String.format("%sCondition> %sYou are now shocked for %s%d %sseconds!",ChatColor.BLUE, ChatColor.GRAY, ChatColor.GREEN, (duration / 1000), ChatColor.GRAY));
+            TimeHandler.repeatedTime(1, 0, new ShockStatus(player));
+        } else {
+            shocked = System.currentTimeMillis() + duration;
+        }
     }
 
     private void applyRoot(int duration) {
-        if (isRooted()) removeRoot();
-        rooted = System.currentTimeMillis() + duration;
         player.sendMessage(String.format("%sCondition> %sYou are now rooted for %s%d %sseconds!", ChatColor.BLUE, ChatColor.GRAY, ChatColor.GREEN, (duration / 1000), ChatColor.GRAY));
-        TimeHandler.repeatedTime(1, 1, new RootedStatus(player));
+        if (!isRooted()) {
+            rooted = System.currentTimeMillis() + duration;
+            TimeHandler.repeatedTime(1, 1, new RootedStatus(player));
+        } else {
+            rooted = System.currentTimeMillis() + duration;
+        }
     }
 
     private void applyGround(int duration) {
-        if (isGrounded()) removeGround();
-        grounded = System.currentTimeMillis() + duration;
-        TimeHandler.repeatedTime(1, 1, new GroundStatus(player));
+        if (!isGrounded()) {
+            grounded = System.currentTimeMillis() + duration;
+            TimeHandler.repeatedTime(1, 1, new GroundStatus(player));
+        } else {
+            grounded = System.currentTimeMillis() + duration;
+        }
     }
 
     private void applyInept(int duration) {
-        if (isInept()) removeInept();
-        inept = System.currentTimeMillis() + duration;
-        TimeHandler.repeatedTime(1, 1, new IneptStatus(player));
+        if (!isInept()) {
+            inept = System.currentTimeMillis() + duration;
+            TimeHandler.repeatedTime(1, 1, new IneptStatus(player));
+        } else {
+            inept = System.currentTimeMillis() + duration;
+        }
     }
 
     private void applyBleed(int duration) {
-        if(isBleeding()) removeBleed();
-        bleeded = System.currentTimeMillis() + duration;
-        TimeHandler.repeatedTime(1, 1, new BleedStatus(player));
+        if(!isBleeding()) {
+            bleeded = System.currentTimeMillis() + duration;
+            TimeHandler.repeatedTime(1, 1, new BleedStatus(player));
+        } else {
+            bleeded = System.currentTimeMillis() + duration;
+        }
     }
 
     public boolean isCloaked() {
