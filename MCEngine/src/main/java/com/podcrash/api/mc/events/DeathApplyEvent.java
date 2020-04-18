@@ -1,6 +1,5 @@
 package com.podcrash.api.mc.events;
 
-import com.comphenix.net.sf.cglib.asm.$ClassReader;
 import com.podcrash.api.mc.damage.Cause;
 import com.podcrash.api.mc.damage.Damage;
 
@@ -8,11 +7,7 @@ import com.podcrash.api.mc.damage.DamageSource;
 import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.TeamEnum;
-import net.jafama.FastMath;
-import net.md_5.bungee.protocol.packet.Chat;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -21,7 +16,6 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -89,7 +83,8 @@ public class DeathApplyEvent extends Event implements Cancellable {
      * @return the player dying message
      */
     public String getDeathMessage() {
-        String withMsg = withMsgCause(damage);
+        ArrayList<String> causesNames = getCausesNamesFromDamage(damage);
+        String withMsg = String.join(",", causesNames);
 
         Game game = GameManager.getGame();
         TeamEnum victimT = game.getTeamEnum(player);
@@ -133,43 +128,37 @@ public class DeathApplyEvent extends Event implements Cancellable {
     private void finishAttacker(StringBuilder builder) {
 
     }
-    private String withMsgCause(Damage damage) {
-        String withMsg = "";
+    private ArrayList<String> getCausesNamesFromDamage(Damage damage) {
+        ArrayList<String> causesNames = new ArrayList<>();
         Cause cause = damage.getCause();
         switch(cause) {
             case PROJECTILE:
-                if (getSources().size() > 1) break; //Show the CUSTOM sources over the default ones
-                withMsg = ChatColor.YELLOW + "Archery";
+                if (damage.getSource().size() > 1) break; //Show the CUSTOM sources over the default ones
+                causesNames.add(ChatColor.YELLOW + "Archery");
                 break;
             case MELEE:
-                if (getSources().size() > 1) break; //Show the CUSTOM sources over the default ones
-                if (damage.getItem() == null || damage.getItem().getItemMeta() == null) withMsg = "Fists";
-                else withMsg = damage.getItem().getItemMeta().getDisplayName();
+                if (damage.getSource().size() > 1) break; //Show the CUSTOM sources over the default ones
+                if (damage.getItem() == null || damage.getItem().getItemMeta() == null) causesNames.add("Fists");
+                else causesNames.add(damage.getItem().getItemMeta().getDisplayName());
                 break;
             case CUSTOM:
                 DamageSource first = damage.getSource().get(0);
-                withMsg =  first.getPrefix() + first.getName();
+                causesNames.add(first.getPrefix() + first.getName());
                 break;
             case NULL:
-                withMsg = ChatColor.DARK_PURPLE + "Magic";
+                causesNames.add(ChatColor.DARK_PURPLE + "Magic");
                 break;
             default:
-                withMsg = cause.getDisplayName();
+                causesNames.add(cause.getDisplayName());
                 break;
         }
-        if(getSources().size() > 1) {
-            StringBuilder builder = new StringBuilder(withMsg);
-            for (int i = 1; i < getSources().size(); i++) {
-                DamageSource source = getSources().get(i);
-                if (!builder.toString().equals("")) {
-                    builder.append(", ");
-                }
-                builder.append(source.getPrefix());
-                builder.append(source.getName());
+        if(damage.getSource().size() > 1) {
+            for (int i = 1; i < damage.getSource().size(); i++) {
+                DamageSource source = damage.getSource().get(i);
+                causesNames.add(source.getPrefix() + source.getName());
             }
-            withMsg = builder.toString();
         }
-        return withMsg;
+        return causesNames;
     }
 
     private LivingEntity findAttacker() {
@@ -280,9 +269,9 @@ public class DeathApplyEvent extends Event implements Cancellable {
         HashSet<String> causes = new HashSet<>();
         for (Damage dmg : damages) {
             totalDamage += (int) dmg.getDamage();
-            String withMsg = withMsgCause(dmg);
-            if (!causes.contains(withMsg)) {
-                causes.add(withMsg);
+            ArrayList<String> causeNames = getCausesNamesFromDamage(dmg);
+            for (String cause : causeNames) {
+                causes.add(cause);
             }
         }
 
