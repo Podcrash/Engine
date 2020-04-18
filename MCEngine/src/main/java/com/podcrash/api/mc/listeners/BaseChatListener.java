@@ -34,11 +34,14 @@ public class BaseChatListener extends ListenerBase {
         }
 
 
+        /*
         if(badWordsFound(e.getMessage()).size() > 0) {
             player.sendMessage(String.format("%sInvicta> %sProfanity is strictly prohibited from Podcrash servers.", ChatColor.BLUE, ChatColor.GRAY));
             e.setCancelled(true);
             return;
         }
+
+         */
         String prefix = "";
 
         Rank rank = PrefixUtil.getPlayerRole(player);

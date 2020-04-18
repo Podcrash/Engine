@@ -6,10 +6,7 @@ import com.podcrash.api.db.pojos.map.GameMap;
 import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.MapTable;
 import com.podcrash.api.db.TableOrganizer;
-import com.podcrash.api.mc.events.game.GameJoinEvent;
-import com.podcrash.api.mc.events.game.GameLeaveEvent;
-import com.podcrash.api.mc.events.game.GameMapChangeEvent;
-import com.podcrash.api.mc.events.game.GameMapLoadEvent;
+import com.podcrash.api.mc.events.game.*;
 import com.podcrash.api.mc.game.resources.GameResource;
 import com.podcrash.api.mc.game.scoreboard.GameLobbyScoreboard;
 import com.podcrash.api.mc.game.scoreboard.GameScoreboard;
@@ -206,7 +203,11 @@ public abstract class Game implements IGame {
      * Set whether the game is ongoing.
      * @param state The ongoing boolean.
      */
-    public void setState(GameState state) { this.state = state; }
+    public void setState(GameState state) {
+        this.state = state;
+        GameStateEvent e = new GameStateEvent(this, this.state);
+        Bukkit.getPluginManager().callEvent(e);
+    }
 
     /**
      * @return The Game World.
