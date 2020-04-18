@@ -7,6 +7,7 @@ import com.podcrash.api.db.tables.PlayerTable;
 import com.podcrash.api.mc.callback.sources.AwaitTime;
 import com.podcrash.api.mc.damage.DamageApplier;
 import com.podcrash.api.mc.damage.HitDetectionInjector;
+import com.podcrash.api.mc.game.GTeam;
 import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.GameState;
@@ -28,7 +29,10 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scoreboard.Team;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -113,11 +117,25 @@ public class SpigotJoinListener extends ListenerBase {
         GameState state = game.getGameState();
         switch (state) {
             case STARTED:
-                int size = Bukkit.getOnlinePlayers().size();
                 if(game.isSpectating(event.getPlayer()))
                     game.removePlayer(event.getPlayer());
-                if(size == 1)
-                    GameManager.endGame(game);
+                else {
+                    Collection<? extends Player> onlinePlayers = Bukkit.getOnlinePlayers();
+                    List<GTeam> teams = game.getTeams();
+                    if(teams == null) return;
+                    GTeam playerTeam = game.getTeam(event.getPlayer());
+                    if(playerTeam == null) return;
+                    int onlineSize = 0;
+                    for(UUID uuid : playerTeam.getPlayers()) {
+                        Player player = Bukkit.getPlayer(uuid);
+                        if(player == null) continue;
+                        if(player.isOnline())
+                            onlineSize++;
+                    }
+                    System.out.println(onlineSize + " <-- size");
+                    if(onlineSize <= 1)
+                        GameManager.endGame(game);
+                }
                 break;
             case LOBBY:
                 GameManager.removePlayer(event.getPlayer());
