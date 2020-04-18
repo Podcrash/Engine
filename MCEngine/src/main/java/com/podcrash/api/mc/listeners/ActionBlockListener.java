@@ -1,6 +1,12 @@
 package com.podcrash.api.mc.listeners;
 
+import com.abstractpackets.packetwrapper.WrapperPlayServerWorldParticles;
+import com.comphenix.protocol.wrappers.EnumWrappers;
+import com.podcrash.api.mc.effect.particle.ParticleGenerator;
+import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.objects.action.ActionBlock;
+import com.podcrash.api.mc.sound.SoundPlayer;
+import com.podcrash.api.mc.util.PacketUtil;
 import com.podcrash.api.mc.util.VectorUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -63,7 +69,18 @@ public final class ActionBlockListener extends ListenerBase {
                 case TELEPORT:
                     Location teleportLoc = actionVector.vector.toLocation(location.getWorld());
                     VectorUtil.conserveDirection(teleportLoc, player);
+
+                    WrapperPlayServerWorldParticles startEffect = ParticleGenerator.createParticle(
+                            player.getEyeLocation().toVector(), EnumWrappers.Particle.EXPLOSION_NORMAL, 5, 0, 0, 0);
+                    PacketUtil.syncSend(startEffect, GameManager.getGame().getBukkitPlayers());
+                    SoundPlayer.sendSound(player.getLocation(), "mob.endermen.portal", 1f, 63);
+
                     player.teleport(teleportLoc);
+
+                    WrapperPlayServerWorldParticles endEffect = ParticleGenerator.createParticle(
+                            player.getEyeLocation().toVector(), EnumWrappers.Particle.EXPLOSION_NORMAL, 5, 0, 0, 0);
+                    PacketUtil.syncSend(endEffect, GameManager.getGame().getBukkitPlayers());
+                    SoundPlayer.sendSound(player.getLocation(), "mob.endermen.portal", 1f, 63);
                     break;
                 default:
                     return;
