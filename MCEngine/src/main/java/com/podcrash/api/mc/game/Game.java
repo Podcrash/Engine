@@ -14,6 +14,7 @@ import com.podcrash.api.mc.game.scoreboard.GameScoreboard;
 import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.ui.TeamSelectGUI;
 import com.podcrash.api.mc.util.ChatUtil;
+import com.podcrash.api.mc.util.InventoryUtil;
 import com.podcrash.api.mc.util.ItemStackUtil;
 import com.podcrash.api.mc.util.PrefixUtil;
 import com.podcrash.api.plugin.Pluginizer;
@@ -22,6 +23,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Scoreboard;
@@ -971,7 +973,7 @@ public abstract class Game implements IGame {
 
         ItemStackUtil.createItem(inv, 145, 1, 21, ChatUtil.chat("&6&lSelect Kit"));
 
-        //ItemStackUtil.createItem(inv, 421, 1, 23, ChatUtil.chat("&6&lSelect Team"));
+        ItemStackUtil.createItem(inv, 421, 1, 23, ChatUtil.chat("&6&lSelect Team"));
         //ItemStackUtil.createItem(inv, 95, 7, 1, 24, ChatUtil.chat("&7&lLeave Team Queue"));
         ItemStack spectate;
         if (isSpectating(p)) {
