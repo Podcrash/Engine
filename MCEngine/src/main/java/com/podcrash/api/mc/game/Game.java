@@ -8,7 +8,6 @@ import com.podcrash.api.db.tables.MapTable;
 import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.mc.events.game.*;
 import com.podcrash.api.mc.game.lobby.GameLobbyTimer;
-import com.podcrash.api.mc.game.lobby.GameLobbyTip;
 import com.podcrash.api.mc.game.resources.GameResource;
 import com.podcrash.api.mc.game.scoreboard.GameLobbyScoreboard;
 import com.podcrash.api.mc.game.scoreboard.GameScoreboard;
@@ -64,7 +63,6 @@ public abstract class Game implements IGame {
 
     private GameLobbyScoreboard lobbyBoard;
     private GameLobbyTimer lobbyTimer;
-    private GameLobbyTip lobbyTips;
     private Map<Player, Double> playerRewards = new HashMap<>();
 
     private GameMap map;
@@ -88,9 +86,7 @@ public abstract class Game implements IGame {
         //Lobby setup
         this.lobbyBoard = new GameLobbyScoreboard(this);
         this.lobbyTimer = new GameLobbyTimer(this);
-        this.lobbyTips = new GameLobbyTip(this);
         this.lobbyBoard.run();
-        this.lobbyTips.run();
 
         this.participants = new HashSet<>();
         this.spectators = new HashSet<>();
@@ -110,7 +106,6 @@ public abstract class Game implements IGame {
     public abstract TeamSettings getTeamSettings();
     public abstract String getMode();
     public abstract String getPresentableResult();
-    public abstract String getRandomTip();
 
     @Override
     public void increment(TeamEnum team, int score) {
