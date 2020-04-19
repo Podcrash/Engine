@@ -262,6 +262,9 @@ public class GameManager {
         }
         GameStartEvent gamestart = new GameStartEvent(game);
         game.setState(GameState.STARTED);
+        for(Player p : game.getBukkitPlayers()) {
+            p.closeInventory();
+        }
         Pluginizer.getSpigotPlugin().getServer().getPluginManager().callEvent(gamestart);
     }
 
