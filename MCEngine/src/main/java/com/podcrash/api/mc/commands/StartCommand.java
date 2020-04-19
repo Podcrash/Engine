@@ -1,7 +1,7 @@
 package com.podcrash.api.mc.commands;
 
 import com.podcrash.api.mc.game.Game;
-import com.podcrash.api.mc.game.GameLobbyTimer;
+import com.podcrash.api.mc.game.lobby.GameLobbyTimer;
 import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.GameState;
 import org.bukkit.ChatColor;

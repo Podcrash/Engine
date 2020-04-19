@@ -1,6 +1,8 @@
-package com.podcrash.api.mc.game;
+package com.podcrash.api.mc.game.lobby;
 
 import com.podcrash.api.mc.damage.DamageApplier;
+import com.podcrash.api.mc.game.Game;
+import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.sound.SoundPlayer;
 import com.podcrash.api.mc.sound.SoundWrapper;
 import com.podcrash.api.mc.time.TimeHandler;

@@ -7,6 +7,7 @@ import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.MapTable;
 import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.mc.events.game.*;
+import com.podcrash.api.mc.game.lobby.GameLobbyTimer;
 import com.podcrash.api.mc.game.resources.GameResource;
 import com.podcrash.api.mc.game.scoreboard.GameLobbyScoreboard;
 import com.podcrash.api.mc.game.scoreboard.GameScoreboard;
@@ -17,12 +18,10 @@ import com.podcrash.api.mc.util.ItemStackUtil;
 import com.podcrash.api.mc.util.PrefixUtil;
 import com.podcrash.api.plugin.Pluginizer;
 import org.bukkit.*;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Scoreboard;
@@ -62,9 +61,8 @@ public abstract class Game implements IGame {
     private Set<UUID> optIn;                            // Spectators to participate next game.
     private Set<UUID> respawning;                       // Respawning players.
 
-    private GameLobbyScoreboard lobby_board;
-    private GameLobbyTimer lobby_timer;
-
+    private GameLobbyScoreboard lobbyBoard;
+    private GameLobbyTimer lobbyTimer;
     private Map<Player, Double> playerRewards = new HashMap<>();
 
     private GameMap map;
@@ -84,9 +82,11 @@ public abstract class Game implements IGame {
         this.state = GameState.LOBBY;
         this.type = type;
         this.gameResources = new ArrayList<>();
-        this.lobby_board = new GameLobbyScoreboard(this);
-        lobby_board.run();
-        this.lobby_timer = new GameLobbyTimer(this);
+
+        //Lobby setup
+        this.lobbyBoard = new GameLobbyScoreboard(this);
+        this.lobbyTimer = new GameLobbyTimer(this);
+        this.lobbyBoard.run();
 
         this.participants = new HashSet<>();
         this.spectators = new HashSet<>();
@@ -153,7 +153,7 @@ public abstract class Game implements IGame {
      * @return The lobby timer attached to this game.
      */
     public GameLobbyTimer getTimer() {
-        return lobby_timer;
+        return lobbyTimer;
     }
 
     /**
