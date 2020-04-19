@@ -960,15 +960,18 @@ public abstract class Game implements IGame {
             inv.setItem(0, diamondsword);
             TimeHandler.delayTime(1L, () -> {
                 ItemStackUtil.createItem(inv, 276, 1, 1, "&a&lEnable Lobby PVP");
+                createTeamItems(p);
             });
         }
         // Setting items in the player's inventory
         // TODO: Remove the Force Start Item.
         //ItemStackUtil.createItem(inv, 388, 1, 1, "&a&lForce-Start Game &7(Temporary for testing)");
+
         ItemStackUtil.createItem(inv, 355, 1, 9, "&d&lReturn to Lobby");
 
         ItemStackUtil.createItem(inv, 145, 1, 21, ChatUtil.chat("&6&lSelect Kit"));
-        ItemStackUtil.createItem(inv, 421, 1, 23, ChatUtil.chat("&6&lSelect Team"));
+
+        //ItemStackUtil.createItem(inv, 421, 1, 23, ChatUtil.chat("&6&lSelect Team"));
         //ItemStackUtil.createItem(inv, 95, 7, 1, 24, ChatUtil.chat("&7&lLeave Team Queue"));
         ItemStack spectate;
         if (isSpectating(p)) {
@@ -978,6 +981,24 @@ public abstract class Game implements IGame {
             spectate = ItemStackUtil.createItem(374, 1, ChatUtil.chat("&7&lToggle Spectator Mode"));
         }
         inv.setItem(25 - 1, spectate); //-1 because here we are using inventory's method (begins at 0)
+    }
+
+    //TODO make this work for all team colors, not just red and blue
+    private void createTeamItems(Player p) {
+        ItemStack red = new ItemStack(Material.WOOL, 1, DyeColor.RED.getData());
+        ItemStack blue = new ItemStack(Material.WOOL, 1, DyeColor.BLUE.getData());
+
+        ItemMeta meta2 = red.getItemMeta();
+        meta2.setDisplayName(ChatColor.BOLD + ChatColor.RED.toString() + "Switch to Red Team!");
+        red.setItemMeta(meta2);
+
+        ItemMeta meta3 = blue.getItemMeta();
+        meta3.setDisplayName(ChatColor.BOLD + ChatColor.BLUE.toString() + "Switch to Blue Team!");
+        blue.setItemMeta(meta3);
+
+        Inventory inventory = p.getInventory();
+        inventory.setItem(2, red);
+        inventory.setItem(3, blue);
     }
 
     /*

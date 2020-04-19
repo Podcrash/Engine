@@ -143,7 +143,7 @@ public class GameManager {
                             game.getId(),
                             ChatColor.GRAY));
                             \
-             */
+
 
             ItemStack red = new ItemStack(Material.WOOL, 1, DyeColor.RED.getData());
             ItemStack blue = new ItemStack(Material.WOOL, 1, DyeColor.BLUE.getData());
@@ -159,6 +159,7 @@ public class GameManager {
             Inventory inventory = p.getInventory();
             inventory.setItem(1, red);
             inventory.setItem(2, blue);
+            */
             game.add(p);
         }else p.sendMessage(
                 String.format(
