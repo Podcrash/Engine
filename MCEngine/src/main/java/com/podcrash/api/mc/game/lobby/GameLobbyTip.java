@@ -23,7 +23,7 @@ public class GameLobbyTip {
             @Override
             public void task() {
                 String tip = game.getRandomTip();
-                if (tip == null) {
+                if (tip == null || game.getGameState() != GameState.LOBBY) {
                     return;
                 }
                 Bukkit.broadcastMessage(tipHeaderColor + tipHeader + ChatColor.RESET + tip);
