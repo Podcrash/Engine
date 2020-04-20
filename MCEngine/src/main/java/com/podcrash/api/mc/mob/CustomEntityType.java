@@ -13,11 +13,11 @@ public enum CustomEntityType {
 
     SKELETON("Skeleton", 51, EntityType.SKELETON, EntitySkeleton.class, CustomSkeleton.class);
 
-    private String name;
-    private int id;
-    private EntityType entityType;
-    private Class<? extends EntityInsentient> nmsClass;
-    private Class<? extends EntityInsentient> customClass;
+    private final String name;
+    private final int id;
+    private final EntityType entityType;
+    private final Class<? extends EntityInsentient> nmsClass;
+    private final Class<? extends EntityInsentient> customClass;
 
     CustomEntityType(String name, int id, EntityType entityType, Class<? extends EntityInsentient> nmsClass,
                      Class<? extends EntityInsentient> customClass) {

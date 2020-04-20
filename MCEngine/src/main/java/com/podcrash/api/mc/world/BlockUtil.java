@@ -79,7 +79,7 @@ public final class BlockUtil {
             Material.WALL_BANNER
     };
 
-    private static Material[] fenceGates = new Material[]{
+    private static final Material[] fenceGates = new Material[]{
             Material.FENCE_GATE,
             Material.SPRUCE_FENCE_GATE,
             Material.BIRCH_FENCE_GATE,

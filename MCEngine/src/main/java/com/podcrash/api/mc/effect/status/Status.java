@@ -31,11 +31,11 @@ public enum Status {
     GROUND("Crippled", null, false, true, 108),
     BLEED("Bleed", null, false, true, 109);
 
-    private String name;
-    private PotionEffectType potionEffectType;
-    private boolean isVanilla;
-    private boolean isNegative;
-    private int id;
+    private final String name;
+    private final PotionEffectType potionEffectType;
+    private final boolean isVanilla;
+    private final boolean isNegative;
+    private final int id;
 
     Status(String name, PotionEffectType potionEffectType, boolean isVanilla, boolean isNegative, int id) {
         this.name = name;
@@ -75,7 +75,7 @@ public enum Status {
     }
 
     public static Status getStatus(String name) {
-        for (Status status : Arrays.asList(Status.values())) {
+        for (Status status : Status.values()) {
             if (name.equalsIgnoreCase(status.getName())) {
                 return status;
             }
@@ -84,7 +84,7 @@ public enum Status {
     }
 
     public static Status getStatus(int id) {
-        for (Status status : Arrays.asList(Status.values())) {
+        for (Status status : Status.values()) {
             if (id == status.getId()) {
                 return status;
             }

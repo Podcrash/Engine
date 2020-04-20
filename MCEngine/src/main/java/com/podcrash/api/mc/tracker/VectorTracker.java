@@ -18,9 +18,9 @@ import java.util.List;
 import java.util.Map;
 
 public final class VectorTracker implements IPlayerTrack<VectorCoordinate> {
-    private JavaPlugin plugin;
+    private final JavaPlugin plugin;
     private PacketListener packetListener;
-    private Map<String, List<VectorCoordinate>> lastVectors = new HashMap<>();
+    private final Map<String, List<VectorCoordinate>> lastVectors = new HashMap<>();
 
     private List<VectorCoordinate> getCoordinates(Player player) {
         return lastVectors.get(player.getName());

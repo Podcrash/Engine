@@ -18,8 +18,12 @@ import java.util.Objects;
  * Quite literally an immutable version of Vector + Location with other stuff.
  */
 public class Coordinate {
-    private double x, y, z, yaw, pitch;
-    private boolean ground;
+    private final double x;
+    private final double y;
+    private final double z;
+    private final double yaw;
+    private final double pitch;
+    private final boolean ground;
 
     public static Coordinate fromLocation(Location location) {
         return new Coordinate(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());

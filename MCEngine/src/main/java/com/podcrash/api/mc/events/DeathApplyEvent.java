@@ -24,12 +24,12 @@ import java.util.*;
 public class DeathApplyEvent extends Event implements Cancellable {
     //this is cancellable because maybe cancel death later??
     private static final HandlerList handlers = new HandlerList();
-    private Player player;
-    private LivingEntity attacker;
+    private final Player player;
+    private final LivingEntity attacker;
 
     private Damage lastAttackerDamage;
-    private Damage damage;
-    private Deque<Damage> history;
+    private final Damage damage;
+    private final Deque<Damage> history;
     private boolean cancel;
 
 

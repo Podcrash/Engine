@@ -197,9 +197,7 @@ public class MapTable extends MongoBaseTable {
     public List<String> getWorlds(String mode) {
         final List<String> worlds = new ArrayList<>();
         Bson select = Projections.fields(Projections.include("name"), Projections.excludeId());
-        Block<BaseMap> addToList = document -> {
-            worlds.add(document.getName());
-        };
+        Block<BaseMap> addToList = document -> worlds.add(document.getName());
         CountDownLatch latch = new CountDownLatch(1);
         getCollection(BaseMap.class)
             .find(Filters.eq("gamemode", mode.toLowerCase()))

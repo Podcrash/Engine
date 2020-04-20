@@ -20,8 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GameDamagerConverterListener extends ListenerBase {
-    private static Map<Integer, Float> arrowDamageMap = new HashMap<>();
-    private Map<String, Long> delay = new HashMap<>();
+    private static final Map<Integer, Float> arrowDamageMap = new HashMap<>();
+    private final Map<String, Long> delay = new HashMap<>();
 
     public GameDamagerConverterListener(JavaPlugin plugin) {
         super(plugin);

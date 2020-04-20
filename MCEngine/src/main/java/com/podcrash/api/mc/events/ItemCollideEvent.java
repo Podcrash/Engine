@@ -9,8 +9,8 @@ import org.bukkit.event.HandlerList;
 public class ItemCollideEvent extends Event implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
 
-    private LivingEntity collisionVictim;
-    private Item item;
+    private final LivingEntity collisionVictim;
+    private final Item item;
     private boolean cancel;
 
     public ItemCollideEvent(LivingEntity collisionVictim, Item item) {

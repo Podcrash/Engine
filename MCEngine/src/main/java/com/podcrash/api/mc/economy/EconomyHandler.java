@@ -10,7 +10,6 @@ import com.podcrash.api.mc.events.econ.*;
 import com.podcrash.api.mc.util.ChatUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.PluginManager;
 
 import java.util.HashMap;
@@ -21,12 +20,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class EconomyHandler implements IEconomyHandler {
-    private EconomyTable eco;
-    private PlayerTable players;
+public class EconomyHandler {
+    private final EconomyTable eco;
+    private final PlayerTable players;
 
     //this is used to track the orders as it is passing from event to event.
-    private Map<String, BuySuccessEvent> currentPlayerOrder;
+    private final Map<String, BuySuccessEvent> currentPlayerOrder;
 
     /**
      * Set up some of the variables
@@ -99,19 +98,20 @@ public class EconomyHandler implements IEconomyHandler {
         if(success == null) return false;
         return success.getItem().equalsIgnoreCase(item);
     }
-    @Override
+
     public void confirm(Player player, String item) {
         item = ChatUtil.strip(item);
         BuySuccessEvent success = currentPlayerOrder.get(player.getName());
-        if(success == null) return;
-        if(!success.getItem().equalsIgnoreCase(item)) return;
+        if(success == null)
+            return;
+        if(!success.getItem().equalsIgnoreCase(item))
+            return;
         BuyConfirmEvent confirm  = new BuyConfirmEvent(success);
         Bukkit.getPluginManager().callEvent(confirm);
         pay(player, -confirm.getCost());
         currentPlayerOrder.remove(player.getName());
     }
 
-    @Override
     public void cancel(Player player, String item) {
         BuySuccessEvent success = currentPlayerOrder.get(player.getName());
         if(success == null) return;

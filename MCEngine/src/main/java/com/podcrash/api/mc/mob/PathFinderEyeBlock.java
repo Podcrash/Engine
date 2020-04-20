@@ -13,8 +13,8 @@ import java.util.HashSet;
  * This is used for illusion
  */
 public class PathFinderEyeBlock extends PathfinderGoal {
-    private Player player;
-    private EntityCreature entitycreature;
+    private final Player player;
+    private final EntityCreature entitycreature;
 
     public PathFinderEyeBlock(Player player, EntityCreature entitycreature) {
         this.player = player;

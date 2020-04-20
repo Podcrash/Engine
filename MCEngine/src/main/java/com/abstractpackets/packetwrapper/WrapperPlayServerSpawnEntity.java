@@ -65,7 +65,7 @@ public class WrapperPlayServerSpawnEntity extends AbstractPacket {
         /**
          * The singleton instance. Can also be retrieved from the parent class.
          */
-        private static ObjectTypes INSTANCE = new ObjectTypes();
+        private static final ObjectTypes INSTANCE = new ObjectTypes();
 
         /**
          * Retrieve an instance of the object types enum.

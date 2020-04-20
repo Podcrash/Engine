@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class HealthBarResource extends GameResource {
     private final char heart = '\u2764';
-    private Map<String, Hologram> players;
+    private final Map<String, Hologram> players;
     //health objective
     private final Objective objective;
     public HealthBarResource(int gameID) {

@@ -7,7 +7,7 @@ public enum ItemRule {
     PICKUP_IGNORE(0),
     PICKUP_TARGET(1);
 
-    private int id;
+    private final int id;
     ItemRule(int id) {
         this.id = id;
     }

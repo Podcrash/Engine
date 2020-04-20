@@ -19,16 +19,16 @@ import java.util.Set;
 public class BoundingBox {
 
     //min and max points of hit box
-    private Coordinate max;
-    private Coordinate min;
+    private final Coordinate max;
+    private final Coordinate min;
 
     private Coordinate[] allBounds;
 
     private static final Coordinate[] NORMALS;
-    private Set<Coordinate> normals = new HashSet<>();
+    private final Set<Coordinate> normals = new HashSet<>();
 
     // is there a more intelligent way of doing this
-    private static int[][] planes = new int[][]{
+    private static final int[][] planes = new int[][]{
         //xz
         {0, 2, 4},
         {6, 2, 7},

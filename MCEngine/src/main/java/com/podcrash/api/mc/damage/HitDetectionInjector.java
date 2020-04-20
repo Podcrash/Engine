@@ -2,17 +2,17 @@ package com.podcrash.api.mc.damage;
 
 import com.abstractpackets.packetwrapper.WrapperPlayClientUseEntity;
 import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLib;
 import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.*;
+import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.events.PacketListener;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.podcrash.api.mc.effect.status.StatusApplier;
 import com.podcrash.api.plugin.Pluginizer;
-
 import com.podcrash.api.plugin.PodcrashSpigot;
 import net.minecraft.server.v1_8_R3.EntityLiving;
 import net.minecraft.server.v1_8_R3.GenericAttributes;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
@@ -29,12 +29,12 @@ import java.util.HashMap;
  * This will remove the default Bukkit system and use our own.
  */
 public final class HitDetectionInjector {
-    private static HashMap<String, HitDetectionInjector> injectors = new HashMap<>();
+    private static final HashMap<String, HitDetectionInjector> injectors = new HashMap<>();
     public static long delay = 400; //this is in milliseconds to ticks
-    private PacketListener listener;
-    private HashMap<String, Long> delays = new HashMap<>();
-    private HashMap<String, Long> deathDelay = new HashMap<>();
-    private Player player;
+    private final PacketListener listener;
+    private final HashMap<String, Long> delays = new HashMap<>();
+    private final HashMap<String, Long> deathDelay = new HashMap<>();
+    private final Player player;
 
     public static HitDetectionInjector getHitDetection(Player p) {
         return injectors.get(p.getName());

@@ -21,7 +21,7 @@ import java.util.*;
 
 public final class ActionBlockListener extends ListenerBase {
     private static final Map<String, Long> cooldown = new HashMap<>();
-    private static Map<Vector, ActionVector> blocks = new LinkedHashMap<>();
+    private static final Map<Vector, ActionVector> blocks = new LinkedHashMap<>();
 
     public ActionBlockListener(JavaPlugin plugin) {
         super(plugin);
@@ -90,8 +90,8 @@ public final class ActionBlockListener extends ListenerBase {
     }
 
     private static class ActionVector {
-        private Vector vector;
-        private ActionBlock.Type actionType;
+        private final Vector vector;
+        private final ActionBlock.Type actionType;
 
         public ActionVector(Vector vector, ActionBlock.Type actionType) {
             this.vector = vector;

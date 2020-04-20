@@ -7,9 +7,9 @@ import org.bukkit.entity.Player;
 import java.util.HashMap;
 
 public class PlayerCache {
-    private static HashMap<String, PlayerCache> cache = new HashMap<>();
+    private static final HashMap<String, PlayerCache> cache = new HashMap<>();
     private WrappedChatComponent component;
-    private Player player;
+    private final Player player;
     private String displayName;
     private PlayerCache(String displayName) {
         this.displayName = displayName;

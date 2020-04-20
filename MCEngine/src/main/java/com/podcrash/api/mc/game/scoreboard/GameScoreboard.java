@@ -17,7 +17,7 @@ import java.util.List;
 
 public abstract class GameScoreboard extends CustomScoreboard {
 
-    private int gameId;
+    private final int gameId;
 
     /**
      * Constructor for the Game Scoreboard.

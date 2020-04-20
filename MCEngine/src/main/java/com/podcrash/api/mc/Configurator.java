@@ -24,11 +24,11 @@ import java.util.function.Consumer;
 public class Configurator {
     private static final int MAX_THREADS = 5;
     private static final ExecutorService executor = Executors.newFixedThreadPool(MAX_THREADS);
-    private JavaPlugin plugin;
+    private final JavaPlugin plugin;
 
     private File configFile;
     private FileConfiguration config;
-    private String fileName;
+    private final String fileName;
 
     private File getFileFromFolder(File folder, String fileName) {
         if(folder.isDirectory()) {

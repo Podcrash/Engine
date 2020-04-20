@@ -16,8 +16,8 @@ public abstract class ItemObjective implements IObjective {
     private final Vector vectorPlus1;
     private final Vector vector;
 
-    private Material baseMaterial;
-    private Material blockMaterial;
+    private final Material baseMaterial;
+    private final Material blockMaterial;
     private boolean canBeAcquired;
     private Item item;
     private Player player;

@@ -11,8 +11,8 @@ import com.podcrash.api.mc.time.resources.TimeResource;
  * @param <T> the callback action that will return.
  */
 public abstract class CallbackAction<T extends CallbackAction> implements TimeResource {
-    private long delay;
-    private long ticks;
+    private final long delay;
+    private final long ticks;
     private CallbackListener whileRun;
     private CallbackListener listener;
     private CallbackBoolean callbackBoolean;

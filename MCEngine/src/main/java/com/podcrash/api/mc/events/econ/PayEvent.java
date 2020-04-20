@@ -8,8 +8,8 @@ import org.bukkit.event.HandlerList;
 public class PayEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
 
-    private Player player;
-    private double moneys;
+    private final Player player;
+    private final double moneys;
 
     public PayEvent(Player player, double moneys) {
         this.player = player;
@@ -18,7 +18,7 @@ public class PayEvent extends Event {
 
     /**
      * Note, this returns the balance before the money is given
-     * @return
+     * @return the balance of the player associated with the event
      */
     public double getBalance() {
         return Pluginizer.getSpigotPlugin().getEconomyHandler().getMoney(player);

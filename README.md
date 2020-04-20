@@ -9,7 +9,7 @@ MONGO_PASSWORD=?
 
 
 ## Code Conventions:
-Braces: OTBR
+Braces: OTBR (including no brace on single line if, but do break the line)
 
 Indents: 4 space tab, not \t
 
@@ -18,7 +18,7 @@ Spacing: space in between the control and bracket i.e. if ()
 Naming: classes UpperCamelCase, variables and methods lowerCamelCase. Constants CAPITALS_WITH_UNDERSCORES, packages
  all lowercase.
 
-Documentation: standard javadocs, no need for package-info's
+Documentation: standard javadocs with proper descriptions + resolution, no need for package-info's
 
 
 ## READ THIS:

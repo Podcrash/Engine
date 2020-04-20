@@ -6,9 +6,9 @@ import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
 public class Flag extends WinObjective {
-    private static ObjectiveType otype = ObjectiveType.CAPTURE_POINT;
+    private static final ObjectiveType otype = ObjectiveType.CAPTURE_POINT;
     private Location locationNow;
-    private Color color;
+    private final Color color;
 
     public Flag(Vector vector, Color color) {
         super(vector);

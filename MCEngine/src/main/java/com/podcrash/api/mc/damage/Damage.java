@@ -21,7 +21,7 @@ public final class Damage {
 
     private final boolean applyKnockback;
 
-    private long time;
+    private final long time;
 
     /**
      * Dataclass for processing in the

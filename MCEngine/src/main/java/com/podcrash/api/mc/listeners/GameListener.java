@@ -54,7 +54,7 @@ import java.util.Map;
  * @see GameManager
  */
 public class GameListener extends ListenerBase {
-    private List<Player> deadPeople = new ArrayList<>();
+    private final List<Player> deadPeople = new ArrayList<>();
 
     public GameListener(JavaPlugin plugin) {
         super(plugin);

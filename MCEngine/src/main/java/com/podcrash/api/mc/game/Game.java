@@ -44,32 +44,32 @@ import java.util.function.Consumer;
 
 public abstract class Game implements IGame {
 
-    private int id;
-    private String name;
+    private final int id;
+    private final String name;
     private List<GTeam> teams;
-    private volatile boolean isLoadedMap;
+    private final boolean isLoadedMap;
     private GameState state;                            // TODO: May replace this with an Enum with a more specific state for the game.
     protected String gameWorldName;
-    private List<GameResource> gameResources;
+    private final List<GameResource> gameResources;
 
     // TODO: Everything in this section is related to the mode or type. To be modified later.
-    private GameType type;                              // TODO: Mode - this may get replaced/removed later.
+    private final GameType type;                              // TODO: Mode - this may get replaced/removed later.
     private String primary_color;
     private String secondary_color;
 
-    private Set<UUID> participants;                     // Participating players only.
-    private Set<UUID> spectators;                       // Spectating players only.
-    private Set<UUID> optIn;                            // Spectators to participate next game.
-    private Set<UUID> respawning;                       // Respawning players.
+    private final Set<UUID> participants;                     // Participating players only.
+    private final Set<UUID> spectators;                       // Spectating players only.
+    private final Set<UUID> optIn;                            // Spectators to participate next game.
+    private final Set<UUID> respawning;                       // Respawning players.
 
-    private GameLobbyScoreboard lobby_board;
-    private GameLobbyTimer lobby_timer;
+    private final GameLobbyScoreboard lobby_board;
+    private final GameLobbyTimer lobby_timer;
 
-    private Map<Player, Double> playerRewards = new HashMap<>();
+    private final Map<Player, Double> playerRewards = new HashMap<>();
 
     private GameMap map;
 
-    private Set<Player> isLobbyPVPing;
+    private final Set<Player> isLobbyPVPing;
     /**
      * Constructor for the game.
      * @param id The ID of the game.
@@ -227,9 +227,7 @@ public abstract class Game implements IGame {
      * @param p - The player
      */
     public void removePlayerLobbyPVPing(Player p) {
-        if (isLobbyPVPing.contains(p)) {
-            isLobbyPVPing.remove(p);
-        }
+        isLobbyPVPing.remove(p);
     }
 
     /**
@@ -237,9 +235,7 @@ public abstract class Game implements IGame {
      * @param p - The player
      */
     public void addPlayerLobbyPVPing(Player p) {
-        if (!isLobbyPVPing.contains(p)) {
-            isLobbyPVPing.add(p);
-        }
+        isLobbyPVPing.add(p);
     }
 
     /**

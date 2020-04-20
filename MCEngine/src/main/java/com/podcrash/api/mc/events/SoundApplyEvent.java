@@ -16,8 +16,8 @@ import java.beans.EventHandler;
 public class SoundApplyEvent extends Event implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
 
-    private LivingEntity victim;
-    private LivingEntity attacker;
+    private final LivingEntity victim;
+    private final LivingEntity attacker;
     private SoundWrapper sound;
     private boolean cancel;
 

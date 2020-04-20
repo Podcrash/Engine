@@ -2,7 +2,6 @@ package com.podcrash.api.mc.effect.particle;
 
 import com.abstractpackets.packetwrapper.AbstractPacket;
 import com.abstractpackets.packetwrapper.ILocationPacket;
-import com.abstractpackets.packetwrapper.WrapperPlayServerWorldParticles;
 import com.podcrash.api.mc.sound.SoundPlayer;
 import com.podcrash.api.mc.sound.SoundWrapper;
 import com.podcrash.api.mc.util.PacketUtil;
@@ -19,7 +18,7 @@ public class EntityParticleWrapper {
     private final ILocationPacket packet;
     private final SoundWrapper sound;
     private boolean cancel;
-    private Player[] players;
+    private final Player[] players;
 
     public EntityParticleWrapper(Entity entity, ILocationPacket packet, SoundWrapper sound, List<Player> players) {
         this(entity, packet, sound, players.toArray(players.toArray(new Player[players.size()])));

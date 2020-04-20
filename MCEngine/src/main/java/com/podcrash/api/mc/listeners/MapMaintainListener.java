@@ -46,7 +46,7 @@ import java.util.*;
  * Prevent dumb things from happening
  */
 public class MapMaintainListener extends ListenerBase {
-    private Map<String, Long> lastHit;
+    private final Map<String, Long> lastHit;
     private final Map<String, Boolean> checkCache;
 
 

@@ -12,7 +12,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import java.lang.reflect.Field;
 
 public class CustomSkeleton extends EntitySkeleton {
-    private Player player;
+    private final Player player;
 
     public CustomSkeleton(net.minecraft.server.v1_8_R3.World world) {
         super(world);

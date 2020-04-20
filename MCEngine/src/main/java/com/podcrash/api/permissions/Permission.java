@@ -1,24 +1,23 @@
 package com.podcrash.api.permissions;
 
 import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.bukkit.permissions.Permissible;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public enum Perm {
+public enum Permission {
     DEVELOPER("champions.developer", 0),
     ANTICHEAT("champions.anticheat", 1),
     HOST("champions.host", 2),
     BUILD("champions.can.break.map", 8),
     MUTE("champions.mute", 10);
 
-    private String permName;
-    private int dbId;
+    private final String permName;
+    private final int dbId;
 
-    Perm(String permName, int dbId) {
+    Permission(String permName, int dbId) {
         this.permName = permName;
         this.dbId = dbId;
     }
@@ -37,14 +36,14 @@ public enum Perm {
         return s.hasPermission(this.getPermName());
     }
 
-    public static Perm getBy(String name) {
-        for(Perm perm : Perm.values())
+    public static Permission getBy(String name) {
+        for(Permission perm : Permission.values())
             if(perm.name().equalsIgnoreCase(name))
                 return perm;
         return null;
     }
-    public static Perm getBy(int id) {
-        for(Perm perm : Perm.values())
+    public static Permission getBy(int id) {
+        for(Permission perm : Permission.values())
             if(perm.getDbId() == id)
                 return perm;
         return null;
@@ -52,18 +51,22 @@ public enum Perm {
 
     /**
      * Check if the permission name is valid
-     * @param name
-     * @return
+     * @param name The permission to check if exists
+     * @return if the permission exists
      */
     public static boolean contains(String name) {
-        for(Perm perm : Perm.values())
+        for(Permission perm : Permission.values())
             if(perm.getPermName().equalsIgnoreCase(name))
                 return true;
         return false;
     }
 
-    //we might want to store this in something like a redis instance
+
+    /**
+     * @return The list of bukkit permissions this permission contains
+     */
     public List<String> getPermissions() {
+        //we might want to store this in something like a redis instance
         switch (this) {
             case DEVELOPER:
                 return Arrays.asList(
@@ -71,10 +74,10 @@ public enum Perm {
                     "plugman.admin",
                     "minecraft.command.*");
             case ANTICHEAT:
-                return Arrays.asList(
+                return Collections.singletonList(
                         "champions.anticheat");
             case BUILD:
-                return Arrays.asList(
+                return Collections.singletonList(
                         "champions.can.break.map");
             case HOST:
                 return Arrays.asList(
@@ -82,7 +85,7 @@ public enum Perm {
                         "minecraft.command.whitelist",
                         "minecraft.command.ban");
             case MUTE:
-                return Arrays.asList(
+                return Collections.singletonList(
                         "champions.mute");
             default:
                 return Collections.emptyList();

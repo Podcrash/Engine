@@ -2,6 +2,7 @@ package com.podcrash.api.plugin;
 
 import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.db.pojos.Rank;
+import com.podcrash.api.db.redis.Communicator;
 import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.MapTable;
 import com.podcrash.api.db.tables.RanksTable;
@@ -9,38 +10,34 @@ import com.podcrash.api.mc.Configurator;
 import com.podcrash.api.mc.commands.*;
 import com.podcrash.api.mc.damage.DamageQueue;
 import com.podcrash.api.mc.economy.EconomyHandler;
-import com.podcrash.api.mc.economy.IEconomyHandler;
 import com.podcrash.api.mc.listeners.*;
 import com.podcrash.api.mc.tracker.CoordinateTracker;
 import com.podcrash.api.mc.tracker.Tracker;
 import com.podcrash.api.mc.tracker.VectorTracker;
 import com.podcrash.api.mc.world.SpawnWorldSetter;
 import com.podcrash.api.mc.world.WorldManager;
-import com.podcrash.api.db.redis.Communicator;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.spigotmc.SpigotConfig;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
 
-public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
+public class PodcrashSpigot extends PodcrashPlugin {
     private static PodcrashSpigot INSTANCE;
     public static PodcrashSpigot getInstance() {
         return INSTANCE;
     }
 
-    private Map<UUID, PermissionAttachment> playerPermissions = new HashMap<>();
+    private final Map<UUID, PermissionAttachment> playerPermissions = new HashMap<>();
 
-    private ExecutorService service = Executors.newCachedThreadPool();
+    private final ExecutorService service = Executors.newCachedThreadPool();
     private int dQInt;
 
     private List<Tracker> trackers;
@@ -49,7 +46,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
 
     private final Map<String, Configurator> configurators = new HashMap<>();
 
-    private IEconomyHandler economyHandler;
+    private EconomyHandler economyHandler;
     private SpawnWorldSetter worldSetter;
 
     @Override
@@ -69,11 +66,11 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
     }
 
     /**
-     * This method is used to start setting up for the game servers
+     * This method is used to start setting up the game servers
      */
     public void gameStart() {
         getLogger().info("This Server is a game lobby with code" + Communicator.getCode());
-        Future future = CompletableFuture.allOf(
+        Future<Void> future = CompletableFuture.allOf(
                 setKnockback(),
                 registerGameListeners()
         );
@@ -113,7 +110,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
         getLogger().info("Starting PodcrashSpigot!");
         Pluginizer.setInstance(this);
 
-        Future future = CompletableFuture.allOf(
+        Future<Void> future = CompletableFuture.allOf(
                 enableWrap(),
                 registerCommands(),
                 registerListeners());
@@ -252,7 +249,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
                 configurators.values().forEach(Configurator::reloadConfig));
     }
 
-    public IEconomyHandler getEconomyHandler() {
+    public EconomyHandler getEconomyHandler() {
         return economyHandler;
     }
     public SpawnWorldSetter getWorldSetter() {

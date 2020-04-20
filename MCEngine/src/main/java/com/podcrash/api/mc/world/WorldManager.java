@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class WorldManager {
     private static volatile WorldManager worldManager;
-    private HashSet<String> worlds = new HashSet<>();
+    private final HashSet<String> worlds = new HashSet<>();
 
     /**
      * Load the world, then return if it was actually loaded.
@@ -51,7 +51,7 @@ public class WorldManager {
             log(String.format("%s does not exist!", worldName));
         } else {
             log("Copying world " + worldName);
-            String copiedName = worldName + Long.toString(System.currentTimeMillis());
+            String copiedName = worldName + System.currentTimeMillis();
             String dirName = String.format("%s%s%s", Bukkit.getWorldContainer().toString(), File.separator, copiedName);
             File world2File = new File(dirName);
             if (!world2File.exists()) world2File.mkdir();

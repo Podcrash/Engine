@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
  * @see me.raindance.champions.listeners.maintainers.GameListener#onDeath(com.podcrash.api.mc.events.DeathApplyEvent)
  */
 public class IneptStatus extends CustomStatus {
-    private Game game;
+    private final Game game;
     public IneptStatus(Player player) {
         super(player, Status.INEPTITUDE);
         game = GameManager.getGame();

@@ -33,7 +33,7 @@ public final class VectorUtil {
         a = a.clone().normalize().setY(0);
         b = b.clone().normalize().setY(0);
         float angle = a.angle(b);
-        return Math.toDegrees((double) angle) <= degreesBased180;
+        return Math.toDegrees(angle) <= degreesBased180;
     }
 
     public static void conserveDirection(Location location, Entity entity) {

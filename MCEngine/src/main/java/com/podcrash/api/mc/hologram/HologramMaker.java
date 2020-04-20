@@ -7,8 +7,8 @@ import java.util.List;
 
 public class HologramMaker implements Runnable {
     //The below is used maybe if there are chunk errors
-    private static List<Hologram> holograms = new ArrayList<>();
-    private static List<HologramUpdateWrapper> hologramUpdaters = new ArrayList<>();
+    private static final List<Hologram> holograms = new ArrayList<>();
+    private static final List<HologramUpdateWrapper> hologramUpdaters = new ArrayList<>();
     private HologramMaker() {
 
     }

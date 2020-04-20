@@ -7,8 +7,8 @@ import org.bukkit.event.HandlerList;
 
 public class GameStateEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
-    private Game game;
-    private GameState state;
+    private final Game game;
+    private final GameState state;
 
     public GameStateEvent(Game game, GameState state) {
         this.game = game;

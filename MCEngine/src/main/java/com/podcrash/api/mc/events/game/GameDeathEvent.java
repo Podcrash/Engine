@@ -8,9 +8,9 @@ import org.bukkit.event.HandlerList;
 
 public class GameDeathEvent extends GamePlayerEvent implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
-    private LivingEntity killer;
+    private final LivingEntity killer;
     private boolean cancelled;
-    private String causesMessage;
+    private final String causesMessage;
 
     public GameDeathEvent(Game game, Player who, LivingEntity killer, String message, String causesMessage) {
         super(game, who, message);

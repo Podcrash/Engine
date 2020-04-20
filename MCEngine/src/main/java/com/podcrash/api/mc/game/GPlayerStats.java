@@ -13,8 +13,8 @@ import java.util.UUID;
 
 public abstract class GPlayerStats {
 
-    private UUID uuid;
-    private String name;
+    private final UUID uuid;
+    private final String name;
 
     /**
      * Constructor for PlayerStats.

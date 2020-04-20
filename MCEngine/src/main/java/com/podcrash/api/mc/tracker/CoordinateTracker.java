@@ -18,7 +18,7 @@ import java.util.List;
  * by the player.
  */
 public final class CoordinateTracker implements IPlayerTrack<Coordinate> {
-    private JavaPlugin plugin;
+    private final JavaPlugin plugin;
     private static final List<PacketType> PACKET_TYPES = Arrays.asList(
             PacketType.Play.Client.FLYING,
             PacketType.Play.Client.POSITION_LOOK,
@@ -27,8 +27,8 @@ public final class CoordinateTracker implements IPlayerTrack<Coordinate> {
             PacketType.Play.Client.USE_ENTITY);
 
     private PacketListener listener;
-    private volatile Map<String, List<TimeCoordinate>> lastTimes;
-    private volatile Map<String, Long> lastUsePackets;
+    private final Map<String, List<TimeCoordinate>> lastTimes;
+    private final Map<String, Long> lastUsePackets;
     public CoordinateTracker(JavaPlugin plugin) {
         this.plugin = plugin;
         this.lastTimes = new HashMap<>();
@@ -214,8 +214,8 @@ public final class CoordinateTracker implements IPlayerTrack<Coordinate> {
     }
 
     private static class TimeCoordinate  {
-        private long time;
-        private Coordinate coordinate;
+        private final long time;
+        private final Coordinate coordinate;
 
         private TimeCoordinate(long time, Coordinate coordinate) {
             this.time = time;

@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public final class TimeHandler {
-    private static HashMap<TimeResource, List<Integer>> timeRunMap = new HashMap<>();
+    private static final HashMap<TimeResource, List<Integer>> timeRunMap = new HashMap<>();
 
     private TimeHandler() {
 

@@ -4,7 +4,7 @@ import com.podcrash.api.mc.game.Game;
 import org.bukkit.event.HandlerList;
 
 public class GameMapChangeEvent extends GameEvent {
-    private String map;
+    private final String map;
     private static final HandlerList handlers = new HandlerList();
     public GameMapChangeEvent(Game game, String map) {
         super(game, "Map changed");

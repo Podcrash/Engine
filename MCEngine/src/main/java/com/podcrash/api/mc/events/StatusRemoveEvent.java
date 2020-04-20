@@ -11,8 +11,8 @@ public class StatusRemoveEvent extends Event implements Cancellable {
 
     private boolean cancelled;
 
-    private LivingEntity livingEntity;
-    private Status status;
+    private final LivingEntity livingEntity;
+    private final Status status;
 
     public StatusRemoveEvent(LivingEntity entity, Status status) {
         this.livingEntity = entity;

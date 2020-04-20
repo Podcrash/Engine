@@ -8,7 +8,8 @@ import org.bukkit.util.Vector;
 public class RayTracer {
     public static double DEFAULT_ESTIMATE = 0.12;
     //TODO: remove all the classes that use a bukkit Vector
-    private Vector origin, direction;
+    private final Vector origin;
+    private Vector direction;
 
     private Coordinate original, dir;
 
@@ -101,9 +102,7 @@ public class RayTracer {
 
         if(compare(minX, x, maxX)) {
             if(compare(minY, y, maxY)) {
-                if(compare(minZ, z, maxZ)) {
-                    return true;
-                }
+                return compare(minZ, z, maxZ);
             }
         }
         return false;

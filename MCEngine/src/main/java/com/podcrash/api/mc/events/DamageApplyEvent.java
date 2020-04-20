@@ -24,20 +24,20 @@ public class DamageApplyEvent extends Event implements Cancellable {
     private boolean cancelled;
     private boolean modified;
 
-    private LivingEntity victim;
-    private LivingEntity attacker;
+    private final LivingEntity victim;
+    private final LivingEntity attacker;
 
     private double damage;
     private double changeXP;
     private double armorValueVictim;
 
-    private Cause cause;
-    private Arrow arrow;
-    private List<DamageSource> sources;
+    private final Cause cause;
+    private final Arrow arrow;
+    private final List<DamageSource> sources;
 
     private boolean doKnockback;
     //velocity multipliers that are multiplied onto the kb vectors
-    private double[] velocityModifier;
+    private final double[] velocityModifier;
 
     /**
      * Dataclass for processing in the

@@ -35,7 +35,7 @@ public enum TeamEnum {
         this.name = name;
         this.data = data;
         this.byteData = byteData;
-        this.intData = (int) byteData;
+        this.intData = byteData;
         this.chatColor = chatColor;
         this.scoreboardColor = scoreboardColor;
         this.dyeColor = dyeColor;

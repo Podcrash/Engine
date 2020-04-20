@@ -13,9 +13,9 @@ import org.bukkit.event.HandlerList;
 public class DamageEvent extends Event implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
 
-    private LivingEntity victim;
-    private double damage;
-    private Cause cause;
+    private final LivingEntity victim;
+    private final double damage;
+    private final Cause cause;
 
     private boolean cancel;
 

@@ -1,13 +1,14 @@
 package com.podcrash.api.mc.game;
 
-import com.comphenix.protocol.PacketType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -23,9 +24,9 @@ public class GTeam {
     private int capacity;
     private int min;
     private int max;
-    private List<UUID> players;
+    private final List<UUID> players;
     private List<Location> spawnpoints;
-    private AtomicInteger score;
+    private final AtomicInteger score;
 
     /**
      * Constructor for a Team.

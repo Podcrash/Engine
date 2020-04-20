@@ -37,7 +37,7 @@ import java.util.*;
 public final class Disguiser {
     private final static HashMap<Integer, Disguise> disguises = new HashMap<>();
     private final static HashMap<Integer, Disguise> seenDisguises = new HashMap<>();
-    private ProtocolManager protocolManager;
+    private final ProtocolManager protocolManager;
 
     public Disguiser() {
 

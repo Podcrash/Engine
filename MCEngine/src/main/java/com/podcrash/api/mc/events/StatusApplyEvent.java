@@ -12,8 +12,8 @@ public class StatusApplyEvent extends Event implements Cancellable {
     private boolean cancelled;
     private boolean modified;
 
-    private LivingEntity livingEntity;
-    private Status status;
+    private final LivingEntity livingEntity;
+    private final Status status;
     private float duration;
     private int potency;
 

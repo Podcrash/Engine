@@ -152,7 +152,7 @@ public class MobManager {
 
         World world = spawnLoc.getWorld();
 
-        Entity entity = (Entity) world.spawnEntity(spawnLoc, mobType);
+        Entity entity = world.spawnEntity(spawnLoc, mobType);
         ((LivingEntity) entity).setCanPickupItems(false);
         ((LivingEntity) entity).setRemoveWhenFarAway(false);
 

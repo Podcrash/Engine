@@ -22,8 +22,8 @@ import java.util.function.Consumer;
  * TODO: Rewrite
  */
 public class StatusApplier {
-    private Player player;
-    private static Map<String, StatusApplier> appliers = new HashMap<>();
+    private final Player player;
+    private static final Map<String, StatusApplier> appliers = new HashMap<>();
     private long cloaked;
     private long marked;
     private long silenced;

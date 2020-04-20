@@ -36,9 +36,9 @@ public final class CapturePoint extends WinObjective {
     private final byte[][] blocks;
     private boolean isFull;
     private int progress;
-    private int[][] captureStyle;
+    private final int[][] captureStyle;
 
-    private Game game;
+    private final Game game;
     /**
      * Constructor for setting up a capture point
      * @param name Name of the capture point
@@ -207,7 +207,7 @@ public final class CapturePoint extends WinObjective {
                 //Assure it once more because of restoring cap naturally (the previous one was b/c of player)
                 assured = assure(color);
                 continue;
-            };
+            }
             capturing = capture(color);
             if (capturing != null) return capturing;
         }

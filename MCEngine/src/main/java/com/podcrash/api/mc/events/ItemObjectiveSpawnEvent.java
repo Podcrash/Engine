@@ -7,7 +7,7 @@ import org.bukkit.event.HandlerList;
 
 public class ItemObjectiveSpawnEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
-    private ItemObjective objective;
+    private final ItemObjective objective;
 
     public ItemObjectiveSpawnEvent(ItemObjective objective) {
         this.objective = objective;

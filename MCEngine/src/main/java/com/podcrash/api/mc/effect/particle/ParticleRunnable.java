@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ParticleRunnable implements TimeResource {
     static ParticleRunnable particleRunnable;
-    private List<EntityParticleWrapper> wrappers = new ArrayList<>();
+    private final List<EntityParticleWrapper> wrappers = new ArrayList<>();
     private boolean active = false;
     private ParticleRunnable() {
         particleRunnable = this;

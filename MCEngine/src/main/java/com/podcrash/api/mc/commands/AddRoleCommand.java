@@ -5,17 +5,18 @@ import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.RanksTable;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-public class AddRoleCommand extends CommandBase{
+public class AddRoleCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if(!sender.isOp()) {
+        if (!sender.isOp()) {
             sender.sendMessage(String.format("%sInvicta> %sYou have insufficient permissions to use that command.", ChatColor.BLUE, ChatColor.GRAY));
             return true;
         }
 
-        if(args.length == 0) {
+        if (args.length != 3) {
             sender.sendMessage("invalid command: try /addrole [ROLE NAME] [COLOR] [POSITION]");
             return true;
         }
@@ -23,65 +24,20 @@ public class AddRoleCommand extends CommandBase{
         String roleName = args[0];
 
 
-
         String color = args[1];
-        int position = Integer.parseInt(args[2]);
-
-        switch(color) {
-            case "black":
-                color = ChatColor.BLACK.toString();
-                break;
-            case "darkblue":
-                color = ChatColor.DARK_BLUE.toString();
-                break;
-            case "darkgreen":
-                color = ChatColor.DARK_GREEN.toString();
-                break;
-            case "darkaqua":
-                color = ChatColor.DARK_AQUA.toString();
-                break;
-            case "darkred":
-                color = ChatColor.DARK_RED.toString();
-                break;
-            case "darkpurple":
-                color = ChatColor.DARK_PURPLE.toString();
-                break;
-            case "gold":
-                color = ChatColor.GOLD.toString();
-                break;
-            case "gray":
-                color = ChatColor.GRAY.toString();
-                break;
-            case "darkgray":
-                color = ChatColor.DARK_GRAY.toString();
-                break;
-            case "blue":
-                color = ChatColor.BLUE.toString();
-                break;
-            case "green":
-                color = ChatColor.GREEN.toString();
-                break;
-            case "aqua":
-                color = ChatColor.AQUA.toString();
-                break;
-            case "red":
-                color = ChatColor.RED.toString();
-                break;
-            case "lightpurple":
-                color = ChatColor.LIGHT_PURPLE.toString();
-                break;
-            case "yellow":
-                color = ChatColor.YELLOW.toString();
-                break;
-            case "white":
-                color = ChatColor.WHITE.toString();
-                break;
+        int position;
+        try {
+            color = ChatColor.valueOf(color.toUpperCase()).toString();
+            position = Integer.parseInt(args[2]);
+        } catch (IllegalArgumentException e) {
+            sender.sendMessage("Invalid argument!");
+            return true;
         }
 
         RanksTable table = TableOrganizer.getTable(DataTableType.PERMISSIONS);
         table.addRank(roleName, color, position);
 
-        return false;
+        return true;
 
     }
 }

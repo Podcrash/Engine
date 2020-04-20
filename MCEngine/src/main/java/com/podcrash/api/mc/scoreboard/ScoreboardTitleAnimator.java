@@ -16,15 +16,15 @@ import java.util.List;
 public class ScoreboardTitleAnimator implements TimeResource {
 
     private int i;
-    private CustomScoreboard scoreboard;
-    private String title;
-    private String primary_color;
-    private String secondary_color;
-    private int shine_begin;
-    private int shine_bdr_begin;
-    private int flash_begin;
-    private int still_begin;
-    private int period;
+    private final CustomScoreboard scoreboard;
+    private final String title;
+    private final String primary_color;
+    private final String secondary_color;
+    private final int shine_begin;
+    private final int shine_bdr_begin;
+    private final int flash_begin;
+    private final int still_begin;
+    private final int period;
 
     /**
      * Constructor for the Scoreboard Title Animator.

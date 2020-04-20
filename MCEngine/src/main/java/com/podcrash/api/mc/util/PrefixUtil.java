@@ -1,14 +1,12 @@
 package com.podcrash.api.mc.util;
 
+import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.db.pojos.Rank;
 import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.RanksTable;
-import com.podcrash.api.db.TableOrganizer;
-import com.podcrash.api.permissions.Perm;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import java.util.List;
 import java.util.Set;
 
 public class PrefixUtil {

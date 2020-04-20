@@ -22,9 +22,9 @@ public class CraftBlockUpdater implements Runnable {
     private int maxX = Integer.MIN_VALUE;
     private int maxZ = Integer.MIN_VALUE;
 
-    private static HashMap<String, CraftBlockUpdater> updaters = new HashMap<>();
-    private List<BlockBreakThenRestore> tempPlace = new ArrayList<>();
-    private ArrayDeque<DeferredBlock> deferredBlocks = new ArrayDeque<>();
+    private static final HashMap<String, CraftBlockUpdater> updaters = new HashMap<>();
+    private final List<BlockBreakThenRestore> tempPlace = new ArrayList<>();
+    private final ArrayDeque<DeferredBlock> deferredBlocks = new ArrayDeque<>();
     private World world;
     private boolean isActive;
 
@@ -162,9 +162,7 @@ public class CraftBlockUpdater implements Runnable {
             ChunkCoords that = (ChunkCoords) o;
 
             if (x != that.x) return false;
-            if (z != that.z) return false;
-
-            return true;
+            return z == that.z;
         }
 
         @Override

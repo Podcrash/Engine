@@ -10,10 +10,10 @@ import java.util.List;
 public class EconEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
 
-    private Player buyer;
-    private String item;
+    private final Player buyer;
+    private final String item;
     private double cost;
-    private double currBalance;
+    private final double currBalance;
 
     private List<String> description;
 

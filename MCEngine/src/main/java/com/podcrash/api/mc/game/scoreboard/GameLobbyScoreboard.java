@@ -16,7 +16,7 @@ import java.util.List;
 
 public class GameLobbyScoreboard extends CustomScoreboard{
 
-    private Game game;
+    private final Game game;
     private boolean running;
 
     public GameLobbyScoreboard(Game game) {

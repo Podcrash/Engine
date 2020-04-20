@@ -14,8 +14,8 @@ import org.bukkit.entity.Player;
  */
 public class EntityParticleResource implements TimeResource {
     protected Entity entity;
-    private WrapperPlayServerWorldParticles packet;
-    private SoundWrapper sound;
+    private final WrapperPlayServerWorldParticles packet;
+    private final SoundWrapper sound;
     public boolean cancel = false;
 
     public EntityParticleResource(Entity entity, WrapperPlayServerWorldParticles packet, SoundWrapper sound) {

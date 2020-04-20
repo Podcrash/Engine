@@ -10,9 +10,9 @@ import org.bukkit.entity.Player;
     Base class for
  */
 public abstract class CustomStatus implements TimeResource {
-    private Status status;
-    private StatusApplier applier;
-    private Player player;
+    private final Status status;
+    private final StatusApplier applier;
+    private final Player player;
 
     protected StatusApplier getApplier() {
         return applier;

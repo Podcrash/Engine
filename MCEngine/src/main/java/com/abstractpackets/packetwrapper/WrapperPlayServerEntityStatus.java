@@ -47,7 +47,7 @@ public class WrapperPlayServerEntityStatus extends AbstractPacket {
         /**
          * The singleton instance. Can also be retrieved from the parent class.
          */
-        private static Status INSTANCE = new Status();
+        private static final Status INSTANCE = new Status();
 
         /**
          * Retrieve an instance of the status enum.

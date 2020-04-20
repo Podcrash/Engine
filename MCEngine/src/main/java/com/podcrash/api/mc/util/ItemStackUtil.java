@@ -55,7 +55,7 @@ public class ItemStackUtil {
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(ChatUtil.chat(displayName));
 
-        List<String> list = Arrays.asList(loreString);
+        String[] list = loreString;
         for (String s : list) {
             lore.add(ChatUtil.chat(s));
         }
@@ -86,7 +86,7 @@ public class ItemStackUtil {
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(ChatUtil.chat(displayName));
 
-        List<String> list = Arrays.asList(loreString);
+        String[] list = loreString;
         for (String s : list) {
             lore.add(ChatUtil.chat(s));
         }

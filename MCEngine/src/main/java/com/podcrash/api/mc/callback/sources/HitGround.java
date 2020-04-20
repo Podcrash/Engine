@@ -11,8 +11,8 @@ import org.bukkit.util.Vector;
  * This class is used to await until the entity in question touches the ground (and isn't moving)
  */
 public class HitGround extends CallbackAction<HitGround> {
-    private Entity entity;
-    private Vector previousVector;
+    private final Entity entity;
+    private final Vector previousVector;
 
     public HitGround(Entity entity) {
         super(0, 1);

@@ -15,7 +15,7 @@ public class GameLobbyTimer {
     private int currentTime;
     private String status;
     private boolean isRunning;
-    private String defaultStatus;
+    private final String defaultStatus;
 
     public GameLobbyTimer(Game game) {
         this.maxTime = 20;

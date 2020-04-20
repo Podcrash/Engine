@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class FallDamageHandler extends ListenerBase {
-    private static Set<String> guaranteeNullFall = new HashSet<>();
+    private static final Set<String> guaranteeNullFall = new HashSet<>();
 
     public FallDamageHandler(JavaPlugin plugin) {
         super(plugin);

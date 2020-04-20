@@ -24,7 +24,7 @@ import java.util.Set;
  */
 public final class DamageApplier {
 
-    private static Set<LivingEntity> invincibleEntities = new HashSet<>();
+    private static final Set<LivingEntity> invincibleEntities = new HashSet<>();
 
     public static Set<LivingEntity> getInvincibleEntities() {
         return invincibleEntities;

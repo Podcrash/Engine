@@ -12,7 +12,7 @@ import java.util.Collection;
  * THis is supposed to be used to apply arrows to status effects
  */
 public class ThrowableStatusApplier {
-    private static Multimap<Arrow, StatusWrapper> arrowStatuses = ArrayListMultimap.create();
+    private static final Multimap<Arrow, StatusWrapper> arrowStatuses = ArrayListMultimap.create();
 
     private ThrowableStatusApplier() {
 
