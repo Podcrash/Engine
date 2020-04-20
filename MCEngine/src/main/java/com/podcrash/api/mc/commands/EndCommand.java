@@ -7,11 +7,23 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 
-public class EndCommand implements CommandExecutor {
+import java.util.Collections;
+import java.util.List;
+
+public class EndCommand extends BukkitCommand {
+
+    public EndCommand() {
+        super("endgame",
+                "End a game.",
+                "/endgame",
+                Collections.emptyList());
+    }
+
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean execute(CommandSender sender, String label, String[] args) {
         if (!sender.hasPermission("invicta.host")) {
             sender.sendMessage(String.format("%sInvicta> %sYou have insufficient permissions to use that command.", ChatColor.BLUE, ChatColor.GRAY));
         } else {

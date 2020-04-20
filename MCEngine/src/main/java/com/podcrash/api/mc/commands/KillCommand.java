@@ -7,11 +7,23 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 
-public class KillCommand implements CommandExecutor {
+import java.util.Collections;
+import java.util.List;
+
+public class KillCommand extends BukkitCommand {
+
+    public KillCommand() {
+        super("kill",
+                "Kills your player if you are currently in a game.",
+                "kill",
+                Collections.emptyList());
+    }
+
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean execute(CommandSender sender, String label, String[] args) {
         if (args.length != 0) {
             return false;
         }

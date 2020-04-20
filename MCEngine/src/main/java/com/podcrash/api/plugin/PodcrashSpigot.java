@@ -19,17 +19,23 @@ import com.podcrash.api.mc.world.WorldManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
+import org.bukkit.command.CommandMap;
+import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.scheduler.BukkitTask;
 import org.spigotmc.SpigotConfig;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
 
 public class PodcrashSpigot extends PodcrashPlugin {
+
+    // TODO make all bukkit calls synchronous
+
     private static PodcrashSpigot INSTANCE;
     public static PodcrashSpigot getInstance() {
         return INSTANCE;
@@ -48,6 +54,8 @@ public class PodcrashSpigot extends PodcrashPlugin {
 
     private EconomyHandler economyHandler;
     private SpawnWorldSetter worldSetter;
+
+    private CommandMap commandMap;
 
     @Override
     public ExecutorService getExecutorService() {
@@ -126,6 +134,15 @@ public class PodcrashSpigot extends PodcrashPlugin {
 
         economyHandler = new EconomyHandler();
         worldSetter = new SpawnWorldSetter(); // this is a special cookie
+        // Fetch private bukkit commandmap by reflections
+        try {
+            Field commandMapField = getServer().getClass().getDeclaredField("commandMap");
+            commandMapField.setAccessible(true);
+            commandMap = (CommandMap) commandMapField.get(getServer());
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            getLogger().severe("Failed to load Bukkit commandmap. Disabling plugin.");
+            getServer().getPluginManager().disablePlugin(this);
+        }
         Communicator.readyGameLobby();
         if(Communicator.isGameLobby())
             gameStart();
@@ -221,23 +238,23 @@ public class PodcrashSpigot extends PodcrashPlugin {
     }
     private CompletableFuture<Void> registerCommands() {
         return CompletableFuture.runAsync(() -> {
-            getCommand("setrole").setExecutor(new SetRoleCommand());
-            getCommand("addrole").setExecutor(new AddRoleCommand());
-            getCommand("bal").setExecutor(new BalanceCommand());
-            getCommand("buy").setExecutor(new BuyCommand());
-            getCommand("confirm").setExecutor(new ConfirmCommand());
-            getCommand("tell").setExecutor(new TellCommand());
-            getCommand("endgame").setExecutor(new EndCommand());
-            getCommand("ping").setExecutor(new PingCommand());
-            getCommand("start").setExecutor(new StartCommand());
-            getCommand("view").setExecutor(new ViewCommand());
-            getCommand("spec").setExecutor(new SpecCommand());
-            getCommand("setmap").setExecutor(new SetMapCommand());
-            getCommand("team").setExecutor(new TeamCommand());
-            getCommand("kill").setExecutor(new KillCommand());
-            getCommand("kb").setExecutor(new KnockbackCommand());
-            getCommand("hitreg").setExecutor(new HitRegCommand());
-            getCommand("mute").setExecutor(new MuteCommand());
+            registerCommand(new SetRoleCommand());
+            registerCommand(new AddRoleCommand());
+            registerCommand(new BalanceCommand());
+            registerCommand(new BuyCommand());
+            registerCommand(new ConfirmCommand());
+            registerCommand(new TellCommand());
+            registerCommand(new EndCommand());
+            registerCommand(new PingCommand());
+            registerCommand(new StartCommand());
+            registerCommand(new ViewCommand());
+            registerCommand(new SpecCommand());
+            registerCommand(new SetMapCommand());
+            registerCommand(new TeamCommand());
+            registerCommand(new KillCommand());
+            registerCommand(new KnockbackCommand());
+            registerCommand(new HitRegCommand());
+            registerCommand(new MuteCommand());
         });
 }
 
@@ -292,5 +309,9 @@ public class PodcrashSpigot extends PodcrashPlugin {
                 }
             }
         });
+    }
+
+    public void registerCommand(BukkitCommand command) {
+        commandMap.register(command.getLabel(), command);
     }
 }

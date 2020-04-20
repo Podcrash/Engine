@@ -5,11 +5,23 @@ import com.podcrash.api.plugin.Pluginizer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 
-public class BuyCommand implements CommandExecutor {
+import java.util.Collections;
+import java.util.List;
+
+public class BuyCommand extends BukkitCommand {
+
+    public BuyCommand() {
+        super("buy",
+                "Purchase a new item with your gold.",
+                "/buy <Name of Item>",
+                Collections.emptyList());
+    }
+
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean execute(CommandSender sender, String label, String[] args) {
         if (!(sender instanceof Player) || args.length != 1)
             return false;
         Player p = (Player) sender;

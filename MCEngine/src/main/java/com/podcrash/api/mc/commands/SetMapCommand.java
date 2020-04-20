@@ -8,15 +8,25 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-public class SetMapCommand implements CommandExecutor {
+public class SetMapCommand extends BukkitCommand {
+
+    public SetMapCommand() {
+        super("setmap",
+                "Set a map for the game.",
+                "/setmap <MapName>",
+                Collections.emptyList());
+    }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean execute(CommandSender sender, String label, String[] args) {
         if (!(sender instanceof Player) || !sender.hasPermission("invicta.host")) {
             sender.sendMessage(String.format("%sInvicta> %sYou have insufficient permissions to use that command.", ChatColor.BLUE, ChatColor.GRAY));
             return true;

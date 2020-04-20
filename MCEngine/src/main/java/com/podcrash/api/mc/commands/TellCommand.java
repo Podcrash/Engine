@@ -4,10 +4,25 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.defaults.BukkitCommand;
 
-public class TellCommand implements CommandExecutor {
+import java.util.Arrays;
+import java.util.List;
+
+public class TellCommand extends BukkitCommand {
+
+    public TellCommand() {
+        super("tell",
+                "Currently unused messaging system.",
+                "/tell",
+                Arrays.asList(
+                        "message",
+                        "msg"
+                ));
+    }
+
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean execute(CommandSender sender, String label, String[] args) {
         //TODO make this better
         if (sender.hasPermission("invicta.mute")) {
             sender.sendMessage(String.format("%sInvicta> %sNice try, you are still muted.", ChatColor.BLUE, ChatColor.GRAY));

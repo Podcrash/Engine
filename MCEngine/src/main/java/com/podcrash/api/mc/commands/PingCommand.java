@@ -6,11 +6,23 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 
-public class PingCommand implements CommandExecutor {
+import java.util.Collections;
+import java.util.List;
+
+public class PingCommand extends BukkitCommand {
+
+    public PingCommand() {
+        super("ping",
+                "Displays you or another player's ping.",
+                "/ping (Player Name)",
+                Collections.emptyList());
+    }
+
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean execute(CommandSender sender, String label, String[] args) {
         if (!(sender instanceof Player)) {
             return true;
         }

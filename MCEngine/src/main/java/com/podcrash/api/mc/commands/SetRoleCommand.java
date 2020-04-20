@@ -10,13 +10,24 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
-public class SetRoleCommand implements CommandExecutor {
+public class SetRoleCommand extends BukkitCommand {
+
+    public SetRoleCommand() {
+        super("setrole",
+                "Set a players role or take it away.",
+                "/setrole <Role> <PlayerName>",
+                Collections.emptyList());
+    }
+
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean execute(CommandSender sender, String label, String[] args) {
         if (!sender.isOp()) {
             sender.sendMessage(String.format("%sInvicta> %sYou have insufficient permissions to use that command.", ChatColor.BLUE, ChatColor.GRAY));
             return true;

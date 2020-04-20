@@ -7,11 +7,23 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 
-public class BalanceCommand implements CommandExecutor {
+import java.util.Collections;
+import java.util.List;
+
+public class BalanceCommand extends BukkitCommand {
+
+    public BalanceCommand() {
+        super("balance",
+                "Check how much gold you currently have.",
+                "/balance",
+                Collections.singletonList("bal"));
+    }
+
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean execute(CommandSender sender, String label, String[] args) {
         if (!(sender instanceof Player))
             return true;
         Player p = (Player) sender;

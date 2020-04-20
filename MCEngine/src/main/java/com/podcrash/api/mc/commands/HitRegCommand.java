@@ -4,10 +4,22 @@ import com.podcrash.api.mc.damage.HitDetectionInjector;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.defaults.BukkitCommand;
 
-public class HitRegCommand implements CommandExecutor {
+import java.util.Collections;
+import java.util.List;
+
+public class HitRegCommand extends BukkitCommand {
+
+    public HitRegCommand() {
+        super("hitreg",
+                "Put a new hitreg.",
+                "/hitreg <integer>",
+                Collections.emptyList());
+    }
+
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean execute(CommandSender sender, String label, String[] args) {
         if (!sender.hasPermission("invicta.testing")) {
             sender.sendMessage("You do not have permission!");
             return true;

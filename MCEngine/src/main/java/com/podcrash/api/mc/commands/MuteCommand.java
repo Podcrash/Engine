@@ -10,16 +10,27 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
-public class MuteCommand implements CommandExecutor {
+public class MuteCommand extends BukkitCommand {
+
+    public MuteCommand() {
+        super("mute",
+                "Mute a player.",
+                "/mute <Player Name>",
+                Collections.emptyList());
+    }
+
 
     //TODO fix this
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean execute(CommandSender sender, String label, String[] args) {
         if (!sender.hasPermission("invicta.mod")) {
             sender.sendMessage(String.format("%sInvicta> %sYou have insufficient permissions to use that command.", ChatColor.BLUE, ChatColor.GRAY));
             return true;

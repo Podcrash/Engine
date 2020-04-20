@@ -7,10 +7,22 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.defaults.BukkitCommand;
 
-public class AddRoleCommand implements CommandExecutor {
+import java.util.Collections;
+import java.util.List;
+
+public class AddRoleCommand extends BukkitCommand {
+
+    public AddRoleCommand() {
+        super("addrole",
+                "Add a new role to the game.",
+                "/addrole <Role Name> <Color> <Position>",
+                Collections.emptyList());
+    }
+
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean execute(CommandSender sender, String label, String[] args) {
         if (!sender.isOp()) {
             sender.sendMessage(String.format("%sInvicta> %sYou have insufficient permissions to use that command.", ChatColor.BLUE, ChatColor.GRAY));
             return true;
