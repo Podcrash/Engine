@@ -60,7 +60,6 @@ public abstract class Game implements IGame {
 
     private Set<UUID> participants;                     // Participating players only.
     private Set<UUID> spectators;                       // Spectating players only.
-    private Set<UUID> optIn;                            // Spectators to participate next game.
     private Set<UUID> respawning;                       // Respawning players.
 
     private GameLobbyScoreboard lobbyBoard;
@@ -92,11 +91,8 @@ public abstract class Game implements IGame {
 
         this.participants = new HashSet<>();
         this.spectators = new HashSet<>();
-        this.optIn = new HashSet<>();
         this.respawning = new HashSet<>();
         this.isLobbyPVPing = new HashSet<>();
-//        this.lobby_board = new GameLobbyScoreboard(15, 0, this);
-//        this.lobby_timer = new GameLobbyTimer();
     }
 
     public abstract GameScoreboard getGameScoreboard();
@@ -362,11 +358,6 @@ public abstract class Game implements IGame {
     public Set<UUID> getSpectators() { return spectators; }
 
     /**
-     * @return A set of spectators to opt in next game.
-     */
-    public Set<UUID> getOptIn() { return optIn; }
-
-    /**
      * @return The set of respawning players.
      */
     public Set<UUID> getRespawning() { return respawning; }
@@ -510,7 +501,6 @@ public abstract class Game implements IGame {
      */
     public void toggleSpec(Player player) {
         if (state == GameState.STARTED) {
-            optIn.add(player.getUniqueId());
             return;
         }
         if (isSpectating(player)) {
@@ -646,7 +636,6 @@ public abstract class Game implements IGame {
         // If ongoing, add to spectators. Else, add to participants.
         if (state == GameState.STARTED) {
             addSpectator(player);
-            optIn.add(player.getUniqueId());
             resetPlayer(player, GameMode.ADVENTURE, false, true, true);
         } else {
             addParticipant(player);
@@ -666,7 +655,6 @@ public abstract class Game implements IGame {
         // Remove from participants and spectators.
         participants.remove(player.getUniqueId());
         spectators.remove(player.getUniqueId());
-        optIn.remove(player.getUniqueId());
         // If on a team, remove from team.
         if (isOnTeam(player)) {
             leaveTeam(player);
@@ -907,17 +895,6 @@ public abstract class Game implements IGame {
      */
     public boolean isSpectating(UUID uuid) {
         return spectators.contains(uuid);
-    }
-
-    /**
-     * Opt in all spectators who have decided to opt in for the next game.
-     * This should only happen at the end of a game.
-     */
-    public void optIn() {
-        for (UUID uuid : optIn) {
-            removeSpectator(Bukkit.getPlayer(uuid));
-            addParticipant(Bukkit.getPlayer(uuid));
-        }
     }
 
     /**

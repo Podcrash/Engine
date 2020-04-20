@@ -278,7 +278,6 @@ public class GameManager {
         }
         Location spawnLoc = Bukkit.getWorld(name).getSpawnLocation();
         game.setState(GameState.LOBBY);
-        game.optIn();
         GameEndEvent gameend = new GameEndEvent(game, spawnLoc);
         //currentGame = null;
         Pluginizer.getSpigotPlugin().getServer().getPluginManager().callEvent(gameend);
