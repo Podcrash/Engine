@@ -65,7 +65,7 @@ public class GameLobbyScoreboard extends CustomScoreboard{
         lines.add("&f" + Communicator.getCode());
         lines.add("");
         lines.add("&e&lPlayers");
-        lines.add("&f" + game.getPlayerCount() + "/" + game.getCapacity());
+        lines.add("&f" + game.size() + "/" + game.getCapacity());
         lines.add("");
         lines.add("&d&lMap");
         lines.add(game.getMapName());

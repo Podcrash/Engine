@@ -15,10 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scoreboard.Scoreboard;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Singleton - Handles games
@@ -141,7 +138,7 @@ public class GameManager {
                         "%sInvicta> %sYou are already in the game.",
                         ChatColor.BLUE,
                         ChatColor.GRAY));
-        if (game.getMaxPlayers() == game.getPlayerCount()) {
+        if (game.getMaxPlayers() == game.size()) {
             game.getTimer().start();
         }
     }
@@ -161,7 +158,6 @@ public class GameManager {
     // TODO: This is assuming blue and red team enums, which are subject to change.
     public static void randomTeam(Player player) {
         Game game = currentGame;
-        game.addParticipant(player);
         int red = game.getTeam(0).teamSize();
         int blue = game.getTeam(1).teamSize();
         if(blue > red)
@@ -228,20 +224,28 @@ public class GameManager {
     }
 
     public static void startGame() {
-        if(currentGame == null) return;
+        if (currentGame == null) return;
         Game game = currentGame;
-        if(game.getGameState() == GameState.STARTED) {
+        if (game.getGameState() == GameState.STARTED) {
             return;
         }
         Pluginizer.getSpigotPlugin().getLogger().info("Attempting to start game " + game.getId());
-        if(!game.hasChosenMap()) {
+        if (!game.hasChosenMap()) {
             game.broadcast("There is no map selected for this game.");
         }
-        GameStartEvent gamestart = new GameStartEvent(game);
-        game.setState(GameState.STARTED);
-        for(Player p : game.getBukkitPlayers()) {
+
+        // Close all inventories before the game starts to prevent weird onClose event bugs
+        for (Player p : game.getBukkitPlayers()) {
             p.closeInventory();
         }
+        // Sort every participant who hasn't chosen a team into a random team.
+        for (UUID uuid: game.getParticipantsNoTeam()) {
+            Player player = Bukkit.getPlayer(uuid);
+            randomTeam(player);
+        }
+
+        game.setState(GameState.STARTED);
+        GameStartEvent gamestart = new GameStartEvent(game);
         Pluginizer.getSpigotPlugin().getServer().getPluginManager().callEvent(gamestart);
     }
 

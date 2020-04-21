@@ -175,6 +175,7 @@ public class GameListener extends ListenerBase {
         Game game = e.getGame();
         game.sendColorTab(true);
         for (Player player : game.getBukkitPlayers()) {
+            game.updateLobbyInventory(player);
             DamageApplier.addInvincibleEntity(player);
             player.setHealth(player.getMaxHealth());
             player.teleport(e.getSpawnlocation());
@@ -430,7 +431,7 @@ public class GameListener extends ListenerBase {
         if(e.isCancelled()) return;
         Player player = e.getPlayer();
 
-        if(GameManager.getGame() != null && GameManager.getGame().isParticipating(player)) {
+        if(GameManager.getGame() != null && GameManager.getGame().isOnTeam(player)) {
             e.setCancelled(true);
             Game game = GameManager.getGame();
             String color = "";

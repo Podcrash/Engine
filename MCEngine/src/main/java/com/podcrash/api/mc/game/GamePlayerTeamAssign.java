@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 
 import java.util.*;
 
+//TODO maybe delete this class because it doesnt do anything
 public class GamePlayerTeamAssign {
 
     public static boolean sortPlayers(Game game, boolean balanced) {
@@ -11,7 +12,7 @@ public class GamePlayerTeamAssign {
         List<GTeam> teams = game.getTeams();
         List<UUID> extra = new ArrayList<UUID>(game.getParticipantsNoTeam());
         int teamCount = teams.size();
-        int participantCount = game.getParticipants().size();
+        int participantCount = game.size();
         int cap = (participantCount/teamCount);
         // If balanced, assign overflow to extras.
         if (balanced) {

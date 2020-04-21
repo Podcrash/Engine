@@ -14,7 +14,6 @@ import com.podcrash.api.mc.game.scoreboard.GameScoreboard;
 import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.ui.TeamSelectGUI;
 import com.podcrash.api.mc.util.ChatUtil;
-import com.podcrash.api.mc.util.InventoryUtil;
 import com.podcrash.api.mc.util.ItemStackUtil;
 import com.podcrash.api.mc.util.PrefixUtil;
 import com.podcrash.api.plugin.Pluginizer;
@@ -446,7 +445,7 @@ public abstract class Game implements IGame {
      * @return If the game is full.
      */
     public boolean isFull() {
-        return getPlayerCount() >= getMaxPlayers();
+        return size() >= getMaxPlayers();
     }
 
     /**
@@ -505,7 +504,9 @@ public abstract class Game implements IGame {
         }
         if (isSpectating(player)) {
             removeSpectator(player);
+            if (state == GameState.LOBBY) { updateLobbyInventory(player); }
             add(player);
+
         } else {
             addSpectator(player);
         }
@@ -614,12 +615,11 @@ public abstract class Game implements IGame {
      */
     public void removeSpectator(Player player) {
         spectators.remove(player.getUniqueId());
-        if (state == GameState.LOBBY) { updateLobbyInventory(player); }
     }
 
     public void addParticipant(Player player) {
-        participants.add(player.getUniqueId());
         removeSpectator(player);
+        participants.add(player.getUniqueId());
 
         // TODO: Set the lobby scoreboard, etc...
     }
@@ -640,12 +640,12 @@ public abstract class Game implements IGame {
         }
         else {
             // If we are in a lobby but the game is full, assign the player to the spectators.
-            if(getPlayerCount() >= getMaxPlayers()) {
+            if(size() >= getMaxPlayers()) {
                 player.sendMessage(String.format("%sInvicta> %sThe game you are trying to join is full!", ChatColor.BLUE, ChatColor.GRAY));
                 addSpectator(player);
                 return;
             } else {
-                GameManager.randomTeam(player);
+                addParticipant(player);
             }
         }
 
@@ -946,8 +946,10 @@ public abstract class Game implements IGame {
             ItemStack diamondsword = new ItemStack(Material.DIAMOND_SWORD);
             inv.setItem(0, diamondsword);
             TimeHandler.delayTime(1L, () -> {
-                ItemStackUtil.createItem(inv, 276, 1, 1, "&a&lEnable Lobby PVP");
-                createTeamItems(p);
+                if(getGameState().equals(GameState.LOBBY)) {
+                    ItemStackUtil.createItem(inv, 276, 1, 1, "&a&lEnable Lobby PVP");
+                    createTeamItems(p);
+                }
             });
         }
         // Setting items in the player's inventory
@@ -1060,7 +1062,23 @@ public abstract class Game implements IGame {
     // TODO: Change this to work with more than 2 teams.
     @Override
     public String toString() {
-        return String.format("%s{Game %d}%s[%d/%d]%s:\n %s\n %s\n %s",ChatColor.GREEN, id, ChatColor.WHITE, getPlayerCount(), getMaxPlayers(), ChatColor.GRAY, niceLookingTeam(TeamEnum.RED), niceLookingTeam(TeamEnum.BLUE), niceLookingSpec());
+        return String.format("%s{Game %d}%s[%d/%d]%s:\n %s\n %s\n %s\n \n %s",
+                ChatColor.GREEN, id, ChatColor.WHITE, size(), getMaxPlayers(), ChatColor.GRAY,
+                niceLookingTeam(TeamEnum.RED),
+                niceLookingTeam(TeamEnum.BLUE),
+                niceLookingUnsorted(),
+                niceLookingSpec());
+    }
+
+    private String niceLookingUnsorted() {
+        StringBuilder result = new StringBuilder(ChatColor.GRAY + "" + ChatColor.BOLD + "Unsorted: ");
+        result.append(ChatColor.RESET);
+        for (UUID uuid : getParticipantsNoTeam()) {
+            Player player = Bukkit.getPlayer(uuid);
+            result.append(player.getName());
+            result.append(' ');
+        }
+        return result.toString();
     }
 
     /**
