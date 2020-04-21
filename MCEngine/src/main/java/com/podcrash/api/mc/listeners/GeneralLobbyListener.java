@@ -27,13 +27,13 @@ public class GeneralLobbyListener extends ListenerBase {
         // Only run this code if there is no game going on; this will work even if engine is the only plugin present
         if(GameManager.getGame() != null || player.getItemInHand().getType().equals(Material.AIR)) return;
 
-        System.out.println("tests");
+        //System.out.println("tests");
         boolean isActioning = (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK ||
                 event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK);
         boolean isHoldingItem = (player.getItemInHand().getItemMeta().hasDisplayName() && player.getItemInHand().getItemMeta().getDisplayName().contains("Enable Lobby PVP"));
 
 
-        System.out.println(isActioning + " " + isHoldingItem);
+        //System.out.println(isActioning + " " + isHoldingItem);
         if (isActioning && isHoldingItem) {
             SoundPlayer.sendSound(player, "random.pop", 1F, 63);
             DamageApplier.removeInvincibleEntity(player);
