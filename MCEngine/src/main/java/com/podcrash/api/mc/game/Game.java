@@ -505,6 +505,7 @@ public abstract class Game implements IGame {
         }
         if (isSpectating(player)) {
             removeSpectator(player);
+            add(player);
         } else {
             addSpectator(player);
         }
@@ -613,12 +614,11 @@ public abstract class Game implements IGame {
      */
     public void removeSpectator(Player player) {
         spectators.remove(player.getUniqueId());
-        participants.add(player.getUniqueId());
         if (state == GameState.LOBBY) { updateLobbyInventory(player); }
-        GameManager.randomTeam(player);
     }
 
     public void addParticipant(Player player) {
+        participants.add(player.getUniqueId());
         removeSpectator(player);
 
         // TODO: Set the lobby scoreboard, etc...
@@ -637,8 +637,16 @@ public abstract class Game implements IGame {
         if (state == GameState.STARTED) {
             addSpectator(player);
             resetPlayer(player, GameMode.ADVENTURE, false, true, true);
-        } else {
-            addParticipant(player);
+        }
+        else {
+            // If we are in a lobby but the game is full, assign the player to the spectators.
+            if(getPlayerCount() >= getMaxPlayers()) {
+                player.sendMessage(String.format("%sInvicta> %sThe game you are trying to join is full!", ChatColor.BLUE, ChatColor.GRAY));
+                addSpectator(player);
+                return;
+            } else {
+                GameManager.randomTeam(player);
+            }
         }
 
         playerRewards.put(player, 0.0);

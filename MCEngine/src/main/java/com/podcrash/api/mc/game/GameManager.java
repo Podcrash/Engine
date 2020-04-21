@@ -90,8 +90,9 @@ public class GameManager {
 
     public static void addSpectator(Player p) {
         Game game = currentGame;
-        if(GameManager.hasPlayer(p)) {
+        if(GameManager.isSpectating(p)) {
             game.removeSpectator(p);
+            game.add(p);
             p.sendMessage(String.format(
                     "%sInvicta> %sYou are no longer spectating this game!",
                     ChatColor.BLUE,
@@ -134,32 +135,6 @@ public class GameManager {
                 return;
         }
         if(!game.contains(p)) {
-            /*p.sendMessage(
-                    String.format(
-                            "%sInvicta> %sYou were added to %sGame %s%s.",
-                            ChatColor.BLUE,
-                            ChatColor.GRAY,
-                            ChatColor.GREEN,
-                            game.getId(),
-                            ChatColor.GRAY));
-                            \
-
-
-            ItemStack red = new ItemStack(Material.WOOL, 1, DyeColor.RED.getData());
-            ItemStack blue = new ItemStack(Material.WOOL, 1, DyeColor.BLUE.getData());
-
-            ItemMeta meta2 = red.getItemMeta();
-            meta2.setDisplayName(ChatColor.BOLD + ChatColor.RED.toString() + "Switch to Red Team!");
-            red.setItemMeta(meta2);
-
-            ItemMeta meta3 = blue.getItemMeta();
-            meta3.setDisplayName(ChatColor.BOLD + ChatColor.BLUE.toString() + "Switch to Blue Team!");
-            blue.setItemMeta(meta3);
-
-            Inventory inventory = p.getInventory();
-            inventory.setItem(1, red);
-            inventory.setItem(2, blue);
-            */
             game.add(p);
         }else p.sendMessage(
                 String.format(
@@ -186,6 +161,7 @@ public class GameManager {
     // TODO: This is assuming blue and red team enums, which are subject to change.
     public static void randomTeam(Player player) {
         Game game = currentGame;
+        game.addParticipant(player);
         int red = game.getTeam(0).teamSize();
         int blue = game.getTeam(1).teamSize();
         if(blue > red)
