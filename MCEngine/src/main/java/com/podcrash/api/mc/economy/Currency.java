@@ -4,9 +4,9 @@ import org.bukkit.ChatColor;
 
 public enum Currency {
 
-    GOLD("gold", ChatColor.GOLD),
+    GOLD("gold", ChatColor.GOLD);
     //CRYSTAL("Crystals", ChatColor.LIGHT_PURPLE)
-    ;
+
 
     private final String name;
     private final ChatColor color;
@@ -21,14 +21,20 @@ public enum Currency {
      *
      * @return The name of the currency LOWERCASE
      */
-    public String getName() {return name;}
+    public String getName() {
+        return name;
+    }
 
     /**
      *
      * @return The formatting for the number that accompanies name
      */
-    public String getFormatting() {return "" + color + ChatColor.BOLD;}
+    public String getFormatting() {
+        return "" + color + ChatColor.BOLD;
+    }
 
-    public String getColor() {return "" + color;}
+    public String getColor() {
+        return "" + color;
+    }
 
 }

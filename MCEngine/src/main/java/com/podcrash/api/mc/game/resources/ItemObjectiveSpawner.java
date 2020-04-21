@@ -17,8 +17,8 @@ public class ItemObjectiveSpawner extends GameResource {
         List<ItemObjective> itemObjectives = this.getGame().getItemObjectives();
         this.itemObjectives = itemObjectives.toArray(new ItemObjective[itemObjectives.size()]);
         this.itemTimes = new long[itemObjectives.size()];
-        for (int i = 0; i < this.itemObjectives.length; i++) {
-            respawn(this.itemObjectives[i]);
+        for (ItemObjective itemObjective : this.itemObjectives) {
+            respawn(itemObjective);
         }
     }
 
@@ -27,15 +27,14 @@ public class ItemObjectiveSpawner extends GameResource {
     }
     public void setItemTime(ItemObjective objective, long time) {
         for(int i = 0; i < itemObjectives.length; i++){
-            if(itemObjectives[i] == objective) {
+            if (itemObjectives[i] == objective)
                 this.itemTimes[i] = time;
-            }
         }
     }
 
     /**
      * Summon the item as well as make a firework
-     * @param itemObjective
+     * @param itemObjective The item to respawn
      */
     private void respawn(ItemObjective itemObjective) {
         ItemObjectiveSpawnEvent e = new ItemObjectiveSpawnEvent(itemObjective);
@@ -51,9 +50,8 @@ public class ItemObjectiveSpawner extends GameResource {
     public void task() {
         for(int i = 0; i < itemObjectives.length; i++) {
             ItemObjective itemObjective = itemObjectives[i];
-            if(!itemObjective.getItem().isValid() && System.currentTimeMillis() - itemTimes[i] >= itemObjective.getDurationMilles()) {
+            if (!itemObjective.getItem().isValid() && System.currentTimeMillis() - itemTimes[i] >= itemObjective.getDurationMilles())
                 respawn(itemObjective);
-            }
         }
     }
 

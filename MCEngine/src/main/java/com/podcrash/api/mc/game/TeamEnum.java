@@ -124,9 +124,10 @@ public enum TeamEnum {
      * @return The TeamEnum.
      */
     public static TeamEnum getByColor(String teamColor) {
-        if(teamColor == null) return NULL;
+        if (teamColor == null) return NULL;
         for (TeamEnum teamEnum : TeamEnum.values()) {
-            if (teamEnum.getName().equalsIgnoreCase(teamColor)) return teamEnum;
+            if (teamEnum.getName().equalsIgnoreCase(teamColor))
+                return teamEnum;
         }
         return NULL;
     }
@@ -138,7 +139,8 @@ public enum TeamEnum {
      */
     public static TeamEnum getByData(int id) {
         for (TeamEnum teamEnum : TeamEnum.values()) {
-            if (teamEnum.getData() == id) return teamEnum;
+            if (teamEnum.getData() == id)
+                return teamEnum;
         }
         return NULL;
     }
@@ -150,7 +152,8 @@ public enum TeamEnum {
      */
     public static boolean isColorIDValid(int id) {
         for (TeamEnum teamEnum : TeamEnum.values()) {
-            if (teamEnum.getData() == id) return true;
+            if (teamEnum.getData() == id)
+                return true;
         }
         return false;
     }

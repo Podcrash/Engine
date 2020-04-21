@@ -17,21 +17,21 @@ public final class SpawnWorldSetter {
 
     public void loadFromEnvVariable(String key) {
         String worldName = System.getenv(key);
-        if(worldName == null) return;
+        if (worldName == null) return;
         setWorld(worldName);
     }
 
     public void setWorld(String worldName) {
-        if(worldName == null) throw new IllegalStateException("worldName cannot be null!");
+        if (worldName == null) throw new IllegalStateException("worldName cannot be null!");
         //if the world is not null, try unloading it
-        if(currentWorldName != null) {
+        if (currentWorldName != null) {
             World unload = Bukkit.getWorld(currentWorldName);
-            if(unload != null) Bukkit.unloadWorld(unload, false);
+            if (unload != null) Bukkit.unloadWorld(unload, false);
         }
 
         MapTable table = TableOrganizer.getTable(DataTableType.MAPS);
         table.downloadWorld(worldName, "regular", BaseMap.class).thenAccept(map -> {
-            if(map == null) return;
+            if (map == null) return;
             this.currentWorldName = map.getName();
         });
     }

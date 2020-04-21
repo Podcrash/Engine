@@ -20,7 +20,7 @@ public class CmdPreprocessHandler extends ListenerBase {
     @EventHandler
     public void overrideStop(PlayerCommandPreprocessEvent event) {
         String cmd = event.getMessage().split(" ")[0].toLowerCase();
-        if(blockedCommands.contains(cmd))
+        if (blockedCommands.contains(cmd))
             event.setCancelled(true);
     }
 }

@@ -13,9 +13,7 @@ import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.GameState;
 import com.podcrash.api.mc.sound.SoundPlayer;
-import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.util.PacketUtil;
-import com.podcrash.api.mc.world.WorldManager;
 import com.podcrash.api.plugin.Pluginizer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -23,7 +21,6 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Painting;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -35,12 +32,18 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.painting.PaintingBreakEvent;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Prevent dumb things from happening
@@ -63,18 +66,18 @@ public class MapMaintainListener extends ListenerBase {
         // Physical means jump on it
         if (e.getAction() == Action.PHYSICAL) {
             Block block = e.getClickedBlock();
-            if (block == null) return;
+            if (block == null)
+                return;
             // If the block is farmland (soil)
-            if (block.getType() == Material.SOIL) {
+            if (block.getType() == Material.SOIL)
                 e.setCancelled(true);
                 //block.setTypeIdAndData(block.getType().getId(), block.getData(), true);
-            }
         }
     }
 
     @EventHandler
     public void onPlayerInteractEntity(PlayerInteractAtEntityEvent e) {
-        if(e.getRightClicked() instanceof ArmorStand) e.setCancelled(true);
+        if (e.getRightClicked() instanceof ArmorStand) e.setCancelled(true);
     }
 
     @EventHandler
@@ -87,15 +90,13 @@ public class MapMaintainListener extends ListenerBase {
         if (evaluate(event.getWorld())) {
             event.getWorld().setWeatherDuration(0);
             event.setCancelled(true);
-
         }
     }
     @EventHandler
     public void onSpawn(CreatureSpawnEvent event) {
         if (evaluate(event.getEntity().getWorld())) {
-            if (event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.CUSTOM)) {
+            if (event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.CUSTOM))
                 return;
-            }
             event.setCancelled(true);
         }
     }
@@ -103,66 +104,63 @@ public class MapMaintainListener extends ListenerBase {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlace(BlockPlaceEvent e){
         if (evaluate(e.getBlock().getWorld())) {
-            if (!e.getPlayer().hasPermission("invicta.map")) {
+            if (!e.getPlayer().hasPermission("invicta.map"))
                 e.setCancelled(true);
-            }
         }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onBreak(BlockBreakEvent e) {
         if (evaluate(e.getBlock().getWorld())) {
-            if (!e.getPlayer().hasPermission("invicta.map")) {
+            if (!e.getPlayer().hasPermission("invicta.map"))
                 e.setCancelled(true);
-            }
         }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onDrop(PlayerDropItemEvent e) {
-        if (evaluate(e.getPlayer().getWorld())) {
+        if (evaluate(e.getPlayer().getWorld()))
             e.setCancelled(true);
-        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onFood(FoodLevelChangeEvent e) {
-        if(isSpawnWorld(e.getEntity().getWorld())) {
+        if (isSpawnWorld(e.getEntity().getWorld()))
             e.setFoodLevel(20);
-        }else e.setCancelled(true);
+        else
+            e.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPickUp(PlayerPickupItemEvent event){
         String name = event.getItem().getCustomName();
-        if(name != null && name.startsWith("RITB")) {
+        if (name != null && name.startsWith("RITB"))
             event.setCancelled(true);
-        }
     }
 
     @EventHandler
     public void despawn(ItemDespawnEvent e) {
-        if(evaluate(e.getEntity().getWorld())) {
+        if (evaluate(e.getEntity().getWorld()))
             e.setCancelled(true);
-        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void damage(EntityDamageByEntityEvent e) {
-        if(e.getDamager() instanceof Player) e.setCancelled(true);
+        if (e.getDamager() instanceof Player)
+            e.setCancelled(true);
     }
     /**
      * Remove the default damage tick which makes alters your velocity
      * Remove default death mechanics.
-     * @param event
      */
     @EventHandler(priority = EventPriority.HIGH)
     public void statusDamage(EntityDamageEvent event) {
-        if(event.isCancelled()) return;
+        if (event.isCancelled())
+            return;
         //if the event was cancelled, or the entity isn't living, or if it's in the og world,
         //or if the cause is null or custom
         // then cancel it
-        if((!(event.getEntity() instanceof LivingEntity)) ||
+        if ((!(event.getEntity() instanceof LivingEntity)) ||
                 DamageApplier.getInvincibleEntities().contains(event.getEntity()) ||
                 (event.getCause() == null || event.getCause() == EntityDamageEvent.DamageCause.CUSTOM)) {
             event.setCancelled(true);
@@ -171,7 +169,7 @@ public class MapMaintainListener extends ListenerBase {
         LivingEntity p = (LivingEntity) event.getEntity();
         double damage = event.getDamage();
         //if the damage is 0, don't go through with the event
-        if(damage <= 0) {
+        if (damage <= 0) {
             event.setCancelled(true);
             return;
         }
@@ -192,25 +190,28 @@ public class MapMaintainListener extends ListenerBase {
         //if the damage is one of the causes above
         //cancel it and set our own damage.
         //This is done because the types of damage above affects velocity
-        if(!poss.contains(event.getCause())) return;
+        if (!poss.contains(event.getCause()))
+            return;
         event.setCancelled(true);
         Long last = lastHit.get(p.getName());
         long curr = System.currentTimeMillis();
-        if(last != null) {
+        if (last != null) {
             long ticksMilles = 600L;
-            if(curr - last <= ticksMilles) return;
+            if (curr - last <= ticksMilles)
+                return;
         }
         lastHit.put(p.getName(), curr);
         Cause cause = Cause.findByEntityDamageCause(event.getCause());
         DamageEvent event2 = new DamageEvent(p, damage, cause);
         Bukkit.getPluginManager().callEvent(event2);
-        if(event2.isCancelled()) return;
+        if (event2.isCancelled())
+            return;
         damage(p, damage);
 
         DamageQueue.artificialAddHistory(p, damage, cause);
         //if the player is about to die, cancel it
         //Then call our own death event.
-        if(p instanceof Player && afterHealth <= 0D) {
+        if (p instanceof Player && afterHealth <= 0D) {
             DamageQueue.artificialDie((Player) p);
         }
     }
@@ -248,11 +249,12 @@ public class MapMaintainListener extends ListenerBase {
         Block block = e.getBlock();
         Block to = e.getToBlock();
         boolean cancel = false;
-        if(evaluate(block.getWorld()) && block.getType() == Material.ICE && to.getType() == Material.WATER)
+        if (evaluate(block.getWorld()) && block.getType() == Material.ICE && to.getType() == Material.WATER)
             cancel = true;
-        else if(block.getType() == Material.AIR && to.getType() == Material.VINE)
+        else if (block.getType() == Material.AIR && to.getType() == Material.VINE)
             cancel = true;
-        if(cancel) e.setCancelled(true);
+        if (cancel)
+            e.setCancelled(true);
     }
 
 
@@ -260,12 +262,10 @@ public class MapMaintainListener extends ListenerBase {
     public void damage(DamageApplyEvent event) {
         Game game = GameManager.getGame();
 
-        if (game == null || game.getGameState() != GameState.STARTED) {
-            if (event.getAttacker() instanceof Player && DamageApplier.getInvincibleEntities().contains(event.getAttacker())) {
+        if (game == null || game.getGameState() != GameState.STARTED)
+            if (event.getAttacker() instanceof Player && DamageApplier.getInvincibleEntities().contains(event.getAttacker()))
                 event.setCancelled(true);
-            }
-        }
-        //if(event.getVictim() instanceof Player) && isSpawnWorld(event.getVictim().getWorld()))
+        //if (event.getVictim() instanceof Player) && isSpawnWorld(event.getVictim().getWorld()))
             //event.setCancelled(true);
     }
 
@@ -273,22 +273,22 @@ public class MapMaintainListener extends ListenerBase {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void preventCraft(InventoryClickEvent event) {
-        if(event.getWhoClicked().getWorld().getName().equals("world")) return;
+        if (event.getWhoClicked().getWorld().getName().equals("world")) return;
         Inventory clicked = event.getClickedInventory();
-        if(clicked != null && clicked.getType() == InventoryType.CRAFTING)
+        if (clicked != null && clicked.getType() == InventoryType.CRAFTING)
             event.setCancelled(true);
     }
 
     /**
      *
-     * @param world
+     * @param world World to evaluate if restrictive or not
      * @return true if the world is restrictive, false if not
      */
     private boolean evaluate(World world) {
         WorldLoader loader = TableOrganizer.getTable(DataTableType.WORLDS);
-        if(isSpawnWorld(world)) return true;
+        if (isSpawnWorld(world)) return true;
         Boolean contains;
-        if((contains = checkCache.get(world.getName())) != null) {
+        if ((contains = checkCache.get(world.getName())) != null) {
             return contains;
         }
         boolean containsDB = loader.listWorlds().contains(world.getName());

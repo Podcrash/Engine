@@ -31,9 +31,9 @@ public class Configurator {
     private final String fileName;
 
     private File getFileFromFolder(File folder, String fileName) {
-        if(folder.isDirectory()) {
+        if (folder.isDirectory()) {
             for(File file1 : folder.listFiles()) {
-                if(fileName.equals(file1.getName())) return file1;
+                if (fileName.equals(file1.getName())) return file1;
             }
         }
         return null;
@@ -51,12 +51,12 @@ public class Configurator {
         this.plugin = plugin;
         this.fileName = fileName + ".yml";
         plugin.getLogger().info("[Configurator] Loading " + this.fileName);
-        if(!file.exists()) {
+        if (!file.exists()) {
             plugin.getLogger().info("[Configurator] Creating folder " + file.getAbsolutePath());
             boolean created = mkdirFile(file);
-            if(!created) throw new IllegalStateException("The file must be made!");
+            if (!created) throw new IllegalStateException("The file must be made!");
         }
-        if((this.configFile = getFileFromFolder(file, this.fileName)) == null) {
+        if ((this.configFile = getFileFromFolder(file, this.fileName)) == null) {
             plugin.getLogger().info("[Configurator] " + this.fileName + " did not exist! Creating!");
             this.configFile = new File(file, this.fileName);
             if (hasDefaults) {
@@ -118,7 +118,7 @@ public class Configurator {
 
     public void deletePath(String path) {
         Runnable deleteCall = () -> {
-            if(config.isSet(path) ) {
+            if (config.isSet(path) ) {
                 config.set(path, null);
                 saveConfig();
             }

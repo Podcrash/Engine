@@ -12,7 +12,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.util.Vector;
 
 import javax.annotation.Nonnull;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -98,9 +97,9 @@ public class BoundingBox {
      * @return
      */
     public double distance(@Nonnull Coordinate p) {
-        if(min.getY() <= p.getY() && p.getY() <= max.getY()) {
+        if (min.getY() <= p.getY() && p.getY() <= max.getY()) {
             return hdistance(p);
-        }else if(min.getZ() <= p.getZ() && p.getZ() <= max.getZ() &&
+        }else if (min.getZ() <= p.getZ() && p.getZ() <= max.getZ() &&
                  min.getX() <= p.getX() && p.getX() <= max.getX()) {
             return vdistance(p);
         }else {
@@ -119,7 +118,7 @@ public class BoundingBox {
             normals.add(normal);
             Coordinate PQ = getBox()[plane[0]].subtract(p);
             double dist = Math.abs(PQ.dot(normal))/normal.length();
-            if(1 < dist && dist < smallest) smallest = dist;
+            if (1 < dist && dist < smallest) smallest = dist;
         }
 
         return smallest;
@@ -133,7 +132,7 @@ public class BoundingBox {
             normals.add(normal);
             Coordinate PQ = getBox()[plane[0]].subtract(p);
             double dist = Math.abs(PQ.dot(normal))/normal.length();
-            if(dist < smallest) smallest = dist;
+            if (dist < smallest) smallest = dist;
         }
 
         return smallest;
@@ -144,7 +143,7 @@ public class BoundingBox {
         for(Coordinate a : getBox()) {
             for(Coordinate b : box.getBox()) {
                 double dist = a.distanceSquared(b);
-                if(dist < min) {
+                if (dist < min) {
                     min = dist;
                 }
             }
@@ -157,7 +156,7 @@ public class BoundingBox {
         for(Coordinate a : getBox()) {
             for(Coordinate b : box.getBox()) {
                 double dist = a.setY(0).distanceSquared(b.setY(0));
-                if(dist < min) {
+                if (dist < min) {
                     min = dist;
                 }
             }
@@ -202,7 +201,7 @@ public class BoundingBox {
      * @return
      */
     public Coordinate[] getBox() {
-        if(allBounds != null) return allBounds;
+        if (allBounds != null) return allBounds;
 
         double diffX = max.getX() - min.getX();
         double diffY = max.getY() - min.getY();

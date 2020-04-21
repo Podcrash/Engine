@@ -35,7 +35,7 @@ public class CraftBlockUpdater implements Runnable {
     }
 
     private void start() {
-        if(!isActive) {
+        if (!isActive) {
             isActive = true;
             thisTask = Bukkit.getScheduler().runTaskTimer(Pluginizer.getSpigotPlugin(), this, 1,0);
         }
@@ -78,8 +78,8 @@ public class CraftBlockUpdater implements Runnable {
 
     @Override
     public void run() {
-        if(Bukkit.getWorld(world.getName()) == null) stop();
-        if(!isActive) return;
+        if (Bukkit.getWorld(world.getName()) == null) stop();
+        if (!isActive) return;
         //long now = System.nanoTime();
         //int n = 0;
 
@@ -92,13 +92,13 @@ public class CraftBlockUpdater implements Runnable {
         Iterator<BlockBreakThenRestore> iterator = tempPlace.iterator();
         while(iterator.hasNext()){
             BlockBreakThenRestore restore = iterator.next();
-            if(restore.check()) {
+            if (restore.check()) {
                 restore.remove();
                 iterator.remove();
             }
         }
 
-        if(blocksModified > 0) {
+        if (blocksModified > 0) {
             notifyClients();
             blocksModified = 0;
         }
@@ -142,9 +142,9 @@ public class CraftBlockUpdater implements Runnable {
     }
 
     public static CraftBlockUpdater getMassBlockUpdater(org.bukkit.World world) {
-        if(!updaters.containsKey(world.getName())) updaters.put(world.getName(), new CraftBlockUpdater(world));
+        if (!updaters.containsKey(world.getName())) updaters.put(world.getName(), new CraftBlockUpdater(world));
         CraftBlockUpdater updater = updaters.get(world.getName());
-        if(!updater.isActive) updater.start();
+        if (!updater.isActive) updater.start();
         return updater;
     }
     private class ChunkCoords {

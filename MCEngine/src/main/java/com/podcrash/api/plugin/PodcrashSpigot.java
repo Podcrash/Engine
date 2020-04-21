@@ -102,7 +102,7 @@ public class PodcrashSpigot extends PodcrashPlugin {
 
     public void gameDisable() {
         for(World world : Bukkit.getWorlds()) {
-            if(world.getName().equalsIgnoreCase("world")) continue;
+            if (world.getName().equalsIgnoreCase("world")) continue;
             Bukkit.unloadWorld(world, false);
         }
         DamageQueue.active = false;
@@ -144,13 +144,13 @@ public class PodcrashSpigot extends PodcrashPlugin {
             getServer().getPluginManager().disablePlugin(this);
         }
         Communicator.readyGameLobby();
-        if(Communicator.isGameLobby())
+        if (Communicator.isGameLobby())
             gameStart();
     }
 
     @Override
     public void onDisable() {
-        if(Communicator.isGameLobby())
+        if (Communicator.isGameLobby())
             gameDisable();
         disable();
         WorldManager.getInstance().unloadWorlds();
@@ -162,7 +162,7 @@ public class PodcrashSpigot extends PodcrashPlugin {
 
     public <K extends Tracker> K getTracker(Class<? extends K> trackerClasz) {
         for(Tracker tracker : trackers)
-            if(tracker.getClass().equals(trackerClasz))
+            if (tracker.getClass().equals(trackerClasz))
                 return trackerClasz.cast(tracker);
         throw new RuntimeException("tracker is null, shouldn't happen");
     }

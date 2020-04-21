@@ -11,6 +11,6 @@ public class AwaitTime extends CallbackAction<AwaitTime> {
     public AwaitTime(long elapsedTimeMilles) {
         this.dueTime = System.currentTimeMillis() + elapsedTimeMilles;
 
-        this.changeEvaluation( () -> System.currentTimeMillis() > dueTime);
+        this.changeEvaluation(() -> System.currentTimeMillis() > dueTime);
     }
 }

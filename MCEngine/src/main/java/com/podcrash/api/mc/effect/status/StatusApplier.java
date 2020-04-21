@@ -44,7 +44,7 @@ public class StatusApplier {
         return appliers.get(player.getName());
     }
     public static StatusApplier getOrNew(LivingEntity entity) {
-        if(entity instanceof Player) return getOrNew((Player) entity);
+        if (entity instanceof Player) return getOrNew((Player) entity);
         else throw new IllegalArgumentException("This is current a stub!");
     }
 
@@ -79,13 +79,13 @@ public class StatusApplier {
         }
 
         //only work for vanilla effects.
-        if(override && status.isVanilla()) {
+        if (override && status.isVanilla()) {
             StatusWrapper wrapper = fromPotionEffect(status);// 30 seconds
             Pluginizer.getLogger().info("statusppaplier wrapper: " + wrapper);
-            if(wrapper == null) return;
+            if (wrapper == null) return;
             float newDuration = (wrapper.getDuration() - duration);
             Pluginizer.getLogger().info("statusppaplier duration: " + newDuration);
-            if(newDuration < 0) return;
+            if (newDuration < 0) return;
             StatusWrapper newWrapper = new StatusWrapper(wrapper.getStatus(), newDuration, wrapper.getPotency(), wrapper.isAmbience(), wrapper.isOverride());
 
             Pluginizer.getLogger().info("statusppaplier new wrapper: " + newWrapper);
@@ -128,9 +128,9 @@ public class StatusApplier {
         final PotionEffect addpotion = new PotionEffect(status.getPotionEffectType(), duration, potency, ambient);
 
         Bukkit.getScheduler().runTask(Pluginizer.getSpigotPlugin(), () -> {
-            if(!player.addPotionEffect(addpotion, override)) {
-                if(duration == Integer.MAX_VALUE && status == Status.SPEED) Pluginizer.getLogger().info("speed not applied");
-            }else if(duration == Integer.MAX_VALUE && status == Status.SPEED) Pluginizer.getLogger().info("speed applied");
+            if (!player.addPotionEffect(addpotion, override)) {
+                if (duration == Integer.MAX_VALUE && status == Status.SPEED) Pluginizer.getLogger().info("speed not applied");
+            }else if (duration == Integer.MAX_VALUE && status == Status.SPEED) Pluginizer.getLogger().info("speed applied");
         });
 
     }
@@ -142,7 +142,7 @@ public class StatusApplier {
     }
 
     public void removeVanilla(Status status) {
-        if(status == null) return;
+        if (status == null) return;
         PotionEffect effect = status.getPotionEffectType().createEffect(0, 0);
         StatusRemoveEvent removeEvent = new StatusRemoveEvent(this.player, status);
         Bukkit.getPluginManager().callEvent(removeEvent);
@@ -305,7 +305,7 @@ public class StatusApplier {
     }
 
     private void applyBleed(int duration) {
-        if(!isBleeding()) {
+        if (!isBleeding()) {
             bleeded = System.currentTimeMillis() + duration;
             TimeHandler.repeatedTime(1, 1, new BleedStatus(player));
         } else {
@@ -413,7 +413,7 @@ public class StatusApplier {
                 if (isInept()) dura = inept;
                 break;
             case BLEED:
-                if(isBleeding()) dura = bleeded;
+                if (isBleeding()) dura = bleeded;
                 break;
         }
         return (dura != 0) ? dura - System.currentTimeMillis() : 0;
@@ -432,7 +432,7 @@ public class StatusApplier {
                 }
             }
         });
-        if(this.player.getFireTicks() > 0) statuses.add(Status.FIRE);
+        if (this.player.getFireTicks() > 0) statuses.add(Status.FIRE);
         if (isCloaked()) statuses.add(Status.CLOAK);
         if (isMarked()) statuses.add(Status.MARKED);
         if (isShocked()) statuses.add(Status.SHOCK);
@@ -463,7 +463,7 @@ public class StatusApplier {
                 break;
             }
         }
-        if(e == null) return null;
+        if (e == null) return null;
         return new StatusWrapper(status, e.getDuration()/20F, e.getAmplifier(), e.isAmbient());
     }
     @Override

@@ -85,7 +85,7 @@ public class MongoConnection implements IConnection<MongoClient> {
         final int PORT_INT;
 
         try {
-            if(PORT != null) PORT_INT = Integer.parseInt(PORT);
+            if (PORT != null) PORT_INT = Integer.parseInt(PORT);
         } catch (NumberFormatException e) {
             e.printStackTrace();
             System.out.println("[Mongo] PORT is not a number, is: " + PORT);

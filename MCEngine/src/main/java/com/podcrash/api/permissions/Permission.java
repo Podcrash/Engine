@@ -38,13 +38,13 @@ public enum Permission {
 
     public static Permission getBy(String name) {
         for(Permission perm : Permission.values())
-            if(perm.name().equalsIgnoreCase(name))
+            if (perm.name().equalsIgnoreCase(name))
                 return perm;
         return null;
     }
     public static Permission getBy(int id) {
         for(Permission perm : Permission.values())
-            if(perm.getDbId() == id)
+            if (perm.getDbId() == id)
                 return perm;
         return null;
     }
@@ -56,7 +56,7 @@ public enum Permission {
      */
     public static boolean contains(String name) {
         for(Permission perm : Permission.values())
-            if(perm.getPermName().equalsIgnoreCase(name))
+            if (perm.getPermName().equalsIgnoreCase(name))
                 return true;
         return false;
     }

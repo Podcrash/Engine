@@ -39,9 +39,9 @@ public final class VectorTracker implements IPlayerTrack<VectorCoordinate> {
         for(int i = vectors.size() - 1; i >= 0; i--) {
             VectorCoordinate coordinate = vectors.get(i);
             long currentTime = coordinate.getTime();
-            if(timeInMS > currentTime)
+            if (timeInMS > currentTime)
                 return coordinate;
-            if(timeInMS - 500L >= currentTime) break;
+            if (timeInMS - 500L >= currentTime) break;
         }
         return null;
     }
@@ -60,7 +60,7 @@ public final class VectorTracker implements IPlayerTrack<VectorCoordinate> {
     public void send(PacketEvent event) {
         StructureModifier<Integer> integers = event.getPacket().getIntegers();
         Entity entity = event.getPacket().getEntityModifier(event).read(0);
-        if(!(entity instanceof Player)) return;
+        if (!(entity instanceof Player)) return;
         double x = integers.read(0) / 8000.0D;
         double y = integers.read(1) / 8000.0D;
         double z = integers.read(2) / 8000.0D;
@@ -71,7 +71,7 @@ public final class VectorTracker implements IPlayerTrack<VectorCoordinate> {
         lastVectors.computeIfAbsent(player.getName(), k -> new ArrayList<>());
         List<VectorCoordinate> lastCoords = lastVectors.get(player.getName());
         lastCoords.add(coordinate);
-        if(lastCoords.size() > 10)
+        if (lastCoords.size() > 10)
             lastCoords.remove(0);
     }
     @Override

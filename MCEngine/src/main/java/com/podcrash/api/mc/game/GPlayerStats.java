@@ -18,7 +18,7 @@ public abstract class GPlayerStats {
 
     /**
      * Constructor for PlayerStats.
-     * @param uuid
+     * @param uuid uuid of the player
      */
     public GPlayerStats(UUID uuid) {
         this.uuid = uuid;

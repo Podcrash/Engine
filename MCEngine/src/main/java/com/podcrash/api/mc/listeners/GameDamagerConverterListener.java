@@ -4,8 +4,6 @@ import com.podcrash.api.mc.damage.DamageApplier;
 import com.podcrash.api.mc.disguise.Disguise;
 import com.podcrash.api.mc.disguise.Disguiser;
 import com.podcrash.api.mc.effect.status.ThrowableStatusApplier;
-import com.podcrash.api.mc.util.EntityUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -13,7 +11,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
@@ -35,19 +32,23 @@ public class GameDamagerConverterListener extends ListenerBase {
             priority = EventPriority.LOWEST
     )
     public void cancelFireBalls(EntityDamageByEntityEvent event) {
-        if(event.getDamager() instanceof Fireball) event.setCancelled(true);
+        if (event.getDamager() instanceof Fireball)
+            event.setCancelled(true);
     }
     @EventHandler(
             priority = EventPriority.HIGHEST
     )
     public void damage(EntityDamageByEntityEvent event) {
-        if(!(event.getDamager() instanceof Arrow)) return;
+        if (!(event.getDamager() instanceof Arrow))
+            return;
         Arrow arrow = (Arrow) event.getDamager();
-        if (arrow == null || !arrowDamageMap.containsKey(arrow.getEntityId())) return;
-        if(System.currentTimeMillis() < delay.getOrDefault(event.getEntity().getName(), 0L))
+        if (arrow == null || !arrowDamageMap.containsKey(arrow.getEntityId()))
+            return;
+        if (System.currentTimeMillis() < delay.getOrDefault(event.getEntity().getName(), 0L))
             return;
         Disguise possDisguise = Disguiser.getSeenDisguises().get(event.getEntity().getEntityId());
-        if(handleDisguise(possDisguise, event)) return;
+        if (handleDisguise(possDisguise, event))
+            return;
         event.setCancelled(true);
         double damage = 8 * arrowDamageMap.get(arrow.getEntityId());
         DamageApplier.damage((LivingEntity) event.getEntity(), (Player) ((Projectile) event.getDamager()).getShooter(), damage, arrow, true);
@@ -61,8 +62,8 @@ public class GameDamagerConverterListener extends ListenerBase {
      * Pass arrows to the original user
      */
     private boolean handleDisguise(Disguise possDisguise, EntityDamageByEntityEvent event) {
-        if(possDisguise == null) return false;
-        if(!(possDisguise.getEntity() instanceof Player)) {
+        if (possDisguise == null) return false;
+        if (!(possDisguise.getEntity() instanceof Player)) {
             ((LivingEntity) possDisguise.getEntity()).damage(event.getDamage(), event.getDamager());
             return true;
         }
@@ -76,14 +77,13 @@ public class GameDamagerConverterListener extends ListenerBase {
 
     /**
      * Cancel shooting in water = not allowed
-     * @param event
      */
     @EventHandler(
             priority = EventPriority.LOWEST
     )
     public void shootBow(EntityShootBowEvent event) {
         if (event.getEntity() instanceof Player && event.getProjectile() instanceof Arrow) {
-            if(event.getEntity().getLocation().getBlock().getType() == Material.WATER ||
+            if (event.getEntity().getLocation().getBlock().getType() == Material.WATER ||
                     event.getEntity().getLocation().getBlock().getType() == Material.STATIONARY_WATER) {
                 event.setCancelled(true);
                 return;
@@ -96,12 +96,10 @@ public class GameDamagerConverterListener extends ListenerBase {
 
     /**
      * Remove arrows quickly
-     * @param event
      */
     @EventHandler(priority = EventPriority.LOWEST)
     public void arrowLand(ProjectileHitEvent event) {
-        if(event.getEntity() instanceof Arrow) {
+        if (event.getEntity() instanceof Arrow)
             event.getEntity().remove();
-        }
     }
 }

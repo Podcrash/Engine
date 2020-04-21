@@ -31,7 +31,7 @@ public class ItemStackUtil {
         ItemStack item = new ItemStack(material, amount);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(displayName);
-        if(lore != null) meta.setLore(lore);
+        if (lore != null) meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
     }

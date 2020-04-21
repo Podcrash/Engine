@@ -5,6 +5,7 @@ import com.podcrash.api.db.pojos.map.BaseMap;
 import com.podcrash.api.db.pojos.map.GameMap;
 import com.podcrash.api.db.pojos.map.Point;
 import com.podcrash.api.db.pojos.map.Point2Point;
+import com.podcrash.api.db.redis.Communicator;
 import com.podcrash.api.mc.damage.DamageApplier;
 import com.podcrash.api.mc.effect.particle.ParticleGenerator;
 import com.podcrash.api.mc.effect.status.Status;
@@ -26,19 +27,14 @@ import com.podcrash.api.mc.util.ItemStackUtil;
 import com.podcrash.api.mc.util.PacketUtil;
 import com.podcrash.api.mc.world.WorldManager;
 import com.podcrash.api.plugin.Pluginizer;
-import com.podcrash.api.db.redis.Communicator;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import org.bukkit.*;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerVelocityEvent;
 import org.bukkit.inventory.ItemStack;
@@ -87,12 +83,11 @@ public class GameListener extends ListenerBase {
         List<GTeam> teams = game.getTeams();
         Map<String, List<Point>> spawnsArr = map.getSpawns();
         //set spawns
-        for(int i = 0, gTeamSize = teams.size(); i < gTeamSize; i++) {
-            GTeam team = teams.get(i);
+        for (GTeam team : teams) {
             String color = team.getTeamEnum().getColor().name();
             List<Point> spawns = spawnsArr.get(color);
             List<Location> spawnLocs = new ArrayList<>();
-            for(Point s : spawns) {
+            for (Point s : spawns) {
                 spawnLocs.add(new Location(world, s.getX(), s.getY(), s.getZ()));
             }
             team.setSpawns(spawnLocs);
@@ -118,16 +113,17 @@ public class GameListener extends ListenerBase {
 
     /**
      * EventPriority of LOW will ensure it will run before most things
-     * @param e
      */
     @EventHandler(priority = EventPriority.LOW)
     public void collideItem(ItemCollideEvent e) {
         Game game = GameManager.getGame();
-        if(game == null) return;
-        if(!(e.getCollisionVictim() instanceof Player)) return;
+        if (game == null)
+            return;
+        if (!(e.getCollisionVictim() instanceof Player))
+            return;
         Player p = (Player) e.getCollisionVictim();
         //if the player is not participating (spectator) or is respawning, then let the item pass through them.
-        if(!game.isParticipating(p) || game.isRespawning(p))
+        if (!game.isParticipating(p) || game.isRespawning(p))
             e.setCancelled(true);
 
     }
@@ -159,7 +155,7 @@ public class GameListener extends ListenerBase {
             player.setGameMode(GameMode.SPECTATOR);
         });
         BaseMap map = game.getMap();
-        if(map == null) return;
+        if (map == null) return;
         StringBuilder authorBuilder = new StringBuilder();
         map.getAuthors().forEach(authorBuilder::append);
         String message = ChatColor.GRAY + "\n ==================== \n \n " + ChatColor.RESET + "" +
@@ -189,7 +185,7 @@ public class GameListener extends ListenerBase {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onGameDeath(GameDeathEvent e) {
-        //if(!(e.getKiller() instanceof Player)) return;
+        //if (!(e.getKiller() instanceof Player)) return;
 
         Player victim = e.getWho();
         LivingEntity killer = e.getKiller();
@@ -207,13 +203,13 @@ public class GameListener extends ListenerBase {
             StatusApplier.getOrNew(victim).removeStatus(Status.values());
             e.getGame().consumeBukkitPlayer(player -> {
                 player.sendMessage(finalMsg);
-                if(player != victim && player.canSee(victim)) player.hidePlayer(victim);
+                if (player != victim && player.canSee(victim))
+                    player.hidePlayer(victim);
             });
 
             String causes = e.getDeathCausesMessage();
-            if (causes != null) {
+            if (causes != null)
                 e.getWho().sendMessage(causes);
-            }
         }, 1L);
 
         Vector vector = victim.getVelocity();
@@ -223,7 +219,7 @@ public class GameListener extends ListenerBase {
 
         //StatusApplier.getOrNew(victim).applyStatus(Status.INEPTITUDE, 9, 1);
         TimeHandler.delayTime(200L, () -> {
-            if(game.getGameState() == GameState.STARTED) {
+            if (game.getGameState() == GameState.STARTED) {
                 GTeam team = game.getTeam(victim);
                 victim.teleport(team.getSpawn(victim));
                 Bukkit.getPluginManager().callEvent(new GameResurrectEvent(game, victim));
@@ -233,7 +229,7 @@ public class GameListener extends ListenerBase {
 
     public static String editMessage(String msg, Game game, Player victim, LivingEntity killer) {
         TeamEnum victimTeam = game.getTeamEnum(victim);
-        if(killer != null) {
+        if (killer != null) {
             TeamEnum enemyTeam = game.getTeamEnum((Player) killer);
             msg = msg.replace(victim.getName(), victimTeam.getChatColor() + victim.getName())
                     .replace(killer.getName(), enemyTeam.getChatColor() + killer.getName());
@@ -295,17 +291,18 @@ public class GameListener extends ListenerBase {
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void gameDamage(GameDamageEvent e) {
         Game game = e.getGame();
-        //if(game.getGameState() == GameState.LOBBY) return;
+        //if (game.getGameState() == GameState.LOBBY) return;
 
-        if(e.getWho() == null || e.getKiller() == null) return;
+        if (e.getWho() == null || e.getKiller() == null)
+            return;
         Player victim = e.getWho();
-        if(deadPeople.contains(victim) || deadPeople.contains(e.getKiller())|| GameManager.isSpectating(victim))
+        if (deadPeople.contains(victim) || deadPeople.contains(e.getKiller())|| GameManager.isSpectating(victim))
             e.setCancelled(true);
-        else if(game.getTeam(e.getWho()) == null)
+        else if (game.getTeam(e.getWho()) == null)
             e.setCancelled(true);
-        else if(deadPeople.contains(e.getKiller()))
+        else if (deadPeople.contains(e.getKiller()))
             e.setCancelled(true);
-        else if(game.isSpectating(e.getKiller()) || game.isSpectating(e.getWho()))
+        else if (game.isSpectating(e.getKiller()) || game.isSpectating(e.getWho()))
             //latter part might be uneeded but just in case
             e.setCancelled(true);
     }
@@ -313,20 +310,23 @@ public class GameListener extends ListenerBase {
     @EventHandler(priority = EventPriority.LOWEST)
     public void hit(DamageApplyEvent e) {
         Game game = GameManager.getGame();
-        if(game == null) return;
-        //if(game.getGameState() == GameState.LOBBY) return;
-        if(!(e.getAttacker() instanceof Player) && !(e.getVictim() instanceof Player)) return;
+        if (game == null)
+            return;
+        //if (game.getGameState() == GameState.LOBBY) return;
+        if (!(e.getAttacker() instanceof Player) && !(e.getVictim() instanceof Player))
+            return;
         boolean sameTeam = game.isOnSameTeam((Player) e.getAttacker(), (Player) e.getVictim());
         System.out.println(e.getCause() + " sameTeam clause: " + sameTeam + " attacker: " + e.getAttacker() + " victim: " + e.getVictim());
-        if(sameTeam)
+        if (sameTeam)
             e.setCancelled(true);
     }
     @EventHandler(priority = EventPriority.NORMAL)
     public void damage(EntityDamageEvent e) {
-        if(e.getEntity() instanceof Player) {
-            if (deadPeople.contains(e.getEntity()) || GameManager.isSpectating((Player) e.getEntity()))
-                e.setCancelled(true);
+        if (!(e.getEntity() instanceof Player)) {
+            return;
         }
+        if (deadPeople.contains(e.getEntity()) || GameManager.isSpectating((Player) e.getEntity()))
+            e.setCancelled(true);
     }
     //--------------------------------------
     //GameEvents (Converters)
@@ -337,13 +337,15 @@ public class GameListener extends ListenerBase {
      */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onDeath(DeathApplyEvent e) {
-        if (e.isCancelled()) return;
+        if (e.isCancelled())
+            return;
         Player p = e.getPlayer();
         Game game = GameManager.getGame();
         LivingEntity killer = e.getAttacker();
-        if (game == null || game.getGameState() == GameState.LOBBY) return;
+        if (game == null || game.getGameState() == GameState.LOBBY)
+            return;
         p.setHealth(p.getMaxHealth()); //heal right away
-        if(e.wasUnsafe())
+        if (e.wasUnsafe())
             p.teleport(game.getGameWorld().getSpawnLocation());
         game.getRespawning().add(p.getUniqueId());
         Bukkit.getServer().getPluginManager().callEvent(new GameDeathEvent(game, p, killer, e.getDeathMessage(), e.getCausesMessage()));
@@ -356,7 +358,7 @@ public class GameListener extends ListenerBase {
 
         if (game == null || game.getGameState() != GameState.STARTED) {
             // AKA if we are in a game lobby
-            if(game != null ) {
+            if (game != null ) {
                 game.removePlayerLobbyPVPing(player);
                 game.updateLobbyInventory(player);
             } else {    // AKA if we are in a general lobby
@@ -381,19 +383,18 @@ public class GameListener extends ListenerBase {
     /**
      * GameDamageEvent(Game game, Player who, Player victim)
      */
-
     @EventHandler
     public void status(StatusApplyEvent e) {
-        if(!(e.getEntity() instanceof Player)) return;
+        if (!(e.getEntity() instanceof Player)) return;
         Player player = (Player) e.getEntity();
-        if(GameManager.isSpectating(player) || deadPeople.contains(player) || DamageApplier.getInvincibleEntities().contains(player))
+        if (GameManager.isSpectating(player) || deadPeople.contains(player) || DamageApplier.getInvincibleEntities().contains(player))
             e.setCancelled(true);
     }
 
     @EventHandler
     public void velocity(PlayerVelocityEvent e) {
         Player player = e.getPlayer();
-        if(GameManager.isSpectating(player) || deadPeople.contains(player) || DamageApplier.getInvincibleEntities().contains(player))
+        if (GameManager.isSpectating(player) || deadPeople.contains(player) || DamageApplier.getInvincibleEntities().contains(player))
             e.setCancelled(true);
     }
 
@@ -402,24 +403,25 @@ public class GameListener extends ListenerBase {
      */
     @EventHandler
     public void onPickUp(PlayerPickupItemEvent e) {
-        if(!EntityUtil.onGround(e.getItem()) || deadPeople.contains(e.getPlayer()) || DamageApplier.getInvincibleEntities().contains(e.getPlayer())) {
+        if (!EntityUtil.onGround(e.getItem()) || deadPeople.contains(e.getPlayer()) || DamageApplier.getInvincibleEntities().contains(e.getPlayer())) {
             e.setCancelled(true);
             return;
         }
         Player who = e.getPlayer();
         Game game = GameManager.getGame();
-        if (game == null) return;
+        if (game == null)
+            return;
         e.setCancelled(true);
         org.bukkit.entity.Item item = e.getItem();
         ItemObjective itemObj = null;
         List<ItemObjective> objectives = game.getItemObjectives();
-        if(objectives == null) return;
+        if (objectives == null) return;
         for(ItemObjective itemObjective : objectives) {
-            if(itemObjective.getItem().getEntityId() == item.getEntityId()) {
+            if (itemObjective.getItem().getEntityId() == item.getEntityId())
                 itemObj = itemObjective;
-            }
         }
-        if(itemObj == null) return;
+        if (itemObj == null)
+            return;
         int remaining = e.getRemaining(); // most likely not too important
 
         Bukkit.getServer().getPluginManager().callEvent(new GamePickUpEvent(game, who, itemObj, remaining));
@@ -427,14 +429,14 @@ public class GameListener extends ListenerBase {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void chat(AsyncPlayerChatEvent e) {
-        if(e.isCancelled()) return;
+        if (e.isCancelled()) return;
         Player player = e.getPlayer();
 
-        if(GameManager.getGame() != null && GameManager.getGame().isParticipating(player)) {
+        if (GameManager.getGame() != null && GameManager.getGame().isParticipating(player)) {
             e.setCancelled(true);
             Game game = GameManager.getGame();
             String color = "";
-            if(!game.isSpectating(player)) color = game.getTeamEnum(player).getChatColor().toString();
+            if (!game.isSpectating(player)) color = game.getTeamEnum(player).getChatColor().toString();
             String name = player.getName();
             String replace = ChatColor.RESET + color + name;
             game.broadcast(e.getFormat().replace(name, replace));
@@ -444,14 +446,14 @@ public class GameListener extends ListenerBase {
 
 //    @EventHandler(priority = EventPriority.HIGHEST)
 //    public void blockBreak(BlockBreakEvent e){
-//        if(GameManager.hasPlayer(e.getPlayer())) {
+//        if (GameManager.hasPlayer(e.getPlayer())) {
 //            e.setCancelled(true);
 //        }
 //    }
 //
 //    @EventHandler(priority = EventPriority.HIGHEST)
 //    public void blockPlace(BlockPlaceEvent e){
-//        if(GameManager.hasPlayer(e.getPlayer())) {
+//        if (GameManager.hasPlayer(e.getPlayer())) {
 //            e.setCancelled(true);
 //        }
 //    }

@@ -63,12 +63,12 @@ public class CustomSkeleton extends EntitySkeleton {
 
     @Override
     protected void getRareDrop() {
-        if(this.player == null) super.getRareDrop();
+        if (this.player == null) super.getRareDrop();
     }
 
     @Override
     protected void a(EntityItem entityItem){
-        if(this.player == null) super.a(entityItem);
+        if (this.player == null) super.a(entityItem);
     }
 
     @Override
@@ -79,7 +79,7 @@ public class CustomSkeleton extends EntitySkeleton {
 
     @Override
     public void makeSound(String s, float f, float f1) {
-        if(this.player == null) super.makeSound(s, f, f1);
+        if (this.player == null) super.makeSound(s, f, f1);
     }
 
     @Override

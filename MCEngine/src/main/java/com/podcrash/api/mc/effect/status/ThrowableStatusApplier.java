@@ -28,12 +28,13 @@ public class ThrowableStatusApplier {
     }
 
     public static void apply(Arrow arrow, Entity entity) {
-        if (arrowStatuses.containsKey(arrow)) {
-            Collection<StatusWrapper> statuses = arrowStatuses.get(arrow);
-            StatusApplier applier = StatusApplier.getOrNew((Player) entity);
-            for (StatusWrapper status : statuses) {
-                applier.applyStatus(status);
-            }
+        if (!arrowStatuses.containsKey(arrow)) {
+            return;
+        }
+        Collection<StatusWrapper> statuses = arrowStatuses.get(arrow);
+        StatusApplier applier = StatusApplier.getOrNew((Player) entity);
+        for (StatusWrapper status : statuses) {
+            applier.applyStatus(status);
         }
     }
 }

@@ -1,10 +1,9 @@
 package com.podcrash.api.mc.listeners;
 
+import com.podcrash.api.mc.mob.MobData;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
@@ -14,7 +13,6 @@ import org.bukkit.potion.PotionEffect;
 import java.util.Collection;
 
 import static com.podcrash.api.mc.mob.MobManager.mobs;
-import com.podcrash.api.mc.mob.MobData;
 
 public class MobListeners extends ListenerBase {
     public MobListeners(JavaPlugin plugin) {
@@ -30,7 +28,8 @@ public class MobListeners extends ListenerBase {
             int id = entity.getEntityId();
             MobData mob = mobs.get(id);
 
-            if (mob == null) continue;
+            if (mob == null)
+                continue;
 
             if (!mob.takesPotionEffects()) {
                 Collection<PotionEffect> entityEffects = entity.getActivePotionEffects();
@@ -49,25 +48,26 @@ public class MobListeners extends ListenerBase {
         int id = e.getEntity().getEntityId();
         MobData mob = mobs.get(id);
 
-        if (mob == null) return;
+        if (mob == null)
+            return;
 
-        if (!mob.canBurn()) {
+        if (!mob.canBurn())
             e.setCancelled(true);
-        }
 
     }
 
     @EventHandler(priority = EventPriority.LOW)
     public void onMobDamage(EntityDamageEvent e) {
-        if(e.isCancelled()) return;
+        if (e.isCancelled())
+            return;
         int id = e.getEntity().getEntityId();
         MobData mob = mobs.get(id);
 
-        if (mob == null) return;
+        if (mob == null)
+            return;
 
-        if(!mob.isDamageable()) {
+        if (!mob.isDamageable())
             e.setCancelled(true);
-        }
 
     }
 }

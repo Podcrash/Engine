@@ -10,7 +10,7 @@ public class HologramMaker implements Runnable {
     private static final List<Hologram> holograms = new ArrayList<>();
     private static final List<HologramUpdateWrapper> hologramUpdaters = new ArrayList<>();
     private HologramMaker() {
-
+        //limit scope
     }
 
     public static Hologram createHologram(Location location, List<String> texts) {
@@ -23,7 +23,8 @@ public class HologramMaker implements Runnable {
     public static void destroyHologram(Hologram hologram) {
         hologram.destroy();
         holograms.remove(hologram);
-        hologramUpdaters.remove(hologram);
+        //todo fix this?
+       // hologramUpdaters.remove(hologram);
     }
 
     private static class HologramUpdateWrapper {
@@ -37,7 +38,7 @@ public class HologramMaker implements Runnable {
         }
 
         private void update() {
-            if(System.currentTimeMillis() - lastTime >= this.delay) {
+            if (System.currentTimeMillis() - lastTime >= this.delay) {
                 hologram.destroy();
                 hologram.render();
                 this.lastTime = System.currentTimeMillis();

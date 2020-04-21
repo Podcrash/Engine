@@ -29,7 +29,7 @@ public class TeamCommand extends BukkitCommand {
             return true;
         }
         // If the sender is spectating, remove them from the list of spectators before assigning to a team.
-        if(GameManager.getGame().isSpectating((Player) sender))
+        if (GameManager.getGame().isSpectating((Player) sender))
             GameManager.getGame().toggleSpec((Player) sender);
 
         Player player = (Player) sender;
@@ -43,12 +43,12 @@ public class TeamCommand extends BukkitCommand {
 
         // Quickly make sure that there will not be a NPE from the specified team not existing.
         for(TeamEnum teamEnum : GameManager.getGame().getTeamSettings().getTeamColors()) {
-            if(teamEnum.getName().equalsIgnoreCase(team)) {
+            if (teamEnum.getName().equalsIgnoreCase(team)) {
                 valid = true;
                 break;
             }
         }
-        if(!valid) {
+        if (!valid) {
             player.sendMessage(String.format("%sInvicta> %sThe team you specified does not exist.", ChatColor.BLUE, ChatColor.GRAY));
             return true;
         }

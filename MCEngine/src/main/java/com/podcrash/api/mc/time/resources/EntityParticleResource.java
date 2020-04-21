@@ -28,10 +28,10 @@ public class EntityParticleResource implements TimeResource {
     public void task() {
         packet.setLocation(entity.getLocation());
         for(Player player : entity.getWorld().getPlayers()) {
-            if(!canSee(this.entity, player)) continue;
+            if (!canSee(this.entity, player)) continue;
             packet.sendPacket(player);
         }
-        if(sound != null) SoundPlayer.sendSound(entity.getLocation(), sound.getSoundName(), sound.getVolume(), sound.getPitch());
+        if (sound != null) SoundPlayer.sendSound(entity.getLocation(), sound.getSoundName(), sound.getVolume(), sound.getPitch());
     }
 
     @Override
@@ -51,7 +51,7 @@ public class EntityParticleResource implements TimeResource {
      * @return
      */
     private boolean canSee(Entity player, Player viewer) {
-        if(!(player instanceof Player)) return true;
+        if (!(player instanceof Player)) return true;
         return viewer.canSee((Player) player);
     }
 }

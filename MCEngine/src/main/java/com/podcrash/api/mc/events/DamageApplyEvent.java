@@ -194,9 +194,8 @@ public class DamageApplyEvent extends Event implements Cancellable {
         int i = 0;
         for(ItemStack armor : entity.getEquipment().getArmorContents()) {
             net.minecraft.server.v1_8_R3.ItemStack nmsArmor = CraftItemStack.asNMSCopy(armor);
-            if(nmsArmor != null && nmsArmor.getItem() instanceof ItemArmor) {
+            if (nmsArmor != null && nmsArmor.getItem() instanceof ItemArmor)
                 i += ((ItemArmor) nmsArmor.getItem()).c;
-            }
         }
         return i;
     }

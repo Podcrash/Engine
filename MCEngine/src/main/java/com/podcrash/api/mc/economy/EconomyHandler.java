@@ -79,7 +79,7 @@ public class EconomyHandler {
 
             boolean canPay = currency.getGold() > cost;
 
-            if(canPay) {
+            if (canPay) {
                 BuySuccessEvent success = new BuySuccessEvent(player, finalItem, cost, currency.getGold());
                 pluginManager.callEvent(success);
                 currentPlayerOrder.put(player.getName(), success);
@@ -95,16 +95,16 @@ public class EconomyHandler {
     public boolean hasAttempted(Player player, String item) {
         item = ChatUtil.strip(item);
         BuySuccessEvent success = currentPlayerOrder.get(player.getName());
-        if(success == null) return false;
+        if (success == null) return false;
         return success.getItem().equalsIgnoreCase(item);
     }
 
     public void confirm(Player player, String item) {
         item = ChatUtil.strip(item);
         BuySuccessEvent success = currentPlayerOrder.get(player.getName());
-        if(success == null)
+        if (success == null)
             return;
-        if(!success.getItem().equalsIgnoreCase(item))
+        if (!success.getItem().equalsIgnoreCase(item))
             return;
         BuyConfirmEvent confirm  = new BuyConfirmEvent(success);
         Bukkit.getPluginManager().callEvent(confirm);
@@ -114,8 +114,8 @@ public class EconomyHandler {
 
     public void cancel(Player player, String item) {
         BuySuccessEvent success = currentPlayerOrder.get(player.getName());
-        if(success == null) return;
-        if(!success.getItem().equalsIgnoreCase(item)) return;
+        if (success == null) return;
+        if (!success.getItem().equalsIgnoreCase(item)) return;
         BuyCancelEvent cancel = new BuyCancelEvent(success);
         Bukkit.getPluginManager().callEvent(cancel);
         currentPlayerOrder.remove(player.getName());

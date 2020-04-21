@@ -19,8 +19,7 @@ public abstract class CallbackAction<T extends CallbackAction> implements TimeRe
     private boolean runOnce = true;
 
     /**
-     * The constructor.
-     * {@link TimeHandler#repeatedTime(long, long, TimeResource)}
+     * @see TimeHandler#repeatedTime(long, long, TimeResource)
      * @param delay the delay in milliseconds to start the callback
      * @param ticks how many synchronized ticks this should run
      */
@@ -70,7 +69,8 @@ public abstract class CallbackAction<T extends CallbackAction> implements TimeRe
 
     @Override
     public boolean cancel() {
-        if (callbackBoolean == null) throw new NullPointerException("callBackBoolean is null");
+        if (callbackBoolean == null)
+            throw new NullPointerException("callBackBoolean is null");
         return this.callbackBoolean.evaluate();
     }
 

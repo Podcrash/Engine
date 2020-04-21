@@ -19,7 +19,7 @@ public final class PacketUtil {
     public static void syncSend(List<AbstractPacket> packets, List<Player> players) {
         Bukkit.getScheduler().runTask(Pluginizer.getSpigotPlugin(), () -> {
             for(AbstractPacket packet : packets){
-                if(packet == null) continue;
+                if (packet == null) continue;
                 for(Player player : players) packet.sendPacket(player);
             }
         });
@@ -27,7 +27,7 @@ public final class PacketUtil {
     public static void syncSend(AbstractPacket[] packets, List<Player> players) {
         Bukkit.getScheduler().runTask(Pluginizer.getSpigotPlugin(), () -> {
             for(AbstractPacket packet : packets){
-                if(packet == null) continue;
+                if (packet == null) continue;
                 for(Player player : players) packet.sendPacket(player);
             }
         });
@@ -35,7 +35,7 @@ public final class PacketUtil {
     public static void syncSend(AbstractPacket[] packets, Player... players) {
         Bukkit.getScheduler().runTask(Pluginizer.getSpigotPlugin(), () -> {
             for(AbstractPacket packet : packets){
-                if(packet == null) continue;
+                if (packet == null) continue;
                 for(Player player : players) packet.sendPacket(player);
             }
         });
@@ -43,7 +43,7 @@ public final class PacketUtil {
     public static void syncSend(List<AbstractPacket> packets, Player... players) {
         Bukkit.getScheduler().runTask(Pluginizer.getSpigotPlugin(), () -> {
             for(AbstractPacket packet : packets){
-                if(packet == null) continue;
+                if (packet == null) continue;
                 for(Player player : players) packet.sendPacket(player);
             }
         });
@@ -60,7 +60,7 @@ public final class PacketUtil {
     public static void asyncSend(List<AbstractPacket> packets, List<Player> players) {
         Bukkit.getScheduler().runTaskAsynchronously(Pluginizer.getSpigotPlugin(), () -> {
             for(AbstractPacket packet : packets){
-                if(packet == null) continue;
+                if (packet == null) continue;
                 for(Player player : players) packet.sendPacket(player);
             }
         });
@@ -68,7 +68,7 @@ public final class PacketUtil {
     public static void asyncSend(AbstractPacket[] packets, List<Player> players) {
         Bukkit.getScheduler().runTaskAsynchronously(Pluginizer.getSpigotPlugin(), () -> {
             for(AbstractPacket packet : packets){
-                if(packet == null) continue;
+                if (packet == null) continue;
                 for(Player player : players) packet.sendPacket(player);
             }
         });
@@ -76,7 +76,7 @@ public final class PacketUtil {
     public static void asyncSend(AbstractPacket[] packets, Player... players) {
         Bukkit.getScheduler().runTaskAsynchronously(Pluginizer.getSpigotPlugin(), () -> {
             for(AbstractPacket packet : packets){
-                if(packet == null) continue;
+                if (packet == null) continue;
                 for(Player player : players) packet.sendPacket(player);
             }
         });
@@ -84,7 +84,7 @@ public final class PacketUtil {
     public static void asyncSend(List<AbstractPacket> packets, Player... players) {
         Bukkit.getScheduler().runTaskAsynchronously(Pluginizer.getSpigotPlugin(), () -> {
             for(AbstractPacket packet : packets){
-                if(packet == null) continue;
+                if (packet == null) continue;
                 for(Player player : players) packet.sendPacket(player);
             }
         });

@@ -45,7 +45,8 @@ public class EntityParticleWrapper {
     public void send() {
         packet.setLocation(entity.getLocation());
         PacketUtil.syncSend((AbstractPacket) packet, players);
-        if(sound != null) SoundPlayer.sendSound(entity.getLocation(), sound.getSoundName(), sound.getVolume(), sound.getPitch());
+        if (sound != null)
+            SoundPlayer.sendSound(entity.getLocation(), sound.getSoundName(), sound.getVolume(), sound.getPitch());
     }
 
 

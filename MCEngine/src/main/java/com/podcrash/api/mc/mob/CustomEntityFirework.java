@@ -33,7 +33,7 @@ public class CustomEntityFirework extends EntityFireworks {
             return;
         }
         gone = true;
-        if(this.world.isClientSide) {
+        if (this.world.isClientSide) {
             if (players != null) {
                 if (players.length > 0) {
                     for (Player player : players) {

@@ -46,7 +46,7 @@ public class RayTracer {
 
             originClone.add(addVector.multiply(i));
             lastV = originClone;
-            if(intersectsBox(originClone, box)) {
+            if (intersectsBox(originClone, box)) {
                 return lastV.distance(origin) < distance;
             }
         }
@@ -58,7 +58,7 @@ public class RayTracer {
         double add = 1D - accuracy;
         Vector originDirection = direction.clone();
 
-        if(soft > 0) {
+        if (soft > 0) {
             Coordinate mid = box.midPoint();
             Vector dirToMid = mid.subtract(origin).toVector().normalize();
             originDirection.add(dirToMid.multiply(soft)).normalize();
@@ -68,7 +68,7 @@ public class RayTracer {
             Vector addVector = originDirection.clone();
 
             originClone.add(addVector.multiply(i));
-            if(intersectsBox(originClone, box)) return i;
+            if (intersectsBox(originClone, box)) return i;
         }
 
         return -1;
@@ -82,7 +82,7 @@ public class RayTracer {
             Vector addVector = direction.clone();
 
             originClone.add(addVector.multiply(i));
-            if(intersectsBox(originClone, box) && originClone.distanceSquared(originClone) < distance * distance) return originClone;
+            if (intersectsBox(originClone, box) && originClone.distanceSquared(originClone) < distance * distance) return originClone;
         }
         return null;
     }
@@ -100,8 +100,8 @@ public class RayTracer {
         double maxY = box.getB().getY();
         double maxZ = box.getB().getZ();
 
-        if(compare(minX, x, maxX)) {
-            if(compare(minY, y, maxY)) {
+        if (compare(minX, x, maxX)) {
+            if (compare(minY, y, maxY)) {
                 return compare(minZ, z, maxZ);
             }
         }

@@ -9,20 +9,15 @@ public class GamePlayerTeamAssign {
     public static boolean sortPlayers(Game game, boolean balanced) {
         // Set the variables.
         List<GTeam> teams = game.getTeams();
-        List<UUID> extra = new ArrayList<UUID>(game.getParticipantsNoTeam());
+        List<UUID> extra = new ArrayList<>(game.getParticipantsNoTeam());
         int teamCount = teams.size();
         int participantCount = game.getParticipants().size();
         int cap = (participantCount/teamCount);
         // If balanced, assign overflow to extras.
         if (balanced) {
             for (GTeam team : teams) {
-                int teamCap;
+                int teamCap = Math.min(cap, team.getMaxPlayers());
                 // Determine the cap for the team.
-                if (cap > team.getMaxPlayers()) {
-                    teamCap = team.getMaxPlayers();
-                } else {
-                    teamCap = cap;
-                }
                 // If the team size is greater than teamCap, assign overflow to extras.
                 if (team.teamSize() > teamCap) {
                     extra.addAll(team.getPlayers().subList(teamCap, team.teamSize()));
@@ -36,14 +31,14 @@ public class GamePlayerTeamAssign {
             UUID uuid = iterator.next();
             // Get all teams that have space left. If there are no teams, break.
             List<GTeam> available = getNonFullTeams(game);
-            if (available.isEmpty()) { break; }
+            if (available.isEmpty())
+                break;
             // Get the team with the least number of players.
             // Add player to the team and remove from extras.
             GTeam min = available.get(0);
             for (GTeam team : available) {
-                if (team.teamSize() < min.teamSize()) {
+                if (team.teamSize() < min.teamSize())
                     min = team;
-                }
             }
             game.joinTeam(Bukkit.getPlayer(uuid), min.getTeamEnum());
             iterator.remove();
@@ -58,9 +53,8 @@ public class GamePlayerTeamAssign {
     private static List<GTeam> getNonFullTeams(Game game) {
         List<GTeam> result = new ArrayList<GTeam>();
         for (GTeam team : game.getTeams()) {
-            if (team.teamSize() < team.getMaxPlayers()) {
+            if (team.teamSize() < team.getMaxPlayers())
                 result.add(team);
-            }
         }
         return result;
     }

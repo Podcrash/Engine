@@ -24,7 +24,7 @@ public class CollideBeforeHitGround extends CallbackAction<CollideBeforeHitGroun
         this.x = hitboxX;
         this.y = hitboxY;
         this.z = hitBoxZ;
-        this.changeEvaluation(() -> (
+        changeEvaluation(() -> (
                 getValidEntitiesInRange(this.entity,x,y,z).size() > 0) ||
                 EntityUtil.onGround(this.entity));
     }
@@ -40,11 +40,11 @@ public class CollideBeforeHitGround extends CallbackAction<CollideBeforeHitGroun
         Game game = GameManager.getGame();
         for (int i = 0; i < entities.size(); i++) {
             Entity anEntity = entities.get(i);
-            if (anEntity instanceof Player &&
-                    (!game.isParticipating((Player) anEntity) || game.isRespawning((Player) anEntity))) {
-                entities.remove(i);
-                i--;
-            }
+            if (!(anEntity instanceof Player) ||
+                    (game.isParticipating((Player) anEntity) && !game.isRespawning((Player) anEntity)))
+                continue;
+            entities.remove(i);
+            i--;
         }
         return entities;
     }

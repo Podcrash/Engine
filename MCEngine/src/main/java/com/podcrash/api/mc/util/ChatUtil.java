@@ -22,7 +22,7 @@ public final class ChatUtil {
      * @param message
      */
     public static void sendMessage(CommandSender sender, String message) {
-        if(message.length() <= 256) {
+        if (message.length() <= 256) {
             sender.sendMessage(message);
             return;
         }
@@ -52,7 +52,7 @@ public final class ChatUtil {
         int size = charAR.length;
         StringBuilder builder = new StringBuilder();
         for(int i = 0; i < size; i++) {
-            if(charAR[i] == ChatColor.COLOR_CHAR) {
+            if (charAR[i] == ChatColor.COLOR_CHAR) {
                 i += 1;
                 continue;
             }

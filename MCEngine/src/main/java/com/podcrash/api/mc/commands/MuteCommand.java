@@ -35,16 +35,16 @@ public class MuteCommand extends BukkitCommand {
             sender.sendMessage(String.format("%sInvicta> %sYou have insufficient permissions to use that command.", ChatColor.BLUE, ChatColor.GRAY));
             return true;
         }
-        if(args.length == 1) {
+        if (args.length == 1) {
             OfflinePlayer player = getUUID(args[0]);
-            if(player == null) {
+            if (player == null) {
                 sender.sendMessage("Player " + args[0] + " has never joined this server before!");
                 return true;
             }
             UUID playerUUID = player.getUniqueId();
             RanksTable table = TableOrganizer.getTable(DataTableType.PERMISSIONS);
             table.hasRoleAsync(playerUUID, "MUTED").thenApply(hasRole-> {
-                if(hasRole) {
+                if (hasRole) {
                     table.removeRole(playerUUID, "MUTED");
                     sender.sendMessage("Successful unmuted " + args[0] + ".");
                 } else {
@@ -52,7 +52,7 @@ public class MuteCommand extends BukkitCommand {
                     sender.sendMessage("Successful muted " + args[0] + ".");
                 }
                 Player p;
-                if((p = Bukkit.getPlayer(playerUUID)) != null) {
+                if ((p = Bukkit.getPlayer(playerUUID)) != null) {
                     PodcrashSpigot.getInstance().setupPermissions(p);
                 }
                 return true;
@@ -62,7 +62,7 @@ public class MuteCommand extends BukkitCommand {
     }
 
     private OfflinePlayer getUUID(String args) {
-        if(Bukkit.getPlayer(args) != null) {
+        if (Bukkit.getPlayer(args) != null) {
             return Bukkit.getPlayer(args);
         }else if (Bukkit.getOfflinePlayer(args).hasPlayedBefore()){
             return Bukkit.getOfflinePlayer(args);

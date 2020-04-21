@@ -38,7 +38,7 @@ public final class SoundPlayer {
     public static void sendSound(Location loc, String sound, float volume, int pitch, List<Player> players) {
         WrapperPlayServerNamedSoundEffect soundPacket = createSound(loc, sound, volume, pitch);
 
-        if(players == null) players = loc.getWorld().getPlayers();
+        if (players == null) players = loc.getWorld().getPlayers();
         PacketUtil.asyncSend(soundPacket, players);
     }
 

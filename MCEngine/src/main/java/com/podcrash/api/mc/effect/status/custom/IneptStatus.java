@@ -7,7 +7,6 @@ import org.bukkit.entity.Player;
 
 /**
  * Part of the respawn for games
- * @see me.raindance.champions.listeners.maintainers.GameListener#onDeath(com.podcrash.api.mc.events.DeathApplyEvent)
  */
 public class IneptStatus extends CustomStatus {
     private final Game game;
@@ -19,7 +18,7 @@ public class IneptStatus extends CustomStatus {
     @Override
     protected void doWhileAffected() {
         for(Player player : game.getBukkitPlayers()){
-            if(player != getPlayer() && player.canSee(getPlayer())) player.hidePlayer(getPlayer());
+            if (player != getPlayer() && player.canSee(getPlayer())) player.hidePlayer(getPlayer());
         }
     }
 
@@ -32,7 +31,7 @@ public class IneptStatus extends CustomStatus {
     protected void removeEffect() {
         getApplier().removeInept();
         for(Player player : game.getBukkitPlayers()){
-            if(player != getPlayer()) player.showPlayer(getPlayer());
+            if (player != getPlayer()) player.showPlayer(getPlayer());
         }
     }
 }

@@ -24,14 +24,18 @@ public class HitGround extends CallbackAction<HitGround> {
     }
 
     /**
-     *
-     * @return true if is moving, false if is (effecitvely) not moving
+     * Finds if the entity is moving or not
+     * @return true if is moving, false if is (effectively) not moving
      */
     private boolean isMoving() {
         Vector currentVector = this.entity.getLocation().toVector();
         return currentVector.distanceSquared(previousVector) > 0.05;
     }
 
+    /**
+     * Finds if the entity is in a block
+     * @return if the entity is in a block
+     */
     private boolean isInABlock() {
         Block block = previousVector.toLocation(entity.getWorld()).getBlock();
         Material type = block.getType();

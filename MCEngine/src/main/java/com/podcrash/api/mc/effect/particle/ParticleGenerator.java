@@ -76,7 +76,8 @@ public final class ParticleGenerator {
     }
 
     public static WrapperPlayServerWorldParticles createParticle(Vector vector, EnumWrappers.Particle particle, int[] data, int particleCount, float offsetX, float offsetY, float offsetZ) {
-        if(vector == null) vector = new Vector(0, 0,0);
+        if (vector == null)
+            vector = new Vector(0, 0,0);
         WrapperPlayServerWorldParticles packet = new WrapperPlayServerWorldParticles();
         packet.setParticleType(particle);
         packet.setX((float) vector.getX());
@@ -112,7 +113,7 @@ public final class ParticleGenerator {
         for (double x = startX; x <= endX; x += 1D) {
             for (double z = startZ; z <= endZ; z += 1D) {
                 Location test = BlockUtil.getHighestUnderneath(new Location(center.getWorld(), x, center.getY(), z), verticalRange);
-                if(test.getBlock().getType() == Material.AIR) continue;
+                if (test.getBlock().getType() == Material.AIR) continue;
                 AbstractPacket particle = createBlockEffect(test.toVector(), test.getBlock().getTypeId());
                 PacketUtil.asyncSend(particle, players);
 

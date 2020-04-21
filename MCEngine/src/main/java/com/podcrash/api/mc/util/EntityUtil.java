@@ -18,7 +18,7 @@ public final class EntityUtil  {
     }
 
     public static boolean onGround(Entity entity, double acc) {
-        if(entity.isOnGround()) return true;
+        if (entity.isOnGround()) return true;
         Location location = entity.getLocation();
         return location.subtract(new Vector(0, acc, 0)).getBlock().getType().isSolid();
     }

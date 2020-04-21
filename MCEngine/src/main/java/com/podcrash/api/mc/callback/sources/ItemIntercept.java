@@ -3,8 +3,8 @@ package com.podcrash.api.mc.callback.sources;
 import com.podcrash.api.mc.callback.CallbackAction;
 import com.podcrash.api.mc.events.ItemCollideEvent;
 import com.podcrash.api.mc.location.BoundingBox;
-import com.podcrash.api.mc.location.RayTracer;
 import com.podcrash.api.mc.util.EntityUtil;
+import com.podcrash.api.mc.util.VectorUtil;
 import com.podcrash.api.mc.world.BlockUtil;
 import com.podcrash.api.plugin.Pluginizer;
 import org.bukkit.Bukkit;
@@ -54,7 +54,8 @@ public class ItemIntercept extends CallbackAction<ItemIntercept> {
         //check for entity collisions (First)
         for(LivingEntity living : world.getLivingEntities()){
             int entityID = living.getEntityId();
-            if(avoids.contains(entityID)) continue;
+            if (avoids.contains(entityID))
+                continue;
 
             //the event is going to be called first before the super advanced projectile calculations
             //so that it will not perform them as much
@@ -68,12 +69,12 @@ public class ItemIntercept extends CallbackAction<ItemIntercept> {
             BoundingBox box = new BoundingBox(living);
             //0.3 is the default for arrows.
             Vector intercept;
-            if ((intercept = projectile2DHit(0.3, radius, item.getVelocity(), itemVector, box)) != null) {
-                /** Deprecated, replaced by the above.
-                 if(living instanceof Player) {
-                 if(!GameManager.getGame().isParticipating((Player) living) || GameManager.getGame().isRespawning((Player) living))
+            if ((intercept = VectorUtil.projectile2DHit(0.3, radius, item.getVelocity(), itemVector, box)) != null) {
+                /* Deprecated, replaced by the above.
+                 if (living instanceof Player) {
+                 if (!GameManager.getGame().isParticipating((Player) living) || GameManager.getGame().isRespawning((Player) living))
                  return false;
-                 }**/
+                 }*/
                 this.entity = living;
                 this.interceptLocation = intercept.toLocation(living.getWorld());
                 return true;
@@ -81,16 +82,16 @@ public class ItemIntercept extends CallbackAction<ItemIntercept> {
         }
 
         boolean onGround = EntityUtil.onGround(item);
-        if(onGround) dir = new Vector(0, -0.5, 0);
+        if (onGround) dir = new Vector(0, -0.5, 0);
 
         Block block = itemLocation.add(dir).getBlock();
         BoundingBox blockBox = new BoundingBox(block);
 
         //check for collision with blocks and if it's on the ground.
         if (!BlockUtil.isPassable(block) || onGround) {
-            Vector v = projectile2DHit(0.2, 10, dir, itemVector, blockBox);
+            Vector v = VectorUtil.projectile2DHit(0.2, 10, dir, itemVector, blockBox);
             //safe check
-            if(v != null) this.interceptLocation = v.toLocation(item.getWorld());
+            if (v != null) this.interceptLocation = v.toLocation(item.getWorld());
             else this.interceptLocation = item.getLocation();
             this.entity = null;
             return true;
@@ -104,25 +105,6 @@ public class ItemIntercept extends CallbackAction<ItemIntercept> {
         return !item.isValid() || item.getFireTicks() > 2;
     }
 
-    /**
-     * this check looks at the 2 vectors, the projectile's velocity and the vector of the projectile's position
-     * and sees via ray tracing it will hit
-     * TODO: make this a util method
-     * @param expectedGrowth expand the hitbox by these directions (squared)
-     * @param projVelo the velocity of the projectile
-     * @param projLoc the location of the entity
-     * @return if the projectile has hit.
-     */
-    private Vector projectile2DHit(double expectedGrowth, double distance, Vector projVelo, Vector projLoc, BoundingBox box) {
-        //grow the box
-        box = box.grow(expectedGrowth);
-
-        RayTracer tracer = new RayTracer(projLoc, projVelo);
-        //the accuracy by default is 0.8, there is no need to make it lower to have an extremely fine detection for hitboxes
-        //that are basically 1 block wide
-        Vector v = tracer.positionOfIntersection(box, distance, 0.95);
-        return v;
-    }
     @Override
     public void cleanup() {
         super.cleanup();

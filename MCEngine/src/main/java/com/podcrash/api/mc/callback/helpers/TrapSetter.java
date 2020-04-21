@@ -1,13 +1,8 @@
 package com.podcrash.api.mc.callback.helpers;
 
-import com.abstractpackets.packetwrapper.WrapperPlayServerWorldParticles;
-import com.comphenix.net.sf.cglib.asm.$ClassWriter;
-import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.podcrash.api.mc.callback.sources.AwaitTime;
 import com.podcrash.api.mc.callback.sources.HitGround;
-import com.podcrash.api.mc.effect.particle.ParticleGenerator;
 import com.podcrash.api.mc.events.TrapPrimeEvent;
-import com.podcrash.api.mc.util.PacketUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Item;
 
@@ -31,7 +26,7 @@ public final class TrapSetter {
         trapIds.add(item.getEntityId());
         item.setPickupDelay(100000);
         time.then(() -> {
-            if(!trapIds.contains(item.getEntityId())) return;
+            if (!trapIds.contains(item.getEntityId())) return;
             item.setPickupDelay(0);
             TrapPrimeEvent primeEvent = new TrapPrimeEvent(item);
             Bukkit.getPluginManager().callEvent(primeEvent);
@@ -46,7 +41,8 @@ public final class TrapSetter {
      * @return whether or not the remove was successful (doubles as a contains)
      */
     public static boolean deleteTrap(Item item) {
-        if(item == null) return false;
+        if (item == null)
+            return false;
         return trapIds.remove(item.getEntityId());
     }
 

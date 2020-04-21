@@ -50,7 +50,9 @@ public abstract class WinObjective implements IObjective {
         return lastTeamCaptured;
     }
 
-    public Vector getVector(){ return this.vector; }
+    public Vector getVector() {
+        return this.vector;
+    }
 
     @Override
     public String toString(){

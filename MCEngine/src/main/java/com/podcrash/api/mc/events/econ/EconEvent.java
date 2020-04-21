@@ -64,15 +64,21 @@ public class EconEvent extends Event {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof EconEvent)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof EconEvent))
+            return false;
 
         EconEvent econEvent = (EconEvent) o;
 
-        if (Double.compare(econEvent.cost, cost) != 0) return false;
-        if (Double.compare(econEvent.currBalance, currBalance) != 0) return false;
-        if (!buyer.equals(econEvent.buyer)) return false;
-        if (!item.equals(econEvent.item)) return false;
+        if (Double.compare(econEvent.cost, cost) != 0)
+            return false;
+        if (Double.compare(econEvent.currBalance, currBalance) != 0)
+            return false;
+        if (!buyer.equals(econEvent.buyer))
+            return false;
+        if (!item.equals(econEvent.item))
+            return false;
         return description.equals(econEvent.description);
     }
 

@@ -97,11 +97,11 @@ public final class CapturePoint extends WinObjective {
      *      1. If there are wool blocks that center around the beacon
      *      2. If there is a glass on top of the above structure
      *      3. If there are 4 wool blocks that are abs(3,5,3) from the beacon.
-     * @return
+     * @return if the capture point is valid
      */
-    public boolean validate(World world){
+    public boolean validate(World world) {
         setWorld(world);
-        if(!getLocation().getBlock().getType().equals(Material.BEACON)) return false;
+        if (!getLocation().getBlock().getType().equals(Material.BEACON)) return false;
         System.out.println("is beacon");
         Location center = getLocation().clone().add(0, 1,0);
         double x1 = center.getX() + 2;
@@ -114,11 +114,12 @@ public final class CapturePoint extends WinObjective {
                 Location location = new Location(getWorld(), x, y, z);
                 //glass/condition2
                 boolean isGlass = (location.getBlock().getType().equals(Material.STAINED_GLASS) || location.getBlock().getType().equals(Material.GLASS));
-                if(isGlass){
+                if (isGlass){
                     Location below = location.clone().subtract(0, 1, 0);
                     //wool/condition1
                     boolean isWoolOrBeacon = (below.equals(getLocation()) || below.getBlock().getType().equals(Material.WOOL));
-                    if(isWoolOrBeacon) continue;
+                    if (isWoolOrBeacon)
+                        continue;
                 }
                 return false;
             }
@@ -130,9 +131,8 @@ public final class CapturePoint extends WinObjective {
         for(double x = x1 + 1; x >= x2 - 1; x -= 6){
             for(double z = z1 + 1; z >= z2 - 1; z-= 6){
                 Location location = new Location(getWorld(), x, y, z);
-                if(!location.getBlock().getType().equals(Material.WOOL)) {
+                if (!location.getBlock().getType().equals(Material.WOOL))
                     return false;
-                }
             }
         }
 
@@ -152,33 +152,35 @@ public final class CapturePoint extends WinObjective {
 
     /**
      * Set the variable as well as change the 4 corner wools
-     * @param color
+     * @param color the color to set of the wools
      */
     public void setTeamColor(String color){
         TeamEnum team = TeamEnum.getByColor(color);
-        if(team != null) {
+        if (team != null) {
             this.color = color;
             Location[] corners = getCornerWools();
-            for(int i = 0; i < corners.length; i++){//TODO: FIREWORK?
-                BlockUtil.replaceBlock(corners[i], Material.WOOL, team.getData(), false);
+            for (Location corner : corners) {//TODO: FIREWORK?
+                BlockUtil.replaceBlock(corner, Material.WOOL, team.getData(), false);
             }
+        } else {
+            throw new IllegalArgumentException("color must be red, blue, or white~!");
         }
-        else throw new IllegalArgumentException("color must be red, blue, or white~!");
     }
 
     /**
      * Before attempting to capture, all the wools should start at the same color
-     * @param color
+     * @param color to check
      * @return whether it is assured to be captured
      */
     private boolean assure(String color) {
-        if(isCaptured()) return true;
+        if (isCaptured())
+            return true;
         String opposite = (color.equalsIgnoreCase("red")) ? "blue" : "red";
         TeamEnum oppoTeam =  TeamEnum.getByColor(opposite);
         for(int x = 0; x < this.blocks.length; x++){
             for(int z = 0; z < this.blocks[0].length; z++){
                 //If the block is the opposing color AND the block is not the middle block (unless progress is 24 i.e last block)
-                if(this.blocks[x][z] == oppoTeam.getByteData() && (progress != 1 == (x != 2 || z != 2))){
+                if (this.blocks[x][z] == oppoTeam.getByteData() && (progress != 1 == (x != 2 || z != 2))){
                     replaceBlock(TeamEnum.WHITE, getLocation().clone().add(x - this.blocks.length/2, 0, z - this.blocks[0].length/2));
                     progress--;
                     this.blocks[x][z] = TeamEnum.WHITE.getByteData();
@@ -191,11 +193,11 @@ public final class CapturePoint extends WinObjective {
 
     /**
      * Recursive part of the function to make sure that the wool starts at the same color.
-     * @param color
+     * @param color The team color
      * @param times how many times it will be ran.
-     * @return
+     * @return The team capturing the point, can be null
      */
-    public TeamEnum capture(String color, int times){
+    public TeamEnum capture(String color, int times) {
         boolean assured = false;
         TeamEnum capturing;
         while (times > 0) {
@@ -209,7 +211,8 @@ public final class CapturePoint extends WinObjective {
                 continue;
             }
             capturing = capture(color);
-            if (capturing != null) return capturing;
+            if (capturing != null)
+                return capturing;
         }
         return null;
     }
@@ -218,13 +221,14 @@ public final class CapturePoint extends WinObjective {
      * Find a random part of the wool map.
      * Turn it into red or blue
      * If the entire thing is red or blue, return the team.
-     * @param color
+     * @param color The team color
      * @return if it isn't null, the point is captured and its color set
      */
     public TeamEnum capture(String color){// yeah we need enums
         TeamEnum team = TeamEnum.getByColor(color);
-        if(team == null) throw new IllegalArgumentException("color cannot be " + color + ". Allowed: red, blue, white");
-        if(this.color.equalsIgnoreCase(color)) {
+        if (team == null)
+            throw new IllegalArgumentException("color cannot be " + color + ". Allowed: red, blue, white");
+        if (this.color.equalsIgnoreCase(color)) {
             //Two cases:
             // (a) Red on a full "red capture" <= do nothing
             if (!isFull) {
@@ -234,7 +238,8 @@ public final class CapturePoint extends WinObjective {
             }
             return null;
         }
-        if(isCaptured()) team = TeamEnum.WHITE;
+        if (isCaptured())
+            team = TeamEnum.WHITE;
         byte colorByte = team.getByteData();
         int row, col;
         byte current;
@@ -245,9 +250,8 @@ public final class CapturePoint extends WinObjective {
         } while (this.blocks[row][col] == colorByte || ((progress == 24) == (row != 2 || col != 2)));
 
         isFull = false;
-        if(!isCaptured()) {
+        if (!isCaptured())
             SoundPlayer.sendSound(getLocation(), "dig.stone", 1, 90);
-        }
         progress++;
         int deltaX = row - this.blocks.length/2;
         int deltaZ = col - this.blocks[0].length/2;
@@ -260,7 +264,7 @@ public final class CapturePoint extends WinObjective {
         List<Player> players = game == null ? world.getPlayers() : game.getBukkitPlayers();
         sendWoolPackets(team, players);
 
-        if(progress == 25){
+        if (progress == 25){
             setTeamColor(team.getName());
             progress = 0;
             isFull = true;
@@ -271,7 +275,7 @@ public final class CapturePoint extends WinObjective {
 
     /*
     public void neutralize(int times){
-        if(times <= 1) neutralize();
+        if (times <= 1) neutralize();
         else neutralize(times - 1);
     }
     */
@@ -280,7 +284,7 @@ public final class CapturePoint extends WinObjective {
      * Restore the capture point to its original state (1 time)
      */
     public void restoreCapture() {
-        if(isFull) return;
+        if (isFull) return;
         progress--;
         TeamEnum team = TeamEnum.getByColor(getColor());
         byte teamByte = team.getByteData();
@@ -292,9 +296,10 @@ public final class CapturePoint extends WinObjective {
 
         sendWoolPackets(team, players);
         for(int x = 0; x < this.blocks.length; x++){
-            if(once) break;
+            if (once)
+                break;
             for(int z = 0; z < this.blocks[0].length; z++){
-                if(this.blocks[x][z] != teamByte){
+                if (this.blocks[x][z] != teamByte){
                     this.blocks[x][z] = teamByte;
                     int deltaX = x - this.blocks.length/2;
                     int deltaZ = z - this.blocks[0].length/2;
@@ -305,7 +310,7 @@ public final class CapturePoint extends WinObjective {
                 }
             }
         }
-        if(!check) {
+        if (!check) {
             progress = 0;
             isFull = true;
         }
@@ -327,12 +332,11 @@ public final class CapturePoint extends WinObjective {
     }
 
     /**
-     * @see {@link BlockUtil#replaceBlock(Location, Material, int, boolean)}
-     * @param team
-     * @param wool
+     * @see BlockUtil#replaceBlock(Location, Material, int, boolean)
      */
     private void replaceBlock(TeamEnum team, Location wool){
-        if(!wool.getBlock().getType().equals(Material.BEACON)) BlockUtil.replaceBlock(wool, Material.WOOL, team.getData(), false);
+        if (!wool.getBlock().getType().equals(Material.BEACON))
+            BlockUtil.replaceBlock(wool, Material.WOOL, team.getData(), false);
         BlockUtil.replaceBlock(wool.add(0, 1, 0), Material.STAINED_GLASS, team.getData(), true);
     }
 
@@ -343,8 +347,9 @@ public final class CapturePoint extends WinObjective {
      * @return the 2 boundaries of the capture point that must be reached to cap
      */
     public Location[] getBounds(){
-        if(bounds != null) return bounds;
-        else{
+        if (bounds != null) {
+            return bounds;
+        } else {
             Location center = getLocation().clone().add(0, 2,0 );
             Location p1 = center.clone().add(2, 0, 2);
             Location p2 = center.clone().add(-2, 3.5, -2);
@@ -354,8 +359,9 @@ public final class CapturePoint extends WinObjective {
     }
     public Location[] getCornerWools(){
         //pls no recursion error
-        if(cornerWools != null && cornerWools.length == 4) return cornerWools;
-        else{
+        if (cornerWools != null && cornerWools.length == 4)  {
+            return cornerWools;
+        } else {
             Location center = getLocation().clone().add(0, 1,0);
             double x1 = center.getX() + 3;
             double z1 = center.getZ() + 3;
@@ -367,7 +373,7 @@ public final class CapturePoint extends WinObjective {
             for(double x = x1; x >= x2; x -= 6){
                 for(double z = z1; z >= z2; z-= 6){
                     Location location = new Location(getWorld(), x, y, z);
-                    if(location.getBlock().getType().equals(Material.WOOL)) {
+                    if (location.getBlock().getType().equals(Material.WOOL)) {
                         corners[i] = location;
                         i++;
                     }
@@ -384,7 +390,8 @@ public final class CapturePoint extends WinObjective {
      * Be aware that the beacon can be next[0]
      */
     public Location[][] getWoolAndGlass(){
-        if(woolGlass != null && woolGlass.length == 25 && woolGlass[0].length == 2) return woolGlass;
+        if (woolGlass != null && woolGlass.length == 25 && woolGlass[0].length == 2)
+            return woolGlass;
         Location[][] wools = new Location[25][2];
         double x2 = getVector().getX() + 2d;
         double z2 = getVector().getZ() + 2d;
@@ -395,7 +402,7 @@ public final class CapturePoint extends WinObjective {
             for(double z = getVector().getZ() - 2d; z <= z2; z++){
                 Location wool = new Location(getWorld(), x, y, z);
                 Location glass = wool.clone().add(0, 1, 0);
-                if((wool.getBlock().getType().equals(Material.WOOL) || wool.getBlock().getType().equals(Material.BEACON)) &&
+                if ((wool.getBlock().getType().equals(Material.WOOL) || wool.getBlock().getType().equals(Material.BEACON)) &&
                         (glass.getBlock().getType().equals(Material.STAINED_GLASS) || glass.getBlock().getType().equals(Material.GLASS))) {
                     wools[i][0] = wool;
                     wools[i][1] = glass;

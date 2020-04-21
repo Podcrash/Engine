@@ -39,6 +39,7 @@ public final class HitDetectionInjector {
     public static HitDetectionInjector getHitDetection(Player p) {
         return injectors.get(p.getName());
     }
+
     public HitDetectionInjector(Player p) {
         this.player = p;
         this.listener = new PacketAdapter(Pluginizer.getSpigotPlugin(), ListenerPriority.NORMAL, PacketType.Play.Client.USE_ENTITY) {
@@ -48,13 +49,16 @@ public final class HitDetectionInjector {
                 EnumWrappers.EntityUseAction action = packet.getType();
                 Entity entity = packet.getTarget(player.getWorld());
                 Player attacker = event.getPlayer();
-                if(event.getPlayer() != player) return;
+                if (event.getPlayer() != player)
+                    return;
                 //if the action is not attack or a living thing, stop
-                if (!(action == EnumWrappers.EntityUseAction.ATTACK && entity instanceof LivingEntity)) return;
+                if (!(action == EnumWrappers.EntityUseAction.ATTACK && entity instanceof LivingEntity))
+                    return;
                 LivingEntity victim = (LivingEntity) entity;
                 //if the player is in spectator mode, don't bother
                 if (attacker.getGameMode() == GameMode.SPECTATOR ||
-                    (victim instanceof Player && ((Player) victim).getGameMode() == GameMode.SPECTATOR)) return;
+                    (victim instanceof Player && ((Player) victim).getGameMode() == GameMode.SPECTATOR))
+                    return;
 
                 event.setCancelled(true);
                 //if there is still a delay, cancel
@@ -68,22 +72,21 @@ public final class HitDetectionInjector {
                 //the victim is invis
                 //if the attacker is blocking
                 //don't do anything
-                if(/*isDeathDelay(victim) ||*/ isInvis(victim)) return;
+                if (/*isDeathDelay(victim) ||*/ isInvis(victim))
+                    return;
 
                 //Find the base damage
                 double damage = findDamage(attacker);
                 //Put melee damage in the queue
                 DamageApplier.damage(victim, attacker, damage, true);
                 //if the player does die
-                if(victim instanceof Player) {
-                    if (calculateIfDeath(damage, victim)) {
-                        Player playerVictim = (Player) victim;
-                        //Give both death delays to avoid hitting each other.
-                        manualDeathDelay(playerVictim);
-                        getHitDetection(playerVictim).manualDeathDelay(player);
-                    }else {
-
-                    }
+                if (!(victim instanceof Player))
+                    return;
+                if (calculateIfDeath(damage, victim)) {
+                    Player playerVictim = (Player) victim;
+                    //Give both death delays to avoid hitting each other.
+                    manualDeathDelay(playerVictim);
+                    getHitDetection(playerVictim).manualDeathDelay(player);
                 }
 
                 //Bukkit.broadcastMessage(String.format("Damager: %s Victim: %s", player.getName(), entityPlayer.getName()));
@@ -96,7 +99,7 @@ public final class HitDetectionInjector {
     /**
      * Inject the custom hit detection to any user
      */
-        public void injectHitDetection() {
+    public void injectHitDetection() {
         ProtocolLibrary.getProtocolManager().addPacketListener(listener);
         Pluginizer.getSpigotPlugin().getLogger().info(player.getName() + " injected with hit detection.");
     }
@@ -108,7 +111,7 @@ public final class HitDetectionInjector {
 
     /**
      * Put a delay on a player's hits if they are dead
-     * @param player
+     * @param player To delay
      */
     public void manualDeathDelay(Player player) {
         deathDelay.put(player.getName(), System.currentTimeMillis() + delay);
@@ -126,18 +129,18 @@ public final class HitDetectionInjector {
 
     /**
      * See if the player is invisible
-     * @param player
-     * @return
+     * @param player The player to check
+     * @return if they are invisible.
      */
     private boolean isInvis(LivingEntity player) {
-        if(!(player instanceof Player)) return false;
+        if (!(player instanceof Player)) return false;
         return StatusApplier.getOrNew((Player) player).isCloaked();
     }
 
     /**
      * Go through the formula and see if the player wiil die.
-     * @param damage - dealt to victim
-     * @param victim - needed for the victim's health
+     * @param damage The damage dealt to victim
+     * @param victim The victim getting damaged
      * @return if the victim will die
      */
     private boolean calculateIfDeath(double damage, LivingEntity victim) {
@@ -152,18 +155,22 @@ public final class HitDetectionInjector {
      * This means we are dividing out the 130% boost for strength, and etc
      *
      * If there is no item, return 1
-     * @param attacker - the player in question
+     * @param attacker The player in question
      * @return the amount of damage
      */
     private double findDamage(LivingEntity attacker) {
         Material mat = attacker.getEquipment().getItemInHand().getType();
-        if(mat == null || mat == Material.AIR) return 1D;
+        if (mat == null || mat == Material.AIR)
+            return 1D;
         double unfiltered = ((CraftLivingEntity) attacker).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).getValue();
         PodcrashSpigot.getInstance().getLogger().info(unfiltered + "");
-        if(unfiltered <= 0) return 0;
+        if (unfiltered <= 0)
+            return 0;
         for(PotionEffect effect : attacker.getActivePotionEffects()) {
-            if(effect.getType().equals(PotionEffectType.INCREASE_DAMAGE)) unfiltered /= 1D + (1.3D * (effect.getAmplifier() + 1D));
-            if(effect.getType().equals(PotionEffectType.WEAKNESS)) unfiltered += 0.5 * (effect.getAmplifier() + 1D);
+            if (effect.getType().equals(PotionEffectType.INCREASE_DAMAGE))
+                unfiltered /= 1D + (1.3D * (effect.getAmplifier() + 1D));
+            if (effect.getType().equals(PotionEffectType.WEAKNESS))
+                unfiltered += 0.5 * (effect.getAmplifier() + 1D);
         }
         PodcrashSpigot.getInstance().getLogger().info(unfiltered - 1 + "");
         return unfiltered - 1;

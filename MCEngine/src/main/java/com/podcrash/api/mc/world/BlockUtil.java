@@ -92,10 +92,10 @@ public final class BlockUtil {
     public static boolean hasPlayersInArea(Location location, double radius, List<Player> players, Player user) {
         double radiusSquared = radius * radius;
         for(Player player : players) {
-            if(player == user || !GameManager.getGame().isParticipating(player) || GameManager.getGame().isRespawning(player) || GameManager.getGame().isSpectating(player)) continue;
+            if (player == user || !GameManager.getGame().isParticipating(player) || GameManager.getGame().isRespawning(player) || GameManager.getGame().isSpectating(player)) continue;
             Location loc = player.getLocation().add(0, 1, 0);
             double distanceSquared = loc.distanceSquared(location);
-            if(distanceSquared <= radiusSquared)
+            if (distanceSquared <= radiusSquared)
                 return true;
         }
         return false;
@@ -106,7 +106,7 @@ public final class BlockUtil {
         for(Player player : players) {
             Location loc = player.getLocation();
             double distanceSquared = loc.distanceSquared(location);
-            if(distanceSquared <= radiusSquared)
+            if (distanceSquared <= radiusSquared)
                 return true;
         }
         return false;
@@ -137,14 +137,14 @@ public final class BlockUtil {
     public static boolean isSafe(Location location) {
         boolean a = isPassable(location.getBlock());
 
-        if(a) {
+        if (a) {
             boolean b = isPassable(location.clone().add(new Vector(0, 1, 0)).getBlock());
             return b;
         }else return false;
     }
 
     public static Player playerIsHere(Location loc, List<Player> players) {
-        if(players == null) players = loc.getWorld().getPlayers();
+        if (players == null) players = loc.getWorld().getPlayers();
         for(Player p : players) {
             double playerX = p.getLocation().getBlockX();
             double playerY = p.getLocation().getBlockY();
@@ -156,7 +156,7 @@ public final class BlockUtil {
             double locX = loc.getBlockX();
             double locY = loc.getBlockY();
             double locZ = loc.getBlockZ();
-            if((locX == playerX && locY == playerY && locZ == playerZ) ||
+            if ((locX == playerX && locY == playerY && locZ == playerZ) ||
                     (locX == headX && locY == headY && locZ == headZ)) {
                 return p;
             }
@@ -167,7 +167,7 @@ public final class BlockUtil {
     public static Location getHighestUnderneath(Location loc) {
         Block block = loc.getBlock();
         while (isPassable(block)) {
-            if(loc.getY() < 0) return loc;
+            if (loc.getY() < 0) return loc;
             loc.subtract(0, 1, 0);
             block = loc.getBlock();
         }
@@ -179,11 +179,11 @@ public final class BlockUtil {
         Block block = loc.getBlock();
         int counter = 0;
         while (isPassable(block)) {
-            if(loc.getY() < 0) return loc;
+            if (loc.getY() < 0) return loc;
             loc.subtract(0, 1, 0);
             counter++;
             block = loc.getBlock();
-            if(counter >= range) return loc;
+            if (counter >= range) return loc;
         }
 
         return loc;
@@ -216,7 +216,7 @@ public final class BlockUtil {
             for(int y = location.getBlockY() - radius; y <= location.getBlockY() + radius; y++) {
                 for(int z = location.getBlockZ() - radius; z <= location.getBlockZ() + radius; z++) {
                     Location test = new Location(location.getWorld(), x, y, z);
-                    if(test.distanceSquared(location) <= distanceSquared) locations.add(test.getBlock());
+                    if (test.distanceSquared(location) <= distanceSquared) locations.add(test.getBlock());
                 }
             }
         }
@@ -231,9 +231,9 @@ public final class BlockUtil {
                 for(int z = center.getBlockZ() - radius; z <= center.getBlockZ() + radius; z++) {
                     Vector vect = new Vector(x,y, z);
                     double dist = vect.distanceSquared(center.toVector());
-                    if(dist < distanceSquared && dist >= distanceMinusSquared) {
-                        if((onlyAir)) {
-                            if(vect.toLocation(center.getWorld()).getBlock().getType() == Material.AIR) {
+                    if (dist < distanceSquared && dist >= distanceMinusSquared) {
+                        if ((onlyAir)) {
+                            if (vect.toLocation(center.getWorld()).getBlock().getType() == Material.AIR) {
                                 locations.add(vect);
                             }
                         }else locations.add(vect);
@@ -250,7 +250,7 @@ public final class BlockUtil {
             for(int y = location.getBlockY() - radius; y <= location.getBlockY() + radius; y++) {
                 for(int z = location.getBlockZ() - radius; z <= location.getBlockZ() + radius; z++) {
                     Location test = new Location(location.getWorld(), x, y, z);
-                    if(!isPassable(test.getBlock()) &&
+                    if (!isPassable(test.getBlock()) &&
                             isPassable(test.getBlock().getRelative(BlockFace.UP)) &&
                             test.distanceSquared(location) <= distanceSquared) {
                         locations.add(test.getBlock());
@@ -272,10 +272,10 @@ public final class BlockUtil {
             for(int y = blockY - radius; y <= blockY + radius; y++) {
                 for(int z = blockZ - radius; z <= blockZ + radius; z++) {
                     Block test = world.getBlockAt(x, y, z);
-                    if(locations.contains(test)) continue;
-                    if(!test.getType().equals(Material.AIR) && test.getLocation().distanceSquared(location) <= distanceSquared) {
-                        if(airTop) {
-                            if(test.getRelative(BlockFace.UP).getType().equals(Material.AIR)) locations.add(test);
+                    if (locations.contains(test)) continue;
+                    if (!test.getType().equals(Material.AIR) && test.getLocation().distanceSquared(location) <= distanceSquared) {
+                        if (airTop) {
+                            if (test.getRelative(BlockFace.UP).getType().equals(Material.AIR)) locations.add(test);
                         }else locations.add(test);
 
                     }
@@ -296,7 +296,7 @@ public final class BlockUtil {
             for(int y = blockY - radius; y <= blockY + radius; y++) {
                 for(int z = blockZ - radius; z <= blockZ + radius; z++) {
                     Block test = world.getBlockAt(x, y, z);
-                    if(checkMaterials(test.getType(), materials) && test.getLocation().distanceSquared(location) <= distanceSquared) {
+                    if (checkMaterials(test.getType(), materials) && test.getLocation().distanceSquared(location) <= distanceSquared) {
                         locations.add(test);
                     }
                 }
@@ -307,14 +307,14 @@ public final class BlockUtil {
 
     private static boolean checkMaterials(Material material, Material... materials) {
         for(Material check : materials) {
-            if(material.equals(check)) return true;
+            if (material.equals(check)) return true;
         }
         return false;
     }
 
     public static List<Player> getAllPlayersHere(Location loc, List<Player> players) {
         List<Player> result = new ArrayList<>();
-        if(players == null) players = loc.getWorld().getPlayers();
+        if (players == null) players = loc.getWorld().getPlayers();
         for(Player p: players) {
             double playerX = p.getLocation().getBlockX();
             double playerY = p.getLocation().getBlockY();
@@ -326,7 +326,7 @@ public final class BlockUtil {
             double locX = loc.getBlockX();
             double locY = loc.getBlockY();
             double locZ = loc.getBlockZ();
-            if((locX == playerX && locY == playerY && locZ == playerZ) ||
+            if ((locX == playerX && locY == playerY && locZ == playerZ) ||
                     (locX == headX && locY == headY && locZ == headZ)) {
                 result.add(p);
             }
@@ -335,11 +335,11 @@ public final class BlockUtil {
     }
     public static List<Player> getPlayersInArea(Location curLoc, int radius, List<Player> players) {
         List<Player> result = new ArrayList<>();
-        if(players == null) players = curLoc.getWorld().getPlayers();
+        if (players == null) players = curLoc.getWorld().getPlayers();
         double radiusSquared = radius * radius;
         //distance formula way
         for(Player p: players) {
-            if(p.getLocation().add(0,1,0).distanceSquared(curLoc) <= radiusSquared) {
+            if (p.getLocation().add(0,1,0).distanceSquared(curLoc) <= radiusSquared) {
                 result.add(p);
             }
         }
@@ -350,7 +350,7 @@ public final class BlockUtil {
                 for(int y = -radius; y <= radius; y++){
                     for(int z = -radius; z <= radius; z++) {
                         List<Player> p1 = getAllPlayersHere(curLoc.clone().add(x, y, z), null);
-                        if(!p1.isEmpty()) {
+                        if (!p1.isEmpty()) {
                             result.addAll(p1);
                         }
                     }
@@ -392,7 +392,7 @@ public final class BlockUtil {
         updater.setBlock(location.getBlockX(), location.getBlockY(), location.getBlockZ(), material, data);
     }
     public static void replaceBlock(Location location, Material material, int data, boolean physics){
-        if(data < -128 || data > 127) throw new IllegalArgumentException("data must be between -128 and 127. was " + data);
+        if (data < -128 || data > 127) throw new IllegalArgumentException("data must be between -128 and 127. was " + data);
         CraftWorld craftWorld = ((CraftWorld) location.getWorld());
         /*
         BlockPosition blockPosition = new BlockPosition(location.getX(), location.getY(), location.getZ());

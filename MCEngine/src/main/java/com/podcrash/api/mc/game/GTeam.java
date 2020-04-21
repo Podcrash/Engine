@@ -110,9 +110,7 @@ public class GTeam {
      * @return List of players on the team.
      */
     public List<UUID> getPlayers() {
-        ArrayList<UUID> result = new ArrayList<UUID>();
-        result.addAll(players);
-        return result;
+        return new ArrayList<>(players);
     }
 
     /**
@@ -231,7 +229,8 @@ public class GTeam {
      * @return The spawnpoint location.
      */
     public Location getSpawn(Player player) {
-        if (!isPlayerOnTeam(player)) { return null; }
+        if (!isPlayerOnTeam(player))
+            return null;
         return spawnpoints.get(players.indexOf(player.getUniqueId()));
     }
 
@@ -270,7 +269,7 @@ public class GTeam {
         int locCursor = 0;
         int spawnSize = spawnpoints.size();
         for(Player player : players) {
-            if(locCursor >= spawnSize) locCursor = 0;//if more players than spawns
+            if (locCursor >= spawnSize) locCursor = 0;//if more players than spawns
             player.teleport(spawnpoints.get(locCursor));
             locCursor++;
         }

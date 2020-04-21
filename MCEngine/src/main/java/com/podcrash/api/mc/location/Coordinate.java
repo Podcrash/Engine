@@ -32,13 +32,13 @@ public class Coordinate {
         return new Coordinate(vector.getX(), vector.getY(), vector.getZ());
     }
     public static Coordinate fromEntity(Entity entity) {
-        if(!(entity instanceof Player)) return fromLocation(entity.getLocation());
+        if (!(entity instanceof Player)) return fromLocation(entity.getLocation());
         return Pluginizer.getSpigotPlugin().getCoordinateTracker().get((Player) entity, 1);
     }
     public static <K> Coordinate from(K inst) {
-        if(inst instanceof Location) return fromLocation((Location) inst);
-        else if(inst instanceof Vector) return fromVector((Vector) inst);
-        else if(inst instanceof Entity) return fromEntity((Entity) inst);
+        if (inst instanceof Location) return fromLocation((Location) inst);
+        else if (inst instanceof Vector) return fromVector((Vector) inst);
+        else if (inst instanceof Entity) return fromEntity((Entity) inst);
         throw new IllegalArgumentException("inst must be either a Location, Vector, or Entity! Was a "+ inst.getClass());
     }
 
