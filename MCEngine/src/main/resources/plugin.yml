@@ -58,3 +58,6 @@ commands:
   mute:
     description: Mute a player.
     usage: /mute <Player Name>
+  accept:
+    description: Backfill into a game.
+    usage: /accept <Player Name>

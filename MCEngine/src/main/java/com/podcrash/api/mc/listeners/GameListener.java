@@ -409,7 +409,7 @@ public class GameListener extends ListenerBase {
         }
         Player who = e.getPlayer();
         Game game = GameManager.getGame();
-        if (game == null) return;
+        if (game == null || game.getGameState().equals(GameState.LOBBY)) return;
         e.setCancelled(true);
         org.bukkit.entity.Item item = e.getItem();
         ItemObjective itemObj = null;

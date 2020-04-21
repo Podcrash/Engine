@@ -46,6 +46,11 @@ public class HealthBarResource extends GameResource {
 
     }
 
+    public void addPlayerToMap(Player player) {
+        players.put(player.getName(), null);
+        objective.getScore(player.getName()).setScore((int) player.getHealth());
+    }
+
     //make sure this part is async
     @Override
     public void run(long ticks, long delay) {

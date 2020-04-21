@@ -208,6 +208,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             new MOTDHandler(this);
             new CmdPreprocessHandler(this);
             new GeneralLobbyListener(this);
+            new BackfillListener(this);
 
             // TODO: Add more listeners here..
         });
@@ -241,6 +242,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             getCommand("kb").setExecutor(new KnockbackCommand());
             getCommand("hitreg").setExecutor(new HitRegCommand());
             getCommand("mute").setExecutor(new MuteCommand());
+            getCommand("accept").setExecutor(new AcceptCommand());
         });
 }
 

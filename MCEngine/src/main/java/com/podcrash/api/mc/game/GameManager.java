@@ -197,7 +197,7 @@ public class GameManager {
         // Reasons for failure include: player is not online, game is ongoing, the player is not participating,
         // there is no GTeam associated with the requested teamEnum, and if the team size is greater than or equal
         // to the maximum amount of players per team.
-        if(game.joinTeam(player, teamEnum)) {
+        if(game.joinTeam(player, teamEnum, false)) {
             player.sendMessage(
                     String.format(
                             "%sInvicta> %sYou joined the %s%s Team %sin %sGame %s%s.",
