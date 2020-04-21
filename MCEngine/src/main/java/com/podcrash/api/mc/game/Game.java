@@ -620,6 +620,7 @@ public abstract class Game implements IGame {
     public void addParticipant(Player player) {
         removeSpectator(player);
         participants.add(player.getUniqueId());
+        refreshTabColor(player, ChatColor.YELLOW.toString());
 
         // TODO: Set the lobby scoreboard, etc...
     }
