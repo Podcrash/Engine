@@ -7,15 +7,19 @@ import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.GameState;
 import com.podcrash.api.mc.game.resources.GameResource;
 import com.podcrash.api.mc.game.resources.HealthBarResource;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -52,6 +56,14 @@ public class BackfillListener extends ListenerBase {
 
             offlinePlayers.remove(absentPlayer);
             updateCanBackfill();
+
+            if (canBackfill) {
+                for (Player p : GameManager.getGame().getBukkitSpectators()) {
+                    List<Player> keysAsArray = new ArrayList<>(offlinePlayers.keySet());
+                    sendCanJoinMessage(p, keysAsArray.get(0));
+                }
+            }
+
             return true;
         }
         return false;
@@ -72,10 +84,14 @@ public class BackfillListener extends ListenerBase {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onJoin(PlayerJoinEvent event) {
         offlinePlayers.remove(event.getPlayer());
         updateCanBackfill();
+        if (canBackfill) {
+            List<Player> keysAsArray = new ArrayList<>(offlinePlayers.keySet());
+            sendCanJoinMessage(event.getPlayer(), keysAsArray.get(0));
+        }
     }
 
     @EventHandler
@@ -104,7 +120,7 @@ public class BackfillListener extends ListenerBase {
         return null;
     }
 
-    private void sendCanJoinMessage(Player joiningPlayer, Player absentPlayer) {
+    private static void sendCanJoinMessage(Player joiningPlayer, Player absentPlayer) {
         joiningPlayer.sendMessage(String.format("%s%sA spot has opened up for you on the %s team. \nType \"/accept %s\" to join!",
                 ChatColor.LIGHT_PURPLE,
                 ChatColor.BOLD,
