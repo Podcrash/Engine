@@ -369,11 +369,11 @@ public class GameListener extends ListenerBase {
             }
             // For ALL lobbies, make the player invincible again
             DamageApplier.addInvincibleEntity(player);
+            player.setHealth(player.getMaxHealth());
 
             Bukkit.getScheduler().runTaskLater(Pluginizer.getSpigotPlugin(), () -> {
                 deathAnimation(player.getLocation());
                 StatusApplier.getOrNew(player).removeStatus(Status.values());
-                player.setHealth(player.getMaxHealth());
                 player.teleport(player.getWorld().getSpawnLocation());
             }, 1L);
         }
