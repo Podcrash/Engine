@@ -3,10 +3,12 @@ package com.podcrash.api.mc.game;
 import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.MapTable;
+import com.podcrash.api.db.tables.RanksTable;
 import com.podcrash.api.mc.events.game.GameEndEvent;
 import com.podcrash.api.mc.events.game.GameStartEvent;
 import com.podcrash.api.mc.game.resources.GameResource;
 import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import org.apache.commons.lang.Validate;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -132,6 +134,11 @@ public class GameManager {
                 return;
         }
         if(!game.contains(p)) {
+            if (game.hasMPSOwner() && game.getMPSOwner().equals(p.getUniqueId())) {
+                RanksTable table = TableOrganizer.getTable(DataTableType.PERMISSIONS);
+                table.addRole(p.getUniqueId(), "HOST");
+                PodcrashSpigot.getInstance().setupPermissions(p);
+            }
             game.add(p);
         }else p.sendMessage(
                 String.format(

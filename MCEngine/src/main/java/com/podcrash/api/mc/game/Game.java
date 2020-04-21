@@ -75,6 +75,8 @@ public abstract class Game implements IGame {
      * @param type The type of the game.
      */
     public Game(int id, String name, GameType type) {
+        // RN this uuid is mine (poetahto) but you can put ur in for testing
+        System.setProperty("mps.owner", "fd4b3460-00e3-4dcb-8997-efe20c3bbc89");
         this.id = id;
         this.name = name;
         this.teams = new ArrayList<>();
@@ -144,6 +146,14 @@ public abstract class Game implements IGame {
     public double getReward(Player player) {
         if(playerRewards.get(player) == null) return 0;
         return playerRewards.get(player);
+    }
+
+    public UUID getMPSOwner() {
+        return UUID.fromString(System.getProperty("mps.owner"));
+    }
+
+    public boolean hasMPSOwner() {
+        return System.getProperty("mps.owner") != null;
     }
 
     /**
