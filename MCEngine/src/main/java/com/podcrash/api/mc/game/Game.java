@@ -533,10 +533,11 @@ public abstract class Game implements IGame {
      * Player joining a team.
      * @param player The player.
      * @param teamEnum The Team Enum of the team to join.
+     * @param isBackfill Whether or not to allow the player to join mid-game.
      * @return If the join was successful.
      */
-    public boolean joinTeam(Player player, TeamEnum teamEnum) {
-        if (!player.isOnline() || state == GameState.STARTED || !isParticipating(player)) return false;
+    public boolean joinTeam(Player player, TeamEnum teamEnum, boolean isBackfill) {
+        if (!player.isOnline() || (!isBackfill && state == GameState.STARTED) || !isParticipating(player)) return false;
         leaveTeam(player);
 
         GTeam team = getTeam(teamEnum);
@@ -548,6 +549,7 @@ public abstract class Game implements IGame {
         bukkitTeam.addEntry(player.getName());
         team.addToTeam(player);
 
+        playerRewards.put(player, 0.0);
         refreshTabColor(player, teamEnum.getChatColor().toString());
 
         if (player.getOpenInventory().getTitle().equals(TeamSelectGUI.inventory_name)) { player.openInventory(TeamSelectGUI.selectTeam(this, player)); }
@@ -650,8 +652,6 @@ public abstract class Game implements IGame {
             }
         }
 
-        playerRewards.put(player, 0.0);
-
         // Call event.
         Bukkit.getServer().getPluginManager().callEvent(new GameJoinEvent(this, player));
     }
@@ -704,6 +704,15 @@ public abstract class Game implements IGame {
     public GTeam getTeam(Player player) {
         for (GTeam team : teams) {
             if (team.getPlayers().contains(player.getUniqueId())) {
+                return team;
+            }
+        }
+        return null;
+    }
+
+    public GTeam getTeam(String player) {
+        for (GTeam team : teams) {
+            if (team.getPlayers().contains(Bukkit.getOfflinePlayer(player).getUniqueId())) {
                 return team;
             }
         }

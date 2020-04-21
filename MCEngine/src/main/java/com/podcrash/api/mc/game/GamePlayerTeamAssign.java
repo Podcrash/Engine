@@ -46,7 +46,7 @@ public class GamePlayerTeamAssign {
                     min = team;
                 }
             }
-            game.joinTeam(Bukkit.getPlayer(uuid), min.getTeamEnum());
+            game.joinTeam(Bukkit.getPlayer(uuid), min.getTeamEnum(), false);
             iterator.remove();
         }
         // For those who aren't on a team by the end, set to spectator.
