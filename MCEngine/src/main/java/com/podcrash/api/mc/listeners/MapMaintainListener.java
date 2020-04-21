@@ -248,7 +248,7 @@ public class MapMaintainListener extends ListenerBase {
         Block block = e.getBlock();
         Block to = e.getToBlock();
         boolean cancel = false;
-        if(evaluate(block.getWorld()) && block.getType() == Material.ICE && to.getType() == Material.WATER)
+        if(block.getType() == Material.ICE && to.getType() == Material.WATER)
             cancel = true;
         else if(block.getType() == Material.AIR && to.getType() == Material.VINE)
             cancel = true;
