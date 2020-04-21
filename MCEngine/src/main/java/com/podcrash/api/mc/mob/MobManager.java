@@ -1,10 +1,6 @@
 package com.podcrash.api.mc.mob;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
-
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
@@ -14,6 +10,9 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Zombie;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class MobManager {
@@ -28,14 +27,11 @@ public class MobManager {
     }
 
     public static MobData getMobData(int id) {
-        MobData data = mobs.get(id);
-        return data;
+        return mobs.get(id);
     }
     
     public static Entity getMob(int id) {
-        MobData mobClass = mobs.get(id);
-        Entity entity = mobClass.getEntity();
-        return entity;
+        return mobs.get(id).getEntity();
     }
 
 
@@ -88,7 +84,7 @@ public class MobManager {
         compound.setByte("NoAI", (byte) 0);
         nmsEn.f(compound);
         MobData mob = mobs.get(id);
-          mob.toggleFreeze(false);
+        mob.toggleFreeze(false);
     }
 
     /*
@@ -99,9 +95,9 @@ public class MobManager {
 
     public static void equipEntity(int id, ItemStack item) {
         Entity creature = getMob(id);
-          EntityEquipment equiped = ((LivingEntity) creature).getEquipment();
-          equiped.setItemInHand(item);
-      }
+        EntityEquipment equiped = ((LivingEntity) creature).getEquipment();
+        equiped.setItemInHand(item);
+    }
 
       /*
         * Equip an entity with armor
@@ -120,7 +116,7 @@ public class MobManager {
         equiped.setChestplate(chestplate);
         equiped.setLeggings(leggings);
         equiped.setBoots(boots);
-      }
+    }
 
 
      /*
@@ -161,9 +157,8 @@ public class MobManager {
 
         freezeEntity(entity);
         damageOff(entity.getEntityId());
-        if (entity instanceof Zombie) {
+        if (entity instanceof Zombie)
             ((Zombie) entity).setBaby(false);
-        }
 
         return entity;
 

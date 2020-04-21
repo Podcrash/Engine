@@ -51,17 +51,16 @@ public class ScoreboardTitleAnimator implements TimeResource {
     @Override
     public void task() {
         if (i <= period) {
-            if (i < shine_begin) {
+            if (i < shine_begin)
                 decorateAndDisplayName(titlePrimaryFill());
-            } else if (i < shine_bdr_begin) {
+            else if (i < shine_bdr_begin)
                 decorateAndDisplayName(shineStage(i - shine_begin, false));
-            } else if (i < flash_begin) {
+            else if (i < flash_begin)
                 decorateAndDisplayName(shineStage(i - shine_bdr_begin, true));
-            } else if (i < still_begin) {
+            else if (i < still_begin)
                 decorateAndDisplayName(titleFlash(i - flash_begin));
-            } else {
+            else
                 decorateAndDisplayName(titlePrimaryFill());
-            }
             i++;
         } else {
             i = 0;
@@ -87,14 +86,13 @@ public class ScoreboardTitleAnimator implements TimeResource {
      */
     private String shineStage(int i, boolean bidirectional) {
         // The result string.
-        String result = "";
+        StringBuilder result = new StringBuilder();
         // Shine width
         int shine_width;
-        if (bidirectional) {
+        if (bidirectional)
             shine_width = 4;
-        } else {
+        else
             shine_width = 3;
-        }
         // The characters of the title.
         String[] chars = title.split("");
         // The formatting codes for each character.
@@ -102,27 +100,25 @@ public class ScoreboardTitleAnimator implements TimeResource {
         // The shine
         for (int pos = 0; pos < title.length(); pos++) {
             // From left to right.
-            if ((pos < i) && (pos >= (i - shine_width))) {
+            if ((pos < i) && (pos >= (i - shine_width)))
                 codes.add(secondary_color);
-            } else {
+            else
                 codes.add(primary_color);
-            }
             // From right to left if bi-directional
-            if (bidirectional && (pos >= title.length() - i) && (pos < title.length() + shine_width - i) && (codes.get(pos).equals(primary_color))) {
+            if (bidirectional && (pos >= title.length() - i) && (pos < title.length() + shine_width - i) && (codes.get(pos).equals(primary_color)))
                 codes.set(pos, secondary_color);
-            }
         }
         // Populate the result string.
         String prev = "";
         for (int j = 0; j < title.length(); j++) {
             if (!codes.get(j).equals(prev)) {
                 prev = codes.get(j);
-                result = result + codes.get(j) + chars[j];
+                result.append(codes.get(j)).append(chars[j]);
             } else {
-                result = result + chars[j];
+                result.append(chars[j]);
             }
         }
-        return result;
+        return result.toString();
     }
 
     /**
@@ -131,9 +127,8 @@ public class ScoreboardTitleAnimator implements TimeResource {
      * @return The title at the time.
      */
     private String titleFlash(int i) {
-        if (i % 2 == 0) {
+        if (i % 2 == 0)
             return titleSecondaryFill();
-        }
         return titlePrimaryFill();
     }
 

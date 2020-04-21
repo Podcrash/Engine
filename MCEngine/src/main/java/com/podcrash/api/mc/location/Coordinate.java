@@ -3,11 +3,9 @@ package com.podcrash.api.mc.location;
 import com.podcrash.api.plugin.Pluginizer;
 import net.jafama.FastMath;
 import net.minecraft.server.v1_8_R3.EntityLiving;
-import net.minecraft.server.v1_8_R3.EntityPlayer;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
@@ -32,14 +30,18 @@ public class Coordinate {
         return new Coordinate(vector.getX(), vector.getY(), vector.getZ());
     }
     public static Coordinate fromEntity(Entity entity) {
-        if (!(entity instanceof Player)) return fromLocation(entity.getLocation());
+        if (!(entity instanceof Player))
+            return fromLocation(entity.getLocation());
         return Pluginizer.getSpigotPlugin().getCoordinateTracker().get((Player) entity, 1);
     }
     public static <K> Coordinate from(K inst) {
-        if (inst instanceof Location) return fromLocation((Location) inst);
-        else if (inst instanceof Vector) return fromVector((Vector) inst);
-        else if (inst instanceof Entity) return fromEntity((Entity) inst);
-        throw new IllegalArgumentException("inst must be either a Location, Vector, or Entity! Was a "+ inst.getClass());
+        if (inst instanceof Location)
+            return fromLocation((Location) inst);
+        else if (inst instanceof Vector)
+            return fromVector((Vector) inst);
+        else if (inst instanceof Entity)
+            return fromEntity((Entity) inst);
+        throw new IllegalArgumentException("inst must be either a Location, Vector, or Entity! Was a " + inst.getClass());
     }
 
     public Coordinate(double x, double y, double z, double yaw, double pitch, boolean onGround) {

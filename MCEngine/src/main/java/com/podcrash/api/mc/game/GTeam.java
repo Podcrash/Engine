@@ -166,7 +166,7 @@ public class GTeam {
      * @param players A list of players.
      */
     public void addToTeam(List<UUID> players) {
-        players.addAll(players);
+        this.players.addAll(players);
     }
 
     /**

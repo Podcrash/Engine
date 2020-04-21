@@ -1,6 +1,5 @@
 package com.podcrash.api.mc;
 
-import org.apache.commons.io.FileUtils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -42,7 +41,7 @@ public class Configurator {
     private boolean mkdirFile(File file) {
         try {
             return file.mkdir();
-        }catch (SecurityException e) {
+        } catch (SecurityException e) {
             e.printStackTrace();
             return false;
         }
@@ -54,7 +53,8 @@ public class Configurator {
         if (!file.exists()) {
             plugin.getLogger().info("[Configurator] Creating folder " + file.getAbsolutePath());
             boolean created = mkdirFile(file);
-            if (!created) throw new IllegalStateException("The file must be made!");
+            if (!created)
+                throw new IllegalStateException("The file must be made!");
         }
         if ((this.configFile = getFileFromFolder(file, this.fileName)) == null) {
             plugin.getLogger().info("[Configurator] " + this.fileName + " did not exist! Creating!");
@@ -77,34 +77,25 @@ public class Configurator {
     public Configurator(JavaPlugin plugin, String fileName, boolean hasDefaults) {
         this(plugin, plugin.getDataFolder(), fileName, hasDefaults);
     }
+
     public Configurator(JavaPlugin plugin, String fileName) {
         this(plugin, fileName, false);
     }
 
     public CompletableFuture<Void> read(String path, Consumer<Object> consumer) {
-        return CompletableFuture.supplyAsync(() -> {
-            return this.config.get(path);
-        }, executor).thenAcceptAsync(consumer);
+        return CompletableFuture.supplyAsync(() -> this.config.get(path), executor).thenAcceptAsync(consumer);
     }
     public CompletableFuture<Void>  readInt(String path, Consumer<Integer> consumer) {
-        return CompletableFuture.supplyAsync(() -> {
-            return (int) this.config.get(path);
-        }, executor).thenAcceptAsync(consumer);
+        return CompletableFuture.supplyAsync(() -> (int) this.config.get(path), executor).thenAcceptAsync(consumer);
     }
     public CompletableFuture<Void>  readDouble(String path, Consumer<Double> consumer) {
-        return CompletableFuture.supplyAsync(() -> {
-            return (double) this.config.get(path);
-        }, executor).thenAcceptAsync(consumer);
+        return CompletableFuture.supplyAsync(() -> (double) this.config.get(path), executor).thenAcceptAsync(consumer);
     }
     public CompletableFuture<Void> readString(String path, Consumer<String> consumer) {
-        return CompletableFuture.supplyAsync(() -> {
-            return (String) this.config.get(path);
-        }, executor).thenAcceptAsync(consumer);
+        return CompletableFuture.supplyAsync(() -> (String) this.config.get(path), executor).thenAcceptAsync(consumer);
     }
     public CompletableFuture<Void> readList(String path, Consumer<List> consumer) {
-        return CompletableFuture.supplyAsync(() -> {
-            return this.config.getList(path, new ArrayList<>());
-        }, executor).thenAcceptAsync(consumer);
+        return CompletableFuture.supplyAsync(() -> this.config.getList(path, new ArrayList<>()), executor).thenAcceptAsync(consumer);
     }
 
     public void set(String path, Object value) {

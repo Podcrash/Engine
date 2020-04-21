@@ -1,6 +1,5 @@
 package com.podcrash.api.mc.location;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.World;
 import org.bukkit.util.Vector;
@@ -18,6 +17,7 @@ public class RayTracer {
         this.origin = origin;
         this.direction = direction;
     }
+
     /**
      * This smoothens it
      * @param box
@@ -36,6 +36,7 @@ public class RayTracer {
         direction = originDirection;
         return value;
     }
+
     public boolean intersectsBoundingBox(BoundingBox box, double distance, double accuracy) {
         assert accuracy > 0 && accuracy < 1;
         double add = 1D - accuracy;
@@ -46,9 +47,8 @@ public class RayTracer {
 
             originClone.add(addVector.multiply(i));
             lastV = originClone;
-            if (intersectsBox(originClone, box)) {
+            if (intersectsBox(originClone, box))
                 return lastV.distance(origin) < distance;
-            }
         }
         return false;
     }
@@ -113,13 +113,13 @@ public class RayTracer {
     }
 
     /**
-     * Find whether or not: b is in between a or c.
+     * Find whether or not b is in between a or c.
      * Estimate is the point of negligence.
      * @param a min
      * @param b value to test
      * @param c max
      * @param estimate offset
-     * @return the
+     * @return Whether or not b is within the specified range
      */
     private boolean compare(double a, double b, double c, double estimate) {
         //First condition: keep old behavior

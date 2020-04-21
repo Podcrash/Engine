@@ -49,9 +49,10 @@ public class MenuCreator {
         }
         for (ItemStack item : items) {
             if (i < finalSlot) {
-                if (border) {
-                    while (i % 9 == 0 || (i + 1) % 9 == 0) { i++; }
-                }
+                if (border)
+                    while (i % 9 == 0 || (i + 1) % 9 == 0) {
+                        i++;
+                    }
                 result.setItem(i, item);
             }
             i++;
@@ -74,11 +75,12 @@ public class MenuCreator {
             rows = 6;
         } else {
             rows = items.size() / 5;
-            if (items.size() % 5 != 0) {
+            if (items.size() % 5 != 0)
                 rows = rows + 1;
-            }
-            if (heading != null) { rows++; }
-            if (rows > 6) { rows = 6; }
+            if (heading != null)
+                rows++;
+            if (rows > 6)
+                rows = 6;
         }
         int size = rows * 9;
         // Create the menu.
@@ -104,7 +106,8 @@ public class MenuCreator {
             int j = i + 1 - num;
             for (ItemStack item : tmp) {
                 result.setItem(j, item);
-                if (j < finalSlot) { j = j + 2; }
+                if (j < finalSlot)
+                    j = j + 2;
             }
             start = start + threshold;
             end = end + threshold;

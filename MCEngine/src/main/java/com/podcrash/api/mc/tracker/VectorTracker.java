@@ -41,7 +41,8 @@ public final class VectorTracker implements IPlayerTrack<VectorCoordinate> {
             long currentTime = coordinate.getTime();
             if (timeInMS > currentTime)
                 return coordinate;
-            if (timeInMS - 500L >= currentTime) break;
+            if (timeInMS - 500L >= currentTime)
+                break;
         }
         return null;
     }
@@ -60,7 +61,8 @@ public final class VectorTracker implements IPlayerTrack<VectorCoordinate> {
     public void send(PacketEvent event) {
         StructureModifier<Integer> integers = event.getPacket().getIntegers();
         Entity entity = event.getPacket().getEntityModifier(event).read(0);
-        if (!(entity instanceof Player)) return;
+        if (!(entity instanceof Player))
+            return;
         double x = integers.read(0) / 8000.0D;
         double y = integers.read(1) / 8000.0D;
         double z = integers.read(2) / 8000.0D;

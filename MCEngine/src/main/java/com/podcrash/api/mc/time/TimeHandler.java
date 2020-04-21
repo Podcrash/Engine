@@ -51,6 +51,7 @@ public final class TimeHandler {
 
     public static void delayTime(long delay, Runnable runnable) {
         int taskID = Bukkit.getScheduler().scheduleSyncDelayedTask(Pluginizer.getSpigotPlugin(), runnable, delay);
+        //todo does this need to be registered?
     }
     public static void delayTime(long delay, TimeResource resource) {
         int taskID = new BukkitRunnable() {
@@ -91,9 +92,8 @@ public final class TimeHandler {
     }
 
     public static void forceDestroy(TimeResource resource) {
-        if (timeRunMap.containsKey(resource)) {
+        if (timeRunMap.containsKey(resource))
             timeRunMap.remove(resource, timeRunMap.get(resource));
-        }
         timeRunMap.get(resource).forEach((taskID) -> Bukkit.getScheduler().cancelTask(taskID));
     }
 

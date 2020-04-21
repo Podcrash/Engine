@@ -14,11 +14,11 @@ public final class SoundPlayer {
 
     /**
      * Create a sound packet with a location, sound, volume, and pitch
-     * @param loc
+     * @param loc Location to spawn sound
      * @param sound the actual sound, see playsound arguments
      * @param volume [0, 1]
      * @param pitch [0, 126] "1" is 63
-     * @return
+     * @return The sound packet
      */
     public static WrapperPlayServerNamedSoundEffect createSound(Location loc, String sound, float volume, int pitch) {
         WrapperPlayServerNamedSoundEffect soundPacket = new WrapperPlayServerNamedSoundEffect();
@@ -38,7 +38,8 @@ public final class SoundPlayer {
     public static void sendSound(Location loc, String sound, float volume, int pitch, List<Player> players) {
         WrapperPlayServerNamedSoundEffect soundPacket = createSound(loc, sound, volume, pitch);
 
-        if (players == null) players = loc.getWorld().getPlayers();
+        if (players == null)
+            players = loc.getWorld().getPlayers();
         PacketUtil.asyncSend(soundPacket, players);
     }
 

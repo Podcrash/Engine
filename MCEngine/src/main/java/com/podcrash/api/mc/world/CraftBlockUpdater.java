@@ -128,9 +128,8 @@ public class CraftBlockUpdater implements Runnable {
 
     private Set<ChunkCoords> calculateChunks() {
         Set<ChunkCoords> res = new HashSet<ChunkCoords>();
-        if (blocksModified == 0) {
+        if (blocksModified == 0)
             return res;
-        }
         int x1 = minX >> 4; int x2 = maxX >> 4;
         int z1 = minZ >> 4; int z2 = maxZ >> 4;
         for (int x = x1; x <= x2; x++) {
@@ -142,9 +141,11 @@ public class CraftBlockUpdater implements Runnable {
     }
 
     public static CraftBlockUpdater getMassBlockUpdater(org.bukkit.World world) {
-        if (!updaters.containsKey(world.getName())) updaters.put(world.getName(), new CraftBlockUpdater(world));
+        if (!updaters.containsKey(world.getName()))
+            updaters.put(world.getName(), new CraftBlockUpdater(world));
         CraftBlockUpdater updater = updaters.get(world.getName());
-        if (!updater.isActive) updater.start();
+        if (!updater.isActive)
+            updater.start();
         return updater;
     }
     private class ChunkCoords {
@@ -156,12 +157,15 @@ public class CraftBlockUpdater implements Runnable {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
 
             ChunkCoords that = (ChunkCoords) o;
 
-            if (x != that.x) return false;
+            if (x != that.x)
+                return false;
             return z == that.z;
         }
 
@@ -183,8 +187,10 @@ public class CraftBlockUpdater implements Runnable {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof DeferredBlock)) return false;
+            if (this == o)
+                return true;
+            if (!(o instanceof DeferredBlock))
+                return false;
             DeferredBlock that = (DeferredBlock) o;
             return x == that.x &&
                     y == that.y &&

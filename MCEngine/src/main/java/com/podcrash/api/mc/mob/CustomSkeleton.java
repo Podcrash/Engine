@@ -52,46 +52,58 @@ public class CustomSkeleton extends EntitySkeleton {
 
     @Override
     protected net.minecraft.server.v1_8_R3.Item getLoot() {
-        if (this.player == null) return super.getLoot();
-        else return null;
+        if (this.player == null)
+            return super.getLoot();
+        else
+            return null;
     }
 
     @Override
     protected void dropDeathLoot(boolean flag, int i){
-        if (this.player == null) super.dropDeathLoot(flag, i);
+        if (this.player == null)
+            super.dropDeathLoot(flag, i);
     }
 
     @Override
     protected void getRareDrop() {
-        if (this.player == null) super.getRareDrop();
+        if (this.player == null)
+            super.getRareDrop();
     }
 
     @Override
     protected void a(EntityItem entityItem){
-        if (this.player == null) super.a(entityItem);
+        if (this.player == null)
+            super.a(entityItem);
     }
 
     @Override
     protected String z() {
-        if (this.player == null) return super.z();
-        else return null;
+        if (this.player == null)
+            return super.z();
+        else
+            return null;
     }
 
     @Override
     public void makeSound(String s, float f, float f1) {
-        if (this.player == null) super.makeSound(s, f, f1);
+        if (this.player == null)
+            super.makeSound(s, f, f1);
     }
 
     @Override
     protected String bp() {
-        if (this.player == null) return super.bp();
-        else return null;
+        if (this.player == null)
+            return super.bp();
+        else
+            return null;
     }
 
     @Override
     protected String bo() {
-        if (this.player == null) return super.bo();
-        else return null;
+        if (this.player == null)
+            return super.bo();
+        else
+            return null;
     }
 
     public void addWorld(World world) {

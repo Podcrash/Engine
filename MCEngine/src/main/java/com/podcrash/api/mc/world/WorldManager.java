@@ -54,7 +54,8 @@ public class WorldManager {
             String copiedName = worldName + System.currentTimeMillis();
             String dirName = String.format("%s%s%s", Bukkit.getWorldContainer().toString(), File.separator, copiedName);
             File world2File = new File(dirName);
-            if (!world2File.exists()) world2File.mkdir();
+            if (!world2File.exists())
+                world2File.mkdir();
             log("Made the directory " + dirName + ", proceeding to copy");
             try {
                 FileUtils.copyDirectory(get.getWorldFolder(), world2File);

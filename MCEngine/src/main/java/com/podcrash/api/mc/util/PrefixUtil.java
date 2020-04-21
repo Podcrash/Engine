@@ -17,11 +17,14 @@ public class PrefixUtil {
     public static Rank getPlayerRole(Player player) {
         RanksTable table = TableOrganizer.getTable(DataTableType.PERMISSIONS);
         Set<Rank> currentRanks = table.getRanksSync(player.getUniqueId());
-        if (currentRanks == null || currentRanks.size() == 0) return null;
+        if (currentRanks == null || currentRanks.size() == 0)
+            return null;
         Rank output = null;
         for(Rank r : currentRanks) {
-            if (output == null) output = r;
-            else if (r.getPosition() < output.getPosition()) output = r;
+            if (output == null)
+                output = r;
+            else if (r.getPosition() < output.getPosition())
+                output = r;
         }
         /*
         Rank current = perms.get(0);
