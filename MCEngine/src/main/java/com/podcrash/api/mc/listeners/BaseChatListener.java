@@ -2,6 +2,8 @@ package com.podcrash.api.mc.listeners;
 
 import com.podcrash.api.db.pojos.Rank;
 import com.podcrash.api.mc.util.PrefixUtil;
+import com.podcrash.api.plugin.PodcrashSpigot;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -19,6 +21,7 @@ public class BaseChatListener extends ListenerBase {
     public BaseChatListener(JavaPlugin plugin) {
         super(plugin);
         this.words = new HashMap<>();
+
         loadConfigs();
     }
 
@@ -42,25 +45,22 @@ public class BaseChatListener extends ListenerBase {
         }
 
          */
-        String prefix = "";
+        String prefix = findPrefix(player);
 
-        Rank rank = PrefixUtil.getPlayerRole(player);
-        if(rank != null) {
-            prefix = PrefixUtil.getPrefix(rank);
-            prefix += " ";
-        }
-
-        e.setFormat(String.format("%s%s%s" + ChatColor.RESET + " %s%s",
+        e.setFormat(String.format("%s %s%s" + ChatColor.RESET + " %s%s",
                 prefix,
                 ChatColor.YELLOW,
                 player.getName(),
                 ChatColor.WHITE,
-                e.getMessage())
+                StringEscapeUtils.escapeJava(e.getMessage()))
         );
     }
 
     public void loadConfigs() {
         try {
+            //check if the file exists first
+            if(!new File("/home/invicta/filter.csv").exists()) return;
+
             FileInputStream stream = new FileInputStream("/home/invicta/filter.csv");
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
             //BufferedReader reader = new BufferedReader(new InputStreamReader(new URL("https://docs.google.com/spreadsheets/d/1hIEi2YG3ydav1E06Bzf2mQbGZ12kh2fe4ISgLg_UBuM/export?format=csv").openConnection().getInputStream()));
@@ -95,6 +95,21 @@ public class BaseChatListener extends ListenerBase {
             e.printStackTrace();
         }
 
+    }
+
+    private String findPrefix(Player chatter) {
+        String prefix = "";
+        PodcrashSpigot spigot = PodcrashSpigot.getInstance();
+        if (spigot.hasMPSOwner() && spigot.getMPSOwner().equals(chatter.getUniqueId())) {
+            prefix = ChatColor.AQUA.toString() + ChatColor.BOLD + "PPL HOST";
+        } else {
+            Rank rank = PrefixUtil.getPlayerRole(chatter);
+            if (rank != null) {
+                prefix = PrefixUtil.getPrefix(rank);
+            }
+        }
+
+        return prefix;
     }
     /**
      * Iterates over a String input and checks whether a cuss word was found in a list, then checks if the word should be ignored (e.g. bass contains the word *ss).

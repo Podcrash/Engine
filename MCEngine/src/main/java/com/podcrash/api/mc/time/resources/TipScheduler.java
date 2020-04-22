@@ -6,8 +6,10 @@ import com.podcrash.api.mc.util.ChatUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,21 +26,21 @@ public class TipScheduler implements TimeResource {
 
     public static TipScheduler fromURL(String urlString) throws IOException {
         URL url = new URL(urlString);
-        return new TipScheduler(url.openStream());
+        return new TipScheduler(url.openConnection().getInputStream());
     }
 
-    public TipScheduler(InputStream stream) {
+    private TipScheduler(InputStream stream) throws IOException {
         this.tips = new ArrayList<>();
         readStream(stream);
         this.cancel = false;
     }
-    private void readStream(InputStream stream) {
-        Scanner scanner = new Scanner(stream);
-        while (scanner.hasNextLine()) {
-            String data = scanner.nextLine();
+    private void readStream(InputStream stream) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        String data;
+        while ((data= reader.readLine()) != null) {
             tips.add(format(data));
         }
-        scanner.close();
+        reader.close();
     }
 
     private String getRandomTip() {

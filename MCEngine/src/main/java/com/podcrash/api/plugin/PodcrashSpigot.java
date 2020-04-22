@@ -38,7 +38,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
         return INSTANCE;
     }
 
-    private Map<UUID, PermissionAttachment> playerPermissions = new HashMap<>();
+    private final Map<UUID, PermissionAttachment> playerPermissions = new HashMap<>();
 
     private ExecutorService service = Executors.newCachedThreadPool();
     private int dQInt;
@@ -269,29 +269,28 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
         permissionsSetter(player);
     }
     private void permissionsSetter(Player player) {
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+        PermissionAttachment attachment = this.playerPermissions.get(player.getUniqueId());
+        String[] disallowedPerms = new String[] {
+                "bukkit.command.reload",
+                "bukkit.command.timings",
+                "bukkit.command.plugins",
+                "bukkit.command.help",
+                "bukkit.command.ban-ip",
+                "bukkit.command.stop",
+                "invicta.map",
+                "invicta.host",
+                "invicta.developer",
+                "invicta.testing",
+                "invicta.mute",
+                "invicta.mod"
+        };
 
-            PermissionAttachment attachment = this.playerPermissions.get(player.getUniqueId());
-            String[] disallowedPerms = new String[] {
-                    "bukkit.command.reload",
-                    "bukkit.command.timings",
-                    "bukkit.command.plugins",
-                    "bukkit.command.help",
-                    "bukkit.command.ban-ip",
-                    "bukkit.command.stop",
-                    "invicta.map",
-                    "invicta.host",
-                    "invicta.developer",
-                    "invicta.testing",
-                    "invicta.mute",
-                    "invicta.mod"
-            };
-            getInstance().getLogger().info("Disabling bad permissions");
-            for(String disallowed : disallowedPerms)
-                attachment.setPermission(disallowed, false);
+        getInstance().getLogger().info("Disabling bad permissions");
+        for(String disallowed : disallowedPerms)
+            attachment.setPermission(disallowed, false);
 
-            RanksTable table = TableOrganizer.getTable(DataTableType.PERMISSIONS);
-            Set<Rank> ranks =  table.getRanksSync(player.getUniqueId());
+        RanksTable table = TableOrganizer.getTable(DataTableType.PERMISSIONS);
+        table.getRanksAsync(player.getUniqueId()).thenAccept(ranks -> {
             for(Rank r : ranks) {
                 player.sendMessage(String.format("%s%sYou have been assigned the %s role!", ChatColor.GREEN, ChatColor.BOLD, r.getName()));
                 for(String permission : r.getPermissions()) {
@@ -299,5 +298,17 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
                 }
             }
         });
+    }
+
+    public Map<UUID, PermissionAttachment> getPlayerPermissions() {
+        return playerPermissions;
+    }
+
+    public UUID getMPSOwner() {
+        return UUID.fromString(System.getProperty("mps.owner"));
+    }
+
+    public boolean hasMPSOwner() {
+        return System.getProperty("mps.owner") != null;
     }
 }

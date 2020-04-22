@@ -64,7 +64,7 @@ public abstract class Game implements IGame {
 
     private GameLobbyScoreboard lobbyBoard;
     private GameLobbyTimer lobbyTimer;
-    private Map<Player, Double> playerRewards = new HashMap<>();
+    private Map<String, Double> playerRewards = new HashMap<>();
 
     private GameMap map;
 
@@ -77,7 +77,6 @@ public abstract class Game implements IGame {
      */
     public Game(int id, String name, GameType type) {
         // RN this uuid is mine (poetahto) but you can put ur in for testing
-        System.setProperty("mps.owner", "fd4b3460-00e3-4dcb-8997-efe20c3bbc89");
         this.id = id;
         this.name = name;
         this.teams = new ArrayList<>();
@@ -97,6 +96,7 @@ public abstract class Game implements IGame {
         this.isLobbyPVPing = new HashSet<>();
 
         makeTeams();
+        //todo:  you shouldn't pass an arraylist, look at makeTeams instead
         this.gameSettings = new GameSettings(getTeamSettings(), this.teams);
     }
 
@@ -140,26 +140,17 @@ public abstract class Game implements IGame {
      * @return whether the player was successfully given the money
      */
     public boolean addReward(Player player, double reward) {
-        if (playerRewards.containsKey(player)) {
-            playerRewards.put(player, playerRewards.get(player) + reward);
+        if (playerRewards.containsKey(player.getName())) {
+            playerRewards.put(player.getName(), playerRewards.get(player.getName()) + reward);
             return true;
         }
         return false;
     }
 
     public double getReward(Player player) {
-        if(playerRewards.get(player) == null) return 0;
-        return playerRewards.get(player);
+        if(playerRewards.get(player.getName()) == null) return 0;
+        return playerRewards.get(player.getName());
     }
-
-    public UUID getMPSOwner() {
-        return UUID.fromString(System.getProperty("mps.owner"));
-    }
-
-    public boolean hasMPSOwner() {
-        return System.getProperty("mps.owner") != null;
-    }
-
     /**
      * @return The lobby timer attached to this game.
      */
@@ -549,7 +540,7 @@ public abstract class Game implements IGame {
         bukkitTeam.addEntry(player.getName());
         team.addToTeam(player);
 
-        playerRewards.put(player, 0.0);
+        playerRewards.put(player.getName(), 0.0);
         refreshTabColor(player, teamEnum.getChatColor().toString());
 
         if (player.getOpenInventory().getTitle().equals(TeamSelectGUI.inventory_name)) { player.openInventory(TeamSelectGUI.selectTeam(this, player)); }

@@ -29,11 +29,13 @@ import org.bukkit.event.player.PlayerInitialSpawnEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Team;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -55,35 +57,61 @@ public class SpigotJoinListener extends ListenerBase {
         e.setSpawnLocation(spawnWorld.getSpawnLocation());
     }
 
-    private void putPlayerDB(UUID uuid) {
-        PlayerTable players = TableOrganizer.getTable(DataTableType.PLAYERS);
-        players.insert(uuid);
-    }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void join(PlayerJoinEvent event) {
-        Logger log = PodcrashSpigot.getInstance().getLogger();
+        PodcrashSpigot spigot = PodcrashSpigot.getInstance();
+        Logger log = spigot.getLogger();
         Player player = event.getPlayer();
         log.info("34ewrf");
         if(Communicator.isGameLobby()) {
             new HitDetectionInjector(player).injectHitDetection();
         }
-        if(GameManager.getGame() == null || GameManager.getGame().getGameState().equals(GameState.LOBBY)) {
-            DamageApplier.addInvincibleEntity(player);
-            player.getInventory().clear();
-            player.getInventory().setArmorContents(new ItemStack[]{null, null, null, null});
-            //ItemStackUtil.createItem(player.getInventory(), 388, 1, 2, "&a&lEnable Lobby PVP");
-        }
+        lobbyGameEnter(player);
         log.info("test123");
-        ((CraftPlayer) player).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).setValue(1);
-        player.setWalkSpeed(0.2F);
-        PodcrashSpigot.getInstance().getLogger().info(((CraftPlayer) player).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).getValue() + "");
-        PodcrashSpigot.getInstance().getLogger().info("join SPIGOTJOIN");
+
+        resetAttributes(player);
 
         putPlayerDB(player.getUniqueId());
+
         PodcrashSpigot.getInstance().setupPermissions(player);
+
+        setUpHostPermissions(player);
     }
 
+    private void putPlayerDB(UUID uuid) {
+        PlayerTable players = TableOrganizer.getTable(DataTableType.PLAYERS);
+        players.insert(uuid);
+    }
+
+    private void lobbyGameEnter(Player player) {
+        if(GameManager.getGame() != null && !GameManager.getGame().getGameState().equals(GameState.LOBBY)) return;
+        DamageApplier.addInvincibleEntity(player);
+        player.getInventory().clear();
+        player.getInventory().setArmorContents(new ItemStack[]{null, null, null, null});
+        //ItemStackUtil.createItem(player.getInventory(), 388, 1, 2, "&a&lEnable Lobby PVP");
+    }
+    private void resetAttributes(Player player) {
+        //having trouble finding out if this method is actually useful
+        ((CraftPlayer) player).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).setValue(1);
+        player.setWalkSpeed(0.2F);
+    }
+
+    private void setUpHostPermissions(Player possibleHost) {
+        PodcrashSpigot spigot = PodcrashSpigot.getInstance();
+        UUID uuid = possibleHost.getUniqueId();
+        if (!uuid.equals(spigot.getMPSOwner())) return;
+
+        RanksTable table = TableOrganizer.getTable(DataTableType.PERMISSIONS);
+        table.getRankAsync("HOST").thenAccept(rank -> {
+            Set<String> permissions = rank.getPermissions();
+            PermissionAttachment attachment = spigot.getPlayerPermissions().get(uuid);
+            for(String perm : permissions) {
+                attachment.setPermission(perm, true);
+            }
+            possibleHost.sendMessage("You are the host of this server!");
+        });
+    }
     @EventHandler(priority = EventPriority.HIGHEST)
     public void joinMessage(PlayerJoinEvent event) {
         StringBuilder builder = new StringBuilder();
@@ -115,12 +143,6 @@ public class SpigotJoinListener extends ListenerBase {
 
         if(GameManager.getGame() == null) return;
         Game game = GameManager.getGame();
-        RanksTable table = TableOrganizer.getTable(DataTableType.PERMISSIONS);
-
-        if(game.hasMPSOwner() && game.getMPSOwner().equals(event.getPlayer().getUniqueId())) {
-            if(table.hasRoleSync(event.getPlayer().getUniqueId(), "HOST"))
-                table.removeRole(event.getPlayer().getUniqueId(), "HOST");
-        }
 
         GameState state = game.getGameState();
         switch (state) {

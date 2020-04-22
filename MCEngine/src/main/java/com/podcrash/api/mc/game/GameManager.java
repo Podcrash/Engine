@@ -133,11 +133,6 @@ public class GameManager {
                 return;
         }
         if(!game.contains(p)) {
-            if (game.hasMPSOwner() && game.getMPSOwner().equals(p.getUniqueId())) {
-                RanksTable table = TableOrganizer.getTable(DataTableType.PERMISSIONS);
-                table.addRole(p.getUniqueId(), "HOST");
-                PodcrashSpigot.getInstance().setupPermissions(p);
-            }
             game.add(p);
         }else p.sendMessage(
                 String.format(
