@@ -1,18 +1,15 @@
 package com.podcrash.api.mc.listeners;
 
 import com.podcrash.api.db.TableOrganizer;
-import com.podcrash.api.db.pojos.map.GameMap;
 import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.PlayerTable;
 import com.podcrash.api.db.tables.RanksTable;
-import com.podcrash.api.mc.callback.sources.AwaitTime;
 import com.podcrash.api.mc.damage.DamageApplier;
 import com.podcrash.api.mc.damage.HitDetectionInjector;
 import com.podcrash.api.mc.game.GTeam;
 import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.GameState;
-import com.podcrash.api.mc.util.ItemStackUtil;
 import com.podcrash.api.mc.world.SpawnWorldSetter;
 import com.podcrash.api.plugin.Pluginizer;
 import com.podcrash.api.plugin.PodcrashSpigot;
@@ -31,7 +28,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scoreboard.Team;
 
 import java.util.Collection;
 import java.util.List;
@@ -100,7 +96,7 @@ public class SpigotJoinListener extends ListenerBase {
     private void setUpHostPermissions(Player possibleHost) {
         PodcrashSpigot spigot = PodcrashSpigot.getInstance();
         UUID uuid = possibleHost.getUniqueId();
-        if (!uuid.equals(spigot.getMPSOwner())) return;
+        if (!uuid.equals(spigot.getPPLOwner())) return;
 
         RanksTable table = TableOrganizer.getTable(DataTableType.PERMISSIONS);
         table.getRankAsync("HOST").thenAccept(rank -> {

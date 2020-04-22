@@ -12,7 +12,6 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
-import java.net.URL;
 import java.util.*;
 
 public class BaseChatListener extends ListenerBase {
@@ -100,7 +99,7 @@ public class BaseChatListener extends ListenerBase {
     private String findPrefix(Player chatter) {
         String prefix = "";
         PodcrashSpigot spigot = PodcrashSpigot.getInstance();
-        if (spigot.hasMPSOwner() && spigot.getMPSOwner().equals(chatter.getUniqueId())) {
+        if (spigot.hasPPLOwner() && spigot.getPPLOwner().equals(chatter.getUniqueId())) {
             prefix = ChatColor.AQUA.toString() + ChatColor.BOLD + "PPL HOST";
         } else {
             Rank rank = PrefixUtil.getPlayerRole(chatter);
@@ -109,7 +108,7 @@ public class BaseChatListener extends ListenerBase {
             }
         }
 
-        return prefix + " ";
+        return prefix.isEmpty() ? "" : prefix + " ";
     }
     /**
      * Iterates over a String input and checks whether a cuss word was found in a list, then checks if the word should be ignored (e.g. bass contains the word *ss).

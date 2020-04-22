@@ -209,6 +209,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             new CmdPreprocessHandler(this);
             new GeneralLobbyListener(this);
             new BackfillListener(this);
+            new GenEconListener(this);
 
             // TODO: Add more listeners here..
         });
@@ -304,11 +305,11 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
         return playerPermissions;
     }
 
-    public UUID getMPSOwner() {
+    public UUID getPPLOwner() {
         return UUID.fromString(System.getProperty("mps.owner"));
     }
 
-    public boolean hasMPSOwner() {
+    public boolean hasPPLOwner() {
         return System.getProperty("mps.owner") != null;
     }
 }

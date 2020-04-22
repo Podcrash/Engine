@@ -40,7 +40,9 @@ public class EconomyHandler implements IEconomyHandler {
 
 
     public void pay(Player player, double moneys) {
-        Bukkit.getPluginManager().callEvent(new PayEvent(player, moneys));
+        PayEvent pay = new PayEvent(player, moneys);
+        Bukkit.getPluginManager().callEvent(pay);
+        if (pay.isCancelled()) return;
         players.incrementMoney(player.getUniqueId(), moneys);
     }
 
