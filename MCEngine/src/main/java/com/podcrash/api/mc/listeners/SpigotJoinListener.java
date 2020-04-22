@@ -4,6 +4,7 @@ import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.db.pojos.map.GameMap;
 import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.PlayerTable;
+import com.podcrash.api.db.tables.RanksTable;
 import com.podcrash.api.mc.callback.sources.AwaitTime;
 import com.podcrash.api.mc.damage.DamageApplier;
 import com.podcrash.api.mc.damage.HitDetectionInjector;
@@ -114,6 +115,13 @@ public class SpigotJoinListener extends ListenerBase {
 
         if(GameManager.getGame() == null) return;
         Game game = GameManager.getGame();
+        RanksTable table = TableOrganizer.getTable(DataTableType.PERMISSIONS);
+
+        if(game.hasMPSOwner() && game.getMPSOwner().equals(event.getPlayer().getUniqueId())) {
+            if(table.hasRoleSync(event.getPlayer().getUniqueId(), "HOST"))
+                table.removeRole(event.getPlayer().getUniqueId(), "HOST");
+        }
+
         GameState state = game.getGameState();
         switch (state) {
             case STARTED:
