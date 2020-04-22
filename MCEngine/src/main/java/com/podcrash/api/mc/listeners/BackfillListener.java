@@ -8,8 +8,9 @@ import com.podcrash.api.mc.game.GameState;
 import com.podcrash.api.mc.game.resources.GameResource;
 import com.podcrash.api.mc.game.resources.HealthBarResource;
 import com.podcrash.api.mc.time.TimeHandler;
+
 import org.bukkit.*;
-import org.bukkit.command.defaults.BukkitCommand;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -47,30 +48,33 @@ public class BackfillListener extends ListenerBase {
             updateCanBackfill();
 
             // Fixes the double damage bug
+            ItemStack lastItemInHand = joiningPlayer.getItemInHand();
             joiningPlayer.setItemInHand(new ItemStack(Material.DIAMOND_SWORD));
             TimeHandler.delayTime(1L, () -> {
-                joiningPlayer.setItemInHand(new ItemStack(Material.AIR));
+                joiningPlayer.setItemInHand(lastItemInHand);
+            }
+            );
 
-                game.removePlayer(absentPlayer);
-                game.addParticipant(joiningPlayer);
-                game.joinTeam(joiningPlayer, offlinePlayers.get(absentPlayer.getUniqueId()).getTeamEnum(), true);
+            game.removePlayer(absentPlayer);
+            game.addParticipant(joiningPlayer);
+            game.joinTeam(joiningPlayer, offlinePlayers.get(absentPlayer.getUniqueId()).getTeamEnum(), true);
 
-                joiningPlayer.teleport(GameManager.getGame().getTeam(joiningPlayer).getSpawn(joiningPlayer));
-                for (GameResource resource : game.getGameResources()) {
-                    if (resource instanceof HealthBarResource)
-                        ((HealthBarResource) resource).addPlayerToMap(joiningPlayer);
+            joiningPlayer.teleport(GameManager.getGame().getTeam(joiningPlayer).getSpawn(joiningPlayer));
+            for (GameResource resource : game.getGameResources()) {
+                if (resource instanceof HealthBarResource)
+                    ((HealthBarResource) resource).addPlayerToMap(joiningPlayer);
+            }
+
+
+
+            if (canBackfill) {
+                for (Player p : GameManager.getGame().getBukkitSpectators()) {
+                    List<UUID> keysAsArray = new ArrayList<>(offlinePlayers.keySet());
+                    UUID id = keysAsArray.get(0);
+                    sendCanJoinMessage(p, id, offlinePlayers.get(id).getName());
                 }
+            }
 
-
-
-                if (canBackfill) {
-                    for (Player p : GameManager.getGame().getBukkitSpectators()) {
-                        List<UUID> keysAsArray = new ArrayList<>(offlinePlayers.keySet());
-                        UUID id = keysAsArray.get(0);
-                        sendCanJoinMessage(p, id, offlinePlayers.get(id).getName());
-                    }
-                }
-            });
             return true;
         }
         return false;
