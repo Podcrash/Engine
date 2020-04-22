@@ -56,7 +56,6 @@ public class GameManager {
         gameID++;
         currentGame = game;
 
-        game.makeTeams();
         game.createScoreboard();
 
         MapTable table = TableOrganizer.getTable(DataTableType.MAPS);

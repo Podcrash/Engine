@@ -243,6 +243,8 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             getCommand("hitreg").setExecutor(new HitRegCommand());
             getCommand("mute").setExecutor(new MuteCommand());
             getCommand("accept").setExecutor(new AcceptCommand());
+            getCommand("increase").setExecutor(new IncreaseMaxPlayersCommand());
+            getCommand("decrease").setExecutor(new DecreaseMaxPlayersCommand());
         });
 }
 

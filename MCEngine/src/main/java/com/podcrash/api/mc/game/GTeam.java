@@ -20,7 +20,6 @@ public class GTeam {
 
     private TeamEnum teamEnum;
     private String name;
-    private int capacity;
     private int min;
     private int max;
     private List<UUID> players;
@@ -30,11 +29,10 @@ public class GTeam {
     /**
      * Constructor for a Team.
      */
-    public GTeam(TeamEnum teamEnum, int capacity, int min, int max, List<Location> spawnpoints) {
+    public GTeam(TeamEnum teamEnum, int min, int max, List<Location> spawnpoints) {
         this.teamEnum = teamEnum;
         this.name = teamEnum.getName();
         this.players = new ArrayList<>();
-        this.capacity = capacity;
         this.min = min;
         this.max = max;
         this.spawnpoints = spawnpoints;
@@ -68,19 +66,6 @@ public class GTeam {
      */
     public void setTeamEnum(TeamEnum teamEnum) {
         this.teamEnum = teamEnum;
-    }
-
-    /**
-     * @return The standard capacity for the team.
-     */
-    public int getCapacity() { return capacity; }
-
-    /**
-     * Set the capacity for the team.
-     * @param capacity The capacity.
-     */
-    public void setCapacity(int capacity) {
-        this.capacity = capacity;
     }
 
     /**

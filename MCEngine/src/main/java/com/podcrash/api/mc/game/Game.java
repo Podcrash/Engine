@@ -47,6 +47,7 @@ public abstract class Game implements IGame {
     private int id;
     private String name;
     private List<GTeam> teams;
+    private GameSettings gameSettings;
     private volatile boolean isLoadedMap;
     private GameState state;                            // TODO: May replace this with an Enum with a more specific state for the game.
     protected String gameWorldName;
@@ -94,6 +95,9 @@ public abstract class Game implements IGame {
         this.spectators = new HashSet<>();
         this.respawning = new HashSet<>();
         this.isLobbyPVPing = new HashSet<>();
+
+        makeTeams();
+        this.gameSettings = new GameSettings(getTeamSettings(), this.teams);
     }
 
     public abstract GameScoreboard getGameScoreboard();
@@ -290,34 +294,20 @@ public abstract class Game implements IGame {
         return type;
     }
 
-    /**
-     * @return The capacity for the game (sum of all team capacities).
-     */
-    public int getCapacity() {
-        int capacity = 0;
-        for (GTeam team : teams) {
-            capacity = capacity + team.getCapacity();
-        }
-        return capacity;
-    }
 
     /**
      * @return The max number of players for the game (sum of amm team maxes).
      */
     public int getMaxPlayers() {
-        int max = 0;
-        for (GTeam team : teams) {
-            max = max + team.getMaxPlayers();
-        }
-        return max;
+        return gameSettings.getMaxPlayers();
     }
 
     public int getMinPlayers() {
-        int min = 0;
-        for (GTeam team : teams) {
-            min = min + team.getMinPlayers();
-        }
-        return min;
+        return gameSettings.getMinPlayers();
+    }
+
+    public void setMaxPlayers(int n) {
+        gameSettings.setMaxPlayers(n);
     }
 
     /**
@@ -471,7 +461,7 @@ public abstract class Game implements IGame {
         TeamSettings settings = getTeamSettings();
         for(TeamEnum team : settings.getTeamColors()) {
             //better would be new GTeam(team, settings);
-            GTeam gTeam = new GTeam(team, settings.getCapacity(), settings.getMin(), settings.getMax(), null);
+            GTeam gTeam = new GTeam(team, settings.getMin(), settings.getMax(), null);
             teams.add(gTeam);
         }
     }
@@ -761,6 +751,25 @@ public abstract class Game implements IGame {
         return getTeam(player).getTeamEnum();
     }
 
+    /**
+     * Get the game settings
+     * @return The game settings
+     */
+    public GameSettings getGameSettings() {
+        return gameSettings;
+    }
+
+    /**
+     * Set the game settings
+     * @param gameSettings the game settings
+     */
+    public void setGameSettings(GameSettings gameSettings) {
+        this.gameSettings = gameSettings;
+        this.teams = gameSettings.getTeams();
+        for (GTeam team : this.teams) {
+            team.clearTeam();
+        }
+    }
 
     /**
      * Get the players on a team with a team enum.
