@@ -953,9 +953,10 @@ public abstract class Game implements IGame {
                 inv.setItem(i, hotbarSave[i]);
             }
         } else {
-            ItemStack diamondsword = new ItemStack(Material.DIAMOND_SWORD);
-            inv.setItem(0, diamondsword);
+            p.setItemInHand(new ItemStack(Material.DIAMOND_SWORD));
+
             TimeHandler.delayTime(1L, () -> {
+                p.setItemInHand(new ItemStack(Material.AIR));
                 if(getGameState().equals(GameState.LOBBY)) {
                     ItemStackUtil.createItem(inv, 276, 1, 1, "&a&lEnable Lobby PVP");
                     createTeamItems(p);
