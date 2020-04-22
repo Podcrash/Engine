@@ -9,6 +9,8 @@ import com.podcrash.api.mc.game.resources.GameResource;
 import com.podcrash.api.mc.game.resources.HealthBarResource;
 import com.podcrash.api.mc.time.TimeHandler;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.*;
 
 import org.bukkit.entity.Player;
@@ -27,7 +29,7 @@ import java.util.*;
  */
 public class BackfillListener extends ListenerBase {
     private static boolean canBackfill = false;                         // Whether or not the game has an open spot for a player to join.
-    private static Map<UUID, GTeam> offlinePlayers = new HashMap<>(); // A list of all players that were participating, but are currently offline.
+    private static Map<UUID, Pair<Player, GTeam>> offlinePlayers = new HashMap<>(); // A list of all players that were participating, but are currently offline.
 
     public BackfillListener(JavaPlugin plugin) {
         super(plugin);
@@ -39,13 +41,12 @@ public class BackfillListener extends ListenerBase {
      * @param absentPlayerIGN The player that is to be replaced.
      */
     public static boolean replaceOfflineWithSpectator(Player joiningPlayer, String absentPlayerIGN) {
-        Player absentPlayer = getOfflineFromString(absentPlayerIGN);
+        Player absentPlayer = getLastOnlineFromString(absentPlayerIGN);
         if(canBackfill && absentPlayer != null && GameManager.isSpectating(joiningPlayer)) {
             Game game = GameManager.getGame();
             joiningPlayer.setGameMode(GameMode.SURVIVAL);
 
-            offlinePlayers.remove(absentPlayer.getUniqueId());
-            updateCanBackfill();
+
 
             // Fixes the double damage bug
             ItemStack lastItemInHand = joiningPlayer.getItemInHand();
@@ -57,7 +58,10 @@ public class BackfillListener extends ListenerBase {
 
             game.removePlayer(absentPlayer);
             game.addParticipant(joiningPlayer);
-            game.joinTeam(joiningPlayer, offlinePlayers.get(absentPlayer.getUniqueId()).getTeamEnum(), true);
+            game.joinTeam(joiningPlayer, offlinePlayers.get(absentPlayer.getUniqueId()).getValue().getTeamEnum(), true);
+
+            offlinePlayers.remove(absentPlayer.getUniqueId());
+            updateCanBackfill();
 
             joiningPlayer.teleport(GameManager.getGame().getTeam(joiningPlayer).getSpawn(joiningPlayer));
             for (GameResource resource : game.getGameResources()) {
@@ -71,7 +75,7 @@ public class BackfillListener extends ListenerBase {
                 for (Player p : GameManager.getGame().getBukkitSpectators()) {
                     List<UUID> keysAsArray = new ArrayList<>(offlinePlayers.keySet());
                     UUID id = keysAsArray.get(0);
-                    sendCanJoinMessage(p, id, offlinePlayers.get(id).getName());
+                    sendCanJoinMessage(p, id, offlinePlayers.get(id).getKey().getName());
                 }
             }
 
@@ -86,7 +90,7 @@ public class BackfillListener extends ListenerBase {
         Player absentPlayer = event.getPlayer();
         // If the player that left was actually participating and the game had started, add them to the offline players list.
         if (game.isParticipating(absentPlayer) && game.getGameState().equals(GameState.STARTED)) {
-            offlinePlayers.put(absentPlayer.getUniqueId(), game.getTeam(absentPlayer));
+            offlinePlayers.put(absentPlayer.getUniqueId(), new ImmutablePair<>(absentPlayer,game.getTeam(absentPlayer)));
             updateCanBackfill();
             // Tell everybody that is spectating that a spot has opened up for them.
             for (Player joiningPlayer : game.getBukkitSpectators()){
@@ -102,7 +106,7 @@ public class BackfillListener extends ListenerBase {
         if (canBackfill && !GameManager.getGame().isParticipating(event.getPlayer())) {
             List<UUID> keysAsArray = new ArrayList<>(offlinePlayers.keySet());
             UUID id = keysAsArray.get(0);
-            sendCanJoinMessage(event.getPlayer(), id, offlinePlayers.get(id).getName());
+            sendCanJoinMessage(event.getPlayer(), id, offlinePlayers.get(id).getKey().getName());
         }
     }
 
@@ -124,13 +128,12 @@ public class BackfillListener extends ListenerBase {
      * @param name The player's IGN that you are searching for.
      * @return The last known player instance kept in Game that corresponds with the IGN supplied: can be null
      */
-    private static Player getOfflineFromString(String name) {
+    private static Player getLastOnlineFromString(String name) {
         //Find the player in current game
-        for (Player p : GameManager.getGame().getBukkitPlayers()) {
-            if (name.equalsIgnoreCase(p.getName())) {
-                UUID id = p.getUniqueId();
-                if (offlinePlayers.containsKey(id)) return p;
-                return null;
+        for (UUID id : offlinePlayers.keySet()) {
+            Player player = offlinePlayers.get(id).getKey();
+            if (name.equalsIgnoreCase(player.getName())) {
+                return player;
             }
         }
         return null;
