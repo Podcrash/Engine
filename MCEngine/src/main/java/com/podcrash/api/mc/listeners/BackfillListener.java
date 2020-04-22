@@ -12,6 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -49,8 +50,12 @@ public class BackfillListener extends ListenerBase {
             joiningPlayer.setGameMode(GameMode.SURVIVAL);
 
             // Fixes the double damage bug
+            ItemStack lastItemInHand = joiningPlayer.getItemInHand();
             joiningPlayer.setItemInHand(new ItemStack(Material.DIAMOND_SWORD));
-            TimeHandler.delayTime(1L, () -> joiningPlayer.setItemInHand(new ItemStack(Material.AIR)));
+            TimeHandler.delayTime(1L, () -> {
+                joiningPlayer.setItemInHand(lastItemInHand);
+            }
+            );
 
             game.removePlayer(absentPlayer);
             game.addParticipant(joiningPlayer);
