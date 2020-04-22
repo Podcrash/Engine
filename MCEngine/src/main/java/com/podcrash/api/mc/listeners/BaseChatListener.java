@@ -47,7 +47,7 @@ public class BaseChatListener extends ListenerBase {
          */
         String prefix = findPrefix(player);
 
-        e.setFormat(String.format("%s %s%s" + ChatColor.RESET + " %s%s",
+        e.setFormat(String.format("%s%s%s" + ChatColor.RESET + " %s%s",
                 prefix,
                 ChatColor.YELLOW,
                 player.getName(),
@@ -109,7 +109,7 @@ public class BaseChatListener extends ListenerBase {
             }
         }
 
-        return prefix;
+        return prefix + " ";
     }
     /**
      * Iterates over a String input and checks whether a cuss word was found in a list, then checks if the word should be ignored (e.g. bass contains the word *ss).
