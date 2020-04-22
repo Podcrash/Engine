@@ -30,6 +30,7 @@ import org.spigotmc.SpigotConfig;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class PodcrashSpigot extends PodcrashPlugin {
@@ -78,25 +79,16 @@ public class PodcrashSpigot extends PodcrashPlugin {
      */
     public void gameStart() {
         getLogger().info("This Server is a game lobby with code" + Communicator.getCode());
-        Future<Void> future = CompletableFuture.allOf(
-                setKnockback(),
-                registerGameListeners()
-        );
+        setKnockback();
+        registerGameListeners();
 
         DamageQueue.active = true;
-        BukkitTask task = Bukkit.getScheduler().runTaskTimerAsynchronously(this, new DamageQueue(), 0, 0);
+        BukkitTask task = Bukkit.getScheduler().runTaskTimer(this, new DamageQueue(), 0, 0);
         dQInt = task.getTaskId();
         trackers = new ArrayList<>();
         addTracker(coordinateTracker = new CoordinateTracker(this));
         addTracker(vectorTracker = new VectorTracker(this));
 
-        try {
-            getLogger().info("Awaiting....");
-            future.get();
-            getLogger().info("Awaited!");
-        }catch (InterruptedException|ExecutionException e) {
-            e.printStackTrace();
-        }
 
     }
 
@@ -118,16 +110,11 @@ public class PodcrashSpigot extends PodcrashPlugin {
         getLogger().info("Starting PodcrashSpigot!");
         Pluginizer.setInstance(this);
 
-        Future<Void> future = CompletableFuture.allOf(
-                enableWrap(),
-                registerCommands(),
-                registerListeners());
+        Future<Void> dbFuture = enableWrap();
+        registerCommands();
+        registerListeners();
+
         //WorldManager.getInstance().loadWorlds();
-        try {
-            future.get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
 
         MapTable table = TableOrganizer.getTable(DataTableType.MAPS);
         table.setPlugin(this); //this is required
@@ -136,11 +123,15 @@ public class PodcrashSpigot extends PodcrashPlugin {
         worldSetter = new SpawnWorldSetter(); // this is a special cookie
         // Fetch private bukkit commandmap by reflections
         try {
+            dbFuture.get();
             Field commandMapField = getServer().getClass().getDeclaredField("commandMap");
             commandMapField.setAccessible(true);
             commandMap = (CommandMap) commandMapField.get(getServer());
         } catch (NoSuchFieldException | IllegalAccessException e) {
             getLogger().severe("Failed to load Bukkit commandmap. Disabling plugin.");
+            getServer().getPluginManager().disablePlugin(this);
+        } catch (InterruptedException | ExecutionException e) {
+            getLogger().severe("Failed to load databases. Disabling plugin.");
             getServer().getPluginManager().disablePlugin(this);
         }
         Communicator.readyGameLobby();
@@ -176,12 +167,10 @@ public class PodcrashSpigot extends PodcrashPlugin {
 
     /**
      * Customized Knockback
-     * @return
      */
-    private CompletableFuture<Void> setKnockback() {
-        return CompletableFuture.runAsync(() -> {
-            Logger log = this.getLogger();
-            log.info("Kb Numbers: ");
+    private void setKnockback() {
+        Logger log = this.getLogger();
+        log.info("Kb Numbers: ");
         /*
 
         getDouble("settings.knockback.friction", knockbackFriction);
@@ -192,78 +181,66 @@ public class PodcrashSpigot extends PodcrashPlugin {
         getDouble("settings.knockback.extravertical", knockbackExtraVertical);
          */
 
-            SpigotConfig.knockbackFriction = SpigotConfig.config.getDouble("settings.knockback.friction");
-            SpigotConfig.knockbackHorizontal = SpigotConfig.config.getDouble("settings.knockback.horizontal");
-            SpigotConfig.knockbackVertical = SpigotConfig.config.getDouble("settings.knockback.vertical");
-            SpigotConfig.knockbackVerticalLimit = SpigotConfig.config.getDouble("settings.knockback.verticallimit");
-            SpigotConfig.knockbackExtraHorizontal = SpigotConfig.config.getDouble("settings.knockback.extrahorizontal");
-            SpigotConfig.knockbackExtraVertical = SpigotConfig.config.getDouble("settings.knockback.extravertical");
+        SpigotConfig.knockbackFriction = SpigotConfig.config.getDouble("settings.knockback.friction");
+        SpigotConfig.knockbackHorizontal = SpigotConfig.config.getDouble("settings.knockback.horizontal");
+        SpigotConfig.knockbackVertical = SpigotConfig.config.getDouble("settings.knockback.vertical");
+        SpigotConfig.knockbackVerticalLimit = SpigotConfig.config.getDouble("settings.knockback.verticallimit");
+        SpigotConfig.knockbackExtraHorizontal = SpigotConfig.config.getDouble("settings.knockback.extrahorizontal");
+        SpigotConfig.knockbackExtraVertical = SpigotConfig.config.getDouble("settings.knockback.extravertical");
 
-
-            log.info("Friction: " + SpigotConfig.knockbackFriction);
-            log.info("Horizontal: " + SpigotConfig.knockbackHorizontal);
-            log.info("Veritcal: " + SpigotConfig.knockbackVertical);
-            log.info("Vertical Limit: " + SpigotConfig.knockbackVerticalLimit);
-            log.info("Extra Horizontal: " + SpigotConfig.knockbackExtraHorizontal);
-            log.info("Extra Vertical: " + SpigotConfig.knockbackExtraVertical);
-
-        }, getExecutorService());
+        debugLog("Friction: " + SpigotConfig.knockbackFriction);
+        debugLog("Horizontal: " + SpigotConfig.knockbackHorizontal);
+        debugLog("Veritcal: " + SpigotConfig.knockbackVertical);
+        debugLog("Vertical Limit: " + SpigotConfig.knockbackVerticalLimit);
+        debugLog("Extra Horizontal: " + SpigotConfig.knockbackExtraHorizontal);
+        debugLog("Extra Vertical: " + SpigotConfig.knockbackExtraVertical);
     }
-    private CompletableFuture<Void> registerListeners() {
+    private void registerListeners() {
         new BaseChatListener(this);
-        return CompletableFuture.runAsync(() -> {
-            new MapMaintainListener(this);
-            new PlayerInventoryListener(this);
-            new SpigotJoinListener(this);
-            new StatusListener(this);
-            new MobListeners(this);
-            new ActionBlockListener(this);
-            new FallDamageHandler(this);
-            new MOTDHandler(this);
-            new CmdPreprocessHandler(this);
-            new GeneralLobbyListener(this);
-
-            // TODO: Add more listeners here..
-        });
+        new MapMaintainListener(this);
+        new PlayerInventoryListener(this);
+        new SpigotJoinListener(this);
+        new StatusListener(this);
+        new MobListeners(this);
+        new ActionBlockListener(this);
+        new FallDamageHandler(this);
+        new MOTDHandler(this);
+        new CmdPreprocessHandler(this);
+        new GeneralLobbyListener(this);
     }
 
-    private CompletableFuture<Void> registerGameListeners() {
-        return CompletableFuture.runAsync(() -> {
-            new GameListener(this);
-            new GameDamagerConverterListener(this);
-            new TrapListener(this);
 
-            // TODO: Add more listeners here..
-        });
+    private void registerGameListeners() {
+        new GameListener(this);
+        new GameDamagerConverterListener(this);
+        new TrapListener(this);
     }
-    private CompletableFuture<Void> registerCommands() {
-        return CompletableFuture.runAsync(() -> {
-            registerCommand(new SetRoleCommand());
-            registerCommand(new AddRoleCommand());
-            registerCommand(new BalanceCommand());
-            registerCommand(new BuyCommand());
-            registerCommand(new ConfirmCommand());
-            registerCommand(new TellCommand());
-            registerCommand(new EndCommand());
-            registerCommand(new PingCommand());
-            registerCommand(new StartCommand());
-            registerCommand(new ViewCommand());
-            registerCommand(new SpecCommand());
-            registerCommand(new SetMapCommand());
-            registerCommand(new TeamCommand());
-            registerCommand(new KillCommand());
-            registerCommand(new KnockbackCommand());
-            registerCommand(new HitRegCommand());
-            registerCommand(new MuteCommand());
-        });
-}
+
+    private void registerCommands() {
+        registerCommand(new SetRoleCommand());
+        registerCommand(new AddRoleCommand());
+        registerCommand(new BalanceCommand());
+        registerCommand(new BuyCommand());
+        registerCommand(new ConfirmCommand());
+        registerCommand(new TellCommand());
+        registerCommand(new EndCommand());
+        registerCommand(new PingCommand());
+        registerCommand(new StartCommand());
+        registerCommand(new ViewCommand());
+        registerCommand(new SpecCommand());
+        registerCommand(new SetMapCommand());
+        registerCommand(new TeamCommand());
+        registerCommand(new KillCommand());
+        registerCommand(new KnockbackCommand());
+        registerCommand(new HitRegCommand());
+        registerCommand(new MuteCommand());
+    }
 
     public Configurator getConfigurator(String identifier) {
         return configurators.get(identifier);
     }
     public void reloadConfigurators() {
-        CompletableFuture.runAsync(() ->
-                configurators.values().forEach(Configurator::reloadConfig));
+        configurators.values().forEach(Configurator::reloadConfig);
     }
 
     public EconomyHandler getEconomyHandler() {
@@ -274,44 +251,55 @@ public class PodcrashSpigot extends PodcrashPlugin {
     }
 
     public void setupPermissions(Player player) {
+        //todo make this not slow
         PermissionAttachment attachment = player.addAttachment(this);
         this.playerPermissions.put(player.getUniqueId(), attachment);
         permissionsSetter(player);
     }
+
     private void permissionsSetter(Player player) {
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+        //todo make this not slow
+        PermissionAttachment attachment = this.playerPermissions.get(player.getUniqueId());
+        final String[] disallowedPerms = new String[] {
+                "bukkit.command.reload",
+                "bukkit.command.timings",
+                "bukkit.command.plugins",
+                "bukkit.command.help",
+                "bukkit.command.ban-ip",
+                "bukkit.command.stop",
+                "invicta.map",
+                "invicta.host",
+                "invicta.developer",
+                "invicta.testing",
+                "invicta.mute",
+                "invicta.mod"
+        };
+        getInstance().getLogger().info("Disabling bad permissions");
+        for(String disallowed : disallowedPerms)
+            attachment.setPermission(disallowed, false);
 
-            PermissionAttachment attachment = this.playerPermissions.get(player.getUniqueId());
-            String[] disallowedPerms = new String[] {
-                    "bukkit.command.reload",
-                    "bukkit.command.timings",
-                    "bukkit.command.plugins",
-                    "bukkit.command.help",
-                    "bukkit.command.ban-ip",
-                    "bukkit.command.stop",
-                    "invicta.map",
-                    "invicta.host",
-                    "invicta.developer",
-                    "invicta.testing",
-                    "invicta.mute",
-                    "invicta.mod"
-            };
-            getInstance().getLogger().info("Disabling bad permissions");
-            for(String disallowed : disallowedPerms)
-                attachment.setPermission(disallowed, false);
-
-            RanksTable table = TableOrganizer.getTable(DataTableType.PERMISSIONS);
-            Set<Rank> ranks =  table.getRanksSync(player.getUniqueId());
-            for(Rank r : ranks) {
-                player.sendMessage(String.format("%s%sYou have been assigned the %s role!", ChatColor.GREEN, ChatColor.BOLD, r.getName()));
-                for(String permission : r.getPermissions()) {
-                    attachment.setPermission(permission, true);
-                }
+        RanksTable table = TableOrganizer.getTable(DataTableType.PERMISSIONS);
+        Set<Rank> ranks =  table.getRanksSync(player.getUniqueId());
+        for(Rank r : ranks) {
+            player.sendMessage(String.format("%s%sYou have been assigned the %s role!", ChatColor.GREEN, ChatColor.BOLD, r.getName()));
+            for(String permission : r.getPermissions()) {
+                attachment.setPermission(permission, true);
             }
-        });
+        }
     }
 
     public void registerCommand(BukkitCommand command) {
         commandMap.register(command.getLabel(), command);
     }
+
+    public static void debugLog(String message) {
+        if(DEBUG)
+            getInstance().getLogger().log(Level.FINE, message);
+    }
+
+    public static void debugErr(String message) {
+        if(DEBUG)
+            getInstance().getLogger().log(Level.SEVERE, message);
+    }
+
 }

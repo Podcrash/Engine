@@ -11,8 +11,10 @@ public final class Pluginizer {
     private static PodcrashPlugin plugin;
 
     public static void setInstance(PodcrashPlugin plugin1) {
-        if (plugin == null) plugin = plugin1;
-        else throw new RuntimeException("This method should only be called once!");
+        if (plugin == null)
+            plugin = plugin1;
+        else
+            throw new RuntimeException("This method should only be called once!");
     }
 
     public static void destroy() {

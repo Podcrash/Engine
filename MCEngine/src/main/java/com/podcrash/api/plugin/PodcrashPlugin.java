@@ -9,6 +9,8 @@ import java.util.concurrent.ExecutorService;
 
 public abstract class PodcrashPlugin extends JavaPlugin {
 
+    public static final boolean DEBUG = true;
+
     public abstract ExecutorService getExecutorService();
 
     public void enable() {
