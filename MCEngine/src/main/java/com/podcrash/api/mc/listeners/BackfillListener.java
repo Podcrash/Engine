@@ -7,14 +7,17 @@ import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.GameState;
 import com.podcrash.api.mc.game.resources.GameResource;
 import com.podcrash.api.mc.game.resources.HealthBarResource;
+import com.podcrash.api.mc.time.TimeHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
@@ -43,12 +46,16 @@ public class BackfillListener extends ListenerBase {
         Player absentPlayer = getOfflineFromString(absentPlayerIGN);
         if(canBackfill && absentPlayer != null && GameManager.isSpectating(joiningPlayer)) {
             Game game = GameManager.getGame();
+            joiningPlayer.setGameMode(GameMode.SURVIVAL);
+
+            // Fixes the double damage bug
+            joiningPlayer.setItemInHand(new ItemStack(Material.DIAMOND_SWORD));
+            TimeHandler.delayTime(1L, () -> joiningPlayer.setItemInHand(new ItemStack(Material.AIR)));
 
             game.removePlayer(absentPlayer);
             game.addParticipant(joiningPlayer);
             game.joinTeam(joiningPlayer, offlinePlayers.get(absentPlayer).getTeamEnum(), true);
 
-            joiningPlayer.setGameMode(GameMode.SURVIVAL);
             joiningPlayer.teleport(GameManager.getGame().getTeam(joiningPlayer).getSpawn(joiningPlayer));
             for (GameResource resource : game.getGameResources()) {
                 if(resource instanceof HealthBarResource) ((HealthBarResource) resource).addPlayerToMap(joiningPlayer);
@@ -88,7 +95,7 @@ public class BackfillListener extends ListenerBase {
     public void onJoin(PlayerJoinEvent event) {
         offlinePlayers.remove(event.getPlayer());
         updateCanBackfill();
-        if (canBackfill) {
+        if (canBackfill && !GameManager.getGame().isParticipating(event.getPlayer())) {
             List<Player> keysAsArray = new ArrayList<>(offlinePlayers.keySet());
             sendCanJoinMessage(event.getPlayer(), keysAsArray.get(0));
         }
