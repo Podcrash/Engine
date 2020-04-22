@@ -12,10 +12,7 @@ public class IncreaseMaxPlayersCommand extends CommandBase{
     public boolean onCommand(CommandSender commandSender, Command cmd, String label, String[] args) {
         Game game = GameManager.getGame();
         int currMax = game.getMaxPlayers() + 1;
-        int possibleMax = 0;
-        for (GTeam team : game.getTeams()) {
-            possibleMax += team.getMaxPlayers();
-        }
+        int possibleMax = game.getTeam(0).getMaxPlayers() * game.getTeams().size();
         game.setMaxPlayers(currMax);
         if (currMax > possibleMax) {
             for (GTeam team : game.getTeams()) {
