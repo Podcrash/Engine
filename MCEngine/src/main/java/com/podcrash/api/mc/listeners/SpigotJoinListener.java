@@ -133,15 +133,12 @@ public class SpigotJoinListener extends ListenerBase {
                             onlineSize++;
                     }
                     System.out.println(onlineSize + " <-- size");
-                    /*
                     if(onlineSize <= 1) {
                         GameManager.endGame(game);
                         Game newGame;
                         if((newGame = GameManager.getGame()) == null) return;
                         newGame.remove(event.getPlayer());
                     }
-
-                     */
                 }
                 break;
             case LOBBY:
