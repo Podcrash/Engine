@@ -79,7 +79,7 @@ public abstract class Game implements IGame {
         this.name = name;
         this.teams = new ArrayList<>();
         this.isLoadedMap = false;
-        this.state = GameState.LOBBY;
+        setState(GameState.LOBBY);
         this.type = type;
         this.gameResources = new ArrayList<>();
 
