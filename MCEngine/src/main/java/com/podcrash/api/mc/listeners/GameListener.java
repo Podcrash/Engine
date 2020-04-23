@@ -153,6 +153,7 @@ public class GameListener extends ListenerBase {
         });
         game.getBukkitSpectators().forEach(player -> {
             DamageApplier.removeInvincibleEntity(player);
+            player.getInventory().clear();
             game.removePlayerLobbyPVPing(player);
             player.setHealth(player.getMaxHealth());
             player.teleport(game.getSpawnLocation());
