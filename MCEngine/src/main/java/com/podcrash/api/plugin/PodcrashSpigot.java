@@ -37,7 +37,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
     public static PodcrashSpigot getInstance() {
         return INSTANCE;
     }
-
+    public static final String CHANNEL_NAME = "INVICTASERVER";
     private final Map<UUID, PermissionAttachment> playerPermissions = new HashMap<>();
 
     private ExecutorService service = Executors.newCachedThreadPool();
@@ -311,5 +311,10 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
 
     public boolean hasPPLOwner() {
         return System.getProperty("mps.owner") != null;
+    }
+
+    private void registerMessengers() {
+        getServer().getMessenger().registerOutgoingPluginChannel(this, CHANNEL_NAME);
+        getServer().getMessenger().registerIncomingPluginChannel(this, CHANNEL_NAME, new MessageListener(CHANNEL_NAME));
     }
 }
