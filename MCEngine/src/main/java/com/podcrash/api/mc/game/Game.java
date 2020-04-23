@@ -952,17 +952,19 @@ public abstract class Game implements IGame {
             for (int i = 0; i < 9; i++) {
                 inv.setItem(i, hotbarSave[i]);
             }
-        }
-        ItemStackUtil.createItem(inv, 276, 1, 1, "&a&lEnable Lobby PVP");
-        // Setting items in the player's inventory
+        } else {
+            ItemStackUtil.createItem(inv, 276, 1, 1, "&a&lEnable Lobby PVP");
+            // Setting items in the player's inventory
+            createTeamItems(p);
 
-        ItemStackUtil.createItem(inv, 355, 1, 9, "&d&lReturn to Lobby");
+            ItemStackUtil.createItem(inv, 355, 1, 9, "&d&lReturn to Lobby");
+        }
 
         ItemStackUtil.createItem(inv, 145, 1, 21, ChatUtil.chat("&6&lSelect Kit"));
 
         ItemStackUtil.createItem(inv, 421, 1, 23, ChatUtil.chat("&6&lSelect Team"));
 
-        createTeamItems(p);
+
         //ItemStackUtil.createItem(inv, 95, 7, 1, 24, ChatUtil.chat("&7&lLeave Team Queue"));
         ItemStack spectate;
         if (isSpectating(p)) {
