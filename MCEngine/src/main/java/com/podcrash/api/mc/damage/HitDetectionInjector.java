@@ -104,17 +104,8 @@ public final class HitDetectionInjector {
         Pluginizer.getSpigotPlugin().getLogger().info(player.getName() + " injected with hit detection.");
 
         //TODO: FIX THE DOUBLE DAMAGE BUG AT ITS SOURCE AND DELETE THIS
-        ItemStack lastItem = player.getItemInHand();
-        ItemStack diamondsword = new ItemStack(Material.DIAMOND_SWORD);
-        player.setItemInHand(diamondsword);
-        TimeHandler.delayTime(1, () -> {
-            //If something changed their holding item in hand within the last tick, respect that change
-            //else we just replace with whatever it used to be
-            if (player.getItemInHand() == diamondsword) {
-                player.setItemInHand(lastItem);
-            }
-
-        });
+        player.setItemInHand(new ItemStack(Material.DIAMOND_SWORD));
+        player.setItemInHand(new ItemStack(Material.AIR));
 
     }
 
