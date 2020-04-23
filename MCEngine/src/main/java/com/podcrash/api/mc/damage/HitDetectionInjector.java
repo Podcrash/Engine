@@ -7,6 +7,7 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.*;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.podcrash.api.mc.effect.status.StatusApplier;
+import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.plugin.Pluginizer;
 
 import com.podcrash.api.plugin.PodcrashSpigot;
@@ -19,6 +20,7 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -96,7 +98,13 @@ public final class HitDetectionInjector {
     /**
      * Inject the custom hit detection to any user
      */
-        public void injectHitDetection() {
+    public void injectHitDetection() {
+        //TODO: FIX THE DOUBLE DAMAGE BUG AT ITS SOURCE AND DELETE THIS
+        ItemStack lastItem = player.getItemInHand();
+        player.setItemInHand(new ItemStack(Material.DIAMOND_SWORD));
+        player.setItemInHand(lastItem);
+
+
         ProtocolLibrary.getProtocolManager().addPacketListener(listener);
         Pluginizer.getSpigotPlugin().getLogger().info(player.getName() + " injected with hit detection.");
     }

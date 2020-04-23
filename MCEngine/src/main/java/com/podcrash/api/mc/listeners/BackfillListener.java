@@ -46,16 +46,6 @@ public class BackfillListener extends ListenerBase {
             Game game = GameManager.getGame();
             joiningPlayer.setGameMode(GameMode.SURVIVAL);
 
-
-
-            // Fixes the double damage bug
-            ItemStack lastItemInHand = joiningPlayer.getItemInHand();
-            joiningPlayer.setItemInHand(new ItemStack(Material.DIAMOND_SWORD));
-            TimeHandler.delayTime(1L, () -> {
-                joiningPlayer.setItemInHand(lastItemInHand);
-            }
-            );
-
             game.removePlayer(absentPlayer);
             game.addParticipant(joiningPlayer);
             game.joinTeam(joiningPlayer, offlinePlayers.get(absentPlayer.getUniqueId()).getValue().getTeamEnum(), true);

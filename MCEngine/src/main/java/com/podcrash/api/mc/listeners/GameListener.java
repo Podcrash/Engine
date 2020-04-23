@@ -360,12 +360,8 @@ public class GameListener extends ListenerBase {
             if(game != null ) {
                 game.removePlayerLobbyPVPing(player);
                 game.updateLobbyInventory(player);
-            } else {    // AKA if we are in a general lobby
-                ItemStack diamondsword = new ItemStack(Material.DIAMOND_SWORD);
-                player.getInventory().setItem(0, diamondsword);
-                TimeHandler.delayTime(1L, () -> {
-                    ItemStackUtil.createItem(player.getInventory(), 276, 1, 1, "&a&lEnable Lobby PVP");
-                });
+            } else {
+                ItemStackUtil.createItem(player.getInventory(), 276, 1, 1, "&a&lEnable Lobby PVP");
             }
             // For ALL lobbies, make the player invincible again
             DamageApplier.addInvincibleEntity(player);
