@@ -1,7 +1,7 @@
 package com.podcrash.api.mc.world;
 
 import com.podcrash.api.mc.time.resources.BlockBreakThenRestore;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -37,7 +37,7 @@ public class CraftBlockUpdater implements Runnable {
     private void start() {
         if (!isActive) {
             isActive = true;
-            thisTask = Bukkit.getScheduler().runTaskTimer(Pluginizer.getSpigotPlugin(), this, 1,0);
+            thisTask = Bukkit.getScheduler().runTaskTimer(PodcrashSpigot.getInstance(), this, 1,0);
         }
     }
     public void stop() {

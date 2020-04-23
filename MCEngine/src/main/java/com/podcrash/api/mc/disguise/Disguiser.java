@@ -17,7 +17,7 @@ import com.podcrash.api.mc.time.resources.TimeResource;
 import com.podcrash.api.mc.util.PacketUtil;
 import com.podcrash.api.mc.util.PlayerCache;
 import com.podcrash.api.mc.util.Utility;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -56,7 +56,7 @@ public final class Disguiser {
                 PacketType.Play.Server.REL_ENTITY_MOVE_LOOK,
                 PacketType.Play.Server.ENTITY_TELEPORT
         };
-        protocolManager.addPacketListener(new PacketAdapter(Pluginizer.getSpigotPlugin(), ListenerPriority.HIGHEST, types) {
+        protocolManager.addPacketListener(new PacketAdapter(PodcrashSpigot.getInstance(), ListenerPriority.HIGHEST, types) {
             @Override
             public void onPacketSending(PacketEvent event) {
                 //what the code accounts for: https://gitlab.com/rain474/dominate-recreation/snippets/1886024

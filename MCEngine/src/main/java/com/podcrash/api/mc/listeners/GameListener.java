@@ -26,7 +26,7 @@ import com.podcrash.api.mc.util.EntityUtil;
 import com.podcrash.api.mc.util.ItemStackUtil;
 import com.podcrash.api.mc.util.PacketUtil;
 import com.podcrash.api.mc.world.WorldManager;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import org.bukkit.*;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
@@ -196,7 +196,7 @@ public class GameListener extends ListenerBase {
 
         e.getWho().sendMessage(String.format("%sRespawn>%s You will respawn in 9 seconds.",ChatColor.BLUE, ChatColor.GRAY));
 
-        Bukkit.getScheduler().runTaskLater(Pluginizer.getSpigotPlugin(), () -> {
+        Bukkit.getScheduler().runTaskLater(PodcrashSpigot.getInstance(), () -> {
             deathAnimation(victim.getLocation());
             victim.setAllowFlight(true);
             victim.setFlying(true);
@@ -371,7 +371,7 @@ public class GameListener extends ListenerBase {
             // For ALL lobbies, make the player invincible again
             DamageApplier.addInvincibleEntity(player);
 
-            Bukkit.getScheduler().runTaskLater(Pluginizer.getSpigotPlugin(), () -> {
+            Bukkit.getScheduler().runTaskLater(PodcrashSpigot.getInstance(), () -> {
                 deathAnimation(player.getLocation());
                 StatusApplier.getOrNew(player).removeStatus(Status.values());
                 player.setHealth(player.getMaxHealth());

@@ -11,7 +11,6 @@ import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.GameState;
 import com.podcrash.api.mc.world.SpawnWorldSetter;
-import com.podcrash.api.plugin.Pluginizer;
 import com.podcrash.api.plugin.PodcrashSpigot;
 import net.minecraft.server.v1_8_R3.GenericAttributes;
 import org.bukkit.Bukkit;
@@ -44,7 +43,7 @@ public class SpigotJoinListener extends ListenerBase {
         if ((game = GameManager.getGame()) != null)
             if (game.getGameState() == GameState.STARTED)
                 return;
-        SpawnWorldSetter worldSetter = Pluginizer.getSpigotPlugin().getWorldSetter();
+        SpawnWorldSetter worldSetter = PodcrashSpigot.getInstance().getWorldSetter();
         if (worldSetter.getCurrentWorldName() == null)
             return;
         World spawnWorld = Bukkit.getWorld(worldSetter.getCurrentWorldName());

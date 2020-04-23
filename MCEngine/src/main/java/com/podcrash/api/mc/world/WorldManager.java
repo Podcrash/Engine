@@ -1,6 +1,6 @@
 package com.podcrash.api.mc.world;
 
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -213,6 +213,6 @@ public class WorldManager {
         return worldManager;
     }
     private void log(String string) {
-        Pluginizer.getSpigotPlugin().getLogger().info(String.format("[WorldManager] %s", string));
+        PodcrashSpigot.getInstance().getLogger().info(String.format("[WorldManager] %s", string));
     }
 }

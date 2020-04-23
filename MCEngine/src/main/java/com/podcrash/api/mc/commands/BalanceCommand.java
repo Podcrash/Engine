@@ -2,16 +2,13 @@ package com.podcrash.api.mc.commands;
 
 import com.podcrash.api.mc.economy.Currency;
 import com.podcrash.api.mc.economy.EconomyHandler;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 
 import java.util.Collections;
-import java.util.List;
 
 public class BalanceCommand extends BukkitCommand {
 
@@ -27,7 +24,7 @@ public class BalanceCommand extends BukkitCommand {
         if (!(sender instanceof Player))
             return true;
         Player p = (Player) sender;
-        EconomyHandler handler = Pluginizer.getSpigotPlugin().getEconomyHandler();
+        EconomyHandler handler = PodcrashSpigot.getInstance().getEconomyHandler();
         p.sendMessage(String.format("%sEconomy> %sYour %s: %s%s",
                 ChatColor.BLUE, //Header
                 ChatColor.GRAY, //Default color

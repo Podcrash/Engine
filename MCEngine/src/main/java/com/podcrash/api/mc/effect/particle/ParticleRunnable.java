@@ -1,7 +1,7 @@
 package com.podcrash.api.mc.effect.particle;
 
 import com.podcrash.api.mc.time.resources.TimeResource;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ public class ParticleRunnable implements TimeResource {
     private ParticleRunnable() {
         particleRunnable = this;
         active = true;
-        Pluginizer.getSpigotPlugin().getLogger().info("ParticleRunnable Starting!");
+        PodcrashSpigot.getInstance().getLogger().info("ParticleRunnable Starting!");
     }
 
     public static void start(){
@@ -43,7 +43,7 @@ public class ParticleRunnable implements TimeResource {
 
     @Override
     public void cleanup() {
-        Pluginizer.getSpigotPlugin().getLogger().info("[ParticleRunnable]: Shutting off!");
+        PodcrashSpigot.getInstance().getLogger().info("[ParticleRunnable]: Shutting off!");
     }
 
     public void setActive(boolean active) {

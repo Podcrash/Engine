@@ -4,13 +4,12 @@ import com.podcrash.api.mc.effect.status.custom.*;
 import com.podcrash.api.mc.events.StatusApplyEvent;
 import com.podcrash.api.mc.events.StatusRemoveEvent;
 import com.podcrash.api.mc.time.TimeHandler;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import javax.annotation.Nonnull;
@@ -81,14 +80,16 @@ public class StatusApplier {
         //only work for vanilla effects.
         if (override && status.isVanilla()) {
             StatusWrapper wrapper = fromPotionEffect(status);// 30 seconds
-            Pluginizer.getLogger().info("statusppaplier wrapper: " + wrapper);
-            if (wrapper == null) return;
+            PodcrashSpigot.getInstance().getLogger().info("statusppaplier wrapper: " + wrapper);
+            if (wrapper == null)
+                return;
             float newDuration = (wrapper.getDuration() - duration);
-            Pluginizer.getLogger().info("statusppaplier duration: " + newDuration);
-            if (newDuration < 0) return;
+            PodcrashSpigot.getInstance().getLogger().info("statusppaplier duration: " + newDuration);
+            if (newDuration < 0)
+                return;
             StatusWrapper newWrapper = new StatusWrapper(wrapper.getStatus(), newDuration, wrapper.getPotency(), wrapper.isAmbience(), wrapper.isOverride());
 
-            Pluginizer.getLogger().info("statusppaplier new wrapper: " + newWrapper);
+            PodcrashSpigot.getInstance().getLogger().info("statusppaplier new wrapper: " + newWrapper);
             TimeHandler.delayTime((long) (20L * (duration + 0.5)), () -> applyStatus(newWrapper));
         }
     }
@@ -127,10 +128,12 @@ public class StatusApplier {
     private void applyVanilla(@Nonnull Status status, int duration, int potency, boolean ambient, boolean override) {
         final PotionEffect addpotion = new PotionEffect(status.getPotionEffectType(), duration, potency, ambient);
 
-        Bukkit.getScheduler().runTask(Pluginizer.getSpigotPlugin(), () -> {
+        Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
             if (!player.addPotionEffect(addpotion, override)) {
-                if (duration == Integer.MAX_VALUE && status == Status.SPEED) Pluginizer.getLogger().info("speed not applied");
-            }else if (duration == Integer.MAX_VALUE && status == Status.SPEED) Pluginizer.getLogger().info("speed applied");
+                if (duration == Integer.MAX_VALUE && status == Status.SPEED)
+                    PodcrashSpigot.getInstance().getLogger().info("speed not applied");
+            } else if (duration == Integer.MAX_VALUE && status == Status.SPEED)
+                PodcrashSpigot.getInstance().getLogger().info("speed applied");
         });
 
     }
@@ -154,7 +157,7 @@ public class StatusApplier {
                 public void run() {
                     player.addPotionEffect(effect, true);
                 }
-            }.runTaskLater(Pluginizer.getSpigotPlugin(), 1L);
+            }.runTaskLater(PodcrashSpigot.getInstance(), 1L);
         }
     }
 
@@ -232,7 +235,7 @@ public class StatusApplier {
 
     private void applyCloak(final int duration) {
         if (!isCloaked()) {
-            Bukkit.getScheduler().runTask(Pluginizer.getSpigotPlugin(), () -> {
+            Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
                 for (Player p : player.getWorld().getPlayers()) {
                     p.hidePlayer(player);
                 }

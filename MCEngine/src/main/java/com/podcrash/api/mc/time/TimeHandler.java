@@ -1,7 +1,7 @@
 package com.podcrash.api.mc.time;
 
 import com.podcrash.api.mc.time.resources.TimeResource;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -20,7 +20,7 @@ public final class TimeHandler {
         Runnable runnable = makeRunnable(resource);
 
         //Bukkit.getScheduler().runTaskAsynchronously(plugin, runnable).getTaskId();
-        int taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(Pluginizer.getSpigotPlugin(), runnable, delayTicks, ticks);
+        int taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(PodcrashSpigot.getInstance(), runnable, delayTicks, ticks);
         //runnable.runTaskTimer(plugin, delaySeconds * 20, seconds * 20);
         register(resource, taskID);
     }
@@ -28,7 +28,7 @@ public final class TimeHandler {
     public static void repeatedTimeAsync(long ticks, long delayTicks, TimeResource resource) {
         Runnable runnable = makeRunnable(resource);
 
-        int taskID = Bukkit.getScheduler().runTaskTimerAsynchronously(Pluginizer.getSpigotPlugin(), runnable, delayTicks, ticks).getTaskId();
+        int taskID = Bukkit.getScheduler().runTaskTimerAsynchronously(PodcrashSpigot.getInstance(), runnable, delayTicks, ticks).getTaskId();
         //runnable.runTaskTimer(plugin, delaySeconds * 20, seconds * 20);
         register(resource, taskID);
     }
@@ -36,7 +36,7 @@ public final class TimeHandler {
     public static void repeatedTimeSeconds(long seconds, long delaySeconds, TimeResource resource) {
         Runnable runnable = makeRunnable(resource);
 
-        int taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(Pluginizer.getSpigotPlugin(), runnable, delaySeconds * 20, seconds * 20);
+        int taskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(PodcrashSpigot.getInstance(), runnable, delaySeconds * 20, seconds * 20);
         //runnable.runTaskTimer(plugin, delaySeconds * 20, seconds * 20);
         register(resource, taskID);
     }
@@ -44,13 +44,13 @@ public final class TimeHandler {
     public static void repeatedTimeSecondsAsync(long seconds, long delaySeconds, TimeResource resource) {
         Runnable runnable = makeRunnable(resource);
 
-        int taskID = Bukkit.getScheduler().runTaskTimerAsynchronously(Pluginizer.getSpigotPlugin(), runnable, delaySeconds * 20, seconds * 20).getTaskId();
+        int taskID = Bukkit.getScheduler().runTaskTimerAsynchronously(PodcrashSpigot.getInstance(), runnable, delaySeconds * 20, seconds * 20).getTaskId();
         register(resource, taskID);
         //runnable.runTaskTimer(plugin, delaySeconds * 20, seconds * 20);
     }
 
     public static void delayTime(long delay, Runnable runnable) {
-        int taskID = Bukkit.getScheduler().scheduleSyncDelayedTask(Pluginizer.getSpigotPlugin(), runnable, delay);
+        int taskID = Bukkit.getScheduler().scheduleSyncDelayedTask(PodcrashSpigot.getInstance(), runnable, delay);
         //todo does this need to be registered?
     }
     public static void delayTime(long delay, TimeResource resource) {
@@ -59,7 +59,7 @@ public final class TimeHandler {
             public void run() {
 
             }
-        }.runTaskLater(Pluginizer.getSpigotPlugin(), delay).getTaskId();
+        }.runTaskLater(PodcrashSpigot.getInstance(), delay).getTaskId();
         register(resource, taskID);
         //runnable.scheduleSync(plugin, delay * 20);
     }

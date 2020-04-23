@@ -6,7 +6,7 @@ import com.podcrash.api.db.tables.MapTable;
 import com.podcrash.api.mc.events.game.GameEndEvent;
 import com.podcrash.api.mc.events.game.GameStartEvent;
 import com.podcrash.api.mc.game.resources.GameResource;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import org.apache.commons.lang.Validate;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -258,28 +258,28 @@ public class GameManager {
         Game game = currentGame;
         if (game.getGameState() == GameState.STARTED)
             return;
-        Pluginizer.getSpigotPlugin().getLogger().info("Attempting to start game " + game.getId());
+        PodcrashSpigot.getInstance().getLogger().info("Attempting to start game " + game.getId());
         if (!game.hasChosenMap()) {
             game.broadcast("There is no map selected for this game.");
         }
         GameStartEvent gamestart = new GameStartEvent(game);
         game.setState(GameState.STARTED);
-        Pluginizer.getSpigotPlugin().getServer().getPluginManager().callEvent(gamestart);
+        PodcrashSpigot.getInstance().getServer().getPluginManager().callEvent(gamestart);
     }
 
     public static void endGame(Game game) {
         //use the default world if it doesn't exist
         //otherwise, use the set spawn
         String name = "world";
-        if (Pluginizer.getSpigotPlugin().getWorldSetter().getCurrentWorldName() != null) {
-            name = Pluginizer.getSpigotPlugin().getWorldSetter().getCurrentWorldName();
+        if (PodcrashSpigot.getInstance().getWorldSetter().getCurrentWorldName() != null) {
+            name = PodcrashSpigot.getInstance().getWorldSetter().getCurrentWorldName();
         }
         Location spawnLoc = Bukkit.getWorld(name).getSpawnLocation();
         game.setState(GameState.LOBBY);
         game.optIn();
         GameEndEvent gameend = new GameEndEvent(game, spawnLoc);
         //currentGame = null;
-        Pluginizer.getSpigotPlugin().getServer().getPluginManager().callEvent(gameend);
+        PodcrashSpigot.getInstance().getServer().getPluginManager().callEvent(gameend);
     }
 
     public static Game getGame() {

@@ -14,7 +14,7 @@ import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.GameState;
 import com.podcrash.api.mc.sound.SoundPlayer;
 import com.podcrash.api.mc.util.PacketUtil;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -241,7 +241,7 @@ public class MapMaintainListener extends ListenerBase {
     public void die(PlayerDeathEvent event) {
         event.setDeathMessage(null);
         event.getDrops().clear();
-        Pluginizer.getSpigotPlugin().getLogger().info("from MapMaintainListener#184: If you ever see this message, it's a bug");
+        PodcrashSpigot.getInstance().getLogger().info("from MapMaintainListener#184: If you ever see this message, it's a bug");
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -298,7 +298,7 @@ public class MapMaintainListener extends ListenerBase {
 
     private boolean isSpawnWorld(World world) {
         //if this is a world loaded by the spawn setter
-        String name = Pluginizer.getSpigotPlugin().getWorldSetter().getCurrentWorldName();
+        String name = PodcrashSpigot.getInstance().getWorldSetter().getCurrentWorldName();
         return world.getName().equalsIgnoreCase(name);
     }
 }

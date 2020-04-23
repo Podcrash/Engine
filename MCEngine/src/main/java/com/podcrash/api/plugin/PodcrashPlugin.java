@@ -19,7 +19,6 @@ public abstract class PodcrashPlugin extends JavaPlugin {
 
     public void disable() {
         closeDBs();
-        Pluginizer.destroy();
     }
     public void connectDbs() {
         Communicator.setup(getExecutorService());

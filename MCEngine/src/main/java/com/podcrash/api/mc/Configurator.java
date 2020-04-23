@@ -16,10 +16,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-/**
- * Just a feeling that the async stuff is uneeded as FileConfiguration just caches it....
- *
- */
 public class Configurator {
     private static final int MAX_THREADS = 5;
     private static final ExecutorService executor = Executors.newFixedThreadPool(MAX_THREADS);

@@ -1,6 +1,6 @@
 package com.podcrash.api.mc.events.econ;
 
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -21,7 +21,7 @@ public class PayEvent extends Event {
      * @return the balance of the player associated with the event
      */
     public double getBalance() {
-        return Pluginizer.getSpigotPlugin().getEconomyHandler().getMoney(player);
+        return PodcrashSpigot.getInstance().getEconomyHandler().getMoney(player);
     }
 
     public Player getPlayer() {

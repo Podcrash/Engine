@@ -9,7 +9,6 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.podcrash.api.mc.effect.status.StatusApplier;
-import com.podcrash.api.plugin.Pluginizer;
 import com.podcrash.api.plugin.PodcrashSpigot;
 import net.minecraft.server.v1_8_R3.EntityLiving;
 import net.minecraft.server.v1_8_R3.GenericAttributes;
@@ -42,7 +41,7 @@ public final class HitDetectionInjector {
 
     public HitDetectionInjector(Player p) {
         this.player = p;
-        this.listener = new PacketAdapter(Pluginizer.getSpigotPlugin(), ListenerPriority.NORMAL, PacketType.Play.Client.USE_ENTITY) {
+        this.listener = new PacketAdapter(PodcrashSpigot.getInstance(), ListenerPriority.NORMAL, PacketType.Play.Client.USE_ENTITY) {
             @Override
             public void onPacketReceiving(PacketEvent event) {
                 WrapperPlayClientUseEntity packet = new WrapperPlayClientUseEntity(event.getPacket());
@@ -101,7 +100,7 @@ public final class HitDetectionInjector {
      */
     public void injectHitDetection() {
         ProtocolLibrary.getProtocolManager().addPacketListener(listener);
-        Pluginizer.getSpigotPlugin().getLogger().info(player.getName() + " injected with hit detection.");
+        PodcrashSpigot.getInstance().getLogger().info(player.getName() + " injected with hit detection.");
     }
 
     public void deinject() {

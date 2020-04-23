@@ -1,6 +1,6 @@
 package com.podcrash.api.mc.location;
 
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import net.jafama.FastMath;
 import net.minecraft.server.v1_8_R3.EntityLiving;
 import org.bukkit.Location;
@@ -32,7 +32,7 @@ public class Coordinate {
     public static Coordinate fromEntity(Entity entity) {
         if (!(entity instanceof Player))
             return fromLocation(entity.getLocation());
-        return Pluginizer.getSpigotPlugin().getCoordinateTracker().get((Player) entity, 1);
+        return PodcrashSpigot.getInstance().getCoordinateTracker().get((Player) entity, 1);
     }
     public static <K> Coordinate from(K inst) {
         if (inst instanceof Location)

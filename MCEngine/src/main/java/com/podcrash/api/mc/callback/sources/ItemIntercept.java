@@ -6,7 +6,7 @@ import com.podcrash.api.mc.location.BoundingBox;
 import com.podcrash.api.mc.util.EntityUtil;
 import com.podcrash.api.mc.util.VectorUtil;
 import com.podcrash.api.mc.world.BlockUtil;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -97,7 +97,7 @@ public class ItemIntercept extends CallbackAction<ItemIntercept> {
             return true;
         }
 
-        Pluginizer.getLogger().info(dir.toString());
+        PodcrashSpigot.getInstance().getLogger().info(dir.toString());
         //if nothing else works, just avoid the NPE
         this.interceptLocation = item.getLocation();
         //if the item doesn't exist, or the item is on the ground, return true.

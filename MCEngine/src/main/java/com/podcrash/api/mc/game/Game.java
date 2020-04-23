@@ -15,7 +15,7 @@ import com.podcrash.api.mc.ui.TeamSelectGUI;
 import com.podcrash.api.mc.util.ChatUtil;
 import com.podcrash.api.mc.util.ItemStackUtil;
 import com.podcrash.api.mc.util.PrefixUtil;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -1028,7 +1028,7 @@ public abstract class Game implements IGame {
       //  }else {
         for(Team team : Bukkit.getScoreboardManager().getMainScoreboard().getTeams()) {
             if (team.getName().equals(id + "redTeam") || team.getName().equals(id + "blueTeam")) {
-                Pluginizer.getSpigotPlugin().getLogger().info("cleared a team! from " + id);
+                PodcrashSpigot.getInstance().getLogger().info("cleared a team! from " + id);
                 team.unregister();
             }
         }
@@ -1104,7 +1104,7 @@ public abstract class Game implements IGame {
     }
 
     protected final void log(String msg){
-        Pluginizer.getSpigotPlugin().getLogger().info(String.format("%s: %s", toString(), msg));
+        PodcrashSpigot.getInstance().getLogger().info(String.format("%s: %s", toString(), msg));
     }
 
     @Override

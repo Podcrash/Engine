@@ -11,7 +11,7 @@ import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.GameState;
 import com.podcrash.api.mc.sound.SoundPlayer;
 import com.podcrash.api.mc.util.PacketUtil;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import net.minecraft.server.v1_8_R3.EntityLiving;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
@@ -33,7 +33,7 @@ public final class DamageQueue implements Runnable {
     private static final Map<String, Deque<Damage>> damageHistory = new HashMap<>();
 
     public DamageQueue() {
-        Pluginizer.getSpigotPlugin().getLogger().info("Starting the Damage Queue!");
+        PodcrashSpigot.getInstance().getLogger().info("Starting the Damage Queue!");
     }
 
     /**

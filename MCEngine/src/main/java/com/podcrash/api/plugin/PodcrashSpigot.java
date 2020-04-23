@@ -108,7 +108,6 @@ public class PodcrashSpigot extends PodcrashPlugin {
     public void onEnable() {
         INSTANCE = this;
         getLogger().info("Starting PodcrashSpigot!");
-        Pluginizer.setInstance(this);
 
         Future<Void> dbFuture = enableWrap();
         registerCommands();

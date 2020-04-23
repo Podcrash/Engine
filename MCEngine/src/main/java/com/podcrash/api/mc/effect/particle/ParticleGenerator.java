@@ -11,7 +11,7 @@ import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.util.PacketUtil;
 import com.podcrash.api.mc.util.VectorUtil;
 import com.podcrash.api.mc.world.BlockUtil;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -39,7 +39,7 @@ public final class ParticleGenerator {
     }
 
     public static void generateLocAs(final WrapperPlayServerWorldParticles packet, Location a, Location b) {
-        Bukkit.getScheduler().runTaskAsynchronously(Pluginizer.getSpigotPlugin(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(PodcrashSpigot.getInstance(), () -> {
             Vector vector = VectorUtil.fromAtoB(a, b).normalize();
             Location start = a.clone();
             List<Player> players = a.getWorld().getPlayers();

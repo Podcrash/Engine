@@ -32,6 +32,7 @@ public enum Permission {
     public boolean has(Permissible p) {
         return p.hasPermission(this.getPermName());
     }
+
     public boolean has(CommandSender s) {
         return s.hasPermission(this.getPermName());
     }
