@@ -84,7 +84,7 @@ public class DeathApplyEvent extends Event implements Cancellable {
      */
     public String getDeathMessage() {
         ArrayList<String> causesNames = getCausesNamesFromDamage(damage);
-        String withMsg = String.join(",", causesNames);
+        String withMsg = String.join(", ", causesNames);
 
         Game game = GameManager.getGame();
         TeamEnum victimT = game.getTeamEnum(player);
