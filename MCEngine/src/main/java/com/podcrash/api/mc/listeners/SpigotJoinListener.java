@@ -71,7 +71,7 @@ public class SpigotJoinListener extends ListenerBase {
             DamageApplier.addInvincibleEntity(player);
             player.getInventory().clear();
             player.getInventory().setArmorContents(new ItemStack[]{null, null, null, null});
-            //ItemStackUtil.createItem(player.getInventory(), 388, 1, 2, "&a&lEnable Lobby PVP");
+            //ItemStackUtil.createItem(player.getInventory(), 276, 1, 2, "&a&lEnable Lobby PVP");
         }
         log.info("test123");
         ((CraftPlayer) player).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).setValue(1);
