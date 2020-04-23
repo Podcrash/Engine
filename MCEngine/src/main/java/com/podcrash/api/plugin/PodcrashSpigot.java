@@ -129,6 +129,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
 
         economyHandler = new EconomyHandler();
         worldSetter = new SpawnWorldSetter(); // this is a special cookie
+        registerMessengers();
         Communicator.readyGameLobby();
         if(Communicator.isGameLobby())
             gameStart();
@@ -210,7 +211,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             new GeneralLobbyListener(this);
             new BackfillListener(this);
             new GenEconListener(this);
-
+            new KickListener(this);
             // TODO: Add more listeners here..
         });
     }
@@ -246,6 +247,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
             getCommand("accept").setExecutor(new AcceptCommand());
             getCommand("increase").setExecutor(new IncreaseMaxPlayersCommand());
             getCommand("decrease").setExecutor(new DecreaseMaxPlayersCommand());
+            getCommand("whitelist").setExecutor(new WhitelistCommand());
         });
 }
 
@@ -314,7 +316,7 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
     }
 
     private void registerMessengers() {
-        getServer().getMessenger().registerOutgoingPluginChannel(this, CHANNEL_NAME);
-        getServer().getMessenger().registerIncomingPluginChannel(this, CHANNEL_NAME, new MessageListener(CHANNEL_NAME));
+        getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+        //getServer().getMessenger().registerIncomingPluginChannel(this, CHANNEL_NAME, new MessageListener(CHANNEL_NAME));
     }
 }

@@ -76,7 +76,6 @@ public abstract class Game implements IGame {
      * @param type The type of the game.
      */
     public Game(int id, String name, GameType type) {
-        // RN this uuid is mine (poetahto) but you can put ur in for testing
         this.id = id;
         this.name = name;
         this.teams = new ArrayList<>();

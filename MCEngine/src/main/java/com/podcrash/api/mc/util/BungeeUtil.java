@@ -1,5 +1,7 @@
 package com.podcrash.api.mc.util;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import com.podcrash.api.plugin.Pluginizer;
 import com.podcrash.api.plugin.PodcrashSpigot;
 import org.bukkit.entity.Player;
@@ -10,15 +12,11 @@ import java.io.IOException;
 
 public final class BungeeUtil {
     public static void sendToServer(Player player, String server) {
-        ByteArrayOutputStream b = new ByteArrayOutputStream();
-        DataOutputStream out = new DataOutputStream(b);
+        ByteArrayDataOutput out = ByteStreams.newDataOutput();
 
-        try {
-            out.writeUTF("Connect");
-            out.writeUTF(server);
-        } catch (IOException e) {
-
-        }
-        player.sendPluginMessage(Pluginizer.getSpigotPlugin(), "BungeeCord", b.toByteArray());
+        out.writeUTF("Connect");
+        out.writeUTF(server);
+        Pluginizer.getLogger().info("Sending " + player.getName() + " to " + server);
+        player.sendPluginMessage(Pluginizer.getSpigotPlugin(), "BungeeCord", out.toByteArray());
     }
 }

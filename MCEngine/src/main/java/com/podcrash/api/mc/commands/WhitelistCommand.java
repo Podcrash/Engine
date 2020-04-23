@@ -42,14 +42,16 @@ public class WhitelistCommand extends CommandBase {
             //if it is not "list".
             if (currentlyWhitelisted.contains(arg)) {
                 Bukkit.getOfflinePlayer(arg).setWhitelisted(false);
-                sender.sendMessage("Whitelisted " + arg);
-            } else {
-                Bukkit.getOfflinePlayer(arg).setWhitelisted(true);
-                sender.sendMessage("Un-whitelisted " + arg);
+                sender.sendMessage("Un-Whitelisted " + arg);
 
                 Player currentPlayer = Bukkit.getPlayer(arg);
                 if (currentPlayer != null && !currentPlayer.hasPermission("invicta.exempt"))
                     currentPlayer.kickPlayer("Unwhitelisted!");
+                
+            } else {
+                Bukkit.getOfflinePlayer(arg).setWhitelisted(true);
+                sender.sendMessage("Whitelisted " + arg);
+
             }
 
             Bukkit.reloadWhitelist();

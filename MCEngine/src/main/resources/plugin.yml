@@ -67,3 +67,6 @@ commands:
   decrease:
     description: Decrease max players
     usage: /decrease
+  whitelist:
+    description: whitelist
+    usage: /whitelist
