@@ -96,7 +96,7 @@ public class ItemIntercept extends CallbackAction<ItemIntercept> {
             return true;
         }
 
-        Pluginizer.getLogger().info(dir.toString());
+        //Pluginizer.getLogger().info(dir.toString());
         //if nothing else works, just avoid the NPE
         this.interceptLocation = item.getLocation();
         //if the item doesn't exist, or the item is on the ground, return true.
