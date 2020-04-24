@@ -139,9 +139,22 @@ public class GameManager {
                         "%sInvicta> %sYou are already in the game.",
                         ChatColor.BLUE,
                         ChatColor.GRAY));
-        if (game.getMaxPlayers() == game.size()) {
-            game.getTimer().start();
+
+        //can start check
+        boolean canStart = true;
+
+        /*future check:
+        for (GTeam team : game.getTeams())
+            if (team.teamSize() < team.getMinPlayers()) {
+                canStart = false;
+                break;
+            }
+         */
+
+        if (game.getMinPlayers() > game.size()) {
+            canStart = false;
         }
+        if (canStart && !game.getTimer().isRunning()) game.getTimer().start();
     }
     public static void removePlayer(Player p) {
         Game game = currentGame;
