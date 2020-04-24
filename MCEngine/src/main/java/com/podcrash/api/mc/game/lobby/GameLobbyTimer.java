@@ -52,7 +52,7 @@ public class GameLobbyTimer {
                 if (isRunning) {
                     status = String.format("Starting in %s%s seconds", timeColor(), currentTime);
                     currentTime--;
-                    if(game.size() < game.getMaxPlayers()) {
+                    if(game.getMinPlayers() > game.size()) {
                         System.out.println("dead game, so stopped");
                         stop(false);
                     }
