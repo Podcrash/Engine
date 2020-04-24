@@ -70,17 +70,21 @@ public final class ActionBlockListener extends ListenerBase {
                     Location teleportLoc = actionVector.vector.toLocation(location.getWorld());
                     VectorUtil.conserveDirection(teleportLoc, player);
 
-                    WrapperPlayServerWorldParticles startEffect = ParticleGenerator.createParticle(
-                            player.getEyeLocation().toVector(), EnumWrappers.Particle.EXPLOSION_NORMAL, 5, 0, 0, 0);
-                    PacketUtil.syncSend(startEffect, GameManager.getGame().getBukkitPlayers());
-                    SoundPlayer.sendSound(player.getLocation(), "mob.endermen.portal", 1f, 63);
+                    if(!GameManager.getGame().isRespawning(player)) {
+                        WrapperPlayServerWorldParticles startEffect = ParticleGenerator.createParticle(
+                                player.getEyeLocation().toVector(), EnumWrappers.Particle.EXPLOSION_NORMAL, 5, 0, 0, 0);
+                        PacketUtil.syncSend(startEffect, GameManager.getGame().getBukkitPlayers());
+                        SoundPlayer.sendSound(player.getLocation(), "mob.endermen.portal", 1f, 63);
+                    }
 
                     player.teleport(teleportLoc);
 
-                    WrapperPlayServerWorldParticles endEffect = ParticleGenerator.createParticle(
-                            player.getEyeLocation().toVector(), EnumWrappers.Particle.EXPLOSION_NORMAL, 5, 0, 0, 0);
-                    PacketUtil.syncSend(endEffect, GameManager.getGame().getBukkitPlayers());
-                    SoundPlayer.sendSound(player.getLocation(), "mob.endermen.portal", 1f, 63);
+                    if(!GameManager.getGame().isRespawning(player)) {
+                        WrapperPlayServerWorldParticles endEffect = ParticleGenerator.createParticle(
+                                player.getEyeLocation().toVector(), EnumWrappers.Particle.EXPLOSION_NORMAL, 5, 0, 0, 0);
+                        PacketUtil.syncSend(endEffect, GameManager.getGame().getBukkitPlayers());
+                        SoundPlayer.sendSound(player.getLocation(), "mob.endermen.portal", 1f, 63);
+                    }
                     break;
                 default:
                     return;
