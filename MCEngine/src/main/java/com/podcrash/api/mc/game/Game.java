@@ -759,6 +759,7 @@ public abstract class Game implements IGame {
         this.teams = gameSettings.getTeams();
         for (GTeam team : this.teams) {
             team.clearTeam();
+            team.setScore(0);
         }
     }
 
