@@ -1,5 +1,6 @@
 package com.podcrash.api.mc.game;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GameSettings {
@@ -17,6 +18,16 @@ public class GameSettings {
             this.maxPlayers += settings.getMax();
         }
         this.teams = teams;
+    }
+
+    public GameSettings(GameSettings other) {
+        this.minPlayers = other.minPlayers;
+        this.maxPlayers = other.maxPlayers;
+        teams = new ArrayList<>();
+        for (GTeam team : other.getTeams()) {
+            teams.add(new GTeam(team.getTeamEnum(), team.getMinPlayers(), team.getMaxPlayers(), team.getSpawns()));
+        }
+
     }
 
     /**

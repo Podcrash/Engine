@@ -754,12 +754,7 @@ public abstract class Game implements IGame {
      * @param gameSettings the game settings
      */
     public void setGameSettings(GameSettings gameSettings) {
-        this.gameSettings = gameSettings;
-        this.teams = gameSettings.getTeams();
-        for (GTeam team : this.teams) {
-            team.clearTeam();
-            team.setScore(0);
-        }
+        this.gameSettings = new GameSettings(gameSettings);
     }
 
     /**
