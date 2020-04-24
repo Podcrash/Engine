@@ -28,6 +28,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.spigotmc.SpigotConfig;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
@@ -63,6 +64,10 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
         tracker.enable();
     }
 
+    public void registerConfigurator(String identifier, Reader reader) {
+        getLogger().info("Registering configurator: " + identifier);
+        configurators.put(identifier, new Configurator(this, identifier, reader));
+    }
     public void registerConfigurator(String identifier) {
         getLogger().info("Registering configurator: " + identifier);
         configurators.put(identifier, new Configurator(this, identifier));

@@ -68,6 +68,13 @@ public class Configurator {
         saveConfig();
     }
 
+    public Configurator(JavaPlugin plugin, String fileName, Reader reader) {
+        this.plugin = plugin;
+        this.fileName = fileName + ".yml";
+        this.configFile = new File(plugin.getDataFolder(), fileName);
+        this.config = YamlConfiguration.loadConfiguration(reader);
+        saveConfig();
+    }
     /**
      * Default bukkit folder
      * @param plugin
