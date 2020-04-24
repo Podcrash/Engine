@@ -10,7 +10,8 @@ import org.bukkit.command.CommandSender;
 public class DecreaseMaxPlayersCommand extends CommandBase{
 
     @Override
-    public boolean onCommand(CommandSender commandSender, Command cmd, String label, String[] args) {
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (!sender.hasPermission("invicta.host")) return true;
         Game game = GameManager.getGame();
         int currMax = game.getMaxPlayers();
         int target = currMax - 1;
@@ -23,16 +24,16 @@ public class DecreaseMaxPlayersCommand extends CommandBase{
         //System.out.println(currMax + " " + currMaxForSingleTeam + " " + target + " " + currMaxForSingleTeam * game.getTeams().size());
         //If we can even decrease at all
         if (target >= currMaxForSingleTeam * game.getTeams().size() && target >= game.getMinPlayers()) {
+            Bukkit.broadcastMessage("max players per team: " + game.getTeam(0).getMaxPlayers() + "current size:" + game.getTeam(0).getPlayers().size());
             game.setMaxPlayers(target);
-            //If we need to lower the team maxes by 1
-            if (currMaxForSingleTeam * game.getTeams().size() < target - game.getTeams().size()) {
-                for (GTeam team : game.getTeams()) {
-                    team.setMaxPlayers(team.getMaxPlayers() - 1);
-                }
+
+            for (GTeam team : game.getTeams()) {
+                team.setMaxPlayers((game.getMaxPlayers() + game.getTeams().size() - 1) / game.getTeams().size());
             }
+
             return true;
         }
-        return false;
+        return true;
 
     }
 }
