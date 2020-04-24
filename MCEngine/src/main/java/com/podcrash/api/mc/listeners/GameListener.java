@@ -224,7 +224,10 @@ public class GameListener extends ListenerBase {
 
 
         //StatusApplier.getOrNew(victim).applyStatus(Status.INEPTITUDE, 9, 1);
+        String name = victim.getName();
         TimeHandler.delayTime(200L, () -> {
+            //if the player has logged off, from then until now, dont call the event
+            if(Bukkit.getPlayer(name) == null) return;
             if(game.getGameState() == GameState.STARTED) {
                 GTeam team = game.getTeam(victim);
                 victim.teleport(team.getSpawn(victim));
