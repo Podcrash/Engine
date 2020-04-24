@@ -17,6 +17,7 @@ import com.podcrash.api.db.redis.Communicator;
 import net.minecraft.server.v1_8_R3.GenericAttributes;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -60,9 +61,11 @@ public class SpigotJoinListener extends ListenerBase {
         Logger log = spigot.getLogger();
         Player player = event.getPlayer();
         log.info("34ewrf");
-        if(Communicator.isGameLobby()) {
+        if(Communicator.isGameLobby()) { // this check might not be needed anymore
             new HitDetectionInjector(player).injectHitDetection();
         }
+
+        fixDoubleDamage(player);
         lobbyGameEnter(player);
         log.info("test123");
 
@@ -75,6 +78,12 @@ public class SpigotJoinListener extends ListenerBase {
         setUpHostPermissions(player);
     }
 
+    private void fixDoubleDamage(Player player) {
+        //TODO: FIX THE DOUBLE DAMAGE BUG AT ITS SOURCE AND DELETE THIS
+        player.setItemInHand(new ItemStack(Material.DIAMOND_SWORD));
+        player.setItemInHand(new ItemStack(Material.AIR));
+    }
+
     private void putPlayerDB(UUID uuid) {
         PlayerTable players = TableOrganizer.getTable(DataTableType.PLAYERS);
         players.insert(uuid);
@@ -85,11 +94,11 @@ public class SpigotJoinListener extends ListenerBase {
         DamageApplier.addInvincibleEntity(player);
         player.getInventory().clear();
         player.getInventory().setArmorContents(new ItemStack[]{null, null, null, null});
-        //ItemStackUtil.createItem(player.getInventory(), 388, 1, 2, "&a&lEnable Lobby PVP");
+        //ItemStackUtil.createItem(player.getInventory(), 276, 1, 2, "&a&lEnable Lobby PVP");
     }
     private void resetAttributes(Player player) {
         //having trouble finding out if this method is actually useful
-        ((CraftPlayer) player).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).setValue(1);
+        //((CraftPlayer) player).getHandle().getAttributeInstance(GenericAttributes.ATTACK_DAMAGE).setValue(1);
         player.setWalkSpeed(0.2F);
     }
 
@@ -158,15 +167,14 @@ public class SpigotJoinListener extends ListenerBase {
                         if(player.isOnline())
                             onlineSize++;
                     }
-                    System.out.println(onlineSize + " <-- size");
                     /*
+                    System.out.println(onlineSize + " <-- size");
                     if(onlineSize <= 1) {
                         GameManager.endGame(game);
                         Game newGame;
                         if((newGame = GameManager.getGame()) == null) return;
                         newGame.remove(event.getPlayer());
                     }
-
                      */
                 }
                 break;

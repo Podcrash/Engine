@@ -5,8 +5,10 @@ import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.hologram.Hologram;
 import com.podcrash.api.mc.hologram.HologramMaker;
 import com.podcrash.api.mc.util.MathUtil;
+import net.minecraft.server.v1_8_R3.EntityLiving;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
@@ -62,7 +64,12 @@ public class HealthBarResource extends GameResource {
         for(String name : players.keySet()) {
             Player player = Bukkit.getPlayer(name);
             if(player == null) continue;
-            objective.getScore(name).setScore((int) player.getHealth());
+
+            CraftEntity craftEntity = (CraftEntity) player;
+            EntityLiving livingCraft = (EntityLiving) craftEntity.getHandle();
+            int absorptionHearts = (int) livingCraft.getAbsorptionHearts();
+
+            objective.getScore(name).setScore((int) player.getHealth() + absorptionHearts);
         }
         //map();
     }

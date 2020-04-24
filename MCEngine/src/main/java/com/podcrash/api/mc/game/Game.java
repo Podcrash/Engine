@@ -963,25 +963,18 @@ public abstract class Game implements IGame {
                 inv.setItem(i, hotbarSave[i]);
             }
         } else {
-            p.setItemInHand(new ItemStack(Material.DIAMOND_SWORD));
+            ItemStackUtil.createItem(inv, 276, 1, 1, "&a&lEnable Lobby PVP");
+            // Setting items in the player's inventory
+            createTeamItems(p);
 
-            TimeHandler.delayTime(1L, () -> {
-                p.setItemInHand(new ItemStack(Material.AIR));
-                if(getGameState().equals(GameState.LOBBY)) {
-                    ItemStackUtil.createItem(inv, 276, 1, 1, "&a&lEnable Lobby PVP");
-                    createTeamItems(p);
-                }
-            });
+            ItemStackUtil.createItem(inv, 355, 1, 9, "&d&lReturn to Lobby");
         }
-        // Setting items in the player's inventory
-        // TODO: Remove the Force Start Item.
-        //ItemStackUtil.createItem(inv, 388, 1, 1, "&a&lForce-Start Game &7(Temporary for testing)");
-
-        ItemStackUtil.createItem(inv, 355, 1, 9, "&d&lReturn to Lobby");
 
         ItemStackUtil.createItem(inv, 145, 1, 21, ChatUtil.chat("&6&lSelect Kit"));
 
         ItemStackUtil.createItem(inv, 421, 1, 23, ChatUtil.chat("&6&lSelect Team"));
+
+
         //ItemStackUtil.createItem(inv, 95, 7, 1, 24, ChatUtil.chat("&7&lLeave Team Queue"));
         ItemStack spectate;
         if (isSpectating(p)) {

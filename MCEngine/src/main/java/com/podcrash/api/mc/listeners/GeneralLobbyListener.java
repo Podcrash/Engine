@@ -1,9 +1,12 @@
 package com.podcrash.api.mc.listeners;
 
 import com.podcrash.api.mc.damage.DamageApplier;
+import com.podcrash.api.mc.events.EnableLobbyPVPEvent;
 import com.podcrash.api.mc.game.GameManager;
+import com.podcrash.api.mc.game.GameType;
 import com.podcrash.api.mc.sound.SoundPlayer;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
@@ -24,29 +27,42 @@ public class GeneralLobbyListener extends ListenerBase {
     public void enableGeneralLobbyPVP(PlayerInteractEvent event) {
         //if (event.isCancelled()) return;
         Player player = event.getPlayer();
-        // Only run this code if there is no game going on; this will work even if engine is the only plugin present
-        if(GameManager.getGame() != null || player.getItemInHand().getType().equals(Material.AIR)) return;
+        String mode;
+
+        if (GameManager.getGame() != null) {
+            mode = GameManager.getGame().getMode();
+        } else {
+            mode = null;
+        }
 
         //System.out.println("tests");
         boolean isActioning = (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK ||
                 event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK);
-        boolean isHoldingItem = (player.getItemInHand().getItemMeta().hasDisplayName() && player.getItemInHand().getItemMeta().getDisplayName().contains("Enable Lobby PVP"));
+        boolean isHoldingItem = (!player.getItemInHand().getType().equals(Material.AIR) &&
+                player.getItemInHand().getItemMeta().hasDisplayName() && player.getItemInHand().getItemMeta().getDisplayName().contains("Enable Lobby PVP"));
 
 
         //System.out.println(isActioning + " " + isHoldingItem);
         if (isActioning && isHoldingItem) {
             SoundPlayer.sendSound(player, "random.pop", 1F, 63);
             DamageApplier.removeInvincibleEntity(player);
-            applyGeneralPVPGear(player);
+
+            EnableLobbyPVPEvent e = new EnableLobbyPVPEvent(player, mode);
+            Bukkit.getPluginManager().callEvent(e);
         }
     }
 
-    private void applyGeneralPVPGear(Player player) {
+    @EventHandler
+    private void applyGeneralPVPGear(EnableLobbyPVPEvent event) {
+        // Only apply this general PVP gear if there is no game currently running.
+        if(event.getGameType() != null)
+            return;
+
         ItemStack sword = new ItemStack(Material.DIAMOND_SWORD);
         ItemMeta meta = sword.getItemMeta();
         meta.spigot().setUnbreakable(true);
         sword.setItemMeta(meta);
-        player.setItemInHand(sword);
+        event.getPlayer().setItemInHand(sword);
 
         Material[] armor = {Material.IRON_BOOTS, Material.IRON_LEGGINGS, Material.IRON_CHESTPLATE , Material.IRON_HELMET};
         ItemStack[] armors = new ItemStack[4];
@@ -59,6 +75,6 @@ public class GeneralLobbyListener extends ListenerBase {
 
             armors[i] = new ItemStack(CraftItemStack.asBukkitCopy(nmsStack));
         }
-        player.getEquipment().setArmorContents(armors);
+        event.getPlayer().getEquipment().setArmorContents(armors);
     }
 }
