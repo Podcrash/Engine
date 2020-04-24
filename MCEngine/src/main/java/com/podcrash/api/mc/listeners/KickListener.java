@@ -1,5 +1,6 @@
 package com.podcrash.api.mc.listeners;
 
+import com.podcrash.api.db.redis.Communicator;
 import com.podcrash.api.mc.util.BungeeUtil;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerKickEvent;
@@ -14,6 +15,8 @@ public class KickListener extends ListenerBase {
     public void kick(PlayerKickEvent e) {
         e.setCancelled(true);
         //maybe we'll process reasons later
+        String reason = e.getReason();
+        e.getPlayer().sendMessage("You have been kicked from " + Communicator.getCode() + ": " + reason);
         BungeeUtil.sendToServer(e.getPlayer(), "hub");
     }
 }

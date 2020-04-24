@@ -4,7 +4,6 @@ import com.podcrash.api.db.pojos.Rank;
 import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.RanksTable;
 import com.podcrash.api.db.TableOrganizer;
-import com.podcrash.api.permissions.Perm;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 

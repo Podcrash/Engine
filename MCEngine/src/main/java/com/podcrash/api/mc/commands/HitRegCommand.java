@@ -2,7 +2,6 @@ package com.podcrash.api.mc.commands;
 
 import com.podcrash.api.mc.commands.CommandBase;
 import com.podcrash.api.mc.damage.HitDetectionInjector;
-import com.podcrash.api.permissions.Perm;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
