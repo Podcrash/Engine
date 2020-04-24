@@ -23,7 +23,7 @@ public class GeneralLobbyListener extends ListenerBase {
         super(plugin);
     }
 
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void enableGeneralLobbyPVP(PlayerInteractEvent event) {
         //if (event.isCancelled()) return;
         Player player = event.getPlayer();
@@ -46,7 +46,7 @@ public class GeneralLobbyListener extends ListenerBase {
         if (isActioning && isHoldingItem) {
             SoundPlayer.sendSound(player, "random.pop", 1F, 63);
             DamageApplier.removeInvincibleEntity(player);
-
+            event.setCancelled(true);
             EnableLobbyPVPEvent e = new EnableLobbyPVPEvent(player, mode);
             Bukkit.getPluginManager().callEvent(e);
         }

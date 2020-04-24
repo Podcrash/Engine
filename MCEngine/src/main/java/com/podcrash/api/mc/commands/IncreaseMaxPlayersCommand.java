@@ -9,7 +9,8 @@ import org.bukkit.command.CommandSender;
 public class IncreaseMaxPlayersCommand extends CommandBase{
 
     @Override
-    public boolean onCommand(CommandSender commandSender, Command cmd, String label, String[] args) {
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (!sender.hasPermission("invicta.host")) return true;
         Game game = GameManager.getGame();
         int currMax = game.getMaxPlayers() + 1;
         int possibleMax = game.getTeam(0).getMaxPlayers() * game.getTeams().size();
