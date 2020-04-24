@@ -313,7 +313,9 @@ public class PodcrashSpigot extends JavaPlugin implements PodcrashPlugin {
     }
 
     public UUID getPPLOwner() {
-        return UUID.fromString(System.getProperty("mps.owner"));
+        String prop = System.getProperty("mps.owner");
+        if (prop == null) return null;
+        return UUID.fromString(prop);
     }
 
     public boolean hasPPLOwner() {
