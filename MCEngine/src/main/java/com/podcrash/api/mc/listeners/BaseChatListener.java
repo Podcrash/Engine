@@ -150,8 +150,8 @@ public class BaseChatListener extends ListenerBase {
                     // for example, if you want to say the word bass, that should be possible.
                     String[] ignoreCheck = words.get(wordToCheck);
                     boolean ignore = false;
-                    for(int s = 0; s < ignoreCheck.length; s++ ) {
-                        if (input.contains(ignoreCheck[s])) {
+                    for (String value : ignoreCheck) {
+                        if (input.contains(value)) {
                             ignore = true;
                             break;
                         }

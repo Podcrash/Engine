@@ -2,7 +2,6 @@ package com.podcrash.api.mc.effect.status.custom;
 
 import com.podcrash.api.mc.effect.status.Status;
 import com.podcrash.api.mc.effect.status.StatusApplier;
-import com.podcrash.api.mc.time.resources.TimeResource;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;

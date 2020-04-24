@@ -21,10 +21,10 @@ public class EntityParticleWrapper {
     private final Player[] players;
 
     public EntityParticleWrapper(Entity entity, ILocationPacket packet, SoundWrapper sound, List<Player> players) {
-        this(entity, packet, sound, players.toArray(players.toArray(new Player[players.size()])));
+        this(entity, packet, sound, players.toArray(players.toArray(new Player[0])));
     }
     public EntityParticleWrapper(Entity entity, ILocationPacket packet, SoundWrapper sound) {
-        this(entity, packet, sound, entity.getWorld().getPlayers().toArray(new Player[entity.getWorld().getPlayers().size()]));
+        this(entity, packet, sound, entity.getWorld().getPlayers().toArray(new Player[0]));
     }
     public EntityParticleWrapper(Entity entity, ILocationPacket packet, SoundWrapper sound, Player[] players) {
         this.entity = entity;

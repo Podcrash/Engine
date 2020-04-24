@@ -127,7 +127,7 @@ public class CraftBlockUpdater implements Runnable {
     }
 
     private Set<ChunkCoords> calculateChunks() {
-        Set<ChunkCoords> res = new HashSet<ChunkCoords>();
+        Set<ChunkCoords> res = new HashSet<>();
         if (blocksModified == 0)
             return res;
         int x1 = minX >> 4; int x2 = maxX >> 4;
@@ -148,7 +148,7 @@ public class CraftBlockUpdater implements Runnable {
             updater.start();
         return updater;
     }
-    private class ChunkCoords {
+    private static class ChunkCoords {
         public final int x, z;
         public ChunkCoords(int x, int z) {
             this.x = x;
@@ -176,7 +176,7 @@ public class CraftBlockUpdater implements Runnable {
             return result;
         }
     }
-    private final class DeferredBlock {
+    private static final class DeferredBlock {
         public final int x, y, z;
 
         public DeferredBlock(int x, int y, int z) {

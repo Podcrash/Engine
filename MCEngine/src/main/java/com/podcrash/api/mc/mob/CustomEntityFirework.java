@@ -63,7 +63,7 @@ public class CustomEntityFirework extends EntityFireworks {
         }
     }
     public static void spawn(Location location, FireworkEffect effect, List<Player> players) {
-        spawn(location, effect, players.toArray(new Player[players.size()]));
+        spawn(location, effect, players.toArray(new Player[0]));
     }
 }
 

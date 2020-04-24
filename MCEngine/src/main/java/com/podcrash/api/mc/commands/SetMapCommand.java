@@ -5,15 +5,12 @@ import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.MapTable;
 import com.podcrash.api.mc.game.GameManager;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class SetMapCommand extends BukkitCommand {

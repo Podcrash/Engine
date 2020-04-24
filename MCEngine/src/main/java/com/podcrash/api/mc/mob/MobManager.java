@@ -16,7 +16,7 @@ import java.util.Map;
 
 
 public class MobManager {
-    public static Map<Integer, MobData> mobs = new HashMap<Integer, MobData>();
+    public static Map<Integer, MobData> mobs = new HashMap<>();
 
     private static void addMobMap(int id, MobData creature) {
         mobs.put(id, creature);

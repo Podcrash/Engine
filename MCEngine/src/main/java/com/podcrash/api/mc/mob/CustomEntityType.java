@@ -157,9 +157,9 @@ public enum CustomEntityType {
         try {
             ((Map) getPrivateStatic(EntityTypes.class, "c")).put(paramString, paramClass);
             ((Map) getPrivateStatic(EntityTypes.class, "d")).put(paramClass, paramString);
-            ((Map) getPrivateStatic(EntityTypes.class, "e")).put(Integer.valueOf(paramInt), paramClass);
-            ((Map) getPrivateStatic(EntityTypes.class, "f")).put(paramClass, Integer.valueOf(paramInt));
-            ((Map) getPrivateStatic(EntityTypes.class, "g")).put(paramString, Integer.valueOf(paramInt));
+            ((Map) getPrivateStatic(EntityTypes.class, "e")).put(paramInt, paramClass);
+            ((Map) getPrivateStatic(EntityTypes.class, "f")).put(paramClass, paramInt);
+            ((Map) getPrivateStatic(EntityTypes.class, "g")).put(paramString, paramInt);
         } catch (Exception exc) {
 // Unable to register the new class.
         }

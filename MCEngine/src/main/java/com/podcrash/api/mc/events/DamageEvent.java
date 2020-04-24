@@ -1,7 +1,6 @@
 package com.podcrash.api.mc.events;
 
 import com.podcrash.api.mc.damage.Cause;
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;

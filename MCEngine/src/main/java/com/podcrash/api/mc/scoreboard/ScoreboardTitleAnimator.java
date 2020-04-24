@@ -96,7 +96,7 @@ public class ScoreboardTitleAnimator implements TimeResource {
         // The characters of the title.
         String[] chars = title.split("");
         // The formatting codes for each character.
-        List<String> codes = new ArrayList<String>();
+        List<String> codes = new ArrayList<>();
         // The shine
         for (int pos = 0; pos < title.length(); pos++) {
             // From left to right.

@@ -1,6 +1,5 @@
 package com.podcrash.api.mc.events.game;
 
-import com.podcrash.api.db.pojos.map.BaseMap;
 import com.podcrash.api.db.pojos.map.GameMap;
 import com.podcrash.api.mc.game.Game;
 import org.bukkit.World;

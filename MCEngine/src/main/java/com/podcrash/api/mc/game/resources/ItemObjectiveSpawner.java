@@ -15,7 +15,7 @@ public class ItemObjectiveSpawner extends GameResource {
     public ItemObjectiveSpawner(int gameID) {
         super(gameID, 1, 0);
         List<ItemObjective> itemObjectives = this.getGame().getItemObjectives();
-        this.itemObjectives = itemObjectives.toArray(new ItemObjective[itemObjectives.size()]);
+        this.itemObjectives = itemObjectives.toArray(new ItemObjective[0]);
         this.itemTimes = new long[itemObjectives.size()];
         for (ItemObjective itemObjective : this.itemObjectives) {
             respawn(itemObjective);

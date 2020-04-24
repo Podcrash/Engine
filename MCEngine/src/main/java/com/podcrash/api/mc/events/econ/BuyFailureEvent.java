@@ -1,7 +1,6 @@
 package com.podcrash.api.mc.events.econ;
 
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
 /**

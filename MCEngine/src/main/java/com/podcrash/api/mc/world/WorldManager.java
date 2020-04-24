@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.logging.Level;
 
 /**
  * From https://bukkit.org/threads/unload-delete-copy-worlds.182814/, thanks!
@@ -55,7 +56,10 @@ public class WorldManager {
             String dirName = String.format("%s%s%s", Bukkit.getWorldContainer().toString(), File.separator, copiedName);
             File world2File = new File(dirName);
             if (!world2File.exists())
-                world2File.mkdir();
+                if(!world2File.mkdir()) {
+                    PodcrashSpigot.getInstance().getLogger().log(Level.SEVERE, "[WorldManager] Could not make world directory!");
+                    return null;
+                }
             log("Made the directory " + dirName + ", proceeding to copy");
             try {
                 FileUtils.copyDirectory(get.getWorldFolder(), world2File);

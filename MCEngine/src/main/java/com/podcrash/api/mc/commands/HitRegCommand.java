@@ -1,13 +1,10 @@
 package com.podcrash.api.mc.commands;
 
 import com.podcrash.api.mc.damage.HitDetectionInjector;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
 
 import java.util.Collections;
-import java.util.List;
 
 public class HitRegCommand extends BukkitCommand {
 

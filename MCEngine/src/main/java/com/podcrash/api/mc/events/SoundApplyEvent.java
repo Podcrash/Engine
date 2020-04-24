@@ -1,13 +1,10 @@
 package com.podcrash.api.mc.events;
 
-import com.podcrash.api.mc.damage.Cause;
 import com.podcrash.api.mc.sound.SoundWrapper;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-
-import java.beans.EventHandler;
 
 /**
  * @see com.podcrash.api.mc.damage.DamageQueue playSound(LivingEntity, LivingEntity, Cause)

@@ -1,15 +1,12 @@
 package com.podcrash.api.mc.commands;
 
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 import org.spigotmc.SpigotConfig;
 
 import java.util.Collections;
-import java.util.List;
 
 public class KnockbackCommand extends BukkitCommand {
 

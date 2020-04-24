@@ -1,13 +1,10 @@
 package com.podcrash.api.mc.commands;
 
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
 
 import java.util.Arrays;
-import java.util.List;
 
 public class TellCommand extends BukkitCommand {
 

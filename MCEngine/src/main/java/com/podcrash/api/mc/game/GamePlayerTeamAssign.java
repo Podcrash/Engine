@@ -51,7 +51,7 @@ public class GamePlayerTeamAssign {
     }
 
     private static List<GTeam> getNonFullTeams(Game game) {
-        List<GTeam> result = new ArrayList<GTeam>();
+        List<GTeam> result = new ArrayList<>();
         for (GTeam team : game.getTeams()) {
             if (team.teamSize() < team.getMaxPlayers())
                 result.add(team);

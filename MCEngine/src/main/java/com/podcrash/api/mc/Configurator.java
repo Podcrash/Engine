@@ -11,14 +11,9 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public class Configurator {
-    private static final int MAX_THREADS = 5;
-    private static final ExecutorService executor = Executors.newFixedThreadPool(MAX_THREADS);
     private final JavaPlugin plugin;
 
     private File configFile;
@@ -78,25 +73,25 @@ public class Configurator {
         this(plugin, fileName, false);
     }
 
-    public CompletableFuture<Void> read(String path, Consumer<Object> consumer) {
-        return CompletableFuture.supplyAsync(() -> this.config.get(path), executor).thenAcceptAsync(consumer);
+    public void read(String path, Consumer<Object> consumer) {
+        consumer.accept(this.config.get(path));
     }
-    public CompletableFuture<Void>  readInt(String path, Consumer<Integer> consumer) {
-        return CompletableFuture.supplyAsync(() -> (int) this.config.get(path), executor).thenAcceptAsync(consumer);
+    public void  readInt(String path, Consumer<Integer> consumer) {
+        consumer.accept((int) this.config.get(path));
     }
-    public CompletableFuture<Void>  readDouble(String path, Consumer<Double> consumer) {
-        return CompletableFuture.supplyAsync(() -> (double) this.config.get(path), executor).thenAcceptAsync(consumer);
+    public void  readDouble(String path, Consumer<Double> consumer) {
+        consumer.accept((double) this.config.get(path));
     }
-    public CompletableFuture<Void> readString(String path, Consumer<String> consumer) {
-        return CompletableFuture.supplyAsync(() -> (String) this.config.get(path), executor).thenAcceptAsync(consumer);
+    public void readString(String path, Consumer<String> consumer) {
+        consumer.accept((String) this.config.get(path));
     }
-    public CompletableFuture<Void> readList(String path, Consumer<List> consumer) {
-        return CompletableFuture.supplyAsync(() -> this.config.getList(path, new ArrayList<>()), executor).thenAcceptAsync(consumer);
+
+    public void readList(String path, Consumer<List<?>> consumer) {
+        consumer.accept(this.config.getList(path, new ArrayList<>()));
     }
 
     public void set(String path, Object value) {
-        Runnable run = () -> config.set(path, value);
-        executor.submit(run);
+        config.set(path, value);
     }
 
     public boolean hasPath(String path) {
@@ -104,24 +99,17 @@ public class Configurator {
     }
 
     public void deletePath(String path) {
-        Runnable deleteCall = () -> {
-            if (config.isSet(path) ) {
-                config.set(path, null);
-                saveConfig();
-            }
-        };
-        executor.submit(deleteCall);
+        if (config.isSet(path)) {
+            config.set(path, null);
+            saveConfig();
+        }
     }
     public void saveConfig(){
-        executor.submit(() -> {
-            synchronized (config) {
-                try {
-                    config.save(configFile);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        try {
+            config.save(configFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public FileConfiguration getConfig() {
