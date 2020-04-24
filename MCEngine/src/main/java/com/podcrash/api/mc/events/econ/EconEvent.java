@@ -18,7 +18,7 @@ public class EconEvent extends Event {
     private List<String> description;
 
     public EconEvent(Player buyer, String item, double cost, double currBalance) {
-        super(true);
+        super();
         this.buyer = buyer;
         this.item = item;
         this.cost = cost;

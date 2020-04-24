@@ -7,8 +7,10 @@ import com.podcrash.api.db.tables.WorldLoader;
 import com.podcrash.api.mc.damage.Cause;
 import com.podcrash.api.mc.damage.DamageApplier;
 import com.podcrash.api.mc.damage.DamageQueue;
+import com.podcrash.api.mc.effect.status.Status;
 import com.podcrash.api.mc.events.DamageApplyEvent;
 import com.podcrash.api.mc.events.DamageEvent;
+import com.podcrash.api.mc.events.StatusRemoveEvent;
 import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.GameState;
@@ -57,6 +59,16 @@ public class MapMaintainListener extends ListenerBase {
 
     }
 
+    @EventHandler
+    public void verifyCloak(StatusRemoveEvent e) {
+        Game game = GameManager.getGame();
+        if (game == null) return;
+        if (!(e.getLivingEntity() instanceof Player)) return;
+        Player p = (Player) e.getLivingEntity();
+        if (e.getStatus() == Status.CLOAK && game.isRespawning(p))
+            e.setCancelled(true);
+
+    }
     @EventHandler
     // stops crops from being destroyed if players jump on it
     public void onPlayerInteract(PlayerInteractEvent e) {

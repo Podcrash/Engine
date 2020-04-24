@@ -74,7 +74,7 @@ public class EconomyHandler implements IEconomyHandler {
 
         PluginManager pluginManager = Bukkit.getPluginManager();
         String finalItem = item;
-        return currencyFuture.thenCombineAsync(costFuture, (currency, oldCost) -> {
+        return currencyFuture.thenCombine(costFuture, (currency, oldCost) -> {
 
             BuyAttemptEvent attempt = new BuyAttemptEvent(player, finalItem, oldCost, currency.getGold());
             pluginManager.callEvent(attempt);

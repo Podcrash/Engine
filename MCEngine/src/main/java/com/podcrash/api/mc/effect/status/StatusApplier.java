@@ -33,8 +33,11 @@ public class StatusApplier {
     private long inept;
     private long bleeded;
 
+    private final Object invisLock;
+
     private StatusApplier(Player p) {
         this.player = p;
+        this.invisLock = new Object();
     }
 
     public static StatusApplier getOrNew(Player player) {
@@ -231,19 +234,20 @@ public class StatusApplier {
     }
 
     private void applyCloak(final int duration) {
-        if (!isCloaked()) {
-            Bukkit.getScheduler().runTask(Pluginizer.getSpigotPlugin(), () -> {
-                for (Player p : player.getWorld().getPlayers()) {
-                    p.hidePlayer(player);
-                }
-
-            });
-            cloaked = System.currentTimeMillis() + duration; //Duplicating code b/c it needs to happen after isCloaked check, but before cloakstatus creation
-            player.sendMessage(String.format("%sCondition> %sYou are now invisible.", ChatColor.BLUE, ChatColor.GRAY));
-            TimeHandler.repeatedTime(1L, 0, new CloakStatus(player));
-        } else {
-            cloaked = System.currentTimeMillis() + duration;
-        }
+            if (!isCloaked()) {
+                Bukkit.getScheduler().runTask(Pluginizer.getSpigotPlugin(), () -> {
+                    synchronized (invisLock) {
+                        for (Player p : player.getWorld().getPlayers()) {
+                            p.hidePlayer(player);
+                        }
+                    }
+                });
+                cloaked = System.currentTimeMillis() + duration; //Duplicating code b/c it needs to happen after isCloaked check, but before cloakstatus creation
+                player.sendMessage(String.format("%sCondition> %sYou are now invisible.", ChatColor.BLUE, ChatColor.GRAY));
+                TimeHandler.repeatedTime(1L, 0, new CloakStatus(player));
+            } else {
+                cloaked = System.currentTimeMillis() + duration;
+            }
     }
 
     private void applyMarked(int duration, int potency) {
@@ -349,8 +353,10 @@ public class StatusApplier {
         cloaked = 0;
         List<Player> players = this.player.getWorld().getPlayers();
         for (Player player : players) {
-            if (this.player != player && !player.canSee(this.player)) {
-                player.showPlayer(this.player);
+            synchronized (invisLock) {
+                if (this.player != player && !player.canSee(this.player)) {
+                    player.showPlayer(this.player);
+                }
             }
         }
     }

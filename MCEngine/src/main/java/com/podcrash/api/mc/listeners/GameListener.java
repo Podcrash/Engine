@@ -217,14 +217,12 @@ public class GameListener extends ListenerBase {
                 e.getWho().sendMessage(causes);
             }
         }, 1L);
-
-        Vector vector = victim.getVelocity();
-        victim.setVelocity(vector.add(new Vector(0, 0.75D, 0)));
         deadPeople.add(victim);
 
 
         //StatusApplier.getOrNew(victim).applyStatus(Status.INEPTITUDE, 9, 1);
         String name = victim.getName();
+        SoundPlayer.sendSound(victim.getLocation(), "game.neutral.die", 0.85F, 64);
         TimeHandler.delayTime(200L, () -> {
             //if the player has logged off, from then until now, dont call the event
             if(Bukkit.getPlayer(name) == null) return;
