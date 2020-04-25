@@ -21,10 +21,8 @@ public class DecreaseMaxPlayersCommand extends CommandBase{
             if (team.getPlayers().size() > currMaxForSingleTeam) currMaxForSingleTeam = team.getPlayers().size();
         }
 
-        //System.out.println(currMax + " " + currMaxForSingleTeam + " " + target + " " + currMaxForSingleTeam * game.getTeams().size());
         //If we can even decrease at all
         if (target >= currMaxForSingleTeam * game.getTeams().size() && target >= game.getMinPlayers()) {
-            Bukkit.broadcastMessage("max players per team: " + game.getTeam(0).getMaxPlayers() + "current size:" + game.getTeam(0).getPlayers().size());
             game.setMaxPlayers(target);
 
             for (GTeam team : game.getTeams()) {
