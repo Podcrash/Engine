@@ -1,14 +1,11 @@
 package com.podcrash.api.mc.listeners;
 
 import com.podcrash.api.mc.events.game.GameEndEvent;
-import com.podcrash.api.mc.game.GTeam;
-import com.podcrash.api.mc.game.Game;
-import com.podcrash.api.mc.game.GameManager;
-import com.podcrash.api.mc.game.GameState;
+import com.podcrash.api.mc.game.*;
 import com.podcrash.api.mc.game.resources.GameResource;
 import com.podcrash.api.mc.game.resources.HealthBarResource;
-import com.podcrash.api.mc.time.TimeHandler;
 
+import com.podcrash.api.plugin.Pluginizer;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.*;
@@ -18,7 +15,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
@@ -35,10 +31,44 @@ public class BackfillListener extends ListenerBase {
         super(plugin);
     }
 
+    public static boolean backfillSpectatorIntoGame(Player joiningPlayer, TeamEnum teamEnum) {
+        Game game = GameManager.getGame();
+        GTeam team = game.getTeam(teamEnum);
+        if (game.getGameState().equals(GameState.STARTED) && team.getPlayers().size() < team.getMaxPlayers() && GameManager.isSpectating(joiningPlayer)) {
+            joiningPlayer.setGameMode(GameMode.SURVIVAL);
+            game.addParticipant(joiningPlayer);
+
+            //TODO below is literally just the GameManager.randomTeam code, but uses game.joinTeam instead of gameManager.joinTeam - make it better idk
+            int red = game.getTeam(0).teamSize();
+            int blue = game.getTeam(1).teamSize();
+            if(blue > red)
+                game.joinTeam(joiningPlayer, TeamEnum.RED, true);
+            else if(red > blue)
+                game.joinTeam(joiningPlayer, TeamEnum.BLUE, true);
+            else //they are equal, good-ol RNG!
+                game.joinTeam(joiningPlayer, new TeamEnum[]{TeamEnum.RED, TeamEnum.BLUE}[(int) (Math.random() + 0.5D)], true);
+
+            joiningPlayer.teleport(game.getTeam(joiningPlayer).getSpawn(joiningPlayer));
+            for (GameResource resource : game.getGameResources()) {
+                if (resource instanceof HealthBarResource)
+                    ((HealthBarResource) resource).addPlayerToMap(joiningPlayer);
+            }
+
+            if (!game.isFull()) {
+                for (Player p : GameManager.getGame().getBukkitSpectators()) {
+                    sendCanJoinMessage(p);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Attempt to replace an absent player with a spectator.
      * @param joiningPlayer The player that wants to join the game.
      * @param absentPlayerIGN The player that is to be replaced.
+     * @return Whether the player successfully joined
      */
     public static boolean replaceOfflineWithSpectator(Player joiningPlayer, String absentPlayerIGN) {
         Player absentPlayer = getLastOnlineFromString(absentPlayerIGN);
@@ -59,13 +89,11 @@ public class BackfillListener extends ListenerBase {
                     ((HealthBarResource) resource).addPlayerToMap(joiningPlayer);
             }
 
-
-
             if (canBackfill) {
                 for (Player p : GameManager.getGame().getBukkitSpectators()) {
                     List<UUID> keysAsArray = new ArrayList<>(offlinePlayers.keySet());
                     UUID id = keysAsArray.get(0);
-                    sendCanJoinMessage(p, id, offlinePlayers.get(id).getKey().getName());
+                    sendCanReplaceMessage(p, id, offlinePlayers.get(id).getKey().getName());
                 }
             }
 
@@ -84,19 +112,24 @@ public class BackfillListener extends ListenerBase {
             updateCanBackfill();
             // Tell everybody that is spectating that a spot has opened up for them.
             for (Player joiningPlayer : game.getBukkitSpectators()){
-                sendCanJoinMessage(joiningPlayer, absentPlayer.getUniqueId(), game.getTeam(absentPlayer).getName());
+                sendCanReplaceMessage(joiningPlayer, absentPlayer.getUniqueId(), game.getTeam(absentPlayer).getName());
             }
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onJoin(PlayerJoinEvent event) {
+        Game game = GameManager.getGame();
         offlinePlayers.remove(event.getPlayer().getUniqueId());
         updateCanBackfill();
-        if (canBackfill && !GameManager.getGame().isParticipating(event.getPlayer())) {
-            List<UUID> keysAsArray = new ArrayList<>(offlinePlayers.keySet());
-            UUID id = keysAsArray.get(0);
-            sendCanJoinMessage(event.getPlayer(), id, offlinePlayers.get(id).getKey().getName());
+        if (!GameManager.getGame().isParticipating(event.getPlayer())) {
+            if (canBackfill) {
+                List<UUID> keysAsArray = new ArrayList<>(offlinePlayers.keySet());
+                UUID id = keysAsArray.get(0);
+                sendCanReplaceMessage(event.getPlayer(), id, offlinePlayers.get(id).getKey().getName());
+            } else if (!game.isFull()) {
+                sendCanJoinMessage(event.getPlayer());
+            }
         }
     }
 
@@ -129,12 +162,20 @@ public class BackfillListener extends ListenerBase {
         return null;
     }
 
-    private static void sendCanJoinMessage(Player joiningPlayer, UUID absentPlayerID, String teamName) {
+    private static void sendCanReplaceMessage(Player joiningPlayer, UUID absentPlayerID, String teamName) {
         OfflinePlayer absentPlayer = Bukkit.getOfflinePlayer(absentPlayerID);
-        joiningPlayer.sendMessage(String.format("%s%sA spot has opened up for you on the %s team. \nType \"/accept %s\" to join!",
+        Bukkit.getScheduler().runTaskLater(Pluginizer.getSpigotPlugin(),
+                () -> joiningPlayer.sendMessage(String.format("%s%sA spot has opened up for you on the %s team. \nType \"/accept %s\" to join!",
+                        ChatColor.LIGHT_PURPLE,
+                        ChatColor.BOLD,
+                        teamName,
+                        absentPlayer.getName())), 5 );
+    }
+
+    private static void sendCanJoinMessage(Player joiningPlayer) {
+        Bukkit.getScheduler().runTaskLater(Pluginizer.getSpigotPlugin(),
+                () -> joiningPlayer.sendMessage(String.format("%s%sA spot is open for you in this game! \nType \"/accept\" to join!",
                 ChatColor.LIGHT_PURPLE,
-                ChatColor.BOLD,
-                teamName,
-                absentPlayer.getName()));
+                ChatColor.BOLD)), 5 );
     }
 }
