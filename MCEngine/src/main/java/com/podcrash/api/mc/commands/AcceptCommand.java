@@ -21,9 +21,9 @@ public class AcceptCommand extends CommandBase{
             for (GTeam team : game.getTeams()) {
                 if (team.getPlayers().size() < team.getMaxPlayers()) {
                     if (BackfillListener.backfillSpectatorIntoGame((Player) sender, team.getTeamEnum())) {
-                        Bukkit.broadcastMessage("sucess");
+
                     } else
-                        Bukkit.broadcastMessage("failure");
+
                     break;
                 }
             }
