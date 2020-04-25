@@ -5,6 +5,7 @@ import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.util.EntityUtil;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -40,8 +41,9 @@ public class CollideBeforeHitGround extends CallbackAction<CollideBeforeHitGroun
         Game game = GameManager.getGame();
         for (int i = 0; i < entities.size(); i++) {
             Entity anEntity = entities.get(i);
-            if (anEntity instanceof Player &&
-                    (!game.isParticipating((Player) anEntity) || game.isRespawning((Player) anEntity))) {
+            if (!(anEntity instanceof LivingEntity)
+                    || (anEntity instanceof Player &&
+                    (!game.isParticipating((Player) anEntity) || game.isRespawning((Player) anEntity)))) {
                 entities.remove(i);
                 i--;
             }
