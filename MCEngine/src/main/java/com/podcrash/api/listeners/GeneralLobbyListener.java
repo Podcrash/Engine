@@ -3,6 +3,7 @@ package com.podcrash.api.listeners;
 import com.podcrash.api.damage.DamageApplier;
 import com.podcrash.api.events.EnableLobbyPVPEvent;
 import com.podcrash.api.game.GameManager;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import com.podcrash.api.sound.SoundPlayer;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import org.bukkit.Bukkit;
@@ -17,6 +18,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 public class GeneralLobbyListener extends ListenerBase {
     public GeneralLobbyListener(JavaPlugin plugin) {
         super(plugin);
@@ -27,19 +32,23 @@ public class GeneralLobbyListener extends ListenerBase {
         //if (event.isCancelled()) return;
         Player player = event.getPlayer();
         // Only run this code if there is no game going on; this will work even if engine is the only plugin present
-        if (GameManager.getGame() != null || player.getItemInHand().getType().equals(Material.AIR))
+        PodcrashSpigot.debugLog("test123");
+        System.out.println("test123");
+        if (GameManager.getGame() == null || player.getItemInHand().getType().equals(Material.AIR))
             return;
+        System.out.println("test1234");
 
         String mode = GameManager.getGame() != null ? GameManager.getGame().getMode() : null;
 
         //System.out.println("tests");
-        boolean isActioning = (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK ||
-                event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK);
-        boolean isHoldingItem = (!player.getItemInHand().getType().equals(Material.AIR) &&
-                player.getItemInHand().getItemMeta().hasDisplayName() && player.getItemInHand().getItemMeta().getDisplayName().contains("Enable Lobby PVP"));
+        Set<Action> validActions = new HashSet<>(Arrays.asList(Action.RIGHT_CLICK_AIR, Action.RIGHT_CLICK_BLOCK, Action.LEFT_CLICK_AIR, Action.LEFT_CLICK_BLOCK));
+        boolean isActioning = validActions.contains(event.getAction());
+
+        ItemMeta meta = player.getItemInHand().getItemMeta();
+        boolean isHoldingItem = meta.hasDisplayName() && meta.getDisplayName().toLowerCase().contains("enable lobby pvp");
 
 
-        //System.out.println(isActioning + " " + isHoldingItem);
+        System.out.println(isActioning + " " + isHoldingItem);
         if (isActioning && isHoldingItem) {
             SoundPlayer.sendSound(player, "random.pop", 1F, 63);
             DamageApplier.removeInvincibleEntity(player);

@@ -88,7 +88,7 @@ public class PodcrashSpigot extends PodcrashPlugin {
         registerGameListeners();
 
         DamageQueue.active = true;
-        BukkitTask task = Bukkit.getScheduler().runTaskTimer(this, new DamageQueue(), 0, 0);
+        BukkitTask task = Bukkit.getScheduler().runTaskTimerAsynchronously(this, new DamageQueue(), 0, 0);
         dQInt = task.getTaskId();
         trackers = new ArrayList<>();
         addTracker(coordinateTracker = new CoordinateTracker(this));
@@ -115,13 +115,9 @@ public class PodcrashSpigot extends PodcrashPlugin {
         getLogger().info("Starting PodcrashSpigot!");
 
         Future<Void> dbFuture = enableWrap();
-        registerCommands();
-        registerListeners();
 
         //WorldManager.getInstance().loadWorlds();
 
-        MapTable table = TableOrganizer.getTable(DataTableType.MAPS);
-        table.setPlugin(this); //this is required
 
         economyHandler = new EconomyHandler();
         worldSetter = new SpawnWorldSetter(); // this is a special cookie
@@ -129,10 +125,11 @@ public class PodcrashSpigot extends PodcrashPlugin {
         registerMessengers();
         // Fetch private bukkit commandmap by reflections
         try {
-            dbFuture.get();
             Field commandMapField = getServer().getClass().getDeclaredField("commandMap");
             commandMapField.setAccessible(true);
             commandMap = (CommandMap) commandMapField.get(getServer());
+
+            dbFuture.get();
         } catch (NoSuchFieldException | IllegalAccessException e) {
             getLogger().severe("Failed to load Bukkit commandmap. Disabling plugin.");
             getServer().getPluginManager().disablePlugin(this);
@@ -140,6 +137,14 @@ public class PodcrashSpigot extends PodcrashPlugin {
             getLogger().severe("Failed to load databases. Disabling plugin.");
             getServer().getPluginManager().disablePlugin(this);
         }
+
+        MapTable table = TableOrganizer.getTable(DataTableType.MAPS);
+        table.setPlugin(this); //this is required
+
+        registerCommands();
+        registerListeners();
+
+
         Communicator.readyGameLobby();
         if (Communicator.isGameLobby())
             gameStart();
