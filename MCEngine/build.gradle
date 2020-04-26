@@ -31,13 +31,15 @@ shadowJar {
     }
 
     relocate("io.netty", "org.redisson.netty")
-    minimize()
+    //todo: include everything in the packetwrapper, rather than minimizing
+    //minimize()
 }
 
 dependencies {
     compileOnly fileTree("../../libs")
 
     implementation project(path: ":Engine:DBEngine")
+    implementation project(path: ":Engine:PacketWrapper")
     implementation 'com.google.code.gson:gson:2.8.6'
 
     testImplementation 'org.bukkit:bukkit:1.8.8-R0.1-SNAPSHOT'
