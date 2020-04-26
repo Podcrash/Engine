@@ -39,11 +39,14 @@ public class EconomyHandler implements IEconomyHandler {
     }
 
 
-    public void pay(Player player, double moneys) {
+    public void pay(Player player, double moneys, boolean ignoreCancel) {
         PayEvent pay = new PayEvent(player, moneys);
         Bukkit.getPluginManager().callEvent(pay);
-        if (pay.isCancelled()) return;
+        if (pay.isCancelled() && !ignoreCancel) return;
         players.incrementMoney(player.getUniqueId(), moneys);
+    }
+    public void pay(Player player, double moneys) {
+        pay(player, moneys, false);
     }
 
     public double getMoney(Player player) {
@@ -109,7 +112,7 @@ public class EconomyHandler implements IEconomyHandler {
         if(!success.getItem().equalsIgnoreCase(item)) return;
         BuyConfirmEvent confirm  = new BuyConfirmEvent(success);
         Bukkit.getPluginManager().callEvent(confirm);
-        pay(player, -confirm.getCost());
+        pay(player, -confirm.getCost(), true);
         currentPlayerOrder.remove(player.getName());
     }
 
