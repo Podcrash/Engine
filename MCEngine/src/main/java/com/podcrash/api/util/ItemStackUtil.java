@@ -124,4 +124,10 @@ public class ItemStackUtil {
         ItemStack item = createItem(materialId, byteId, amount, displayName, loreString);
         inv.setItem(invSlot - 1, item);
     }
+
+    public static void setItemName(ItemStack item, String name) {
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(name);
+        item.setItemMeta(meta);
+    }
 }
