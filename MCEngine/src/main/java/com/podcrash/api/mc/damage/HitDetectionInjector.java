@@ -58,7 +58,8 @@ public final class HitDetectionInjector {
                 //if the player is in spectator mode, don't bother
                 if (attacker.getGameMode() == GameMode.SPECTATOR ||
                     (victim instanceof Player && ((Player) victim).getGameMode() == GameMode.SPECTATOR)) return;
-
+                if (event.isCancelled()) //if the event is cancelled already, read it
+                    return;
                 event.setCancelled(true);
                 //if there is still a delay, cancel
                 if (delays.containsKey(victim.getName())) {
