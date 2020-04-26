@@ -2,36 +2,38 @@ package com.podcrash.api.plugin;
 
 import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.db.redis.Communicator;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.logging.Logger;
 
-public interface PodcrashPlugin {
+public abstract class PodcrashPlugin extends JavaPlugin {
 
-    ExecutorService getExecutorService();
-    Logger getLogger();
+    //flag for determining whether or not to debug log, will be optimized away by JIT during runtime
+    public static final boolean DEBUG = true;
 
-    default void enable() {
+
+    public abstract ExecutorService getExecutorService();
+
+    public void enable() {
         connectDbs();
     }
 
-    default void disable() {
+    public void disable() {
         closeDBs();
-        Pluginizer.destroy();
     }
-    default void connectDbs() {
+    public void connectDbs() {
         Communicator.setup(getExecutorService());
         TableOrganizer.initConnections();
         TableOrganizer.createTables();
     }
 
-    default void closeDBs() {
+    public void closeDBs() {
         Communicator.shutdown();
         TableOrganizer.deleteConnections();
     }
 
-    default CompletableFuture<Void> enableWrap() {
+    public CompletableFuture<Void> enableWrap() {
         CompletableFuture<Void> setUpRedis = Communicator.setup(getExecutorService());
         CompletableFuture<Void> setUpMongo = CompletableFuture.runAsync(TableOrganizer::initConnections).thenRunAsync(TableOrganizer::createTables);
 

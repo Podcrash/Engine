@@ -11,7 +11,7 @@ public interface IGame {
 
     /**
      * Update the score values.
-     * @param team
+     * @param team Team whose scores should be updated
      * @param score the increment to add by
      */
     void increment(TeamEnum team, int score);

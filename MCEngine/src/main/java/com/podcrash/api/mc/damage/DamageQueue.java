@@ -1,7 +1,6 @@
 package com.podcrash.api.mc.damage;
 
 import com.abstractpackets.packetwrapper.WrapperPlayServerEntityStatus;
-import com.comphenix.protocol.PacketType;
 import com.podcrash.api.mc.effect.status.StatusApplier;
 import com.podcrash.api.mc.events.DamageApplyEvent;
 import com.podcrash.api.mc.events.DeathApplyEvent;
@@ -11,16 +10,11 @@ import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.GameState;
 import com.podcrash.api.mc.sound.SoundPlayer;
-import com.podcrash.api.mc.time.TimeHandler;
-import com.podcrash.api.mc.time.resources.SimpleTimeResource;
 import com.podcrash.api.mc.util.PacketUtil;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import net.minecraft.server.v1_8_R3.EntityLiving;
-import net.minecraft.server.v1_8_R3.ItemArmor;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -39,11 +33,11 @@ public final class DamageQueue implements Runnable {
     private static final Map<String, Deque<Damage>> damageHistory = new HashMap<>();
 
     public DamageQueue() {
-        Pluginizer.getSpigotPlugin().getLogger().info("Starting the Damage QUEUE!");
+        PodcrashSpigot.getInstance().getLogger().info("Starting the Damage Queue!");
     }
 
     /**
-     * Processes the damages, without
+     * Processes the damages using Thread.
      * @see Thread#run()
      */
     @Override
@@ -57,11 +51,7 @@ public final class DamageQueue implements Runnable {
     }
 
 
-    /**Through testing the below does absolutely nothing LOOOL
-     *
-     * The below methods are exactly what they sound like.
-     * @param player
-     */
+    //TODO FIX THESE
     private void addDeath(Player player) {
         deadPlayers.add(player.getName());
     }
@@ -73,18 +63,21 @@ public final class DamageQueue implements Runnable {
     }
 
     /**
-     * This method gets a name as usage for a key for damageHistory. {@link DamageQueue#damageHistory}
+     * Gets a name to be used as a key for {@link DamageQueue#damageHistory}.
      * If the entity is a player, just return its player name.
      * If it's a mob, return its type and concat its id.
-     * @param entity - the entity whose name will be extracted
-     * @return the name of the entity as usage for a key
+     * @param entity  The entity whose name will be extracted
+     * @return the name of the entity to be used for a key
      */
     private static String getNameFor(Entity entity) {
-        if(entity instanceof Player) return entity.getName();
-        else {
+        if (entity instanceof Player) {
+            return entity.getName();
+        } else {
             String name = entity.getName();
-            if(name == null) name = entity.getCustomName();
-            if(name == null) name = entity.getType().name() + entity.getEntityId();
+            if (name == null)
+                name = entity.getCustomName();
+            if (name == null)
+                name = entity.getType().name() + entity.getEntityId();
             return name;
         }
     }
@@ -96,24 +89,24 @@ public final class DamageQueue implements Runnable {
      */
     private void addHistory(Entity victim, Damage damageWrapper) {
         String name = getNameFor(victim);
-        if(!damageHistory.containsKey(name)) {
+        if (!damageHistory.containsKey(name))
             damageHistory.put(name, new ArrayDeque<>());
-        }
         damageHistory.get(name).add(damageWrapper);
     }
 
     /**
      * Self-explanatory, clear the victim's history (presumably after the victim dies)
-     * @param victimName the key for the damageHistory {@link DamageQueue#damageHistory)
+     * @param victimName the key for the {@link DamageQueue#damageHistory)
      */
     private void clearHistory(String victimName) {
-        if(damageHistory.containsKey(victimName))
+        if (damageHistory.containsKey(victimName))
             damageHistory.get(victimName).clear();
     }
 
     /**
-     * See {@link DamageQueue#clearHistory(String)}
-     * @param victim
+     * Clears the history of the Entity, presumably after it dies.
+     * @see DamageQueue#clearHistory(String)
+     * @param victim The victim to clear
      */
     private void clearHistory(Entity victim) {
         clearHistory(getNameFor(victim));
@@ -127,7 +120,7 @@ public final class DamageQueue implements Runnable {
      * @param entity the entity that will be damaged
      * @param damage the amount of damage
      *
-     * @returns if the entity will die
+     * @return if the entity will die
      */
     private boolean damageEntity(LivingEntity entity, double damage) {
         //handle absorption health
@@ -138,13 +131,14 @@ public final class DamageQueue implements Runnable {
         setAbsorptionHealth(entity, nowAbsorp);
 
         //handle damage, only if nowAbsorp turns out to be negative
-        if(nowAbsorp > 0) return false;
+        if (nowAbsorp > 0)
+            return false;
         double nowHealth = entity.getHealth() + nowAbsorp;
         if (nowHealth > entity.getMaxHealth()) //this will never happen, but just in case
             nowHealth = entity.getMaxHealth();
 
-        if(nowHealth <= 0) {
-            if(entity instanceof Player) {
+        if (nowHealth <= 0) {
+            if (entity instanceof Player) {
                 PlayerInventory inventory = ((Player) entity).getInventory();
                 inventory.clear();
                 inventory.setArmorContents(new ItemStack[]{null, null, null, null});
@@ -152,7 +146,9 @@ public final class DamageQueue implements Runnable {
             SoundPlayer.sendSound(entity.getLocation(), "game.neutral.die", 1, 75);
             die(entity);
             return true;
-        }else entity.setHealth(nowHealth);
+        } else {
+            entity.setHealth(nowHealth);
+        }
 
         return false;
     }
@@ -176,10 +172,13 @@ public final class DamageQueue implements Runnable {
         Game game = GameManager.getGame();
         //if there's no game, then it's fine to process the damage
         //if it isn't ongoing, return false;
-        if(game == null) return true;
-        if(game.getGameState() == GameState.LOBBY) return true;
+        if (game == null)
+            return true;
+        if (game.getGameState() == GameState.LOBBY)
+            return true;
         //if the entities involved aren't players, then process the damage
-        if(!(victim instanceof Player) || !(attacker instanceof Player)) return false;
+        if (!(victim instanceof Player) || !(attacker instanceof Player))
+            return false;
         GameDamageEvent event = new GameDamageEvent(game, (Player) victim, (Player) attacker);
         Bukkit.getPluginManager().callEvent(event);
         return !event.isCancelled();
@@ -190,24 +189,21 @@ public final class DamageQueue implements Runnable {
      * attacker's strength = + x
      * attacker's weakness = - x
      * victim's resistance = - x
-     * @param victim self-explanatory
-     * @param attacker self-explanatory
+     * @param victim The victim
+     * @param attacker The attacker
      * @return the bonus for dealing more or less damage.
      */
     private int findPotionBonus(LivingEntity victim, LivingEntity attacker) {
         int bonus = 0;
         for (PotionEffect potion : attacker.getActivePotionEffects()) {
-            if (potion.getType().equals(PotionEffectType.INCREASE_DAMAGE)) {
+            if (potion.getType().equals(PotionEffectType.INCREASE_DAMAGE))
                 bonus += potion.getAmplifier() + 1;
-            }
-            if (potion.getType().equals(PotionEffectType.WEAKNESS)) {
+            if (potion.getType().equals(PotionEffectType.WEAKNESS))
                 bonus -= potion.getAmplifier() + 1;
-            }
         }
         for (PotionEffect potion : victim.getActivePotionEffects()) {
-            if (potion.getType().equals(PotionEffectType.DAMAGE_RESISTANCE)) {
+            if (potion.getType().equals(PotionEffectType.DAMAGE_RESISTANCE))
                 bonus -= potion.getAmplifier() + 1;
-            }
         }
         return bonus;
     }
@@ -216,16 +212,20 @@ public final class DamageQueue implements Runnable {
      * Damage calculations for {@link DamageQueue#damageEntity(LivingEntity, double)}
      * @param entity the victim
      * @param damage the unfiltered damage
-     * @param damageEvent the event
+     * @param damageEvent the event to process the damage
      */
     private void damage(LivingEntity entity, double damage, double armorValue, DamageApplyEvent damageEvent) {
-        if(damage < 0) damage = 0;
+        if (damage < 0)
+            damage = 0;
         double damageFormula = damage * (1D - 0.04D * armorValue);
         //Bukkit.broadcastMessage("AV: " + armorValue  + " " + damage + " --> " + damageFormula);
-        if(damageEntity(entity, damageFormula)) return;
-        if(!damageEvent.isDoKnockback()) return;
+        if (damageEntity(entity, damageFormula))
+            return;
+        if (!damageEvent.isDoKnockback())
+            return;
         //if rooted don't deal the kb
-        if(entity instanceof Player && StatusApplier.getOrNew((Player) entity).isRooted()) return;
+        if (entity instanceof Player && StatusApplier.getOrNew((Player) entity).isRooted())
+            return;
         Cause cause = damageEvent.getCause();
         LivingEntity victim = damageEvent.getVictim();
         LivingEntity attacker = damageEvent.getAttacker();
@@ -237,20 +237,22 @@ public final class DamageQueue implements Runnable {
     /**
      * On the offchance that an entity dies right after they get damaged.
      * Note: this does not cover fire damage, wither damage, and the like.
-     * @param victim
+     * @param victim The entity that possibly dies
      * @return
      */
     private boolean die(LivingEntity victim) {
         String name = getNameFor(victim);
         Deque<Damage> history = damageHistory.get(name);
-        if(history.size() == 0) return false;
+        if (history.size() == 0)
+            return false;
         addDeath((Player) victim);
         Damage damage = history.getLast();
 
         DeathApplyEvent deathEvent = new DeathApplyEvent(damage, history);
         Bukkit.getPluginManager().callEvent(deathEvent);
         removeDeath((Player) victim);
-        if(deathEvent.isCancelled()) return false;
+        if (deathEvent.isCancelled())
+            return false;
         clearHistory(name);
         return true;
     }
@@ -260,25 +262,26 @@ public final class DamageQueue implements Runnable {
      * If the attacker shot the victim with a bow, play a satisfying ding sound.
      *
      * Might just use the game damage event to put in the sounds!
-     * @param victim
-     * @param attacker
-     * @param cause
+     * @param victim The victim who gets shot
+     * @param attacker The attacker to
+     * @param cause The cause of the sound
      */
     private void playSound(LivingEntity victim, LivingEntity attacker, Cause cause) {
-        if(victim instanceof Player) {
+     //   if (victim instanceof Player) {
             //ChampionsPlayer championVictim = ChampionsPlayerManager.getInstance().getChampionsPlayer((Player) victim);
-            /*if(championVictim != null)
+            /*if (championVictim != null)
                 SoundPlayer.sendSound(victim.getLocation(), championVictim.getSound());*/
-        }
+      //  }
         //if it was a bow arrow hit, play the shooter a satisfying ding sound we all know.
-        if(attacker instanceof Player && cause == Cause.PROJECTILE)
+        if (attacker instanceof Player && cause == Cause.PROJECTILE)
             SoundPlayer.sendSound((Player) attacker, "random.successful_hit", 0.8F, 20);
 
         SoundApplyEvent sound = new SoundApplyEvent(victim, attacker, null);
 
         Bukkit.getPluginManager().callEvent(sound);
         //By default, the sound is null, but if we want to make another sound, do so.
-        if(sound.isCancelled() || sound.getSound() == null || !sound.getSound().isValid()) return;
+        if (sound.isCancelled() || sound.getSound() == null || !sound.getSound().isValid())
+            return;
         SoundPlayer.sendSound(victim.getLocation(), sound.getSound());
     }
 
@@ -289,7 +292,7 @@ public final class DamageQueue implements Runnable {
             if (multiplier < 0) multiplier = 1; //uhs
             velocity[0] *= multiplier;
             velocity[2] *= multiplier;
-        }else if ((cause == Cause.MELEE || cause == Cause.MELEESKILL)) {
+        }//else if ((cause == Cause.MELEE || cause == Cause.MELEESKILL)) {
             /*
             double multiplier = .05 * damage + 0.60;
             velocity[0] *= multiplier;
@@ -297,18 +300,19 @@ public final class DamageQueue implements Runnable {
             velocity[2] *= multiplier;
             
              */
-        }
+        //}
         return velocity;
     }
 
     /**
      * See {@link DamageApplier#nativeApplyKnockback(LivingEntity, LivingEntity, double[])}
-     * @param victim
-     * @param attacker
-     * @param velocityModifiers
+     * @param victim Victim of the knockback
+     * @param attacker Entity that deals the knockback
+     * @param velocityModifiers Any modifiers to the velocity in the form of {x,y,z}
      */
     private void applyKnockback(LivingEntity victim, LivingEntity attacker, double[] velocityModifiers) {
-        if(velocityModifiers == null) velocityModifiers = new double[] {1D, 1D, 1D};
+        if (velocityModifiers == null)
+            velocityModifiers = new double[] {1D, 1D, 1D};
         DamageApplier.nativeApplyKnockback(victim, attacker, velocityModifiers);
     }
 
@@ -323,45 +327,51 @@ public final class DamageQueue implements Runnable {
     }
     /**
      * The main method of this runnable. It does all of the above.
-     * @param damageWrapper
+     * @param damageWrapper The damage object to process
      */
     private void processDamage(Damage damageWrapper) {
         LivingEntity victim = damageWrapper.getVictim();
         LivingEntity attacker = damageWrapper.getAttacker();
         Cause cause = damageWrapper.getCause();
 
-        if(!evaluateGame(victim, attacker)) return;
-        if(!(attacker instanceof Player) || !(victim instanceof Player)) return;
-        if(hasDeath((Player) attacker) || hasDeath((Player) victim)) return; //if the attacker/victim is currently dead, don't process the damage at all
-        if(victim instanceof Player && cause == Cause.MELEE && StatusApplier.getOrNew((Player) victim).isCloaked()) return;
+        if (!evaluateGame(victim, attacker))
+            return;
+        if (!(attacker instanceof Player) || !(victim instanceof Player))
+            return;
+        if (hasDeath((Player) attacker) || hasDeath((Player) victim))
+            return; //if the attacker/victim is currently dead, don't process the damage at all
+        if (victim instanceof Player && cause == Cause.MELEE && StatusApplier.getOrNew((Player) victim).isCloaked())
+            return;
 
         double bonus = 0;
-        if(cause == Cause.MELEE || cause == Cause.MELEESKILL)
+        if (cause == Cause.MELEE || cause == Cause.MELEESKILL)
             bonus = findPotionBonus(victim, attacker);
         DamageApplyEvent damageEvent = new DamageApplyEvent(victim, attacker, damageWrapper.getDamage() + bonus, cause,
                 damageWrapper.getArrow(), damageWrapper.getSource(), damageWrapper.isApplyKnockback());
-        double damage = damageEvent.getDamage();
+        double damage;
         Bukkit.getPluginManager().callEvent(damageEvent);
 
-        if(damageEvent.isCancelled() || damageEvent.getAttacker() == damageEvent.getVictim()) return;
-        if(damageEvent.isModified()) {
+        if (damageEvent.isCancelled() || damageEvent.getAttacker() == damageEvent.getVictim()) return;
+        if (damageEvent.isModified()) {
             damageWrapper.setDamage(damageEvent.getDamage());
         }
         damage = damageEvent.getDamage();
         addHistory(victim, damageWrapper);
         double armorValue = damageEvent.getArmorValue();
         playSound(victim, attacker, cause);
-        if(attacker instanceof Player) ((Player) attacker).setLevel((int) damage);
+        if (attacker instanceof Player)
+            ((Player) attacker).setLevel((int) damage);
         sendUsePacket(victim);
         damage(victim, damage, armorValue, damageEvent);
     }
 
     /**
      * For PlayerDeathEvents.
-     * @param player - the player you want to do it for
+     * @param player The player you want to do it for
      */
     public static void artificialDie(Player player) {
-        if(hasDeath(player)) return;
+        if (hasDeath(player))
+            return;
         Deque<Damage> damages = damageHistory.get(player.getName());
         player.getInventory().clear();
         player.getInventory().setArmorContents(new ItemStack[]{null, null, null, null});
@@ -369,24 +379,23 @@ public final class DamageQueue implements Runnable {
         Damage damage;
         final Damage nullDamage = new Damage(player, null, -99, null, Cause.NULL, null, (DamageSource) null,false);
         boolean a = false;
-        if(damages == null ||
-           damages.size() == 0) {
+        if (damages == null ||
+            damages.size() == 0) {
             damage = nullDamage;
-        }
-        else {
+        } else {
             damage = damages.getLast();
             a = true;
         }
 
         Bukkit.getPluginManager().callEvent(new DeathApplyEvent(damage, damages));
-        if(a) damages.clear();
+        if (a)
+            damages.clear();
     }
 
     public static void artificialAddHistory(LivingEntity entity, double damage, Cause cause) {
         String name = getNameFor(entity);
-        if(!damageHistory.containsKey(name)) {
+        if (!damageHistory.containsKey(name))
             damageHistory.put(name, new ArrayDeque<>());
-        }
         Damage wrapper = new Damage(entity, null, damage, null, cause, null, (DamageSource) null, false);
         damageHistory.get(name).add(wrapper);
     }

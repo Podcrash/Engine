@@ -1,6 +1,5 @@
 package com.podcrash.api.mc;
 
-import org.apache.commons.io.FileUtils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -12,28 +11,19 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-/**
- * Just a feeling that the async stuff is uneeded as FileConfiguration just caches it....
- *
- */
 public class Configurator {
-    private static final int MAX_THREADS = 5;
-    private static final ExecutorService executor = Executors.newFixedThreadPool(MAX_THREADS);
-    private JavaPlugin plugin;
+    private final JavaPlugin plugin;
 
     private File configFile;
     private FileConfiguration config;
-    private String fileName;
+    private final String fileName;
 
     private File getFileFromFolder(File folder, String fileName) {
-        if(folder.isDirectory()) {
+        if (folder.isDirectory()) {
             for(File file1 : folder.listFiles()) {
-                if(fileName.equals(file1.getName())) return file1;
+                if (fileName.equals(file1.getName())) return file1;
             }
         }
         return null;
@@ -42,7 +32,7 @@ public class Configurator {
     private boolean mkdirFile(File file) {
         try {
             return file.mkdir();
-        }catch (SecurityException e) {
+        } catch (SecurityException e) {
             e.printStackTrace();
             return false;
         }
@@ -51,12 +41,13 @@ public class Configurator {
         this.plugin = plugin;
         this.fileName = fileName + ".yml";
         plugin.getLogger().info("[Configurator] Loading " + this.fileName);
-        if(!file.exists()) {
+        if (!file.exists()) {
             plugin.getLogger().info("[Configurator] Creating folder " + file.getAbsolutePath());
             boolean created = mkdirFile(file);
-            if(!created) throw new IllegalStateException("The file must be made!");
+            if (!created)
+                throw new IllegalStateException("The file must be made!");
         }
-        if((this.configFile = getFileFromFolder(file, this.fileName)) == null) {
+        if ((this.configFile = getFileFromFolder(file, this.fileName)) == null) {
             plugin.getLogger().info("[Configurator] " + this.fileName + " did not exist! Creating!");
             this.configFile = new File(file, this.fileName);
             if (hasDefaults) {
@@ -84,39 +75,30 @@ public class Configurator {
     public Configurator(JavaPlugin plugin, String fileName, boolean hasDefaults) {
         this(plugin, plugin.getDataFolder(), fileName, hasDefaults);
     }
+
     public Configurator(JavaPlugin plugin, String fileName) {
         this(plugin, fileName, false);
     }
 
-    public CompletableFuture<Void> read(String path, Consumer<Object> consumer) {
-        return CompletableFuture.supplyAsync(() -> {
-            return this.config.get(path);
-        }, executor).thenAcceptAsync(consumer);
+    public void read(String path, Consumer<Object> consumer) {
+        consumer.accept(this.config.get(path));
     }
-    public CompletableFuture<Void>  readInt(String path, Consumer<Integer> consumer) {
-        return CompletableFuture.supplyAsync(() -> {
-            return (int) this.config.get(path);
-        }, executor).thenAcceptAsync(consumer);
+    public void  readInt(String path, Consumer<Integer> consumer) {
+        consumer.accept((int) this.config.get(path));
     }
-    public CompletableFuture<Void>  readDouble(String path, Consumer<Double> consumer) {
-        return CompletableFuture.supplyAsync(() -> {
-            return (double) this.config.get(path);
-        }, executor).thenAcceptAsync(consumer);
+    public void  readDouble(String path, Consumer<Double> consumer) {
+        consumer.accept((double) this.config.get(path));
     }
-    public CompletableFuture<Void> readString(String path, Consumer<String> consumer) {
-        return CompletableFuture.supplyAsync(() -> {
-            return (String) this.config.get(path);
-        }, executor).thenAcceptAsync(consumer);
+    public void readString(String path, Consumer<String> consumer) {
+        consumer.accept((String) this.config.get(path));
     }
-    public CompletableFuture<Void> readList(String path, Consumer<List> consumer) {
-        return CompletableFuture.supplyAsync(() -> {
-            return this.config.getList(path, new ArrayList<>());
-        }, executor).thenAcceptAsync(consumer);
+
+    public void readList(String path, Consumer<List<?>> consumer) {
+        consumer.accept(this.config.getList(path, new ArrayList<>()));
     }
 
     public void set(String path, Object value) {
-        Runnable run = () -> config.set(path, value);
-        executor.submit(run);
+        config.set(path, value);
     }
 
     public boolean hasPath(String path) {
@@ -124,24 +106,17 @@ public class Configurator {
     }
 
     public void deletePath(String path) {
-        Runnable deleteCall = () -> {
-            if(config.isSet(path) ) {
-                config.set(path, null);
-                saveConfig();
-            }
-        };
-        executor.submit(deleteCall);
+        if (config.isSet(path)) {
+            config.set(path, null);
+            saveConfig();
+        }
     }
     public void saveConfig(){
-        executor.submit(() -> {
-            synchronized (config) {
-                try {
-                    config.save(configFile);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        try {
+            config.save(configFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public FileConfiguration getConfig() {

@@ -8,9 +8,9 @@ import org.bukkit.event.HandlerList;
 
 public class GamePickUpEvent extends GamePlayerEvent implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
-    private ItemObjective itemObjective;
+    private final ItemObjective itemObjective;
     private boolean cancel = false;
-    private int remaining;
+    private final int remaining;
 
     public GamePickUpEvent(Game game, Player player, ItemObjective itemObjective, int remaining) {
         super(game, player, "You scored 300 points");

@@ -43,19 +43,6 @@ public class WrapperPlayServerEntityStatus extends AbstractPacket {
         public static final int WITCH_SPAWN_MAGIC_PARTICLE = 15;
         public static final int ZOMBIE_VILLAGERIZING = 16;
         public static final int FIREWORK_EXPLODING = 17;
-
-        /**
-         * The singleton instance. Can also be retrieved from the parent class.
-         */
-        private static Status INSTANCE = new Status();
-
-        /**
-         * Retrieve an instance of the status enum.
-         * @return Status enum.
-         */
-        public static Status getInstance() {
-            return INSTANCE;
-        }
     }
 
     public WrapperPlayServerEntityStatus() {

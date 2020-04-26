@@ -1,19 +1,30 @@
 package com.podcrash.api.mc.commands;
 
-import com.podcrash.api.mc.economy.EconomyHandler;
 import com.podcrash.api.mc.economy.Currency;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.mc.economy.EconomyHandler;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 
-public class BalanceCommand extends CommandBase {
+import java.util.Collections;
+
+public class BalanceCommand extends BukkitCommand {
+
+    public BalanceCommand() {
+        super("balance",
+                "Check how much gold you currently have.",
+                "/balance",
+                Collections.singletonList("bal"));
+    }
+
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if(!(sender instanceof Player)) return false;
+    public boolean execute(CommandSender sender, String label, String[] args) {
+        if (!(sender instanceof Player))
+            return true;
         Player p = (Player) sender;
-        EconomyHandler handler = (EconomyHandler) Pluginizer.getSpigotPlugin().getEconomyHandler();
+        EconomyHandler handler = PodcrashSpigot.getInstance().getEconomyHandler();
         p.sendMessage(String.format("%sEconomy> %sYour %s: %s%s",
                 ChatColor.BLUE, //Header
                 ChatColor.GRAY, //Default color

@@ -7,7 +7,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -31,7 +30,8 @@ public class ItemStackUtil {
         ItemStack item = new ItemStack(material, amount);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(displayName);
-        if(lore != null) meta.setLore(lore);
+        if (lore != null)
+            meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
     }
@@ -48,15 +48,14 @@ public class ItemStackUtil {
     @SuppressWarnings("deprecation")
     public static ItemStack createItem(int materialId, int amount, String displayName, String... loreString) {
         ItemStack item;
-        List<String> lore = new ArrayList<String>();
+        List<String> lore = new ArrayList<>();
 
         item = new ItemStack(Material.getMaterial(materialId), amount);
 
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(ChatUtil.chat(displayName));
 
-        List<String> list = Arrays.asList(loreString);
-        for (String s : list) {
+        for (String s : loreString) {
             lore.add(ChatUtil.chat(s));
         }
         meta.setLore(lore);
@@ -79,15 +78,14 @@ public class ItemStackUtil {
     @SuppressWarnings("deprecation")
     public static ItemStack createItem(int materialId, int byteId, int amount, String displayName, String... loreString) {
         ItemStack item;
-        List<String> lore = new ArrayList<String>();
+        List<String> lore = new ArrayList<>();
 
         item = new ItemStack(Material.getMaterial(materialId), amount, (short) byteId);
 
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(ChatUtil.chat(displayName));
 
-        List<String> list = Arrays.asList(loreString);
-        for (String s : list) {
+        for (String s : loreString) {
             lore.add(ChatUtil.chat(s));
         }
         meta.setLore(lore);
@@ -121,7 +119,6 @@ public class ItemStackUtil {
      * @param invSlot The inventory slot.
      * @param displayName The display name of the item.
      * @param loreString The lore strings of the item
-     * @return
      */
     public static void createItem(Inventory inv, int materialId, int byteId, int amount, int invSlot, String displayName, String... loreString) {
         ItemStack item = createItem(materialId, byteId, amount, displayName, loreString);

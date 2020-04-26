@@ -1,7 +1,6 @@
 package com.podcrash.api.mc.effect.particle;
 
 import com.abstractpackets.packetwrapper.ILocationPacket;
-import com.abstractpackets.packetwrapper.WrapperPlayServerWorldParticles;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 

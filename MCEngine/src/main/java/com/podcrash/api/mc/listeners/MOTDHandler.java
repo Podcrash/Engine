@@ -14,7 +14,8 @@ public class MOTDHandler extends ListenerBase {
     @EventHandler
     public void onServerPing(ServerListPingEvent e) {
         Game game = GameManager.getGame();
-        if(game == null) return;
+        if (game == null)
+            return;
         e.setMotd(game.getGameState().toString());
     }
 }

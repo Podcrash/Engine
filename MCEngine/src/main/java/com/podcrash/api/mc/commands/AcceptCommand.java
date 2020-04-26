@@ -7,11 +7,21 @@ import com.podcrash.api.mc.listeners.BackfillListener;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 
-public class AcceptCommand extends CommandBase{
+import java.util.Collections;
+
+public class AcceptCommand extends BukkitCommand {
+    public AcceptCommand() {
+        super("accept",
+                "Accept a player's position in a game",
+                "/accept <Player Name>",
+                Collections.emptyList());
+    }
+
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean execute(CommandSender sender, String label, String[] args) {
         if (args.length == 1 && sender instanceof Player) {
             if (BackfillListener.replaceOfflineWithSpectator((Player) sender, args[0])) {
                 //sender.sendMessage("sucess");

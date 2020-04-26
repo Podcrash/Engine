@@ -1,11 +1,11 @@
 package com.podcrash.api.mc.game;
 
+import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.db.pojos.Rank;
 import com.podcrash.api.db.pojos.map.BaseMap;
 import com.podcrash.api.db.pojos.map.GameMap;
 import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.MapTable;
-import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.mc.events.game.*;
 import com.podcrash.api.mc.game.lobby.GameLobbyTimer;
 import com.podcrash.api.mc.game.resources.GameResource;
@@ -16,7 +16,7 @@ import com.podcrash.api.mc.ui.TeamSelectGUI;
 import com.podcrash.api.mc.util.ChatUtil;
 import com.podcrash.api.mc.util.ItemStackUtil;
 import com.podcrash.api.mc.util.PrefixUtil;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -29,7 +29,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 /**
@@ -42,33 +42,37 @@ import java.util.function.Consumer;
  * TODO: Scoreboards and timers.
  */
 
+//todo: for the love of god someone please rewrite this
+    //gamemanager and game should not have the same type of relationship to a lot of things
 public abstract class Game implements IGame {
 
-    private int id;
-    private String name;
+    private final int id;
+    private final String name;
     private List<GTeam> teams;
+
     private GameSettings gameSettings;
     private volatile boolean isLoadedMap;
+
     private GameState state;                            // TODO: May replace this with an Enum with a more specific state for the game.
     protected String gameWorldName;
-    private List<GameResource> gameResources;
+    private final List<GameResource> gameResources;
 
     // TODO: Everything in this section is related to the mode or type. To be modified later.
-    private GameType type;                              // TODO: Mode - this may get replaced/removed later.
+    private final GameType type;                              // TODO: Mode - this may get replaced/removed later.
     private String primary_color;
     private String secondary_color;
 
-    private Set<UUID> participants;                     // Participating players only.
-    private Set<UUID> spectators;                       // Spectating players only.
-    private Set<UUID> respawning;                       // Respawning players.
+    private final Set<UUID> participants;                     // Participating players only.
+    private final Set<UUID> spectators;                       // Spectating players only.
+    private final Set<UUID> respawning;                       // Respawning players.
 
-    private GameLobbyScoreboard lobbyBoard;
-    private GameLobbyTimer lobbyTimer;
-    private Map<String, Double> playerRewards = new HashMap<>();
+    private final GameLobbyScoreboard lobbyBoard;
+    private final GameLobbyTimer lobbyTimer;
+    private final Map<String, Double> playerRewards = new HashMap<>();
 
     private GameMap map;
 
-    private Set<Player> isLobbyPVPing;
+    private final Set<Player> isLobbyPVPing;
     /**
      * Constructor for the game.
      * @param id The ID of the game.
@@ -126,7 +130,7 @@ public abstract class Game implements IGame {
         //TODO: this solution is not clever.... rework
         CompletableFuture<? extends GameMap> futureMap = mapTable.downloadWorld(gameWorldName, getMode().toLowerCase(), getMapClass());
         futureMap.thenAcceptAsync(map -> {
-            if(map == null) return;
+            if (map == null) return;
             this.map = map;
             Bukkit.getPluginManager().callEvent(new GameMapLoadEvent(this, this.map, Bukkit.getWorld(gameWorldName)));
         });
@@ -147,7 +151,7 @@ public abstract class Game implements IGame {
     }
 
     public double getReward(Player player) {
-        if(playerRewards.get(player.getName()) == null) return 0;
+        if (playerRewards.get(player.getName()) == null) return 0;
         return playerRewards.get(player.getName());
     }
     /**
@@ -160,22 +164,30 @@ public abstract class Game implements IGame {
     /**
      * @return The ID of the game.
      */
-    public int getId() { return id; }
+    public int getId() {
+        return id;
+    }
 
     /**
      * @return The name of the game.
      */
-    public String getName() { return name; }
+    public String getName() {
+        return name;
+    }
 
     /**
      * @return A list of teams.
      */
-    public List<GTeam> getTeams() { return teams; }
+    public List<GTeam> getTeams() {
+        return teams;
+    }
 
     /**
      * @return The number of teams.
      */
-    public int numberOfTeams() { return teams.size(); }
+    public int numberOfTeams() {
+        return teams.size();
+    }
 
     /**
      * @return If the map is loaded.
@@ -187,6 +199,7 @@ public abstract class Game implements IGame {
     public boolean hasChosenMap() {
         return gameWorldName != null && !gameWorldName.isEmpty();
     }
+
     /**
      * Precondition: if loadMap has been called.
      * @return the map
@@ -198,7 +211,9 @@ public abstract class Game implements IGame {
     /**
      * @return Whether the game is ongoing.
      */
-    public GameState getGameState() { return state; }
+    public GameState getGameState() {
+        return state;
+    }
 
     /**
      * Set whether the game is ongoing.
@@ -213,7 +228,9 @@ public abstract class Game implements IGame {
     /**
      * @return The Game World.
      */
-    public World getGameWorld() { return Bukkit.getWorld(gameWorldName); }
+    public World getGameWorld() {
+        return Bukkit.getWorld(gameWorldName);
+    }
 
     /**
      *
@@ -228,9 +245,7 @@ public abstract class Game implements IGame {
      * @param p - The player
      */
     public void removePlayerLobbyPVPing(Player p) {
-        if (isLobbyPVPing.contains(p)) {
-            isLobbyPVPing.remove(p);
-        }
+        isLobbyPVPing.remove(p);
     }
 
     /**
@@ -238,9 +253,7 @@ public abstract class Game implements IGame {
      * @param p - The player
      */
     public void addPlayerLobbyPVPing(Player p) {
-        if (!isLobbyPVPing.contains(p)) {
-            isLobbyPVPing.add(p);
-        }
+        isLobbyPVPing.add(p);
     }
 
     /**
@@ -249,8 +262,10 @@ public abstract class Game implements IGame {
      */
     public void setGameWorld(String world){
         //unload the last game world
-        if(this.gameWorldName != null) Bukkit.unloadWorld(this.gameWorldName, false);
-        if(world.equalsIgnoreCase(gameWorldName)) return;
+        if (this.gameWorldName != null)
+            Bukkit.unloadWorld(this.gameWorldName, false);
+        if (world.equalsIgnoreCase(gameWorldName))
+            return;
         //unload the current world just in case
         Bukkit.unloadWorld(world, false);
         this.gameWorldName = world;
@@ -264,7 +279,7 @@ public abstract class Game implements IGame {
      * @return The map name.
      */
     public String getMapName(){
-        if(gameWorldName == null) {
+        if (gameWorldName == null) {
             return "None";
         } else {
             String[] splitName = gameWorldName.split("(?=\\p{Upper})");
@@ -312,7 +327,8 @@ public abstract class Game implements IGame {
      * @param resource The game resource.
      */
     public void registerResource(GameResource resource){
-        if(resource.getGameID() != this.id) throw new IllegalArgumentException("resource does not correspond with its game id" + "gameid: " + id + " resourceid: " + resource.getGameID());
+        if (resource.getGameID() != this.id)
+            throw new IllegalArgumentException("resource does not correspond with its game id" + "gameid: " + id + " resourceid: " + resource.getGameID());
         gameResources.add(resource);
         resource.run(resource.getTicks(), resource.getDelayTicks());
     }
@@ -339,17 +355,23 @@ public abstract class Game implements IGame {
     /**
      * @return A set of the participating players.
      */
-    public Set<UUID> getParticipants() { return participants; }
+    public Set<UUID> getParticipants() {
+        return participants;
+    }
 
     /**
      * @return A set of spectating players.
      */
-    public Set<UUID> getSpectators() { return spectators; }
+    public Set<UUID> getSpectators() {
+        return spectators;
+    }
 
     /**
      * @return The set of respawning players.
      */
-    public Set<UUID> getRespawning() { return respawning; }
+    public Set<UUID> getRespawning() {
+        return respawning;
+    }
 
     /**
      * @return A set of all players (participating and spectating).
@@ -362,9 +384,10 @@ public abstract class Game implements IGame {
     }
 
     public Set<UUID> getParticipantsNoTeam() {
-        Set<UUID> result = new HashSet<UUID>();
+        Set<UUID> result = new HashSet<>();
         for (UUID uuid : participants) {
-            if (!isOnTeam(uuid)) { result.add(uuid); }
+            if (!isOnTeam(uuid))
+                result.add(uuid);
         }
         return result;
     }
@@ -376,14 +399,16 @@ public abstract class Game implements IGame {
         List<Player> players = new ArrayList<>();
         for(UUID uuid : getPlayers()) {
             Player p;
-            if ((p = Bukkit.getPlayer(uuid)) != null) players.add(p);
+            if ((p = Bukkit.getPlayer(uuid)) != null)
+                players.add(p);
         }
         return players;
     }
     public void consumeBukkitPlayer(Consumer<Player> playerConsumer) {
         for(UUID uuid : getPlayers()) {
             Player p = Bukkit.getPlayer(uuid);
-            if(p != null) playerConsumer.accept(p);
+            if (p != null)
+                playerConsumer.accept(p);
         }
     }
 
@@ -394,7 +419,8 @@ public abstract class Game implements IGame {
         List<Player> players = new ArrayList<>();
         for(UUID uuid : getSpectators()) {
             Player p;
-            if ((p = Bukkit.getPlayer(uuid)) != null) players.add(p);
+            if ((p = Bukkit.getPlayer(uuid)) != null)
+                players.add(p);
         }
         return players;
     }
@@ -406,9 +432,8 @@ public abstract class Game implements IGame {
      */
     public List<UUID> getTeamPlayers(Player player) {
         for (GTeam team : teams) {
-            if (team.getPlayers().contains(player.getUniqueId())) {
+            if (team.getPlayers().contains(player.getUniqueId()))
                 return team.getPlayers();
-            }
         }
         return null;
     }
@@ -489,17 +514,17 @@ public abstract class Game implements IGame {
      * @param player The player.
      */
     public void toggleSpec(Player player) {
-        if (state == GameState.STARTED) {
+        if (state == GameState.STARTED)
             return;
-        }
+
         if (isSpectating(player)) {
             removeSpectator(player);
-            if (state == GameState.LOBBY) { updateLobbyInventory(player); }
+            if (state == GameState.LOBBY)
+                updateLobbyInventory(player);
             add(player);
 
-        } else {
+        } else
             addSpectator(player);
-        }
     }
 
     /**
@@ -527,11 +552,13 @@ public abstract class Game implements IGame {
      * @return If the join was successful.
      */
     public boolean joinTeam(Player player, TeamEnum teamEnum, boolean isBackfill) {
-        if (!player.isOnline() || (!isBackfill && state == GameState.STARTED) || !isParticipating(player)) return false;
-        leaveTeam(player);
+        if (!player.isOnline() || (!isBackfill && state == GameState.STARTED) || !isParticipating(player))
+            return false;
 
+        leaveTeam(player);
         GTeam team = getTeam(teamEnum);
-        if (team == null || team.teamSize() >= team.getMaxPlayers()) return false;
+        if (team == null || team.teamSize() >= team.getMaxPlayers())
+            return false;
 
         Scoreboard scoreboard =  getGameScoreboard().getBoard();
         Team bukkitTeam = scoreboard.getTeam(getTeamString(teamEnum));
@@ -542,13 +569,14 @@ public abstract class Game implements IGame {
         playerRewards.put(player.getName(), 0.0);
         refreshTabColor(player, teamEnum.getChatColor().toString());
 
-        if (player.getOpenInventory().getTitle().equals(TeamSelectGUI.inventory_name)) { player.openInventory(TeamSelectGUI.selectTeam(this, player)); }
+        if (player.getOpenInventory().getTitle().equals(TeamSelectGUI.inventory_name))
+            player.openInventory(TeamSelectGUI.selectTeam(this, player));
         return true;
     }
 
     public void refreshTabColor(Player player, String color) {
         Rank rank = PrefixUtil.getPlayerRole(player);
-        if(rank != null) {
+        if (rank != null) {
             player.setPlayerListName(String.format("%s %s%s",
                     PrefixUtil.getPrefix(rank),
                     color,
@@ -561,7 +589,8 @@ public abstract class Game implements IGame {
     }
 
     public boolean leaveTeam(Player player) {
-        if (!contains(player) || !isOnTeam(player)) { return false; }
+        if (!contains(player) || !isOnTeam(player))
+            return false;
         getTeam(player).removeFromTeam(player);
         player.setPlayerListName(ChatUtil.chat("&7" + player.getName()));
         if (player.getOpenInventory().getTitle().equals(TeamSelectGUI.inventory_name)) { player.openInventory(TeamSelectGUI.selectTeam(this, player)); }
@@ -607,6 +636,11 @@ public abstract class Game implements IGame {
      */
     public void removeSpectator(Player player) {
         spectators.remove(player.getUniqueId());
+        participants.add(player.getUniqueId());
+        if (state == GameState.LOBBY)
+            updateLobbyInventory(player);
+        //this call to gamemanager is bad.
+        GameManager.randomTeam(player);
     }
 
     public void addParticipant(Player player) {
@@ -655,9 +689,8 @@ public abstract class Game implements IGame {
         participants.remove(player.getUniqueId());
         spectators.remove(player.getUniqueId());
         // If on a team, remove from team.
-        if (isOnTeam(player)) {
+        if (isOnTeam(player))
             leaveTeam(player);
-        }
         // Reset scoreboard.
         //player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         // Call event.
@@ -679,9 +712,8 @@ public abstract class Game implements IGame {
      */
     public List<UUID> getTeamStr(String color) {
         for (GTeam team : teams) {
-            if (team.getTeamEnum().getName().equalsIgnoreCase(color)) {
+            if (team.getTeamEnum().getName().equalsIgnoreCase(color))
                 return team.getPlayers();
-            }
         }
         throw new IllegalArgumentException(String.format("%s is not a valid team color!", color));
     }
@@ -693,9 +725,8 @@ public abstract class Game implements IGame {
      */
     public GTeam getTeam(Player player) {
         for (GTeam team : teams) {
-            if (team.getPlayers().contains(player.getUniqueId())) {
+            if (team.getPlayers().contains(player.getUniqueId()))
                 return team;
-            }
         }
         return null;
     }
@@ -716,9 +747,8 @@ public abstract class Game implements IGame {
      */
     public GTeam getTeam(TeamEnum teamEnum) {
         for (GTeam team : teams) {
-            if (team.getTeamEnum() == teamEnum) {
+            if (team.getTeamEnum() == teamEnum)
                 return team;
-            }
         }
         return null;
     }
@@ -782,9 +812,8 @@ public abstract class Game implements IGame {
      */
     public boolean isOnTeam(UUID uuid) {
         for (GTeam team : teams) {
-            if (team.getPlayers().contains(uuid)) {
+            if (team.getPlayers().contains(uuid))
                 return true;
-            }
         }
         return false;
     }
@@ -835,9 +864,8 @@ public abstract class Game implements IGame {
      */
     public boolean isTeamEnumTaken(TeamEnum teamEnum) {
         for (GTeam team : teams) {
-            if (team.getTeamEnum() == teamEnum) {
+            if (team.getTeamEnum() == teamEnum)
                 return true;
-            }
         }
         return false;
     }
@@ -848,9 +876,8 @@ public abstract class Game implements IGame {
      */
     public boolean hasEmptyTeam() {
         for (GTeam team : teams) {
-            if (team.isEmpty()) {
+            if (team.isEmpty())
                 return true;
-            }
         }
         return false;
     }
@@ -862,7 +889,8 @@ public abstract class Game implements IGame {
      * @return If they are on the same team.
      */
     public boolean isOnSameTeam(Player p1, Player p2) {
-        if (!(isOnTeam(p1) && isOnTeam(p2)))  return false;
+        if (!(isOnTeam(p1) && isOnTeam(p2)))
+            return false;
         return getTeam(p1).isPlayerOnTeam(p2);
     }
 
@@ -936,11 +964,10 @@ public abstract class Game implements IGame {
         p.setFlying(flight);
         p.getInventory().clear();
         for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-            if (visible) {
+            if (visible)
                 player.showPlayer(p);
-            } else {
+            else
                 player.hidePlayer(p);
-            }
         }
         if (resetExp) {
             p.setLevel(0);
@@ -1012,10 +1039,10 @@ public abstract class Game implements IGame {
      * @param reset Reset boolean.
      */
     public void sendColorTab(boolean reset) {
-        if(!reset) {
+      //  if (!reset) {
             /*
             for(Team team : Bukkit.getScoreboardManager().getMainScoreboard().getTeams()) {
-                if(team.getName().equals(id + "redTeam") || team.getName().equals(id + "blueTeam")) {
+                if (team.getName().equals(id + "redTeam") || team.getName().equals(id + "blueTeam")) {
                     WrapperPlayServerScoreboardTeam teamPacket = new WrapperPlayServerScoreboardTeam();
                     teamPacket.setMode(WrapperPlayServerScoreboardTeam.Mode.TEAM_UPDATED);
                     teamPacket.setPrefix(team.getPrefix());
@@ -1028,14 +1055,14 @@ public abstract class Game implements IGame {
                 }
             }
             */
-        }else {
-            for(Team team : Bukkit.getScoreboardManager().getMainScoreboard().getTeams()) {
-                if(team.getName().equals(id + "redTeam") || team.getName().equals(id + "blueTeam")) {
-                    Pluginizer.getSpigotPlugin().getLogger().info("cleared a team! from " + id);
-                    team.unregister();
-                }
+      //  }else {
+        for(Team team : Bukkit.getScoreboardManager().getMainScoreboard().getTeams()) {
+            if (team.getName().equals(id + "redTeam") || team.getName().equals(id + "blueTeam")) {
+                PodcrashSpigot.getInstance().getLogger().info("cleared a team! from " + id);
+                team.unregister();
             }
         }
+        //}
     }
 
     /**
@@ -1053,9 +1080,8 @@ public abstract class Game implements IGame {
             if (gteam != null) {
                 gteam.removeFromTeam(player.getUniqueId());
                 Team team = getGameScoreboard().getBoard().getTeam(id + gteam.getTeamEnum().getName() + "Team");
-                if (team != null) {
+                if (team != null)
                     team.removeEntry(name);
-                }
             }
             player.sendMessage(
                     String.format(
@@ -1063,7 +1089,7 @@ public abstract class Game implements IGame {
                             ChatColor.BLUE,
                             ChatColor.GRAY));
             //player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
-        } else if(isSpectating(player)) {
+        } else if (isSpectating(player)) {
             spectators.remove(player.getUniqueId());
         }
     }
@@ -1115,24 +1141,29 @@ public abstract class Game implements IGame {
 
     /**
      * Broadcast a message to all Bukkit Players involved in the game.
-     * @param msg
+     * @param msg The messaage
      */
     public void broadcast(String msg) {
         for (Player player : getBukkitPlayers()){
             player.sendMessage(msg);
         }
     }
+
     protected final void log(String msg){
-        Pluginizer.getSpigotPlugin().getLogger().info(String.format("%s: %s", toString(), msg));
+        PodcrashSpigot.getInstance().getLogger().info(String.format("%s: %s", toString(), msg));
     }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Game)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof Game))
+            return false;
         Game game = (Game) o;
         return id == game.id &&
                 Objects.equals(name, game.name);
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(id);

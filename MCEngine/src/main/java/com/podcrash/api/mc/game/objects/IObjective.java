@@ -2,7 +2,7 @@ package com.podcrash.api.mc.game.objects;
 
 import com.podcrash.api.mc.game.TeamEnum;
 import com.podcrash.api.mc.game.objects.objectives.ObjectiveType;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -29,6 +29,6 @@ public interface IObjective {
         return getVector().toLocation(getWorld());
     }
     default void log(String s){
-        Pluginizer.getSpigotPlugin().getLogger().info(String.format("[%s{%s}]: %s", this.getClass().getSimpleName(), getName(), s));
+        PodcrashSpigot.getInstance().getLogger().info(String.format("[%s{%s}]: %s", this.getClass().getSimpleName(), getName(), s));
     }
 }

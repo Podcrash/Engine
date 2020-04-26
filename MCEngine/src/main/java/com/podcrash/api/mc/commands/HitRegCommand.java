@@ -1,27 +1,37 @@
 package com.podcrash.api.mc.commands;
 
-import com.podcrash.api.mc.commands.CommandBase;
 import com.podcrash.api.mc.damage.HitDetectionInjector;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.defaults.BukkitCommand;
 
-public class HitRegCommand extends CommandBase {
+import java.util.Collections;
+
+public class HitRegCommand extends BukkitCommand {
+
+    public HitRegCommand() {
+        super("hitreg",
+                "Put a new hitreg.",
+                "/hitreg <integer>",
+                Collections.emptyList());
+    }
+
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if(!sender.hasPermission("invicta.testing")) {
-            sender.sendMessage("You do not have permissions!");
-            return false;
+    public boolean execute(CommandSender sender, String label, String[] args) {
+        if (!sender.hasPermission("invicta.testing")) {
+            sender.sendMessage("You do not have permission!");
+            return true;
         }
-        if(args.length == 1) {
+        if (args.length == 1) {
             try {
-                long newReg = Long.parseLong(args[0]);
-                HitDetectionInjector.delay = newReg;
+                HitDetectionInjector.delay = Long.parseLong(args[0]);
                 sender.sendMessage("[HitReg] " + "Changed to " + args[0]);
-            }catch (NumberFormatException e) {
-                sender.sendMessage("[HitReg] "+ args[0] + " must be a number!");
+            } catch (NumberFormatException e) {
+                sender.sendMessage("[HitReg] " + args[0] + " must be a number!");
             }
             return true;
-        }else sender.sendMessage("[HitReg] Please provide an argument!");
+        } else {
+            sender.sendMessage("[HitReg] Please provide an argument!");
+        }
         return false;
     }
 

@@ -9,13 +9,11 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class FallDamageHandler extends ListenerBase {
-    private static Set<String> guaranteeNullFall = new HashSet<>();
+    private static final Set<String> guaranteeNullFall = new HashSet<>();
 
     public FallDamageHandler(JavaPlugin plugin) {
         super(plugin);
@@ -43,11 +41,12 @@ public class FallDamageHandler extends ListenerBase {
     }
     @EventHandler(priority = EventPriority.NORMAL)
     public void fall(EntityDamageEvent event) {
-        if(event.getCause() != EntityDamageEvent.DamageCause.FALL) return;
+        if (event.getCause() != EntityDamageEvent.DamageCause.FALL)
+            return;
         event.setDamage(event.getDamage() - 3);//mini breakfall.
 
         String entry = event.getEntity().getName();
-        if(guaranteeNullFall.contains(entry)) {
+        if (guaranteeNullFall.contains(entry)) {
             event.setCancelled(true);
             event.setDamage(0);
             guaranteeNullFall.remove(entry);

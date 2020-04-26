@@ -11,19 +11,25 @@ public final class MathHelper {
 
     /**
      * Rounds up in 50 ms intervals
-     * @param ping
-     * @return
+     * @param ping Number to round
+     * @return Number rounded to nearest 50
      */
     public static int roundPing(int ping) {
         //this looks really stupid but
         //ping = 87
         //87/50 = 1.78... --> 1
         //1 * 50 = 50 + 50 = 100
-         int i = ping % 50 >= 25 ? 50 : 0;
+        int i = ping % 50 >= 25 ? 50 : 0;
 
         return (ping / 50) * 50 + i;
     }
 
+    /**
+     * Rounds a number to a specified precision
+     * @param value Value to round
+     * @param precision Precision to round to
+     * @return the rounded value
+     */
     public static double round(double value, int precision) {
         int scale = (int) Math.pow(10, precision);
         return (double) Math.round(value * scale) / scale;

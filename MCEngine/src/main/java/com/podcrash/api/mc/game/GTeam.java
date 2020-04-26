@@ -1,13 +1,14 @@
 package com.podcrash.api.mc.game;
 
-import com.comphenix.protocol.PacketType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -22,9 +23,9 @@ public class GTeam {
     private String name;
     private int min;
     private int max;
-    private List<UUID> players;
+    private final List<UUID> players;
     private List<Location> spawnpoints;
-    private AtomicInteger score;
+    private final AtomicInteger score;
 
     /**
      * Constructor for a Team.
@@ -94,9 +95,7 @@ public class GTeam {
      * @return List of players on the team.
      */
     public List<UUID> getPlayers() {
-        ArrayList<UUID> result = new ArrayList<UUID>();
-        result.addAll(players);
-        return result;
+        return new ArrayList<>(players);
     }
 
     /**
@@ -152,7 +151,7 @@ public class GTeam {
      * @param players A list of players.
      */
     public void addToTeam(List<UUID> players) {
-        players.addAll(players);
+        this.players.addAll(players);
     }
 
     /**
@@ -215,7 +214,8 @@ public class GTeam {
      * @return The spawnpoint location.
      */
     public Location getSpawn(Player player) {
-        if (!isPlayerOnTeam(player)) { return null; }
+        if (!isPlayerOnTeam(player))
+            return null;
         return spawnpoints.get(players.indexOf(player.getUniqueId()));
     }
 
@@ -254,7 +254,7 @@ public class GTeam {
         int locCursor = 0;
         int spawnSize = spawnpoints.size();
         for(Player player : players) {
-            if(locCursor >= spawnSize) locCursor = 0;//if more players than spawns
+            if (locCursor >= spawnSize) locCursor = 0;//if more players than spawns
             player.teleport(spawnpoints.get(locCursor));
             locCursor++;
         }

@@ -44,11 +44,11 @@ public class WrapperPlayServerWorldParticles extends AbstractPacket implements I
     @Override
     public void sendPacket(Player reciever){
         new Thread(() -> {
-            if(reciever.getLocation().distanceSquared(new Location(reciever.getWorld(), getX(), getY(), getZ())) > 256){
+            if (reciever.getLocation().distanceSquared(new Location(reciever.getWorld(), getX(), getY(), getZ())) > 256) {
                 this.setLongDistance(true);
             }
             super.sendPacket(reciever);
-        }).run();
+        }).start();
     }
 
     public void setLocation(Location loc){

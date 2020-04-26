@@ -24,12 +24,12 @@ import java.util.*;
 public class DeathApplyEvent extends Event implements Cancellable {
     //this is cancellable because maybe cancel death later??
     private static final HandlerList handlers = new HandlerList();
-    private Player player;
-    private LivingEntity attacker;
+    private final Player player;
+    private final LivingEntity attacker;
 
     private Damage lastAttackerDamage;
-    private Damage damage;
-    private Deque<Damage> history;
+    private final Damage damage;
+    private final Deque<Damage> history;
     private boolean cancel;
 
 
@@ -99,22 +99,25 @@ public class DeathApplyEvent extends Event implements Cancellable {
         builder.append(ChatColor.RESET);
 
         //TODO: This needs refactor and testing
-        if(attacker == null) {
+        if (attacker == null) {
             builder.append(getCause().getDisplayName()).append(".");
-        }else {
+        } else {
             String attackerName;
             if (attacker instanceof Player) {
                 Player attackerCast = ((Player) attacker);
                 TeamEnum attackerT = game.getTeamEnum(attackerCast);
                 builder.append(attackerT.getChatColor());
                 attackerName = attackerCast.getDisplayName();
-            } else attackerName = attacker.getName();
+            } else  {
+                attackerName = attacker.getName();
+            }
 
             builder.append(attackerName);
 
             int i = findAssists();
 
-            if (i != 0) builder.append(" + " + i);
+            if (i != 0)
+                builder.append(" + ").append(i);
             builder.append(ChatColor.GRAY);
             builder.append(" using ");
             builder.append(ChatColor.RESET);
@@ -133,13 +136,17 @@ public class DeathApplyEvent extends Event implements Cancellable {
         Cause cause = damage.getCause();
         switch(cause) {
             case PROJECTILE:
-                if (damage.getSource().size() > 1) break; //Show the CUSTOM sources over the default ones
+                if (damage.getSource().size() > 1)
+                    break; //Show the CUSTOM sources over the default ones
                 causesNames.add(ChatColor.YELLOW + "Archery");
                 break;
             case MELEE:
-                if (damage.getSource().size() > 1) break; //Show the CUSTOM sources over the default ones
-                if (damage.getItem() == null || damage.getItem().getItemMeta() == null) causesNames.add("Fists");
-                else causesNames.add(damage.getItem().getItemMeta().getDisplayName());
+                if (damage.getSource().size() > 1)
+                    break; //Show the CUSTOM sources over the default ones
+                if (damage.getItem() == null || damage.getItem().getItemMeta() == null)
+                    causesNames.add("Fists");
+                else
+                    causesNames.add(damage.getItem().getItemMeta().getDisplayName());
                 break;
             case CUSTOM:
                 DamageSource first = damage.getSource().get(0);
@@ -152,7 +159,7 @@ public class DeathApplyEvent extends Event implements Cancellable {
                 causesNames.add(cause.getDisplayName());
                 break;
         }
-        if(damage.getSource().size() > 1) {
+        if (damage.getSource().size() > 1) {
             for (int i = 1; i < damage.getSource().size(); i++) {
                 DamageSource source = damage.getSource().get(i);
                 causesNames.add(source.getPrefix() + source.getName());
@@ -162,18 +169,20 @@ public class DeathApplyEvent extends Event implements Cancellable {
     }
 
     private LivingEntity findAttacker() {
-        if(damage == null) return null;
-        if(history == null || history.size() == 0) return damage.getAttacker();
+        if (damage == null) return null;
+        if (history == null || history.size() == 0) return damage.getAttacker();
         List<Damage> damageList = new ArrayList<>(history);
         //find the player who last damaged
         Damage lastEntityDamage = damage;
         for(int i = damageList.size() - 1; i >= 0; i--) {
-            if(lastEntityDamage.getAttacker() != null) break;
+            if (lastEntityDamage.getAttacker() != null)
+                break;
             lastEntityDamage = damageList.get(i);
         }
 
-        if(lastEntityDamage == null) return null;
-        if(damage.getTime() - lastEntityDamage.getTime() > 12000) return null;
+        if (lastEntityDamage == null) return null;
+        if (damage.getTime() - lastEntityDamage.getTime() > 12000)
+            return null;
         lastAttackerDamage = lastEntityDamage;
         return lastEntityDamage.getAttacker();
     }
@@ -182,9 +191,8 @@ public class DeathApplyEvent extends Event implements Cancellable {
         int a = 0;
         HashMap<LivingEntity, ArrayList<Damage>> sources = getHistoryByPlayers();
         for (LivingEntity entity : sources.keySet()) {
-            if (entity != null && entity.getUniqueId() != attacker.getUniqueId()) {
+            if (entity != null && entity.getUniqueId() != attacker.getUniqueId())
                 a++;
-            }
         }
         return a;
     }
@@ -213,11 +221,10 @@ public class DeathApplyEvent extends Event implements Cancellable {
     private HashMap<Cause, Double> getDamagesByCause(ArrayList<Damage> damages) {
         HashMap<Cause, Double> causeMap= new HashMap<>();
         for (Damage dmg : damages) {
-            if (causeMap.containsKey(dmg.getCause())) {
+            if (causeMap.containsKey(dmg.getCause()))
                 causeMap.replace(dmg.getCause(), causeMap.get(dmg.getCause()) + dmg.getDamage());
-            } else {
+            else
                 causeMap.put(dmg.getCause(),dmg.getDamage());
-            }
         }
         return causeMap;
     }
@@ -241,27 +248,28 @@ public class DeathApplyEvent extends Event implements Cancellable {
                             .append(ChatColor.GRAY).append("]\n");
                     hasSomething = true;
                 }
-
-                continue;
             } else {
                 String attackerName;
                 if (entity instanceof Player) {
                     Player attackerCast = ((Player) entity);
                     TeamEnum attackerT = game.getTeamEnum(attackerCast);
                     attackerName = attackerT.getChatColor() + attackerCast.getDisplayName();
-                } else attackerName = entity.getName();
+                } else {
+                    attackerName = entity.getName();
+                }
                 builder.append(formatDeathCause(attackerName, damages));
                 hasSomething = true;
             }
         }
-        if (!hasSomething) return null;
+        if (!hasSomething)
+            return null;
         return builder.toString();
     }
 
     /**
-     *
-     * @param attackerName
-     * @param damages
+     * Formats the death string.
+     * @param attackerName The attacker who killed them.
+     * @param damages The list of damage objects that damaged the player in the process of their death
      * @return The stringbuilder for a single reason of death ex. " -  [20] - Trishula (Longshot, Frost Arrows)"
      */
     private StringBuilder formatDeathCause(String attackerName, ArrayList<Damage> damages) {
@@ -270,9 +278,7 @@ public class DeathApplyEvent extends Event implements Cancellable {
         for (Damage dmg : damages) {
             totalDamage += (int) dmg.getDamage();
             ArrayList<String> causeNames = getCausesNamesFromDamage(dmg);
-            for (String cause : causeNames) {
-                causes.add(cause);
-            }
+            causes.addAll(causeNames);
         }
 
         StringBuilder builder = new StringBuilder();

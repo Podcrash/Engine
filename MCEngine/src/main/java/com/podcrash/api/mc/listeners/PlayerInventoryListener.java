@@ -1,15 +1,8 @@
 package com.podcrash.api.mc.listeners;
 
-import com.podcrash.api.mc.game.Game;
-import com.podcrash.api.mc.game.GameManager;
-import com.podcrash.api.mc.game.TeamEnum;
-import com.podcrash.api.mc.ui.TeamSelectGUI;
 import com.podcrash.api.plugin.PodcrashSpigot;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
 
 public class PlayerInventoryListener extends ListenerBase {
 

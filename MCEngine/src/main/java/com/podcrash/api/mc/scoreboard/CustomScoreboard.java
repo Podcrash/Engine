@@ -24,7 +24,7 @@ public class CustomScoreboard implements IScoreboard {
     private Objective objective;
     private int size;
     private ScoreboardTitleAnimator animator;
-    private static List<Character> codes =
+    private static final List<Character> codes =
             Arrays.asList('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'k', 'l', 'm', 'n', 'o', 'r');
 
     /**
@@ -39,7 +39,6 @@ public class CustomScoreboard implements IScoreboard {
     /**
      * Create or initialize/re-initialize the scoreboard and objective with a size.
      * @param size The size (number of lines) of the scoreboard (Between 1 and 15 inclusive).
-     * @return The scoreboard.
      */
     private void createBoard(int size) {
         // Create the scoreboard.
@@ -93,9 +92,8 @@ public class CustomScoreboard implements IScoreboard {
         // Stop the timer.
         TimeHandler.unregister(animator);
         // Unregister the objective.
-        if (this.objective != null) {
+        if (this.objective != null)
             this.objective.unregister();
-        }
     }
 
     public List<String> getLines() {
@@ -146,11 +144,10 @@ public class CustomScoreboard implements IScoreboard {
         // Both prefix and suffix take a maximum of size characters.
         if (format_start == -1 && format_end == -1) {
             for (int i = 0; i < string.length() && i < 32; i++) {
-                if (i < size) {
+                if (i < size)
                     prefix = prefix.concat("" + string.charAt(i));
-                } else {
+                else
                     suffix = suffix.concat("" + string.charAt(i));
-                }
             }
             setLine(line, prefix, suffix);
             return;
@@ -179,18 +176,16 @@ public class CustomScoreboard implements IScoreboard {
     }
 
     public boolean setPrefix(int line, String prefix) {
-        if (prefix.length() > size) {
+        if (prefix.length() > size)
             return false;
-        }
         //Bukkit.broadcastMessage("Line: " + line + " ScoreboardTeam: " + scoreboard.getTeam(Integer.toString(line)) + " Prefix: " + prefix);
         scoreboard.getTeam(Integer.toString(line)).setPrefix(ChatUtil.chat(prefix));
         return true;
     }
 
     public boolean setSuffix(int line, String suffix) {
-        if (suffix.length() > size) {
+        if (suffix.length() > size)
             return false;
-        }
         scoreboard.getTeam(Integer.toString(line)).setSuffix(ChatUtil.chat(suffix));
         return true;
     }

@@ -1,20 +1,19 @@
 package com.podcrash.api.mc.effect.particle;
 
 import com.podcrash.api.mc.time.resources.TimeResource;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class ParticleRunnable implements TimeResource {
     static ParticleRunnable particleRunnable;
-    private List<EntityParticleWrapper> wrappers = new ArrayList<>();
+    private final List<EntityParticleWrapper> wrappers = new ArrayList<>();
     private boolean active = false;
     private ParticleRunnable() {
         particleRunnable = this;
         active = true;
-        Pluginizer.getSpigotPlugin().getLogger().info("[ParticleRunnable]: Starting!");
+        PodcrashSpigot.getInstance().getLogger().info("ParticleRunnable Starting!");
     }
 
     public static void start(){
@@ -27,9 +26,8 @@ public class ParticleRunnable implements TimeResource {
 
     @Override
     public void task() {
-        if(wrappers.size() > 0) {
-            for(final Iterator<EntityParticleWrapper> wrapperIterator = wrappers.iterator(); wrapperIterator.hasNext(); ){
-                EntityParticleWrapper wrapper = wrapperIterator.next();
+        if (wrappers.size() > 0) {
+            for (EntityParticleWrapper wrapper : wrappers) {
                 if (!wrapper.cancel()) {
                     wrapper.send();
                 }
@@ -45,7 +43,7 @@ public class ParticleRunnable implements TimeResource {
 
     @Override
     public void cleanup() {
-        Pluginizer.getSpigotPlugin().getLogger().info("[ParticleRunnable]: Shutting off!");
+        PodcrashSpigot.getInstance().getLogger().info("[ParticleRunnable]: Shutting off!");
     }
 
     public void setActive(boolean active) {

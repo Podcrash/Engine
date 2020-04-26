@@ -4,13 +4,12 @@ import com.podcrash.api.mc.effect.status.custom.*;
 import com.podcrash.api.mc.events.StatusApplyEvent;
 import com.podcrash.api.mc.events.StatusRemoveEvent;
 import com.podcrash.api.mc.time.TimeHandler;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import javax.annotation.Nonnull;
@@ -22,8 +21,8 @@ import java.util.function.Consumer;
  * TODO: Rewrite
  */
 public class StatusApplier {
-    private Player player;
-    private static Map<String, StatusApplier> appliers = new HashMap<>();
+    private final Player player;
+    private static final Map<String, StatusApplier> appliers = new HashMap<>();
     private long cloaked;
     private long marked;
     private long silenced;
@@ -47,7 +46,7 @@ public class StatusApplier {
         return appliers.get(player.getName());
     }
     public static StatusApplier getOrNew(LivingEntity entity) {
-        if(entity instanceof Player) return getOrNew((Player) entity);
+        if (entity instanceof Player) return getOrNew((Player) entity);
         else throw new IllegalArgumentException("This is current a stub!");
     }
 
@@ -82,16 +81,18 @@ public class StatusApplier {
         }
 
         //only work for vanilla effects.
-        if(override && status.isVanilla()) {
+        if (override && status.isVanilla()) {
             StatusWrapper wrapper = fromPotionEffect(status);// 30 seconds
-            Pluginizer.getLogger().info("statusppaplier wrapper: " + wrapper);
-            if(wrapper == null) return;
+            PodcrashSpigot.getInstance().getLogger().info("statusppaplier wrapper: " + wrapper);
+            if (wrapper == null)
+                return;
             float newDuration = (wrapper.getDuration() - duration);
-            Pluginizer.getLogger().info("statusppaplier duration: " + newDuration);
-            if(newDuration < 0) return;
+            PodcrashSpigot.getInstance().getLogger().info("statusppaplier duration: " + newDuration);
+            if (newDuration < 0)
+                return;
             StatusWrapper newWrapper = new StatusWrapper(wrapper.getStatus(), newDuration, wrapper.getPotency(), wrapper.isAmbience(), wrapper.isOverride());
 
-            Pluginizer.getLogger().info("statusppaplier new wrapper: " + newWrapper);
+            PodcrashSpigot.getInstance().getLogger().info("statusppaplier new wrapper: " + newWrapper);
             TimeHandler.delayTime((long) (20L * (duration + 0.5)), () -> applyStatus(newWrapper));
         }
     }
@@ -130,10 +131,12 @@ public class StatusApplier {
     private void applyVanilla(@Nonnull Status status, int duration, int potency, boolean ambient, boolean override) {
         final PotionEffect addpotion = new PotionEffect(status.getPotionEffectType(), duration, potency, ambient);
 
-        Bukkit.getScheduler().runTask(Pluginizer.getSpigotPlugin(), () -> {
-            if(!player.addPotionEffect(addpotion, override)) {
-                if(duration == Integer.MAX_VALUE && status == Status.SPEED) Pluginizer.getLogger().info("speed not applied");
-            }else if(duration == Integer.MAX_VALUE && status == Status.SPEED) Pluginizer.getLogger().info("speed applied");
+        Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
+            if (!player.addPotionEffect(addpotion, override)) {
+                if (duration == Integer.MAX_VALUE && status == Status.SPEED)
+                    PodcrashSpigot.getInstance().getLogger().info("speed not applied");
+            } else if (duration == Integer.MAX_VALUE && status == Status.SPEED)
+                PodcrashSpigot.getInstance().getLogger().info("speed applied");
         });
 
     }
@@ -145,7 +148,7 @@ public class StatusApplier {
     }
 
     public void removeVanilla(Status status) {
-        if(status == null) return;
+        if (status == null) return;
         PotionEffect effect = status.getPotionEffectType().createEffect(0, 0);
         StatusRemoveEvent removeEvent = new StatusRemoveEvent(this.player, status);
         Bukkit.getPluginManager().callEvent(removeEvent);
@@ -157,7 +160,7 @@ public class StatusApplier {
                 public void run() {
                     player.addPotionEffect(effect, true);
                 }
-            }.runTaskLater(Pluginizer.getSpigotPlugin(), 1L);
+            }.runTaskLater(PodcrashSpigot.getInstance(), 1L);
         }
     }
 
@@ -234,20 +237,19 @@ public class StatusApplier {
     }
 
     private void applyCloak(final int duration) {
-            if (!isCloaked()) {
-                Bukkit.getScheduler().runTask(Pluginizer.getSpigotPlugin(), () -> {
-                    synchronized (invisLock) {
-                        for (Player p : player.getWorld().getPlayers()) {
-                            p.hidePlayer(player);
-                        }
-                    }
-                });
-                cloaked = System.currentTimeMillis() + duration; //Duplicating code b/c it needs to happen after isCloaked check, but before cloakstatus creation
-                player.sendMessage(String.format("%sCondition> %sYou are now invisible.", ChatColor.BLUE, ChatColor.GRAY));
-                TimeHandler.repeatedTime(1L, 0, new CloakStatus(player));
-            } else {
-                cloaked = System.currentTimeMillis() + duration;
-            }
+        if (!isCloaked()) {
+            Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
+                for (Player p : player.getWorld().getPlayers()) {
+                    p.hidePlayer(player);
+                }
+
+            });
+            cloaked = System.currentTimeMillis() + duration; //Duplicating code b/c it needs to happen after isCloaked check, but before cloakstatus creation
+            player.sendMessage(String.format("%sCondition> %sYou are now invisible.", ChatColor.BLUE, ChatColor.GRAY));
+            TimeHandler.repeatedTime(1L, 0, new CloakStatus(player));
+        } else {
+            cloaked = System.currentTimeMillis() + duration;
+        }
     }
 
     private void applyMarked(int duration, int potency) {
@@ -309,7 +311,7 @@ public class StatusApplier {
     }
 
     private void applyBleed(int duration) {
-        if(!isBleeding()) {
+        if (!isBleeding()) {
             bleeded = System.currentTimeMillis() + duration;
             TimeHandler.repeatedTime(1, 1, new BleedStatus(player));
         } else {
@@ -419,7 +421,7 @@ public class StatusApplier {
                 if (isInept()) dura = inept;
                 break;
             case BLEED:
-                if(isBleeding()) dura = bleeded;
+                if (isBleeding()) dura = bleeded;
                 break;
         }
         return (dura != 0) ? dura - System.currentTimeMillis() : 0;
@@ -438,7 +440,7 @@ public class StatusApplier {
                 }
             }
         });
-        if(this.player.getFireTicks() > 0) statuses.add(Status.FIRE);
+        if (this.player.getFireTicks() > 0) statuses.add(Status.FIRE);
         if (isCloaked()) statuses.add(Status.CLOAK);
         if (isMarked()) statuses.add(Status.MARKED);
         if (isShocked()) statuses.add(Status.SHOCK);
@@ -469,7 +471,7 @@ public class StatusApplier {
                 break;
             }
         }
-        if(e == null) return null;
+        if (e == null) return null;
         return new StatusWrapper(status, e.getDuration()/20F, e.getAmplifier(), e.isAmbient());
     }
     @Override

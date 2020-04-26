@@ -36,9 +36,12 @@ public class BuySuccessEvent extends EconEvent implements Cancellable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof BuySuccessEvent)) return false;
-        if (!super.equals(o)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof BuySuccessEvent))
+            return false;
+        if (!super.equals(o))
+            return false;
 
         BuySuccessEvent event = (BuySuccessEvent) o;
 

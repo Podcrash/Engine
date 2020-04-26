@@ -9,7 +9,7 @@ public final class ConfigUtil {
     public static Properties readPropertiesFile(ClassLoader loader, String fileName) {
         Properties prop = new Properties();
         InputStream stream = loader.getResourceAsStream(fileName);
-        if(stream != null) {
+        if (stream != null) {
             try {
                 prop.load(stream);
             } catch (IOException e) {

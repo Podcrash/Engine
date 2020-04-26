@@ -1,14 +1,9 @@
 package com.podcrash.api.mc.util;
 
-import com.abstractpackets.packetwrapper.*;
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.wrappers.WrappedAttribute;
-import com.comphenix.protocol.wrappers.WrappedAttributeModifier;
-import com.comphenix.protocol.wrappers.WrappedDataWatcher;
+import com.abstractpackets.packetwrapper.WrapperPlayServerEntityDestroy;
 import net.minecraft.server.v1_8_R3.*;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -28,7 +23,8 @@ public final class RevealUtil {
      */
     public static void hide(Player entity, List<Player> recievers) {
         Validate.notNull(entity, "hidden entity cannot be null");
-        if(hiddenEntities.contains(entity.getUniqueId())) return; //if the entity is already hidden
+        if (hiddenEntities.contains(entity.getUniqueId()))
+            return; //if the entity is already hidden
         recievers.remove(entity); //remove the entity, since he will always see himself
         hiddenEntities.add(entity.getUniqueId());
 
@@ -46,7 +42,8 @@ public final class RevealUtil {
     public static void show(Player entity, List<Player> recievers) {
 
         Validate.notNull(entity, "hidden entity cannot be null");
-        if(!hiddenEntities.contains(entity.getUniqueId())) return; //if the entity is already seen
+        if (!hiddenEntities.contains(entity.getUniqueId()))
+            return; //if the entity is already seen
         recievers.remove(entity); //remove the entity, since he will always see himself
         hiddenEntities.remove(entity.getUniqueId());
 
@@ -65,15 +62,17 @@ public final class RevealUtil {
             PlayerConnection connection = entityPlayer.playerConnection;
             connection.sendPacket(spawn);
             connection.sendPacket(metadata);
-            if(!collection.isEmpty()) connection.sendPacket(attributes);
-            if(sendEquipments) equipments.forEach(connection::sendPacket);
+            if (!collection.isEmpty())
+                connection.sendPacket(attributes);
+            if (sendEquipments)
+                equipments.forEach(connection::sendPacket);
 
         }
 
         /*
         //use interfaces instead.
         List<AbstractPacket> packets = new ArrayList<>();
-        if(entity instanceof Player) {
+        if (entity instanceof Player) {
             WrapperPlayServerNamedEntitySpawn spawn = new WrapperPlayServerNamedEntitySpawn();
             spawn.setEntityID(entity.getEntityId());
             spawn.setPlayerUUID(entity.getUniqueId());
@@ -105,9 +104,9 @@ public final class RevealUtil {
         }
         PacketUtil.syncSend(packets, recievers);
 
+        Bukkit.broadcastMessage("test: reveal " + entity.getName());
 
          */
-        Bukkit.broadcastMessage("test: reveal " + entity.getName());
     }
 
     /**
@@ -123,9 +122,8 @@ public final class RevealUtil {
         for (int i = 0; i < 5; ++i) {
             ItemStack itemstack = player.getEquipment(i);
 
-            if (itemstack != null) {
+            if (itemstack != null)
                 equipments.add(new PacketPlayOutEntityEquipment(player.getId(), i, itemstack));
-            }
         }
         return equipments;
     }

@@ -1,7 +1,6 @@
 package com.podcrash.api.mc.util;
 
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.Vector;
@@ -18,7 +17,8 @@ public final class EntityUtil  {
     }
 
     public static boolean onGround(Entity entity, double acc) {
-        if(entity.isOnGround()) return true;
+        if (entity.isOnGround())
+            return true;
         Location location = entity.getLocation();
         return location.subtract(new Vector(0, acc, 0)).getBlock().getType().isSolid();
     }

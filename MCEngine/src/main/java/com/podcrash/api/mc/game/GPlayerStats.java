@@ -13,12 +13,12 @@ import java.util.UUID;
 
 public abstract class GPlayerStats {
 
-    private UUID uuid;
-    private String name;
+    private final UUID uuid;
+    private final String name;
 
     /**
      * Constructor for PlayerStats.
-     * @param uuid
+     * @param uuid uuid of the player
      */
     public GPlayerStats(UUID uuid) {
         this.uuid = uuid;

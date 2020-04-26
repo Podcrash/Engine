@@ -6,11 +6,20 @@ import com.podcrash.api.mc.game.GameManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.defaults.BukkitCommand;
 
-public class DecreaseMaxPlayersCommand extends CommandBase{
+import java.util.Collections;
+
+public class DecreaseMaxPlayersCommand extends BukkitCommand {
+    public DecreaseMaxPlayersCommand() {
+        super("decrease",
+                "Decrease the maximum player count within a PPL",
+                "/decrease",
+                Collections.emptyList());
+    }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean execute(CommandSender sender, String label, String[] args) {
         if (!sender.hasPermission("invicta.host")) return true;
         Game game = GameManager.getGame();
         int currMax = game.getMaxPlayers();

@@ -12,23 +12,22 @@ import org.bukkit.entity.Entity;
 import org.bukkit.util.Vector;
 
 import javax.annotation.Nonnull;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 public class BoundingBox {
 
     //min and max points of hit box
-    private Coordinate max;
-    private Coordinate min;
+    private final Coordinate max;
+    private final Coordinate min;
 
     private Coordinate[] allBounds;
 
     private static final Coordinate[] NORMALS;
-    private Set<Coordinate> normals = new HashSet<>();
+    private final Set<Coordinate> normals = new HashSet<>();
 
     // is there a more intelligent way of doing this
-    private static int[][] planes = new int[][]{
+    private static final int[][] planes = new int[][]{
         //xz
         {0, 2, 4},
         {6, 2, 7},
@@ -93,23 +92,28 @@ public class BoundingBox {
     }
 
     /**
-     *
+     * Calculates the distance between the bounding box and a given coordinate
      * @param p the origin-reference in this case
-     * @return
+     * @return The distance between the coordinate and this bounding box
      */
     public double distance(@Nonnull Coordinate p) {
-        if(min.getY() <= p.getY() && p.getY() <= max.getY()) {
+        if (min.getY() <= p.getY() && p.getY() <= max.getY()) {
             return hdistance(p);
-        }else if(min.getZ() <= p.getZ() && p.getZ() <= max.getZ() &&
+        } else if (min.getZ() <= p.getZ() && p.getZ() <= max.getZ() &&
                  min.getX() <= p.getX() && p.getX() <= max.getX()) {
             return vdistance(p);
-        }else {
+        } else {
             double hor = hdistance(p);
             double ver = vdistance(p);
             return Math.sqrt(hor * hor + ver * ver);
         }
     }
 
+    /**
+     * Finds the horizontal distance between this bounding box and a given coordinate
+     * @param p The origin-reference
+     * @return The horizontal distance between the coordinate and this bounding box
+     */
     public double hdistance(Coordinate p) {
         double smallest = Double.MAX_VALUE;
 
@@ -119,11 +123,17 @@ public class BoundingBox {
             normals.add(normal);
             Coordinate PQ = getBox()[plane[0]].subtract(p);
             double dist = Math.abs(PQ.dot(normal))/normal.length();
-            if(1 < dist && dist < smallest) smallest = dist;
+            if (1 < dist && dist < smallest) smallest = dist;
         }
 
         return smallest;
     }
+
+    /**
+     * Finds the vertical distance between this bounding box and a given coordinate
+     * @param p The origin-reference
+     * @return The vertical distance between the coordinate and this bounding box
+     */
     public double vdistance(Coordinate p) {
         double smallest = Double.MAX_VALUE;
 
@@ -133,18 +143,23 @@ public class BoundingBox {
             normals.add(normal);
             Coordinate PQ = getBox()[plane[0]].subtract(p);
             double dist = Math.abs(PQ.dot(normal))/normal.length();
-            if(dist < smallest) smallest = dist;
+            if (dist < smallest) smallest = dist;
         }
 
         return smallest;
     }
 
+    /**
+     * Finds the distance between this bounding box and another.
+     * @param box The bounding box the calculate the distaance between.
+     * @return The distance between the two
+     */
     public double distance(BoundingBox box) {
         double min = Double.MAX_VALUE;
         for(Coordinate a : getBox()) {
             for(Coordinate b : box.getBox()) {
                 double dist = a.distanceSquared(b);
-                if(dist < min) {
+                if (dist < min) {
                     min = dist;
                 }
             }
@@ -152,12 +167,17 @@ public class BoundingBox {
         return Math.sqrt(min);
     }
 
-    public double distanceHorizontal(BoundingBox box) {
+    /**
+     * Gets the horizontal distance between this bounding box and another
+     * @param box The bounding box to check
+     * @return the distance between the two boxes
+     */
+    public double hdistance(BoundingBox box) {
         double min = Double.MAX_VALUE;
         for(Coordinate a : getBox()) {
             for(Coordinate b : box.getBox()) {
                 double dist = a.setY(0).distanceSquared(b.setY(0));
-                if(dist < min) {
+                if (dist < min) {
                     min = dist;
                 }
             }
@@ -173,14 +193,29 @@ public class BoundingBox {
         return min;
     }
 
+    /**
+     * Debugs the boundingbox function by playing a particle where each of the 8 vertices are calculated to be.
+     * @param world The world the box is in
+     */
     public void debug(World world) {
         for(int i = 0; i < 8; i++) {
             debug(world, i);
         }
     }
+    /**
+     * Debugs the boundingbox function by playing a particle where a specified vertex is.
+     * @param world The world the box is in
+     * @param i index of the vertex to check.
+     */
     public void debug(World world, int i) {
         world.playEffect(getBox()[i].toLocation(world), Effect.COLOURED_DUST, 0);
     }
+
+    /**
+     * Debugs the boundingbox function by playing a particle at a number of specified vertices.
+     * @param world The world the box is in
+     * @param i The array of vertex indices to check.
+     */
     public void debug(World world, int[] i) {
         for(int d : i)
             debug(world, d);
@@ -199,10 +234,11 @@ public class BoundingBox {
      *         | /            | /
      *         |/             |/
      *        0--------------2
-     * @return
+     * @return the coordinates of the bounding box
      */
     public Coordinate[] getBox() {
-        if(allBounds != null) return allBounds;
+        if (allBounds != null)
+            return allBounds;
 
         double diffX = max.getX() - min.getX();
         double diffY = max.getY() - min.getY();
@@ -228,21 +264,13 @@ public class BoundingBox {
 
     public Coordinate findNormal(int i1, int i2, int i3) {
         Coordinate[] box = getBox();
-        Coordinate coordinate = CoordinateHelper.findNormal(box[i1], box[i2], box[i3]);
-        return coordinate;
+        return CoordinateHelper.findNormal(box[i1], box[i2], box[i3]);
     }
 
-    /**
-     *
-     * @param i1
-     * @param i2
-     * @param i3
-     * @return
-     */
+
     public double[] findPlane(int i1, int i2, int i3) {
         Coordinate normalVector = findNormal(i1, i2, i3);
-        double[] a = CoordinateHelper.findEquationPlane(getBox()[i1], normalVector);
-        return a;
+        return CoordinateHelper.findEquationPlane(getBox()[i1], normalVector);
     }
 
 

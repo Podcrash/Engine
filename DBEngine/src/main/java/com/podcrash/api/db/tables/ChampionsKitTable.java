@@ -47,7 +47,7 @@ public class ChampionsKitTable extends MongoBaseTable implements IPlayerDB {
     private void evaluate(UUID uuid) {
         InvictaPlayer playerDoc = getPlayerDocumentSync(uuid, "gameData.conquest");
 
-        if(playerDoc.getGameData().containsKey("conquest")) return;
+        if (playerDoc.getGameData().containsKey("conquest")) return;
 
         ConquestGameData conquestData = PojoHelper.createConquestGameData();
 

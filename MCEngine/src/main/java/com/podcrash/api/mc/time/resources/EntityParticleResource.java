@@ -1,12 +1,9 @@
 package com.podcrash.api.mc.time.resources;
 
 import com.abstractpackets.packetwrapper.WrapperPlayServerWorldParticles;
-import com.comphenix.protocol.PacketType;
 import com.podcrash.api.mc.sound.SoundPlayer;
 import com.podcrash.api.mc.sound.SoundWrapper;
-import com.podcrash.api.mc.util.RevealUtil;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 /**
@@ -14,8 +11,8 @@ import org.bukkit.entity.Player;
  */
 public class EntityParticleResource implements TimeResource {
     protected Entity entity;
-    private WrapperPlayServerWorldParticles packet;
-    private SoundWrapper sound;
+    private final WrapperPlayServerWorldParticles packet;
+    private final SoundWrapper sound;
     public boolean cancel = false;
 
     public EntityParticleResource(Entity entity, WrapperPlayServerWorldParticles packet, SoundWrapper sound) {
@@ -28,10 +25,12 @@ public class EntityParticleResource implements TimeResource {
     public void task() {
         packet.setLocation(entity.getLocation());
         for(Player player : entity.getWorld().getPlayers()) {
-            if(!canSee(this.entity, player)) continue;
+            if (!canSee(this.entity, player))
+                continue;
             packet.sendPacket(player);
         }
-        if(sound != null) SoundPlayer.sendSound(entity.getLocation(), sound.getSoundName(), sound.getVolume(), sound.getPitch());
+        if (sound != null)
+            SoundPlayer.sendSound(entity.getLocation(), sound.getSoundName(), sound.getVolume(), sound.getPitch());
     }
 
     @Override
@@ -45,13 +44,14 @@ public class EntityParticleResource implements TimeResource {
     }
 
     /**
-     *
-     * @param player - this is pretty misleading huh
-     * @param viewer
-     * @return
+     * Checks if a given player can see another
+     * @param toSee The entity being seen
+     * @param viewer The player looking
+     * @return If the viewer can see toSee or not.
      */
-    private boolean canSee(Entity player, Player viewer) {
-        if(!(player instanceof Player)) return true;
-        return viewer.canSee((Player) player);
+    private boolean canSee(Entity toSee, Player viewer) {
+        if (!(toSee instanceof Player))
+            return true;
+        return viewer.canSee((Player) toSee);
     }
 }

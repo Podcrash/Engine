@@ -115,17 +115,17 @@ public class WrapperPlayServerSpawnEntityPainting extends AbstractPacket {
 
     private static final Class<?> DIRECTION_CLASS = MinecraftReflection.getMinecraftClass("EnumDirection");
 
-    public static enum Direction {
+    public enum Direction {
         DOWN,
         UP,
         NORTH,
         SOUTH,
         WEST,
-        EAST;
+        EAST
     }
 
     private StructureModifier<Direction> getDirections() {
-        return handle.getModifier().<Direction> withType(DIRECTION_CLASS, EnumWrappers.getGenericConverter(Direction.class));
+        return handle.getModifier().withType(DIRECTION_CLASS, EnumWrappers.getGenericConverter(Direction.class));
     }
 
     public Direction getDirection() {

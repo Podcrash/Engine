@@ -16,10 +16,10 @@ public class TrapListener extends ListenerBase {
     @EventHandler
     public void itemPickUp(PlayerPickupItemEvent e) {
         Item item = e.getItem();
-        if(!TrapSetter.deleteTrap(item)) return;
+        if (!TrapSetter.deleteTrap(item)) return;
         TrapSnareEvent snareEvent = new TrapSnareEvent(e.getItem(), e.getPlayer());
         Bukkit.getPluginManager().callEvent(snareEvent);
-        if(!snareEvent.isCancelled()) {
+        if (!snareEvent.isCancelled()) {
             e.setCancelled(true);
             item.remove();
         }

@@ -10,7 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.util.Vector;
 
 public class Restock extends ItemObjective {
-    private static ObjectiveType otype = ObjectiveType.RESTOCK;
+    private static final ObjectiveType otype = ObjectiveType.RESTOCK;
 
     public Restock(Location location) {
         this(location.toVector());

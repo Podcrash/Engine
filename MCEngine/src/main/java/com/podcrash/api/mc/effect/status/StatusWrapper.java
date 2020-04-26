@@ -50,14 +50,12 @@ public final class StatusWrapper {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("StatusWrapper{");
-        sb.append("status=").append(status);
-        sb.append(", duration=").append(duration);
-        sb.append(", potency=").append(potency);
-        sb.append(", ambient=").append(ambient);
-        sb.append(", override=").append(override);
-        sb.append(", ambience=").append(isAmbience());
-        sb.append('}');
-        return sb.toString();
+        return "StatusWrapper{" + "status=" + status +
+                ", duration=" + duration +
+                ", potency=" + potency +
+                ", ambient=" + ambient +
+                ", override=" + override +
+                ", ambience=" + isAmbience() +
+                '}';
     }
 }

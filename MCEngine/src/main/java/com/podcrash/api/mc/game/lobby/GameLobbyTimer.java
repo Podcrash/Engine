@@ -4,7 +4,6 @@ import com.podcrash.api.mc.damage.DamageApplier;
 import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.sound.SoundPlayer;
-import com.podcrash.api.mc.sound.SoundWrapper;
 import com.podcrash.api.mc.time.TimeHandler;
 import com.podcrash.api.mc.time.resources.TimeResource;
 import org.bukkit.Bukkit;
@@ -17,7 +16,7 @@ public class GameLobbyTimer {
     private int currentTime;
     private String status;
     private boolean isRunning;
-    private String defaultStatus;
+    private final String defaultStatus;
 
     public GameLobbyTimer(Game game) {
         this.maxTime = 20;
@@ -34,7 +33,8 @@ public class GameLobbyTimer {
      * By default, it will wait for 10 seconds.
      */
     public void start() {
-        if(isRunning) return;
+        if (isRunning)
+            return;
         isRunning = true;
 
         Bukkit.broadcastMessage("" + ChatColor.LIGHT_PURPLE + "" + ChatColor.BOLD + "The match on " + game.getMapName() + "will start in " + currentTime + " seconds.");
@@ -61,7 +61,7 @@ public class GameLobbyTimer {
 
             @Override
             public boolean cancel() {
-                if(currentTime < 0) {
+                if (currentTime < 0) {
                     status = "Starting...";
                     GameManager.startGame();
                     return true;
@@ -77,7 +77,7 @@ public class GameLobbyTimer {
     }
 
     private ChatColor timeColor() {
-        if(currentTime <= 5) {
+        if (currentTime <= 5) {
             SoundPlayer.sendSound(game.getBukkitPlayers(), "note.pling", 1, 63);
             return ChatColor.RED;
         }
@@ -90,7 +90,7 @@ public class GameLobbyTimer {
      */
     public void stop(boolean pause) {
         isRunning = false;
-        if(!pause) {
+        if (!pause) {
             currentTime = maxTime;
             status = defaultStatus;
         }

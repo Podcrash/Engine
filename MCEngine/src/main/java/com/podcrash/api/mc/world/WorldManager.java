@@ -1,6 +1,6 @@
 package com.podcrash.api.mc.world;
 
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.logging.Level;
 
 /**
  * From https://bukkit.org/threads/unload-delete-copy-worlds.182814/, thanks!
@@ -18,7 +19,7 @@ import java.util.List;
  */
 public class WorldManager {
     private static volatile WorldManager worldManager;
-    private HashSet<String> worlds = new HashSet<>();
+    private final HashSet<String> worlds = new HashSet<>();
 
     /**
      * Load the world, then return if it was actually loaded.
@@ -51,10 +52,14 @@ public class WorldManager {
             log(String.format("%s does not exist!", worldName));
         } else {
             log("Copying world " + worldName);
-            String copiedName = worldName + Long.toString(System.currentTimeMillis());
+            String copiedName = worldName + System.currentTimeMillis();
             String dirName = String.format("%s%s%s", Bukkit.getWorldContainer().toString(), File.separator, copiedName);
             File world2File = new File(dirName);
-            if (!world2File.exists()) world2File.mkdir();
+            if (!world2File.exists())
+                if(!world2File.mkdir()) {
+                    PodcrashSpigot.getInstance().getLogger().log(Level.SEVERE, "[WorldManager] Could not make world directory!");
+                    return null;
+                }
             log("Made the directory " + dirName + ", proceeding to copy");
             try {
                 FileUtils.copyDirectory(get.getWorldFolder(), world2File);
@@ -212,6 +217,6 @@ public class WorldManager {
         return worldManager;
     }
     private void log(String string) {
-        Pluginizer.getSpigotPlugin().getLogger().info(String.format("[WorldManager] %s", string));
+        PodcrashSpigot.getInstance().getLogger().info(String.format("[WorldManager] %s", string));
     }
 }

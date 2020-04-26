@@ -5,8 +5,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -15,11 +17,19 @@ import java.util.Set;
  * simple whitelist command using the bukkit system
  * we might want to hold our own instance of the list just because
  */
-public class WhitelistCommand extends CommandBase {
-    //by default, mps systems will have no wls
+public class WhitelistCommand extends BukkitCommand {
+
+    public WhitelistCommand() {
+        super("whitelist",
+                "Whitelist players in a PPL!",
+                "/whitelist <user>",
+                Collections.emptyList());
+    }
+
+    //by default, mps systems will have no wls enabled
     private boolean whitelistOn = false;
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean execute(CommandSender sender, String label, String[] args) {
         if (!sender.hasPermission("invicta.host")) return true;
 
         if (args.length == 0) {

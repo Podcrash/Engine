@@ -11,14 +11,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
-import java.util.List;
 
 /**
  * The class is needed because it needs to get the most accurate position possible
  * by the player.
  */
 public final class CoordinateTracker implements IPlayerTrack<Coordinate> {
-    private JavaPlugin plugin;
+    private final JavaPlugin plugin;
     private static final List<PacketType> PACKET_TYPES = Arrays.asList(
             PacketType.Play.Client.FLYING,
             PacketType.Play.Client.POSITION_LOOK,
@@ -27,8 +26,9 @@ public final class CoordinateTracker implements IPlayerTrack<Coordinate> {
             PacketType.Play.Client.USE_ENTITY);
 
     private PacketListener listener;
-    private volatile Map<String, List<TimeCoordinate>> lastTimes;
-    private volatile Map<String, Long> lastUsePackets;
+    private final Map<String, List<TimeCoordinate>> lastTimes;
+    private final Map<String, Long> lastUsePackets;
+
     public CoordinateTracker(JavaPlugin plugin) {
         this.plugin = plugin;
         this.lastTimes = new HashMap<>();
@@ -41,7 +41,7 @@ public final class CoordinateTracker implements IPlayerTrack<Coordinate> {
                 listener = new PacketAdapter(plugin, ListenerPriority.LOWEST, PACKET_TYPES) {
             @Override
             public void onPacketReceiving(PacketEvent event) {
-                recieve(event);
+                receive(event);
             }
         });
     }
@@ -59,30 +59,32 @@ public final class CoordinateTracker implements IPlayerTrack<Coordinate> {
     }
     /**
      * Just accounts for the head height
-     * {@link me.lordraindance2.sweetdreams.checks.Reach#evaluateIfReach(PacketContainer)}
-     * @param player
-     * @return
+     * @param player The player whose head to get
+     * @return The coordinate of the player's head
      */
     public Coordinate getHead(Player player) {
         return get(player).add(0, player.getEyeHeight(), 0);
     }
+
     public Coordinate getHead(Player player, int index) {
         return get(player, index).add(0, player.getEyeHeight(), 0);
     }
 
     public Coordinate getTimeBefore(Player player, long timeInMS, boolean includeHead) {
-        if(timeInMS > 0) timeInMS = 1;
+        if (timeInMS > 0) timeInMS = 1;
         long timeInNS = timeInMS * 1000000;
         Coordinate poss = null;
         List<TimeCoordinate> coordinates = lastTimes.get(player.getName());
         long delta = System.nanoTime() - timeInNS;
         for(int i = coordinates.size() - 1; i >= 0; i--) {
             TimeCoordinate coordinate = coordinates.get(i);
-            if(delta > coordinate.time) {
+            if (delta > coordinate.time) {
                 poss = coordinate.coordinate;
                 break;
             }
         }
+        if (poss == null)
+            return null;
         return includeHead ? poss.add(0, player.getEyeHeight(), 0) : poss;
     }
 
@@ -100,12 +102,14 @@ public final class CoordinateTracker implements IPlayerTrack<Coordinate> {
         Coordinate coordinate = null;
         for(int i = coordinates.size() - 1; i >= 0; i--) {
             TimeCoordinate poss = coordinates.get(i);
-            if(lastUseTime > poss.time) {
+            if (lastUseTime > poss.time) {
                 delta = lastUseTime - poss.time;
                 coordinate = poss.coordinate;
                 break;
             }
         }
+        if (coordinate == null)
+            return null;
         return includeHead ? coordinate.add(0, player.getEyeHeight(), 0) : coordinate;
     }
     /**
@@ -120,12 +124,12 @@ public final class CoordinateTracker implements IPlayerTrack<Coordinate> {
         int last = lastTimes.get(name).size() - 1 - indexFromLast;
         return lastTimes.get(name).get(last).coordinate;
     }
-    private void recieve(PacketEvent event) {
-        if(event.getPacketType() != PacketType.Play.Client.USE_ENTITY)
+    private void receive(PacketEvent event) {
+        if (event.getPacketType() != PacketType.Play.Client.USE_ENTITY) {
             recordLocation(event.getPlayer(), event.getPacket());
-        else {
+        } else {
             Entity target = event.getPacket().getEntityModifier(event).read(0);
-            if(target instanceof Player)
+            if (target instanceof Player)
                 lastUsePackets.put(target.getName(), System.nanoTime());
         }
     }
@@ -147,7 +151,7 @@ public final class CoordinateTracker implements IPlayerTrack<Coordinate> {
         float yaw = 0, pitch = 0;
 
         boolean ground;
-        if(packet.getType() == PacketType.Play.Client.FLYING) {
+        if (packet.getType() == PacketType.Play.Client.FLYING) {
             Location location = player.getLocation();
             x = location.getX();
             y = location.getY();
@@ -157,9 +161,9 @@ public final class CoordinateTracker implements IPlayerTrack<Coordinate> {
             pitch = location.getPitch();
 
             ground = true;
-        }else {
+        } else {
             ground = packet.getBooleans().read(0);
-            if(packet.getType() == PacketType.Play.Client.POSITION_LOOK) {
+            if (packet.getType() == PacketType.Play.Client.POSITION_LOOK) {
                 StructureModifier<Double> doubles = packet.getDoubles();
                 x = doubles.read(0);
                 y = doubles.read(1);
@@ -169,9 +173,9 @@ public final class CoordinateTracker implements IPlayerTrack<Coordinate> {
                 yaw = floats.read(0);
                 pitch = floats.read(1);
 
-            }else {
+            } else {
                 Location location = player.getLocation();
-                if(packet.getType() == PacketType.Play.Client.POSITION) {
+                if (packet.getType() == PacketType.Play.Client.POSITION) {
                     StructureModifier<Double> doubles = packet.getDoubles();
                     x = doubles.read(0);
                     y = doubles.read(1);
@@ -180,7 +184,7 @@ public final class CoordinateTracker implements IPlayerTrack<Coordinate> {
                     yaw = location.getYaw();
                     pitch = location.getPitch();
 
-                }else if(packet.getType() == PacketType.Play.Client.LOOK) {
+                } else if (packet.getType() == PacketType.Play.Client.LOOK) {
                     x = location.getX();
                     y = location.getY();
                     z = location.getZ();
@@ -209,13 +213,13 @@ public final class CoordinateTracker implements IPlayerTrack<Coordinate> {
         lastTimes.computeIfAbsent(player.getName(), k -> new ArrayList<>());
         List<TimeCoordinate> lastCoords = lastTimes.get(player.getName());
         lastCoords.add(new TimeCoordinate(System.nanoTime(), coordinate));
-        if(lastCoords.size() > 20)
+        if (lastCoords.size() > 20)
             lastCoords.remove(0);
     }
 
     private static class TimeCoordinate  {
-        private long time;
-        private Coordinate coordinate;
+        private final long time;
+        private final Coordinate coordinate;
 
         private TimeCoordinate(long time, Coordinate coordinate) {
             this.time = time;

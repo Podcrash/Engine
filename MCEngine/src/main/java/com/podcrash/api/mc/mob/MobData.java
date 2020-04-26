@@ -34,19 +34,11 @@ public class MobData {
 	}
 
 	public void togglePotionEffects() {
-		if (this.potionEffects) {
-			this.potionEffects = false;
-		} else {
-			this.potionEffects = true;
-		}
+        this.potionEffects = !this.potionEffects;
 	}
 
 	public void toggleBurn() {
-		if (this.burns) {
-			this.burns = false;
-		} else {
-			this.burns = true;
-		}
+        this.burns = !this.burns;
 	}
 
 	public boolean canBurn() {

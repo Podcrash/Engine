@@ -1,13 +1,6 @@
 package com.podcrash.api.mc.callback.sources;
 
-import com.podcrash.api.mc.util.EntityUtil;
-import com.podcrash.api.mc.world.BlockUtil;
-import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.entity.Item;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
 
 /**
  * //TODO: FIX ALL OF THIS, callbacks are very confusing and hard to understand
@@ -22,7 +15,8 @@ public class DelayItemIntercept extends ItemIntercept {
 
     @Override
     public boolean cancel() {
-        if(super.cancel()) return true;
+        if (super.cancel())
+            return true;
         return System.currentTimeMillis() > this.duration;
     }
 

@@ -3,7 +3,6 @@ package com.podcrash.api.mc.game.resources;
 import com.podcrash.api.mc.game.GTeam;
 import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.hologram.Hologram;
-import com.podcrash.api.mc.hologram.HologramMaker;
 import com.podcrash.api.mc.util.MathUtil;
 import net.minecraft.server.v1_8_R3.EntityLiving;
 import org.bukkit.Bukkit;
@@ -20,7 +19,7 @@ import java.util.Map;
 
 public class HealthBarResource extends GameResource {
     private final char heart = '\u2764';
-    private Map<String, Hologram> players;
+    private final Map<String, Hologram> players;
     //health objective
     private final Objective objective;
     public HealthBarResource(int gameID) {
@@ -63,7 +62,8 @@ public class HealthBarResource extends GameResource {
     public void task() {
         for(String name : players.keySet()) {
             Player player = Bukkit.getPlayer(name);
-            if(player == null) continue;
+            if(player == null)
+                continue;
 
             CraftEntity craftEntity = (CraftEntity) player;
             EntityLiving livingCraft = (EntityLiving) craftEntity.getHandle();
@@ -77,7 +77,8 @@ public class HealthBarResource extends GameResource {
     private void map() {
         for(Map.Entry<String, Hologram> playerData : players.entrySet()) {
             Player player = Bukkit.getPlayer(playerData.getKey());
-            if(player == null) continue;
+            if (player == null)
+                continue;
             process(player, playerData.getValue());
         }
 
@@ -90,6 +91,7 @@ public class HealthBarResource extends GameResource {
         hologram.editLine(0, text);
         hologram.update();
     }
+
     @Override
     public void cleanup() {
         players.clear();

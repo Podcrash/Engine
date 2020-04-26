@@ -9,9 +9,9 @@ import org.bukkit.event.HandlerList;
 
 public class GameCaptureEvent extends GamePlayerEvent {
     private static final HandlerList handlers = new HandlerList();
-    private Game game;
-    private Player who;
-    private IObjective iObjective;
+    private final Game game;
+    private final Player who;
+    private final IObjective iObjective;
 
     public GameCaptureEvent(Game game, Player who, IObjective iObjective, String message) {
         super(game, who, message);

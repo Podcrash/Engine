@@ -1,5 +1,6 @@
 package com.podcrash.api.mc.listeners;
 
+import com.abstractpackets.packetwrapper.AbstractPacket;
 import com.abstractpackets.packetwrapper.WrapperPlayServerWorldParticles;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.podcrash.api.mc.effect.particle.ParticleGenerator;
@@ -8,7 +9,6 @@ import com.podcrash.api.mc.game.objects.action.ActionBlock;
 import com.podcrash.api.mc.sound.SoundPlayer;
 import com.podcrash.api.mc.util.PacketUtil;
 import com.podcrash.api.mc.util.VectorUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -17,11 +17,14 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public final class ActionBlockListener extends ListenerBase {
     private static final Map<String, Long> cooldown = new HashMap<>();
-    private static Map<Vector, ActionVector> blocks = new LinkedHashMap<>();
+    private static final Map<Vector, ActionVector> blocks = new LinkedHashMap<>();
 
     public ActionBlockListener(JavaPlugin plugin) {
         super(plugin);
@@ -57,45 +60,46 @@ public final class ActionBlockListener extends ListenerBase {
         Location location = event.getTo().getBlock().getLocation().subtract(0, 1, 0);
         Vector vector = location.toVector();
         ActionVector actionVector = blocks.get(vector);
-        if(actionVector != null) {
-            long cd = cooldown.getOrDefault(event.getPlayer().getName(), -1L);
-            if(cd >= System.currentTimeMillis()) return;
-            Player player = event.getPlayer();
-            switch (actionVector.actionType) {
-                case SLIME:
-                    player.setVelocity(actionVector.vector);
-                    FallDamageHandler.guaranteeSafeFall(event.getPlayer());
-                    break;
-                case TELEPORT:
-                    Location teleportLoc = actionVector.vector.toLocation(location.getWorld());
-                    VectorUtil.conserveDirection(teleportLoc, player);
-
-                    if(!GameManager.getGame().isRespawning(player)) {
-                        WrapperPlayServerWorldParticles startEffect = ParticleGenerator.createParticle(
-                                player.getEyeLocation().toVector(), EnumWrappers.Particle.EXPLOSION_NORMAL, 5, 0, 0, 0);
-                        PacketUtil.syncSend(startEffect, GameManager.getGame().getBukkitPlayers());
-                        SoundPlayer.sendSound(player.getLocation(), "mob.endermen.portal", 1f, 63);
-                    }
-
-                    player.teleport(teleportLoc);
-
-                    if(!GameManager.getGame().isRespawning(player)) {
-                        WrapperPlayServerWorldParticles endEffect = ParticleGenerator.createParticle(
-                                player.getEyeLocation().toVector(), EnumWrappers.Particle.EXPLOSION_NORMAL, 5, 0, 0, 0);
-                        PacketUtil.syncSend(endEffect, GameManager.getGame().getBukkitPlayers());
-                        SoundPlayer.sendSound(player.getLocation(), "mob.endermen.portal", 1f, 63);
-                    }
-                    break;
-                default:
-                    return;
-            }
-            cooldown.put(event.getPlayer().getName(), System.currentTimeMillis() + 1500L);
+        if (actionVector == null) {
+            return;
         }
+        long cd = cooldown.getOrDefault(event.getPlayer().getName(), -1L);
+        if (cd >= System.currentTimeMillis())
+            return;
+        Player player = event.getPlayer();
+        switch (actionVector.actionType) {
+            case SLIME:
+                player.setVelocity(actionVector.vector);
+                FallDamageHandler.guaranteeSafeFall(event.getPlayer());
+                break;
+            case TELEPORT:
+                Location teleportLoc = actionVector.vector.toLocation(location.getWorld());
+                VectorUtil.conserveDirection(teleportLoc, player);
+
+                //replace with an event
+                if(!GameManager.getGame().isRespawning(player)) {
+                    WrapperPlayServerWorldParticles startEffect = ParticleGenerator.createParticle(
+                            player.getEyeLocation().toVector(), EnumWrappers.Particle.EXPLOSION_NORMAL, 5, 0, 0, 0);
+                    WrapperPlayServerWorldParticles endEffect = ParticleGenerator.createParticle(
+                            player.getEyeLocation().toVector(), EnumWrappers.Particle.EXPLOSION_NORMAL, 5, 0, 0, 0);
+
+                    PacketUtil.syncSend(new AbstractPacket[] {startEffect, endEffect}, GameManager.getGame().getBukkitPlayers());
+
+                    SoundPlayer.sendSound(player.getLocation(), "mob.endermen.portal", 1f, 63);
+                    SoundPlayer.sendSound(player.getLocation(), "mob.endermen.portal", 1f, 63);
+                }
+
+                player.teleport(teleportLoc);
+                break;
+            default:
+                return;
+        }
+        cooldown.put(event.getPlayer().getName(), System.currentTimeMillis() + 1500L);
     }
 
     private static class ActionVector {
-        private Vector vector;
-        private ActionBlock.Type actionType;
+        private final Vector vector;
+        private final ActionBlock.Type actionType;
 
         public ActionVector(Vector vector, ActionBlock.Type actionType) {
             this.vector = vector;

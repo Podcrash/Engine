@@ -16,8 +16,8 @@ public abstract class ItemObjective implements IObjective {
     private final Vector vectorPlus1;
     private final Vector vector;
 
-    private Material baseMaterial;
-    private Material blockMaterial;
+    private final Material baseMaterial;
+    private final Material blockMaterial;
     private boolean canBeAcquired;
     private Item item;
     private Player player;
@@ -52,7 +52,7 @@ public abstract class ItemObjective implements IObjective {
      * Spawn an item with a vertical velocity, set its block
      */
     public void respawn() {
-        if(this.item != null && this.item.isValid()) return;
+        if (this.item != null && this.item.isValid()) return;
         this.item = ItemManipulationManager.regular(baseMaterial, vectorPlus1.toLocation(getWorld()), new Vector(0, 1, 0));
         BlockUtil.setBlock(getLocation(), blockMaterial);
         BlockUtil.setBlock(getLocation().add(0, 1, 0), Material.AIR);
@@ -63,7 +63,7 @@ public abstract class ItemObjective implements IObjective {
      * block ( which is an iron block)
      */
     public void die() {
-        if(this.item != null) this.item.remove();
+        if (this.item != null) this.item.remove();
         BlockUtil.setBlock(getLocation(), Material.IRON_BLOCK);
     }
 

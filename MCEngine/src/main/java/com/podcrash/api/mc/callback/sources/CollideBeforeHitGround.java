@@ -14,10 +14,10 @@ import java.util.List;
  * This is used when a player uses a skill or similar that requires being in the air and having dropped back down to the ground
  */
 public class CollideBeforeHitGround extends CallbackAction<CollideBeforeHitGround> {
-    private Entity entity;
-    private double x;
-    private double y;
-    private double z;
+    private final Entity entity;
+    private final double x;
+    private final double y;
+    private final double z;
 
     public CollideBeforeHitGround(Entity entity, long delay, double hitboxX, double hitboxY, double hitBoxZ) {
         super(delay, 1);
@@ -25,7 +25,7 @@ public class CollideBeforeHitGround extends CallbackAction<CollideBeforeHitGroun
         this.x = hitboxX;
         this.y = hitboxY;
         this.z = hitBoxZ;
-        this.changeEvaluation(() -> (
+        changeEvaluation(() -> (
                 getValidEntitiesInRange(this.entity,x,y,z).size() > 0) ||
                 EntityUtil.onGround(this.entity));
     }

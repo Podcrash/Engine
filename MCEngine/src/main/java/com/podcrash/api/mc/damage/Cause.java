@@ -27,8 +27,8 @@ public enum Cause {
     LAVA("LAVA", "Lava"),
     NULL;
 
-    private String bukkitName;
-    private String displayName;
+    private final String bukkitName;
+    private final String displayName;
 
     Cause() {
         this(null, "CUSTOM");
@@ -38,7 +38,7 @@ public enum Cause {
         this.bukkitName = bukkitName;
         this.displayName = displayName;
     }
-    private static Cause[] details = Cause.values();
+    private static final Cause[] details = Cause.values();
 
     public static Cause findByEntityDamageCause(EntityDamageEvent.DamageCause damageCause) {
         for(Cause cause : details) {

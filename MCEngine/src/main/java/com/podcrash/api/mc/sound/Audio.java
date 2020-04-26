@@ -8,7 +8,7 @@ public enum Audio {
     //more here....
 
 
-    private String code;
+    private final String code;
 
     Audio(String code) {
         this.code = code.toLowerCase();

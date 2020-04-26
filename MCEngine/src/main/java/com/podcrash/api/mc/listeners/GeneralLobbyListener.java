@@ -27,7 +27,13 @@ public class GeneralLobbyListener extends ListenerBase {
     public void enableGeneralLobbyPVP(PlayerInteractEvent event) {
         //if (event.isCancelled()) return;
         Player player = event.getPlayer();
+<<<<<<< HEAD
         String mode;
+=======
+        // Only run this code if there is no game going on; this will work even if engine is the only plugin present
+        if (GameManager.getGame() != null || player.getItemInHand().getType().equals(Material.AIR))
+            return;
+>>>>>>> 5a09f29b946ce34b832c6e84b6195b3991fb8bcb
 
         if (GameManager.getGame() != null) {
             mode = GameManager.getGame().getMode();

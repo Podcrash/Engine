@@ -1,13 +1,16 @@
 package com.podcrash.api.mc.util;
 
+import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.db.pojos.Rank;
 import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.RanksTable;
+<<<<<<< HEAD
 import com.podcrash.api.db.TableOrganizer;
+=======
+>>>>>>> 5a09f29b946ce34b832c6e84b6195b3991fb8bcb
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import java.util.List;
 import java.util.Set;
 
 public class PrefixUtil {
@@ -18,16 +21,19 @@ public class PrefixUtil {
     public static Rank getPlayerRole(Player player) {
         RanksTable table = TableOrganizer.getTable(DataTableType.PERMISSIONS);
         Set<Rank> currentRanks = table.getRanksSync(player.getUniqueId());
-        if(currentRanks == null || currentRanks.size() == 0) return null;
+        if (currentRanks == null || currentRanks.size() == 0)
+            return null;
         Rank output = null;
         for(Rank r : currentRanks) {
-            if(output == null) output = r;
-            else if (r.getPosition() < output.getPosition()) output = r;
+            if (output == null)
+                output = r;
+            else if (r.getPosition() < output.getPosition())
+                output = r;
         }
         /*
         Rank current = perms.get(0);
         for(int i = 1; i < perms.size(); i++) {
-            if(current.getPosition() < perms.get(i).getPosition()) {
+            if (current.getPosition() < perms.get(i).getPosition()) {
                 current = perms.get(i);
             }
         }

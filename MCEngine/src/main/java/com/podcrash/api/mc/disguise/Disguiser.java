@@ -17,7 +17,7 @@ import com.podcrash.api.mc.time.resources.TimeResource;
 import com.podcrash.api.mc.util.PacketUtil;
 import com.podcrash.api.mc.util.PlayerCache;
 import com.podcrash.api.mc.util.Utility;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -37,7 +37,7 @@ import java.util.*;
 public final class Disguiser {
     private final static HashMap<Integer, Disguise> disguises = new HashMap<>();
     private final static HashMap<Integer, Disguise> seenDisguises = new HashMap<>();
-    private ProtocolManager protocolManager;
+    private final ProtocolManager protocolManager;
 
     public Disguiser() {
 
@@ -45,7 +45,7 @@ public final class Disguiser {
     }
 
     public void disguiserIntercepter(){
-        /**
+        /*
          * All the movement packets to account for
          */
         PacketType[] types = new PacketType[] {
@@ -56,32 +56,31 @@ public final class Disguiser {
                 PacketType.Play.Server.REL_ENTITY_MOVE_LOOK,
                 PacketType.Play.Server.ENTITY_TELEPORT
         };
-        protocolManager.addPacketListener(new PacketAdapter(Pluginizer.getSpigotPlugin(), ListenerPriority.HIGHEST, types) {
+        protocolManager.addPacketListener(new PacketAdapter(PodcrashSpigot.getInstance(), ListenerPriority.HIGHEST, types) {
             @Override
             public void onPacketSending(PacketEvent event) {
                 //what the code accounts for: https://gitlab.com/rain474/dominate-recreation/snippets/1886024
                 HashMap<Integer, Disguise> disguisesClone = (HashMap<Integer, Disguise>) disguises.clone();
                 int entityID = event.getPacket().getIntegers().read(0);
                 Disguise disguise = disguisesClone.getOrDefault(entityID, null);
-                if (disguise != null) {
+                if (disguise != null)
                     event.getPacket().getIntegers().write(0, disguise.getSeen().getEntityId());
-                }
             }
 
             /**
              * Pass use packets towards the original entity as well.
-             * @param event
              */
             @Override
             public void onPacketReceiving(PacketEvent event) {
-                if(event.getPacketType() == PacketType.Play.Client.USE_ENTITY){
+                if (event.getPacketType() != PacketType.Play.Client.USE_ENTITY) {
+                    return;
+                }
 
-                    HashMap<Integer, Disguise> seenDisguisesClone = (HashMap<Integer, Disguise>) seenDisguises.clone();
-                    WrapperPlayClientUseEntity useEntity = new WrapperPlayClientUseEntity(event.getPacket());
-                    Disguise disguise = seenDisguisesClone.getOrDefault(useEntity.getTargetID(), null);
-                    if(disguise != null) {
-                        useEntity.setTargetID(disguise.getEntity().getEntityId());
-                    }
+                HashMap<Integer, Disguise> seenDisguisesClone = (HashMap<Integer, Disguise>) seenDisguises.clone();
+                WrapperPlayClientUseEntity useEntity = new WrapperPlayClientUseEntity(event.getPacket());
+                Disguise disguise = seenDisguisesClone.getOrDefault(useEntity.getTargetID(), null);
+                if (disguise != null) {
+                    useEntity.setTargetID(disguise.getEntity().getEntityId());
                 }
             }
 
@@ -97,22 +96,23 @@ public final class Disguiser {
         TimeHandler.repeatedTime(1, 0, new TimeResource() {
             @Override
             public void task() {
-                if(disguises.size() == 0) return;
+                if (disguises.size() == 0)
+                    return;
                 Iterator<Integer> entityIds = disguises.keySet().iterator();
                 List<Integer> destroyIDs = new ArrayList<>();
                 Disguise disguise = null;
                 while(entityIds.hasNext()){
                     disguise = disguises.get(entityIds.next());
-                    if(!disguise.getEntity().isValid()) {
+                    if (!disguise.getEntity().isValid()) {
                         entityIds.remove();
                         destroyIDs.add(disguise.getSeen().getEntityId());
                     }
                 }
-                if(destroyIDs.size() > 0) {
-                    WrapperPlayServerEntityDestroy entityDestroy = destroyPacket(destroyIDs.stream().mapToInt(i -> i).toArray());
-                    //this nullpointer error won't actually be called ever.
-                    PacketUtil.asyncSend(entityDestroy, disguise.getEntity().getWorld().getPlayers());
-                }
+                if (destroyIDs.size() <= 0)
+                    return;
+                WrapperPlayServerEntityDestroy entityDestroy = destroyPacket(destroyIDs.stream().mapToInt(i -> i).toArray());
+                //this nullpointer error won't actually be called ever.
+                PacketUtil.asyncSend(entityDestroy, disguise.getEntity().getWorld().getPlayers());
             }
 
             @Override
@@ -150,7 +150,7 @@ public final class Disguiser {
         spawn.setEntityID(entityPlayer.getId());
         spawn.setPlayerUUID(entityPlayer.getUniqueID());
         List<AbstractPacket> armorPackets = null;
-        if(copyPlayer) {
+        if (copyPlayer) {
             armorPackets = copyArmorPackets(entityPlayer.getId(), object);
             spawn.setCurrentItem(object.getItemInHand().getType().getId());
         }
@@ -160,7 +160,7 @@ public final class Disguiser {
         seenDisguises.put(entityPlayer.getId(), disguise);
 
         List<AbstractPacket> allPackets = new ArrayList<>(Arrays.asList(destroy, info, spawn));
-        if(armorPackets != null)
+        if (armorPackets != null)
             allPackets.addAll(armorPackets);
         for(Player player : players) {
             for(AbstractPacket packet : allPackets) {
@@ -193,9 +193,9 @@ public final class Disguiser {
     }
 
     /**
-     * Get the armor packets required to send a disguise to
+     * Get the armor packets required to send a disguise.
      * @param object the player whose armor will be copied
-     * @return
+     * @return  The armor packets required
      */
     public static List<AbstractPacket> copyArmorPackets(int disguiseID, LivingEntity object) {
         List<AbstractPacket> armorPackets = new ArrayList<>();
@@ -205,7 +205,7 @@ public final class Disguiser {
         PacketContainer entityArmor = base.getHandle();
         for(int i = 0; i < armors.length; i++){
             ItemStack armor = armors[i];
-            if(armor.getType() == Material.AIR) continue;
+            if (armor.getType() == Material.AIR) continue;
             WrapperPlayServerEntityEquipment entityEquipment = new WrapperPlayServerEntityEquipment(entityArmor.shallowClone());
             entityEquipment.setSlot(i + 1);
             entityEquipment.setItem(armor);

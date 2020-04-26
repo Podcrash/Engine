@@ -21,19 +21,19 @@ public final class Damage {
 
     private final boolean applyKnockback;
 
-    private long time;
+    private final long time;
 
     /**
-     * Dataclass for processing in the
+     * Class used for processing in the DamageQueue
      * @see DamageQueue#run()
-     * @param victim - the entity that was attacked
-     * @param attacker - the entity who attacked the victim
-     * @param damage - how much damage the attacker dealt to the victim
-     * @param itemStack - what item was the attacker holding (if applicable)
-     * @param damageCause - what cause? This part is very loose however
-     * @param arrow - what arrow from the attacker? (if applicable)
-     * @param source - the custom ability that the attacker used
-     * @param applyKnockback - if true, deal knockback
+     * @param victim The entity that was attacked
+     * @param attacker The entity who attacked the victim
+     * @param damage How much damage the attacker dealt to the victim
+     * @param itemStack The item that the attacker holding (if applicable, null if not)
+     * @param damageCause What cause? This part is very loose however
+     * @param arrow What arrow from the attacker? (if applicable, null if not)
+     * @param source The custom ability that the attacker used
+     * @param applyKnockback Whether or not to deal knockback
      */
     public Damage(LivingEntity victim, LivingEntity attacker, double damage, ItemStack itemStack, Cause damageCause, Arrow arrow, List<DamageSource> source, boolean applyKnockback) {
         this.victim = victim;

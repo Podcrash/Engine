@@ -13,11 +13,11 @@ public enum CustomEntityType {
 
     SKELETON("Skeleton", 51, EntityType.SKELETON, EntitySkeleton.class, CustomSkeleton.class);
 
-    private String name;
-    private int id;
-    private EntityType entityType;
-    private Class<? extends EntityInsentient> nmsClass;
-    private Class<? extends EntityInsentient> customClass;
+    private final String name;
+    private final int id;
+    private final EntityType entityType;
+    private final Class<? extends EntityInsentient> nmsClass;
+    private final Class<? extends EntityInsentient> customClass;
 
     CustomEntityType(String name, int id, EntityType entityType, Class<? extends EntityInsentient> nmsClass,
                      Class<? extends EntityInsentient> customClass) {
@@ -157,9 +157,9 @@ public enum CustomEntityType {
         try {
             ((Map) getPrivateStatic(EntityTypes.class, "c")).put(paramString, paramClass);
             ((Map) getPrivateStatic(EntityTypes.class, "d")).put(paramClass, paramString);
-            ((Map) getPrivateStatic(EntityTypes.class, "e")).put(Integer.valueOf(paramInt), paramClass);
-            ((Map) getPrivateStatic(EntityTypes.class, "f")).put(paramClass, Integer.valueOf(paramInt));
-            ((Map) getPrivateStatic(EntityTypes.class, "g")).put(paramString, Integer.valueOf(paramInt));
+            ((Map) getPrivateStatic(EntityTypes.class, "e")).put(paramInt, paramClass);
+            ((Map) getPrivateStatic(EntityTypes.class, "f")).put(paramClass, paramInt);
+            ((Map) getPrivateStatic(EntityTypes.class, "g")).put(paramString, paramInt);
         } catch (Exception exc) {
 // Unable to register the new class.
         }

@@ -1,6 +1,5 @@
 package com.podcrash.api.mc.location;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.World;
 import org.bukkit.util.Vector;
@@ -8,7 +7,8 @@ import org.bukkit.util.Vector;
 public class RayTracer {
     public static double DEFAULT_ESTIMATE = 0.12;
     //TODO: remove all the classes that use a bukkit Vector
-    private Vector origin, direction;
+    private final Vector origin;
+    private Vector direction;
 
     private Coordinate original, dir;
 
@@ -17,6 +17,7 @@ public class RayTracer {
         this.origin = origin;
         this.direction = direction;
     }
+
     /**
      * This smoothens it
      * @param box
@@ -35,6 +36,7 @@ public class RayTracer {
         direction = originDirection;
         return value;
     }
+
     public boolean intersectsBoundingBox(BoundingBox box, double distance, double accuracy) {
         assert accuracy > 0 && accuracy < 1;
         double add = 1D - accuracy;
@@ -45,9 +47,8 @@ public class RayTracer {
 
             originClone.add(addVector.multiply(i));
             lastV = originClone;
-            if(intersectsBox(originClone, box)) {
+            if (intersectsBox(originClone, box))
                 return lastV.distance(origin) < distance;
-            }
         }
         return false;
     }
@@ -57,7 +58,7 @@ public class RayTracer {
         double add = 1D - accuracy;
         Vector originDirection = direction.clone();
 
-        if(soft > 0) {
+        if (soft > 0) {
             Coordinate mid = box.midPoint();
             Vector dirToMid = mid.subtract(origin).toVector().normalize();
             originDirection.add(dirToMid.multiply(soft)).normalize();
@@ -67,7 +68,7 @@ public class RayTracer {
             Vector addVector = originDirection.clone();
 
             originClone.add(addVector.multiply(i));
-            if(intersectsBox(originClone, box)) return i;
+            if (intersectsBox(originClone, box)) return i;
         }
 
         return -1;
@@ -81,7 +82,7 @@ public class RayTracer {
             Vector addVector = direction.clone();
 
             originClone.add(addVector.multiply(i));
-            if(intersectsBox(originClone, box) && originClone.distanceSquared(originClone) < distance * distance) return originClone;
+            if (intersectsBox(originClone, box) && originClone.distanceSquared(originClone) < distance * distance) return originClone;
         }
         return null;
     }
@@ -99,11 +100,9 @@ public class RayTracer {
         double maxY = box.getB().getY();
         double maxZ = box.getB().getZ();
 
-        if(compare(minX, x, maxX)) {
-            if(compare(minY, y, maxY)) {
-                if(compare(minZ, z, maxZ)) {
-                    return true;
-                }
+        if (compare(minX, x, maxX)) {
+            if (compare(minY, y, maxY)) {
+                return compare(minZ, z, maxZ);
             }
         }
         return false;
@@ -114,13 +113,13 @@ public class RayTracer {
     }
 
     /**
-     * Find whether or not: b is in between a or c.
+     * Find whether or not b is in between a or c.
      * Estimate is the point of negligence.
      * @param a min
      * @param b value to test
      * @param c max
      * @param estimate offset
-     * @return the
+     * @return Whether or not b is within the specified range
      */
     private boolean compare(double a, double b, double c, double estimate) {
         //First condition: keep old behavior

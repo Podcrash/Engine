@@ -7,9 +7,9 @@ import org.bukkit.entity.Player;
 import java.util.HashMap;
 
 public class PlayerCache {
-    private static HashMap<String, PlayerCache> cache = new HashMap<>();
+    private static final HashMap<String, PlayerCache> cache = new HashMap<>();
     private WrappedChatComponent component;
-    private Player player;
+    private final Player player;
     private String displayName;
     private PlayerCache(String displayName) {
         this.displayName = displayName;
@@ -19,7 +19,7 @@ public class PlayerCache {
 
     public static PlayerCache getPlayerCache(Player player) {
         PlayerCache playerCache = cache.getOrDefault(player.getName(), null);
-        if(playerCache == null) {
+        if (playerCache == null) {
             addPlayerCache(player);
             playerCache = cache.get(player.getName());
         }
@@ -27,7 +27,7 @@ public class PlayerCache {
     }
     public static PlayerCache getPlayerCache(String name) {
         PlayerCache playerCache = cache.getOrDefault(name, null);
-        if(playerCache == null) {
+        if (playerCache == null) {
             cache.put(name, new PlayerCache(name));
             playerCache = cache.get(name);
         }
@@ -52,7 +52,7 @@ public class PlayerCache {
             public void onPacketSending(PacketEvent event) {
                 //TODO: We are going to need this later down the line
 
-                if(event.getPacketType() == PacketType.Play.Server.CHAT) {
+                if (event.getPacketType() == PacketType.Play.Server.CHAT) {
                     WrapperPlayServerChat chat = new WrapperPlayServerChat(event.getPacket());
                     WrappedChatComponent component = chat.getMessage();
                     String json = component.getJson();
@@ -60,7 +60,7 @@ public class PlayerCache {
                     jsonObject.add
 
                     Bukkit.broadcastMessage(component.getJson());
-                }else if(event.getPacketType() == PacketType.Play.Server.PLAYER_INFO) {
+                }else if (event.getPacketType() == PacketType.Play.Server.PLAYER_INFO) {
                     WrapperPlayServerPlayerInfo info = new WrapperPlayServerPlayerInfo(event.getPacket());
                     List<PlayerInfoData> newPlayerInfoDataList = new ArrayList<>();
 

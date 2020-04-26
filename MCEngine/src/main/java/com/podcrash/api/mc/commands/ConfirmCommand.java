@@ -1,17 +1,28 @@
 package com.podcrash.api.mc.commands;
 
 import com.podcrash.api.mc.economy.EconomyHandler;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 
-public class ConfirmCommand extends CommandBase {
+import java.util.Collections;
+
+public class ConfirmCommand extends BukkitCommand {
+
+    public ConfirmCommand() {
+        super("confirm",
+                "Confirm the purchase of an item.",
+                "/confirm <Name of Item>",
+                Collections.emptyList());
+    }
+
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if(!(sender instanceof Player)) return false;
-        if(args.length == 0) {
+    public boolean execute(CommandSender sender, String label, String[] args) {
+        if (!(sender instanceof Player))
+            return true;
+        if (args.length == 0) {
             sender.sendMessage(
                     String.format(
                             "%SEconomy> %sUse the command %s%s/confirm [NAME OF ITEM] %sto confirm your purchase!",
@@ -24,7 +35,7 @@ public class ConfirmCommand extends CommandBase {
         }
         Player p = (Player) sender;
         String item = args[0];
-        EconomyHandler handler = (EconomyHandler) Pluginizer.getSpigotPlugin().getEconomyHandler();
+        EconomyHandler handler = PodcrashSpigot.getInstance().getEconomyHandler();
         handler.confirm(p, item);
         return true;
     }

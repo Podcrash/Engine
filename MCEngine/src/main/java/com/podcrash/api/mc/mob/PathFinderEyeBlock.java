@@ -13,8 +13,8 @@ import java.util.HashSet;
  * This is used for illusion
  */
 public class PathFinderEyeBlock extends PathfinderGoal {
-    private Player player;
-    private EntityCreature entitycreature;
+    private final Player player;
+    private final EntityCreature entitycreature;
 
     public PathFinderEyeBlock(Player player, EntityCreature entitycreature) {
         this.player = player;
@@ -49,7 +49,7 @@ public class PathFinderEyeBlock extends PathfinderGoal {
 
         //this is massive
         Location loc = player.getTargetBlock((HashSet<Byte>) null, 100).getLocation();
-        if(loc == null){
+        if (loc == null) {
             loc = BlockUtil.getHighestUnderneath(this.entitycreature.getBukkitEntity().getLocation().add(player.getLocation().getDirection().normalize().setY(this.entitycreature.getBukkitEntity().getLocation().getY()).multiply(2)));
         }
         PathEntity pathEntity = this.entitycreature.getNavigation().a(loc.getX(), loc.getY(), loc.getZ());

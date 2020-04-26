@@ -1,13 +1,10 @@
 package com.podcrash.api.mc.events;
 
-import com.podcrash.api.mc.damage.Cause;
 import com.podcrash.api.mc.sound.SoundWrapper;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-
-import java.beans.EventHandler;
 
 /**
  * @see com.podcrash.api.mc.damage.DamageQueue playSound(LivingEntity, LivingEntity, Cause)
@@ -16,8 +13,8 @@ import java.beans.EventHandler;
 public class SoundApplyEvent extends Event implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
 
-    private LivingEntity victim;
-    private LivingEntity attacker;
+    private final LivingEntity victim;
+    private final LivingEntity attacker;
     private SoundWrapper sound;
     private boolean cancel;
 

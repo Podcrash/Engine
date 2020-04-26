@@ -11,17 +11,17 @@ public final class DBUtils {
      * @param throwable
      */
     public static void handleDuplicateKeyException(Throwable throwable) {
-        if(throwable == null) return;
-        if(!(throwable instanceof MongoWriteException)) return;
+        if (throwable == null) return;
+        if (!(throwable instanceof MongoWriteException)) return;
 
         MongoWriteException exception = (MongoWriteException) throwable;
         WriteError writeError = exception.getError();
         boolean isDuplicateKey = writeError.getCategory() == ErrorCategory.DUPLICATE_KEY;
-        if(isDuplicateKey) return;
+        if (isDuplicateKey) return;
         handleThrowables(throwable);
     }
     public static void handleThrowables(Throwable throwable) {
-        if(throwable == null) return;
+        if (throwable == null) return;
         System.out.println(throwable.getLocalizedMessage());
         throwable.printStackTrace();
     }

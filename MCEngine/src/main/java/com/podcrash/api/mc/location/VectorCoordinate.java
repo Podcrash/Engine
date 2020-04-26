@@ -3,7 +3,7 @@ package com.podcrash.api.mc.location;
 import org.bukkit.util.Vector;
 
 public class VectorCoordinate extends Coordinate {
-    private long time;
+    private final long time;
     public VectorCoordinate(double x, double y, double z, double yaw, double pitch, boolean onGround) {
         super(x, y, z, yaw, pitch, onGround);
         this.time = System.currentTimeMillis();

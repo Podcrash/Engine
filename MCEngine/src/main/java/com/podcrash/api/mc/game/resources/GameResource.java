@@ -4,7 +4,7 @@ import com.podcrash.api.mc.game.Game;
 import com.podcrash.api.mc.game.GameManager;
 import com.podcrash.api.mc.game.GameState;
 import com.podcrash.api.mc.time.resources.TimeResource;
-import com.podcrash.api.plugin.Pluginizer;
+import com.podcrash.api.plugin.PodcrashSpigot;
 
 /**
  * This is used as helpers for games that have started.
@@ -46,7 +46,7 @@ public abstract class GameResource implements TimeResource {
     }
 
     protected final void log(String msg){
-        Pluginizer.getSpigotPlugin().getLogger().info(String.format("%s: %s", this.getClass().getSimpleName(), msg));
+        PodcrashSpigot.getInstance().getLogger().info(String.format("%s: %s", this.getClass().getSimpleName(), msg));
     }
 
     protected void clear() {

@@ -17,7 +17,7 @@ import java.util.List;
 
 public abstract class GameScoreboard extends CustomScoreboard {
 
-    private int gameId;
+    private final int gameId;
 
     /**
      * Constructor for the Game Scoreboard.
@@ -69,7 +69,7 @@ public abstract class GameScoreboard extends CustomScoreboard {
      * @return The final lines of the game scoreboard.
      */
     private List<String> createGameLines(String name, String mode, List<String> lines) {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         result.add(name);
         result.add(mode);
         result.add("");

@@ -11,8 +11,6 @@ import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftItem;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Item;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -50,7 +48,7 @@ public class ItemManipulationManager {
         EntityItem entity = new EntityItem(craftWorld.getHandle(), location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(itemStack));
         entity.pickupDelay = 5;
         craftWorld.getHandle().addEntity(entity, CreatureSpawnEvent.SpawnReason.CUSTOM);
-        if(vector != null) {
+        if (vector != null) {
             entity.motX = vector.getX();
             entity.motY = vector.getY();
             entity.motZ = vector.getZ();
@@ -71,7 +69,7 @@ public class ItemManipulationManager {
         EntityItem entity = new EntityItem(craftWorld.getHandle(), location.getX(), location.getY(), location.getZ(), CraftItemStack.asNMSCopy(itemStack));
         entity.pickupDelay = 5;
         craftWorld.getHandle().addEntity(entity, CreatureSpawnEvent.SpawnReason.CUSTOM);
-        if(vector != null) {
+        if (vector != null) {
             entity.motX = vector.getX();
             entity.motY = vector.getY();
             entity.motZ = vector.getZ();
@@ -91,7 +89,7 @@ public class ItemManipulationManager {
     public static Item intercept(Material material, Location location, Vector vector, InterceptCallback callback) {
         Item item = spawnItem(material, location, vector);
         ItemIntercept intercept = new ItemIntercept(item, 1.5);
-        if(callback != null) intercept.then(() -> callback.dorun(item, intercept.getIntercepted(), intercept.getInterceptLocation()));
+        if (callback != null) intercept.then(() -> callback.dorun(item, intercept.getIntercepted(), intercept.getInterceptLocation()));
         intercept.run();
         return item;
     }
@@ -99,12 +97,11 @@ public class ItemManipulationManager {
     /**
      *
      * @param item generate this from the assorted regular/spawnItem methods
-     * @return
      */
-
     public static Item intercept(Item item, double radius, InterceptCallback callback) {
         ItemIntercept intercept = new ItemIntercept(item, radius);
-        if(callback != null) intercept.then(() -> callback.dorun(item, intercept.getIntercepted(), intercept.getInterceptLocation()));
+        if (callback != null)
+            intercept.then(() -> callback.dorun(item, intercept.getIntercepted(), intercept.getInterceptLocation()));
         intercept.run();
         return item;
     }
@@ -112,7 +109,7 @@ public class ItemManipulationManager {
     public static Item interceptWithCooldown(Material material, Location location, Vector vector, float delay, InterceptCallback callback) {
         Item item = spawnItem(material, location, vector);
         ItemIntercept intercept = new DelayItemIntercept(item, delay);
-        if(callback != null) intercept.then(() -> callback.dorun(item, intercept.getIntercepted(), intercept.getInterceptLocation()));
+        if (callback != null) intercept.then(() -> callback.dorun(item, intercept.getIntercepted(), intercept.getInterceptLocation()));
         intercept.run();
         return item;
     }

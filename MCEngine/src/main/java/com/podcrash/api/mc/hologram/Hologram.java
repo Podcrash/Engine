@@ -75,12 +75,13 @@ public class Hologram {
      * There is also a distance check to avoid being obnoxious.
      * @param line the string
      * @param loc where the line will be located
-     * @return
+     * @return The armor stand id
      */
     private int showLine(String line, Location loc) {
         WrapperPlayServerSpawnEntityLiving living = spawnPacket(line, loc);
         for(Player player : loc.getWorld().getPlayers()) {
-            if(distCheck && player.getLocation().distanceSquared(loc) <= 8D) continue;
+            if (distCheck && player.getLocation().distanceSquared(loc) <= 8D)
+                continue;
             PacketUtil.syncSend(living, location.getWorld().getPlayers());
         }
         return living.getEntityID();
@@ -89,9 +90,9 @@ public class Hologram {
     /**
      * Create a spawn packet
      * {@link Hologram#showLine(int, Location)}
-     * @param line
-     * @param loc
-     * @return
+     * @param line the line to use with the armor stand
+     * @param loc where the line will be located
+     * @return the armor stand packet
      */
     private WrapperPlayServerSpawnEntityLiving spawnPacket(String line, Location loc) {
         WorldServer worldServer = ((CraftWorld) location.getWorld()).getHandle();
@@ -114,7 +115,8 @@ public class Hologram {
      * Subtract so that the words don't get mixed up.
      */
     public void render() {
-        if(show) return;
+        if (show)
+            return;
         Location use = this.location.clone();
         final Vector down = new Vector(0, gapDistance, 0);
         for (String line : this.lines) {
@@ -140,18 +142,17 @@ public class Hologram {
 
     /**
      * Combine the createScoreboard and destroy methods to seamlessly update values.
-     * {@link me.raindance.champions.kits.skills.RangerSkills.HeartsEye}
      */
     public void update() {
         //if the previous and current locations matchup, then you don't need to update it.
-        if(pastLocation == location.toVector()) return;
+        if (pastLocation == location.toVector())
+            return;
         destroy();
         render();
     }
 
     /**
-     * Size of the lines
-     * @return
+     * @return the size of the lines
      */
     public int size(){
         return lines.size();

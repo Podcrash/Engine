@@ -29,11 +29,10 @@ public class CustomEntityFirework extends EntityFireworks {
 
     @Override
     public void t_() {
-        if (gone) {
+        if (gone)
             return;
-        }
         gone = true;
-        if(this.world.isClientSide) {
+        if (this.world.isClientSide) {
             if (players != null) {
                 if (players.length > 0) {
                     for (Player player : players) {
@@ -57,15 +56,14 @@ public class CustomEntityFirework extends EntityFireworks {
             ((Firework) firework.getBukkitEntity()).setFireworkMeta(meta);
             firework.setPosition(location.getX(), location.getY(), location.getZ());
 
-            if ((((CraftWorld) location.getWorld()).getHandle()).addEntity(firework)) {
+            if ((((CraftWorld) location.getWorld()).getHandle()).addEntity(firework))
                 firework.setInvisible(true);
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
     public static void spawn(Location location, FireworkEffect effect, List<Player> players) {
-        spawn(location, effect, players.toArray(new Player[players.size()]));
+        spawn(location, effect, players.toArray(new Player[0]));
     }
 }
 

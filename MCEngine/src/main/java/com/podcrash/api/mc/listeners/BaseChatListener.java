@@ -30,7 +30,7 @@ public class BaseChatListener extends ListenerBase {
     @EventHandler(priority = EventPriority.LOW)
     public void chat(AsyncPlayerChatEvent e) {
         Player player = e.getPlayer();
-        if(player.hasPermission("invicta.mute")){
+        if (player.hasPermission("invicta.mute")){
             e.setCancelled(true);
             player.sendMessage(String.format("%sInvicta> %sYou are muted.", ChatColor.BLUE, ChatColor.GRAY));
             return;
@@ -38,7 +38,7 @@ public class BaseChatListener extends ListenerBase {
 
 
         /*
-        if(badWordsFound(e.getMessage()).size() > 0) {
+        if (badWordsFound(e.getMessage()).size() > 0) {
             player.sendMessage(String.format("%sInvicta> %sProfanity is strictly prohibited from Podcrash servers.", ChatColor.BLUE, ChatColor.GRAY));
             e.setCancelled(true);
             return;
@@ -71,16 +71,16 @@ public class BaseChatListener extends ListenerBase {
                 String[] content = null;
                 try {
                     content = line.split(",");
-                    if(content.length == 0) {
+                    if (content.length == 0) {
                         continue;
                     }
                     String word = content[0];
                     String[] ignore_in_combination_with_words = new String[]{};
-                    if(content.length > 1) {
+                    if (content.length > 1) {
                         ignore_in_combination_with_words = content[1].split("_");
                     }
 
-                    if(word.length() > largestWordLength) {
+                    if (word.length() > largestWordLength) {
                         largestWordLength = word.length();
                     }
                     words.put(word.replaceAll(" ", ""), ignore_in_combination_with_words);
@@ -104,20 +104,19 @@ public class BaseChatListener extends ListenerBase {
             prefix = ChatColor.AQUA.toString() + ChatColor.BOLD + "PPL HOST";
         } else {
             Rank rank = PrefixUtil.getPlayerRole(chatter);
-            if (rank != null) {
+            if (rank != null)
                 prefix = PrefixUtil.getPrefix(rank);
-            }
         }
 
         return prefix.isEmpty() ? "" : prefix + " ";
     }
     /**
      * Iterates over a String input and checks whether a cuss word was found in a list, then checks if the word should be ignored (e.g. bass contains the word *ss).
-     * @param input
-     * @return
+     * @param input the string to check
+     * @return List of the bad words found
      */
     public ArrayList<String> badWordsFound(String input) {
-        if(input == null) {
+        if (input == null) {
             return new ArrayList<>();
         }
 
@@ -157,17 +156,17 @@ public class BaseChatListener extends ListenerBase {
             // from each letter, keep going to find bad words until either the end of the sentence is reached, or the max word length is reached.
             for(int offset = 1; offset < (input.length()+1 - start) && offset < largestWordLength; offset++)  {
                 String wordToCheck = input.substring(start, start + offset);
-                if(words.containsKey(wordToCheck)) {
+                if (words.containsKey(wordToCheck)) {
                     // for example, if you want to say the word bass, that should be possible.
                     String[] ignoreCheck = words.get(wordToCheck);
                     boolean ignore = false;
-                    for(int s = 0; s < ignoreCheck.length; s++ ) {
-                        if(input.contains(ignoreCheck[s])) {
+                    for (String value : ignoreCheck) {
+                        if (input.contains(value)) {
                             ignore = true;
                             break;
                         }
                     }
-                    if(!ignore) {
+                    if (!ignore) {
                         badWords.add(wordToCheck);
                     }
                 }

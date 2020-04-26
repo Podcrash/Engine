@@ -64,7 +64,7 @@ public class EconomyTable extends MongoBaseTable {
             .projection(Projections.fields(Projections.include("cost"), Projections.excludeId()))
             .first((res, t) -> {
             DBUtils.handleThrowables(t);
-            if(res == null) costFuture.complete(0D);
+            if (res == null) costFuture.complete(0D);
             else costFuture.complete((Double) res.get("cost"));
         });
 
@@ -76,7 +76,7 @@ public class EconomyTable extends MongoBaseTable {
         int size = charAR.length;
         StringBuilder builder = new StringBuilder();
         for(int i = 0; i < size; i++) {
-            if(charAR[i] == ChatColor.COLOR_CHAR) {
+            if (charAR[i] == ChatColor.COLOR_CHAR) {
                 i += 1;
                 continue;
             }

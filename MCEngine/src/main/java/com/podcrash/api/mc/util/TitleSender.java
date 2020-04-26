@@ -22,7 +22,7 @@ public final class TitleSender {
         int size = bar.length() - 1;
         double percentage = 1D - a/b;
         int currentProgress = (int) (size * percentage);
-        currentProgress = (currentProgress > size) ? size : currentProgress;
+        currentProgress = Math.min(currentProgress, size);
 
         String sprogress = bar.substring(0, currentProgress) + ChatColor.RED + bar.substring(currentProgress, size);
         String builder = ChatColor.BOLD + header + ChatColor.GREEN + sprogress + ChatColor.RESET + ChatColor.BOLD + ' ' + footer;

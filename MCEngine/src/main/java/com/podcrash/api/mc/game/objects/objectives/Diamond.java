@@ -11,7 +11,7 @@ import org.bukkit.Material;
 import org.bukkit.util.Vector;
 
 public class Diamond extends ItemObjective {
-    private static ObjectiveType otype = ObjectiveType.EMERALD;
+    private static final ObjectiveType otype = ObjectiveType.EMERALD;
 
     public Diamond(Location location) {
         this(location.toVector());
