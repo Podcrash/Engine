@@ -118,8 +118,6 @@ public class PodcrashSpigot extends PodcrashPlugin {
 
         //WorldManager.getInstance().loadWorlds();
 
-
-        economyHandler = new EconomyHandler();
         worldSetter = new SpawnWorldSetter(); // this is a special cookie
 
         registerMessengers();
@@ -143,6 +141,7 @@ public class PodcrashSpigot extends PodcrashPlugin {
 
         registerCommands();
         registerListeners();
+        economyHandler = new EconomyHandler();
 
 
         Communicator.readyGameLobby();
