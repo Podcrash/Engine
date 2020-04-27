@@ -14,7 +14,7 @@ public interface ISkill extends Listener {
     Player getPlayer();
     void setPlayer(Player player);
     default <T extends KitPlayer> T getChampionsPlayer() {
-        return (T) KitPlayerManager.getInstance().getChampionsPlayer(getPlayer());
+        return (T) KitPlayerManager.getInstance().getKitPlayer(getPlayer());
     }
 
 }

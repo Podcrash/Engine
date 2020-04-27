@@ -121,7 +121,7 @@ public abstract class Skill implements ISkill, DamageSource {
         }
     }
     public KitPlayer getChampionsPlayer() {
-        return KitPlayerManager.getInstance().getChampionsPlayer(getPlayer());
+        return KitPlayerManager.getInstance().getKitPlayer(getPlayer());
     }
     public void setPlayer(Player player) {
         synchronized (playerLock) {

@@ -33,7 +33,7 @@ public class KitPlayerManager {
         skill.init();
         if (skill instanceof IPassiveTimer) ((IPassiveTimer) skill).start();
         if (skill instanceof IConstruct) ((IConstruct) skill).doConstruct();
-        if (skill instanceof IInjector) addPacketListener(getChampionsPlayer(skill.getPlayer()), ((IInjector) skill).inject());
+        if (skill instanceof IInjector) addPacketListener(getKitPlayer(skill.getPlayer()), ((IInjector) skill).inject());
         if (skill instanceof ICharge) skill.getPlayer().sendMessage(String.format("%s%s> %sMaximum Charges: %d", ChatColor.BLUE, skill.getName(), ChatColor.GOLD, ((ICharge) skill).getMaxCharges()));
     }
 
@@ -43,12 +43,12 @@ public class KitPlayerManager {
         Bukkit.getPluginManager().callEvent(apply);
         if (apply.isCancelled())
             return;
-        KitPlayer oldPlayer = getChampionsPlayer(cplayer.getPlayer());
+        KitPlayer oldPlayer = getKitPlayer(cplayer.getPlayer());
         removeKitPlayer(oldPlayer);
 
         kitPlayer.putIfAbsent(cplayer.getPlayer().getName(), cplayer);
 
-        KitPlayer cp = getChampionsPlayer(cplayer.getPlayer());
+        KitPlayer cp = getKitPlayer(cplayer.getPlayer());
         StatusApplier.getOrNew(cp.getPlayer()).removeStatus(Status.values());
 
         cp.equip();
@@ -89,7 +89,7 @@ public class KitPlayerManager {
             removeKitPlayer(kitPlayer);
     }
 
-    public KitPlayer getChampionsPlayer(Player player) {
+    public KitPlayer getKitPlayer(Player player) {
         return kitPlayer.getOrDefault(player.getName(), null);
     }
 

@@ -268,7 +268,7 @@ public final class DamageQueue implements Runnable {
      */
     private void playSound(LivingEntity victim, LivingEntity attacker, Cause cause) {
      //   if (victim instanceof Player) {
-            //ChampionsPlayer championVictim = ChampionsPlayerManager.getInstance().getChampionsPlayer((Player) victim);
+            //ChampionsPlayer championVictim = ChampionsPlayerManager.getInstance().getKitPlayer((Player) victim);
             /*if (championVictim != null)
                 SoundPlayer.sendSound(victim.getLocation(), championVictim.getSound());*/
       //  }

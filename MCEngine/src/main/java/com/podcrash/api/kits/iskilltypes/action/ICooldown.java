@@ -27,7 +27,7 @@ public interface ICooldown {
         return String.format(
                 "%s%s> %s%s %scannot be used for %s%.2f %sseconds",
                 ChatColor.BLUE,
-                KitPlayerManager.getInstance().getChampionsPlayer(getPlayer()).getName(),
+                KitPlayerManager.getInstance().getKitPlayer(getPlayer()).getName(),
                 ChatColor.GREEN,
                 getName(),
                 ChatColor.GRAY,

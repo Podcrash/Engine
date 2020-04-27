@@ -9,10 +9,13 @@ import com.podcrash.api.db.tables.RanksTable;
 import com.podcrash.api.commands.*;
 import com.podcrash.api.damage.DamageQueue;
 import com.podcrash.api.economy.EconomyHandler;
+import com.podcrash.api.effect.particle.ParticleRunnable;
+import com.podcrash.api.kits.KitPlayerManager;
 import com.podcrash.api.listeners.*;
 import com.podcrash.api.tracker.CoordinateTracker;
 import com.podcrash.api.tracker.Tracker;
 import com.podcrash.api.tracker.VectorTracker;
+import com.podcrash.api.util.PlayerCache;
 import com.podcrash.api.world.SpawnWorldSetter;
 import com.podcrash.api.world.WorldManager;
 import javafx.scene.layout.BackgroundFill;
@@ -143,6 +146,8 @@ public class PodcrashSpigot extends PodcrashPlugin {
         registerCommands();
         registerListeners();
         economyHandler = new EconomyHandler();
+        ParticleRunnable.start();
+        PlayerCache.packetUpdater();
 
 
         Communicator.readyGameLobby();
@@ -152,8 +157,11 @@ public class PodcrashSpigot extends PodcrashPlugin {
 
     @Override
     public void onDisable() {
-        if (Communicator.isGameLobby())
+        if (Communicator.isGameLobby()) {
+            DamageQueue.active = false;
             gameDisable();
+            KitPlayerManager.getInstance().clear();
+        }
         disable();
         WorldManager.getInstance().unloadWorlds();
     }
