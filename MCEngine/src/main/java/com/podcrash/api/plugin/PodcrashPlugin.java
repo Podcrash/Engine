@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutorService;
 public abstract class PodcrashPlugin extends JavaPlugin {
 
     //flag for determining whether or not to debug log, will be optimized away by JIT during runtime
+    //env variable
     public static final boolean DEBUG = true;
 
 

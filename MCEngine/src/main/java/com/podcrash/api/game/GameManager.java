@@ -59,6 +59,7 @@ public class GameManager {
         Set<String> validMaps = new HashSet<>(table.getWorlds(game.getMode()));
 
         int size = validMaps.size();
+        if (size == 0) return;
         int item = new Random().nextInt(size);
         int i = 0;
         for(String map : validMaps) {

@@ -72,6 +72,8 @@ public abstract class Game implements IGame {
     private GameMap map;
 
     private final Set<Player> isLobbyPVPing;
+
+    protected GameScoreboard board;
     /**
      * Constructor for the game.
      * @param id The ID of the game.
@@ -102,9 +104,7 @@ public abstract class Game implements IGame {
         this.gameSettings = new GameSettings(getTeamSettings(), this.teams);
     }
 
-    public abstract GameScoreboard getGameScoreboard();
     public abstract int getAbsoluteMinPlayers();
-    public abstract Location spectatorSpawn();
     public abstract void leaveCheck();
 
     public abstract Class<? extends GameMap> getMapClass();
@@ -119,6 +119,14 @@ public abstract class Game implements IGame {
         //getGameScoreboard().update();
     }
 
+    public GameScoreboard getGameScoreboard() {
+        return board;
+    }
+
+    public Location spectatorSpawn() {
+
+        return getGameWorld().getSpawnLocation();
+    }
     /**
      * Load the map method, uses a callback of a bukkit event for custom loading
      */
