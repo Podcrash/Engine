@@ -7,6 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 public class SpecCommand extends BukkitCommand {
@@ -15,7 +16,7 @@ public class SpecCommand extends BukkitCommand {
         super("spectate",
                 "Spectate a game.",
                 "/spectate",
-                Collections.emptyList());
+                Collections.singletonList("spec"));
     }
 
     @Override

@@ -15,6 +15,7 @@ import com.podcrash.api.tracker.Tracker;
 import com.podcrash.api.tracker.VectorTracker;
 import com.podcrash.api.world.SpawnWorldSetter;
 import com.podcrash.api.world.WorldManager;
+import javafx.scene.layout.BackgroundFill;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -206,17 +207,20 @@ public class PodcrashSpigot extends PodcrashPlugin {
         debugLog("Extra Vertical: " + SpigotConfig.knockbackExtraVertical);
     }
     private void registerListeners() {
+        new ActionBlockListener(this);
         new BaseChatListener(this);
+        new CmdPreprocessHandler(this);
+        new BackfillListener(this);
         new MapMaintainListener(this);
-        new PlayerInventoryListener(this);
         new SpigotJoinListener(this);
         new StatusListener(this);
         new MobListeners(this);
-        new ActionBlockListener(this);
         new FallDamageHandler(this);
         new MOTDHandler(this);
-        new CmdPreprocessHandler(this);
+        new PlayerInventoryListener(this);
         new GeneralLobbyListener(this);
+        new GenEconListener(this);
+        new KickListener(this);
     }
 
 
