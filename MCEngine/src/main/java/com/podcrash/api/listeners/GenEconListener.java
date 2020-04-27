@@ -12,7 +12,7 @@ public class GenEconListener extends ListenerBase {
 
     @EventHandler
     public void pay(PayEvent e) {
-        if (PodcrashSpigot.getInstance().hasPPLOwner())
+        if (PodcrashSpigot.getInstance().hasPPLOwner() && e.getMoneys() > 0)
             e.setCancelled(true);
     }
 }

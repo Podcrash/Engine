@@ -32,11 +32,8 @@ public class GeneralLobbyListener extends ListenerBase {
         //if (event.isCancelled()) return;
         Player player = event.getPlayer();
         // Only run this code if there is no game going on; this will work even if engine is the only plugin present
-        PodcrashSpigot.debugLog("test123");
-        System.out.println("test123");
         if (GameManager.getGame() == null || player.getItemInHand().getType().equals(Material.AIR))
             return;
-        System.out.println("test1234");
 
         String mode = GameManager.getGame() != null ? GameManager.getGame().getMode() : null;
 

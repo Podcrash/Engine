@@ -149,7 +149,7 @@ public class GameManager {
             }
          */
 
-        if (game.getMinPlayers() > game.size()) {
+        if (game.getMinPlayers() > game.size() || PodcrashSpigot.getInstance().hasPPLOwner()) {
             canStart = false;
         }
         if (canStart && !game.getTimer().isRunning()) game.getTimer().start();
