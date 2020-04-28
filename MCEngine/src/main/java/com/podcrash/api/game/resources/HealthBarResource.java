@@ -1,5 +1,7 @@
 package com.podcrash.api.game.resources;
 
+import com.nametagedit.plugin.NametagEdit;
+import com.nametagedit.plugin.api.data.FakeTeam;
 import com.podcrash.api.game.GTeam;
 import com.podcrash.api.game.Game;
 import com.podcrash.api.hologram.Hologram;
@@ -34,7 +36,9 @@ public class HealthBarResource extends GameResource {
         for(GTeam team : teams) {
             for(Player player : team.getBukkitPlayers()) {
                 players.put(player.getName(), null);
-                objective.getScore(player.getName()).setScore((int) player.getHealth());
+                FakeTeam fakeTeam = NametagEdit.getApi().getFakeTeam(player);
+                String name = fakeTeam.getName();
+                objective.getScore(name).setScore((int) player.getHealth());
                 /*
                 Hologram hologram = HologramMaker.createHologram(player.getLocation(), "");
                 hologram.setDistCheck(true);

@@ -1,5 +1,8 @@
 package com.podcrash.api.game;
 
+import com.nametagedit.plugin.NametagEdit;
+import com.nametagedit.plugin.api.NametagAPI;
+import com.nametagedit.plugin.api.data.Nametag;
 import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.db.pojos.Rank;
 import com.podcrash.api.db.pojos.map.BaseMap;
@@ -583,6 +586,14 @@ public abstract class Game implements IGame {
 
     public void refreshTabColor(Player player, String color) {
         Rank rank = PrefixUtil.getPlayerRole(player);
+        String prefix = rank == null ? "" : rank.getColor() + rank.getName() + " ";
+
+        NametagEdit.getApi().setPrefix(player, prefix + color);
+
+        Nametag tag = NametagEdit.getApi().getNametag(player);
+        System.out.println(prefix + color);
+        System.out.println(tag.getPrefix());
+        /*
         if (rank != null) {
             player.setPlayerListName(String.format("%s %s%s",
                     PrefixUtil.getPrefix(rank),
@@ -593,6 +604,8 @@ public abstract class Game implements IGame {
                     color,
                     player.getName()));
         }
+
+         */
     }
 
     public boolean leaveTeam(Player player) {
@@ -856,7 +869,7 @@ public abstract class Game implements IGame {
             getTeam(teamEnum).setTeamEnum(newTeamEnum);
             for (UUID uuid : getTeam(newTeamEnum).getPlayers()) {
                 Player p = Bukkit.getPlayer(uuid);
-                p.setPlayerListName(newTeamEnum.getChatColor() + p.getName());
+                this.refreshTabColor(p, newTeamEnum.getChatColor().toString());
             }
             return true;
         } else {

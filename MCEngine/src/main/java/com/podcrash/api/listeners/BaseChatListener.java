@@ -51,7 +51,7 @@ public class BaseChatListener extends ListenerBase {
                 ChatColor.YELLOW,
                 player.getName(),
                 ChatColor.WHITE,
-                StringEscapeUtils.escapeJava(e.getMessage()))
+                e.getMessage())
         );
     }
 
