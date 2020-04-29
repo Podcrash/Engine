@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly fileTree("../../libs")
+    compileOnly fileTree("../libs")
 
     implementation 'com.google.code.gson:gson:2.8.6'
 

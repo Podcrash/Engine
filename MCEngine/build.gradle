@@ -35,9 +35,9 @@ shadowJar {
 }
 
 dependencies {
-    compileOnly fileTree("../../libs")
+    compileOnly fileTree("../libs")
 
-    implementation project(path: ":Engine:DBEngine")
+    implementation project(path: ":DBEngine")
     implementation 'com.google.code.gson:gson:2.8.6'
 
     testImplementation 'org.bukkit:bukkit:1.8.8-R0.1-SNAPSHOT'
