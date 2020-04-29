@@ -10,7 +10,7 @@ pipeline {
 
     stage('Archive') {
       steps {
-        archiveArtifacts '/*/build/libs/*.jar'
+        archiveArtifacts '*/build/libs/*.jar'
       }
     }
 
