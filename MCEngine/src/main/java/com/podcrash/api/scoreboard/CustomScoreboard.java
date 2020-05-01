@@ -183,6 +183,12 @@ public class CustomScoreboard implements IScoreboard {
         return true;
     }
 
+    public boolean setDisplay(int line, String display) {
+        if (display.length() > 16) return false;
+        Bukkit.broadcastMessage("Line: " + line + " ScoreboardTeam: " + scoreboard.getTeam(Integer.toString(line)) + " Display: " + display);
+        return true;
+    }
+
     public boolean setSuffix(int line, String suffix) {
         if (suffix.length() > size)
             return false;
