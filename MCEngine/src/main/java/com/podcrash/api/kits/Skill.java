@@ -1,6 +1,7 @@
 package com.podcrash.api.kits;
 
 import com.podcrash.api.damage.DamageSource;
+import com.podcrash.api.effect.status.Status;
 import com.podcrash.api.game.TeamEnum;
 import com.podcrash.api.events.skill.SkillCooldownEvent;
 import com.podcrash.api.game.Game;
@@ -108,6 +109,11 @@ public abstract class Skill implements ISkill, DamageSource {
     public String getMustAirborneMessage() {
         return String.format("%s%s> %sYou cannot use %s%s%s while airborne.",
                 ChatColor.BLUE, getChampionsPlayer().getName() , ChatColor.GRAY, ChatColor.GREEN, getName(), ChatColor.GRAY);
+    }
+
+    public String getCannotUseWhileMessage(String reason) {
+        return String.format("%s%s> %sYou cannot use %s%s%s while %s%s",
+                ChatColor.BLUE, getChampionsPlayer().getName(), ChatColor.GRAY, ChatColor.GREEN, getName(), ChatColor.GRAY, ChatColor.YELLOW, reason);
     }
 
     public String getFailedMessage() {
