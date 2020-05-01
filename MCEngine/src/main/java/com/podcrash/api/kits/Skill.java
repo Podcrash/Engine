@@ -112,8 +112,8 @@ public abstract class Skill implements ISkill, DamageSource {
     }
 
     public String getCannotUseWhileMessage(String reason) {
-        return String.format("%s%s> %sYou cannot use %s%s%s while %s%s",
-                ChatColor.BLUE, getChampionsPlayer().getName(), ChatColor.GRAY, ChatColor.GREEN, getName(), ChatColor.GRAY, ChatColor.YELLOW, reason);
+        return String.format("%s%s> %sYou cannot use %s%s%s while %s%s%s.",
+                ChatColor.BLUE, getChampionsPlayer().getName(), ChatColor.GRAY, ChatColor.GREEN, getName(), ChatColor.GRAY, ChatColor.YELLOW, reason, ChatColor.GRAY);
     }
 
     public String getFailedMessage() {
