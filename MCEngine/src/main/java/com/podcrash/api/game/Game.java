@@ -590,9 +590,7 @@ public abstract class Game implements IGame {
 
         NametagEdit.getApi().setPrefix(player, prefix + color);
 
-        Nametag tag = NametagEdit.getApi().getNametag(player);
-        System.out.println(prefix + color);
-        System.out.println(tag.getPrefix());
+        NametagEdit.getApi().getNametag(player);
         /*
         if (rank != null) {
             player.setPlayerListName(String.format("%s %s%s",
