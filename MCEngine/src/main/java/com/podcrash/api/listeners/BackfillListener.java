@@ -126,7 +126,7 @@ public class BackfillListener extends ListenerBase {
             if (canBackfill) {
                 List<UUID> keysAsArray = new ArrayList<>(offlinePlayers.keySet());
                 UUID id = keysAsArray.get(0);
-                sendCanReplaceMessage(event.getPlayer(), id, offlinePlayers.get(id).getKey().getName());
+                sendCanReplaceMessage(event.getPlayer(), id, game.getTeam(Bukkit.getPlayer(id)).getName());
             } else if (!game.isFull()) {
                 sendCanJoinMessage(event.getPlayer());
             }
