@@ -110,6 +110,11 @@ public class CustomScoreboard implements IScoreboard {
         return prefix + team.getSuffix();
     }
 
+    public String getDisplayName(int i) {
+        Team team = scoreboard.getTeam(Integer.toString(i));
+        return team.getDisplayName();
+    }
+
     public void setLine(int line, String string) {
         // Initially empty strings to populate.
         String prefix = "";
@@ -185,7 +190,7 @@ public class CustomScoreboard implements IScoreboard {
 
     public boolean setDisplay(int line, String display) {
         if (display.length() > 16) return false;
-        Bukkit.broadcastMessage("Line: " + line + " ScoreboardTeam: " + scoreboard.getTeam(Integer.toString(line)) + " Display: " + display);
+        scoreboard.getTeam(Integer.toString(line)).setDisplayName(display);
         return true;
     }
 
