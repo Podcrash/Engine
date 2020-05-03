@@ -1,5 +1,6 @@
 package com.podcrash.api.damage;
 
+import com.comphenix.protocol.PacketType;
 import com.packetwrapper.abstractpackets.WrapperPlayServerEntityStatus;
 import com.podcrash.api.effect.status.StatusApplier;
 import com.podcrash.api.events.DamageApplyEvent;
@@ -224,7 +225,7 @@ public final class DamageQueue implements Runnable {
         if (!damageEvent.isDoKnockback())
             return;
         //if rooted don't deal the kb
-        if (entity instanceof Player && StatusApplier.getOrNew((Player) entity).isRooted())
+        if (StatusApplier.getOrNew(entity).isRooted())
             return;
         Cause cause = damageEvent.getCause();
         LivingEntity victim = damageEvent.getVictim();
@@ -244,6 +245,8 @@ public final class DamageQueue implements Runnable {
         String name = getNameFor(victim);
         Deque<Damage> history = damageHistory.get(name);
         if (history.size() == 0)
+            return false;
+        if (!(victim instanceof Player))
             return false;
         addDeath((Player) victim);
         Damage damage = history.getLast();
@@ -336,11 +339,11 @@ public final class DamageQueue implements Runnable {
 
         if (!evaluateGame(victim, attacker))
             return;
-        if (!(attacker instanceof Player) || !(victim instanceof Player))
+        if (!(attacker instanceof Player))
             return;
-        if (hasDeath((Player) attacker) || hasDeath((Player) victim))
+        if (victim instanceof Player && (hasDeath((Player) attacker) || hasDeath((Player) victim)))
             return; //if the attacker/victim is currently dead, don't process the damage at all
-        if (victim instanceof Player && cause == Cause.MELEE && StatusApplier.getOrNew((Player) victim).isCloaked())
+        if (cause == Cause.MELEE && StatusApplier.getOrNew(victim).isCloaked())
             return;
 
         double bonus = 0;

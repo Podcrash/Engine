@@ -316,10 +316,9 @@ public class GameListener extends ListenerBase {
         if (game == null)
             return;
         //if (game.getGameState() == GameState.LOBBY) return;
-        if (!(e.getAttacker() instanceof Player) && !(e.getVictim() instanceof Player))
+        if (!(e.getAttacker() instanceof Player) || !(e.getVictim() instanceof Player))
             return;
         boolean sameTeam = game.isOnSameTeam((Player) e.getAttacker(), (Player) e.getVictim());
-        System.out.println(e.getCause() + " sameTeam clause: " + sameTeam + " attacker: " + e.getAttacker() + " victim: " + e.getVictim());
         if (sameTeam)
             e.setCancelled(true);
     }

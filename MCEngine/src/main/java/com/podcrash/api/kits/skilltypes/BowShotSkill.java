@@ -98,11 +98,11 @@ public abstract class BowShotSkill extends Instant implements ICooldown {
         if(livingEntity != getPlayer()) return;
         if(!arrowForceMap.containsKey(proj)) return;
         getPlayer().sendMessage(getUsedMessage(event.getVictim()).replace("used", "shot"));
-        shotPlayer(event, (Player) proj.getShooter(), (Player) event.getVictim(), proj, arrowForceMap.get(proj));
+        shotEntity(event, (Player) proj.getShooter(), event.getVictim(), proj, arrowForceMap.get(proj));
 
         //proj.remove();
     }
-    protected abstract void shotPlayer(DamageApplyEvent event, Player shooter, Player victim, Arrow arrow, float force);
+    protected abstract void shotEntity(DamageApplyEvent event, Player shooter, LivingEntity victim, Arrow arrow, float force);
 
     /*
     Shooting the ground
