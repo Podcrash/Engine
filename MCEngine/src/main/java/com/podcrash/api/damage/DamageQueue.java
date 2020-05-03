@@ -143,7 +143,7 @@ public final class DamageQueue implements Runnable {
                 PlayerInventory inventory = ((Player) entity).getInventory();
                 inventory.clear();
                 inventory.setArmorContents(new ItemStack[]{null, null, null, null});
-            }
+            }else entity.setHealth(0);
             SoundPlayer.sendSound(entity.getLocation(), "game.neutral.die", 1, 75);
             die(entity);
             return true;
@@ -178,8 +178,8 @@ public final class DamageQueue implements Runnable {
         if (game.getGameState() == GameState.LOBBY)
             return true;
         //if the entities involved aren't players, then process the damage
-        if (!(victim instanceof Player) || !(attacker instanceof Player))
-            return false;
+        if (!(victim instanceof Player))
+            return true; //process non players as normal enemies (may need refactor)
         GameDamageEvent event = new GameDamageEvent(game, (Player) victim, (Player) attacker);
         Bukkit.getPluginManager().callEvent(event);
         return !event.isCancelled();
@@ -231,7 +231,6 @@ public final class DamageQueue implements Runnable {
         LivingEntity victim = damageEvent.getVictim();
         LivingEntity attacker = damageEvent.getAttacker();
         double[] modifiers = findVectorModifiers(damageEvent.getVelocityModifiers(), cause, damage);
-        System.out.println(Arrays.toString(modifiers));
         applyKnockback(victim, attacker, modifiers);
     }
 
