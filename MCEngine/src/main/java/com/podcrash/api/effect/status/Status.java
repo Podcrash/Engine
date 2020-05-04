@@ -3,7 +3,7 @@ package com.podcrash.api.effect.status;
 import org.bukkit.potion.PotionEffectType;
 
 public enum Status {
-    HASTE("Haste", PotionEffectType.FAST_DIGGING, true, false, 3),
+    HASTE("HASTE", PotionEffectType.FAST_DIGGING, true, false, 3),
     BLIND("BLIND", PotionEffectType.BLINDNESS, true, true, 15),
     DIZZY("NAUSEA", PotionEffectType.CONFUSION, true, true, 9),
     POISON("POISON", PotionEffectType.POISON, true, true, 19),
