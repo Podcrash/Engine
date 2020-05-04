@@ -92,7 +92,9 @@ public class StatusApplier {
      */
     public void applyStatus(Status status, float duration, int potency, boolean ambient, boolean override) {
         LivingEntity entity = getEntity();
+        PodcrashSpigot.debugLog(getEntity().getName() + " gained " + status.getName() + "2");
         if (entity == null && status == null) return;
+        PodcrashSpigot.debugLog(getEntity().getName() + " gained " + status.getName() + "3");
         StatusApplyEvent statusApplyEvent = new StatusApplyEvent(entity, status, duration, potency);
         Bukkit.getPluginManager().callEvent(statusApplyEvent);
         if (statusApplyEvent.isCancelled()) return;
