@@ -162,6 +162,7 @@ public class StatusApplier {
         final PotionEffect addpotion = new PotionEffect(status.getPotionEffectType(), duration, potency, ambient);
 
         Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
+            PodcrashSpigot.debugLog(entity + " is recieving " + status.getName());
             if (!entity.addPotionEffect(addpotion, override)) {
                 if (duration == Integer.MAX_VALUE && status == Status.SPEED)
                     PodcrashSpigot.getInstance().getLogger().info("speed not applied");

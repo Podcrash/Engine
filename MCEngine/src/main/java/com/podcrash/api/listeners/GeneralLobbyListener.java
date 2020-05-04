@@ -44,8 +44,6 @@ public class GeneralLobbyListener extends ListenerBase {
         ItemMeta meta = player.getItemInHand().getItemMeta();
         boolean isHoldingItem = meta.hasDisplayName() && meta.getDisplayName().toLowerCase().contains("enable lobby pvp");
 
-
-        System.out.println(isActioning + " " + isHoldingItem);
         if (isActioning && isHoldingItem) {
             SoundPlayer.sendSound(player, "random.pop", 1F, 63);
             DamageApplier.removeInvincibleEntity(player);

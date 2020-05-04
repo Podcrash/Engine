@@ -5,6 +5,7 @@ public enum ItemType {
     AXE("AXE"),
     SHOVEL("SPADE"),
     BOW("BOW"),
+    PICKAXE("PICKAXE"),
     NULL(null);
     private String name;
 
