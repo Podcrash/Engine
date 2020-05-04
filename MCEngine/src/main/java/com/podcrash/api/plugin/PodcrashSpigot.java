@@ -261,6 +261,7 @@ public class PodcrashSpigot extends PodcrashPlugin {
         registerCommand(new IncreaseMaxPlayersCommand());
         registerCommand(new DecreaseMaxPlayersCommand());
         registerCommand(new WhitelistCommand());
+        registerCommand(new FriendCommand());
     }
 
     public Configurator getConfigurator(String identifier) {
