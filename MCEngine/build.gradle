@@ -26,19 +26,23 @@ shadowJar {
         include (dependency("javax.cache:cache-api:1.0.0"))
         */
         exclude "spigot.jar"
+        exclude "com.nametagedit:nametagedit:4.4.6"
         //exclude(dependency("com.comphenix.protocol:ProtocolLib:4.4.0"))
 
     }
 
     relocate("io.netty", "org.redisson.netty")
-    minimize()
+    //todo: include everything in the packetwrapper, rather than minimizing
+    //minimize()
 }
 
 dependencies {
     compileOnly fileTree("../../libs")
 
     implementation project(path: ":Engine:DBEngine")
+    implementation project(path: ":Engine:PacketWrapper")
     implementation 'com.google.code.gson:gson:2.8.6'
+    implementation "com.nametagedit:nametagedit:4.4.6"
 
     testImplementation 'org.bukkit:bukkit:1.8.8-R0.1-SNAPSHOT'
     testImplementation 'org.slf4j:slf4j-simple:1.7.21'

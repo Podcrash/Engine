@@ -118,7 +118,7 @@ public class MapTable extends MongoBaseTable {
         SlimePlugin slimePlugin = getSlimePlugin();
 
         return getMetadataAsync(worldName, mode, mapClass).thenApplyAsync(map -> {
-            if(map == null) {
+            if (map == null) {
                 System.out.println(worldName + " doesn't exist!");
                 return null;
             }
@@ -177,7 +177,7 @@ public class MapTable extends MongoBaseTable {
      */
     public CompletableFuture<Void> uploadWorld(@Nonnull String worldName) {
         World world = Bukkit.getWorld(worldName);
-        if(world != null) Bukkit.unloadWorld(world, false);
+        if (world != null) Bukkit.unloadWorld(world, false);
 
         return CompletableFuture.runAsync(() -> {
             File folder = Bukkit.getWorldContainer().getAbsoluteFile();
@@ -197,9 +197,7 @@ public class MapTable extends MongoBaseTable {
     public List<String> getWorlds(String mode) {
         final List<String> worlds = new ArrayList<>();
         Bson select = Projections.fields(Projections.include("name"), Projections.excludeId());
-        Block<BaseMap> addToList = document -> {
-            worlds.add(document.getName());
-        };
+        Block<BaseMap> addToList = document -> worlds.add(document.getName());
         CountDownLatch latch = new CountDownLatch(1);
         getCollection(BaseMap.class)
             .find(Filters.eq("gamemode", mode.toLowerCase()))

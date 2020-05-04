@@ -55,13 +55,13 @@ public class WorldLoader extends MongoBaseTable implements SlimeLoader {// World
         CompletableFuture<ByteArrayOutputStream> future = new CompletableFuture<>();
         getCollection().find(Filters.eq("name", worldName)).first((res, t) -> {
             DBUtils.handleThrowables(t);
-            if(res == null) {
+            if (res == null) {
                 future.completeExceptionally(new UnknownWorldException(worldName));
                 return;
             }
-            if(!readOnly) {
+            if (!readOnly) {
                 long lockedMillis = res.getLong("locked");
-                if(System.currentTimeMillis() - lockedMillis <= MAX_LOCK_TIME)
+                if (System.currentTimeMillis() - lockedMillis <= MAX_LOCK_TIME)
                     future.completeExceptionally(new WorldInUseException(worldName));
 
                 updateLock(worldName, true);
@@ -130,7 +130,7 @@ public class WorldLoader extends MongoBaseTable implements SlimeLoader {// World
         CountDownLatch latch = new CountDownLatch(1);
         bucket.find(Filters.eq("filename", worldName)).first((result, t) -> {
             DBUtils.handleThrowables(t);
-            if(result != null)
+            if (result != null)
                 bucket.rename(result.getObjectId(), worldName + "_backup", ((result1, t1) -> {
                     DBUtils.handleThrowables(t);
                     latch.countDown();
@@ -150,7 +150,7 @@ public class WorldLoader extends MongoBaseTable implements SlimeLoader {// World
         getCollection().find(Filters.eq("name")).first((result, t) -> {
             DBUtils.handleThrowables(t);
             long lockMillis = lock ? System.currentTimeMillis() : 0L;
-            if(result == null) {
+            if (result == null) {
                 CountDownLatch latch3 = new CountDownLatch(1);
                 Document doc = new Document("name", worldName).append("locked", lockMillis);
                 getCollection().insertOne(doc, (result1, t1) -> latch3.countDown());
@@ -179,14 +179,14 @@ public class WorldLoader extends MongoBaseTable implements SlimeLoader {// World
             DBUtils.handleThrowables(t);
             updateResultF.complete(result);
         });
-        if(futureGuaranteeGet(updateResultF).getMatchedCount() == 0)
+        if (futureGuaranteeGet(updateResultF).getMatchedCount() == 0)
             throw new UnknownWorldException(worldName);
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public boolean isWorldLocked(String worldName) throws UnknownWorldException, IOException {
-        if(lockedWorlds.containsKey(worldName)) return true;
+        if (lockedWorlds.containsKey(worldName)) return true;
 
         CompletableFuture<Boolean> truth = new CompletableFuture<>();
         getCollection()
@@ -194,7 +194,7 @@ public class WorldLoader extends MongoBaseTable implements SlimeLoader {// World
             .projection(Projections.fields(Projections.include("locked"), Projections.excludeId()))
             .first((result, t) -> {
             DBUtils.handleThrowables(t);
-            if(result == null) truth.completeExceptionally(new UnknownWorldException(worldName));
+            if (result == null) truth.completeExceptionally(new UnknownWorldException(worldName));
             else truth.complete(System.currentTimeMillis() - result.getLong("locked") <= MAX_LOCK_TIME);
         });
 
@@ -205,18 +205,18 @@ public class WorldLoader extends MongoBaseTable implements SlimeLoader {// World
     @Override
     public void deleteWorld(String worldName) throws UnknownWorldException, IOException {
         ScheduledFuture future = lockedWorlds.remove(worldName);
-        if(future != null) future.cancel(false);
+        if (future != null) future.cancel(false);
 
         CompletableFuture<GridFSFile> fileFuture = new CompletableFuture<>();
         GridFSBucket bucket = GridFSBuckets.create(getDatabase(), getName());
         bucket.find(Filters.eq("filename", worldName)).first((result, t) -> {
             DBUtils.handleThrowables(t);
-            if(result == null) fileFuture.completeExceptionally(new UnknownWorldException(worldName));
+            if (result == null) fileFuture.completeExceptionally(new UnknownWorldException(worldName));
             else {
                 bucket.delete(result.getObjectId(), (result1, t1) -> DBUtils.handleThrowables(t1));
                 getCollection().find(Filters.eq("filename", worldName + "_backup")).first((result1, t1) -> {
                     DBUtils.handleThrowables(t1);
-                    if(result1 != null)
+                    if (result1 != null)
                         bucket.delete(result.getObjectId(), (result2, t2) -> DBUtils.handleThrowables(t1));
                 });
                 fileFuture.complete(result);

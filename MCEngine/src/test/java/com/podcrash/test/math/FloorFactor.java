@@ -1,6 +1,6 @@
 package com.podcrash.test.math;
 
-import com.podcrash.api.mc.util.MathUtil;
+import com.podcrash.api.util.MathUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;

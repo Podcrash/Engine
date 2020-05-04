@@ -2,8 +2,7 @@ package com.podcrash.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.podcrash.api.mc.util.ChatUtil;
-import org.junit.jupiter.api.Assertions;
+import com.podcrash.api.util.ChatUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

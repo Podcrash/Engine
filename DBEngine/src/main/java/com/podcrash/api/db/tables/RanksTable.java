@@ -137,11 +137,11 @@ public class RanksTable extends MongoBaseTable implements IPlayerDB {
         return getPlayerDocumentAsync(uuid, "ranks").thenApplyAsync(player -> {
             Set<Rank> output = new HashSet<>();
 
-            if(player == null) return output;
+            if (player == null) return output;
             Set<String> ranks = player.getRanks();
-            if(ranks == null) return output;
+            if (ranks == null) return output;
             Block<Rank> addRank = (rank) -> {
-                if(ranks.contains(rank.getName())) output.add(rank);
+                if (ranks.contains(rank.getName())) output.add(rank);
             };
             CompletableFuture<Void> future = new CompletableFuture<>();
             getCollection(Rank.class).find().forEach(addRank, (res, t) -> {
@@ -168,7 +168,7 @@ public class RanksTable extends MongoBaseTable implements IPlayerDB {
     public CompletableFuture<Boolean> hasRoleAsync(UUID uuid, final String role) {
         return getRanksAsync(uuid).thenApplyAsync(ranks -> {
             for(Rank r : ranks) {
-                if(r.getName().equals(role)) return true;
+                if (r.getName().equals(role)) return true;
             }
             return false;
         });

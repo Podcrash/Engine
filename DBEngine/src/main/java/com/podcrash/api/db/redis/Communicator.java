@@ -170,7 +170,7 @@ public class Communicator {
      */
     public static void readyGameLobby() {
         code = System.getProperty("lobby.code");
-        if(code != null && !code.isEmpty())
+        if (code != null && !code.isEmpty())
             controllerMessages.publish(code + " READY");
     }
 
@@ -209,7 +209,7 @@ public class Communicator {
     private static String[] getCredentials() {
         final String HOST = System.getenv("REDIS_HOST");
         final String PASS = System.getenv("REDIS_PASS");
-        if(HOST == null || PASS == null) {
+        if (HOST == null || PASS == null) {
             System.out.println(
                     "Failed to detect redis host and pass, stopping!\n" +
                     "Host: " + HOST + '\n' +

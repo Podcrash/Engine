@@ -33,7 +33,7 @@ public final class TableOrganizer {
     public static <T extends IConnection<?>> T getConnection(Class<T> clasz) {
         System.out.println("conn size: " + connections.size());
         for(IConnection<?> connection : connections)
-            if(connection.getClass() == clasz) return (T) connection;
+            if (connection.getClass() == clasz) return (T) connection;
         return null;
     }
 
