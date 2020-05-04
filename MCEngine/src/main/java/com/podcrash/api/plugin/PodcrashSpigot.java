@@ -18,7 +18,6 @@ import com.podcrash.api.tracker.VectorTracker;
 import com.podcrash.api.util.PlayerCache;
 import com.podcrash.api.world.SpawnWorldSetter;
 import com.podcrash.api.world.WorldManager;
-import javafx.scene.layout.BackgroundFill;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
