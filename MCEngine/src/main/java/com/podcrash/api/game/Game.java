@@ -998,6 +998,7 @@ public abstract class Game implements IGame {
         p.getInventory().clear();
         Inventory inv = p.getInventory();
 
+        //===Hotbar Items===
         if (isLobbyPVPing.contains(p)) {
             for (int i = 0; i < 9; i++) {
                 inv.setItem(i, hotbarSave[i]);
@@ -1010,6 +1011,13 @@ public abstract class Game implements IGame {
             ItemStackUtil.createItem(inv, 355, 1, 9, "&d&lReturn to Lobby");
         }
 
+        //PodcrashSpigot.debugLog(PodcrashSpigot.getInstance().getPPLOwner().toString());
+        //PodcrashSpigot.debugLog(p.getUniqueId().toString());
+        if (PodcrashSpigot.getInstance().getPPLOwner().equals(p.getUniqueId())) {
+            ItemStackUtil.createItem(inv, 404, 1, 8, "&ePPL Settings");
+        }
+
+        //===Inventory Items===
         ItemStackUtil.createItem(inv, 145, 1, 21, ChatUtil.chat("&6&lSelect Kit"));
 
         ItemStackUtil.createItem(inv, 421, 1, 23, ChatUtil.chat("&6&lSelect Team"));

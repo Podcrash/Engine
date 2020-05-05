@@ -230,6 +230,7 @@ public class PodcrashSpigot extends PodcrashPlugin {
         new KickListener(this);
         new SkillMaintainListener(this);
         new ApplyKitListener(this);
+        new PPLMenuListener(this);
     }
 
 
