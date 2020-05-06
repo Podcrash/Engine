@@ -1,8 +1,7 @@
 package com.podcrash.api.listeners;
 
-import com.podcrash.api.commands.IncreaseMaxPlayersCommand;
-import com.podcrash.api.game.GTeam;
-import com.podcrash.api.game.Game;
+import com.podcrash.api.commands.helpers.GameCommands;
+import com.podcrash.api.commands.helpers.PPLCommands;
 import com.podcrash.api.game.GameManager;
 import com.podcrash.api.plugin.PodcrashSpigot;
 import com.podcrash.api.util.ItemStackUtil;
@@ -10,7 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
@@ -124,42 +122,23 @@ public class PPLMenuListener extends ListenerBase {
         if (event.getInventory().getName().equals("PPL Settings")) {
             ItemStack selected = event.getCurrentItem();
             if (selected == null || selected.getItemMeta() == null) return;
+            if(!(event.getWhoClicked() instanceof Player)) return;
             String dispName = selected.getItemMeta().getDisplayName();
+            Player player = (Player) event.getWhoClicked();
             if (dispName.contains("Change Max Players")) {
                 if (event.getClick().isLeftClick()) {
-                    //TODO: get rid of nasty copy-and-paste code and refactor increase/decrease command
-                    Game game = GameManager.getGame();
-                    int currMax = game.getMaxPlayers() + 1;
-                    int possibleMax = game.getTeam(0).getMaxPlayers() * game.getTeams().size();
-                    game.setMaxPlayers(currMax);
-                    if (currMax > possibleMax) {
-                        for (GTeam team : game.getTeams()) {
-                            team.setMaxPlayers(team.getMaxPlayers() + 1);
-                        }
-                    }
+                    PPLCommands.increaseMaxPlayers();
                 } else if (event.getClick().isRightClick()) {
-                    Game game = GameManager.getGame();
-                    int currMax = game.getMaxPlayers();
-                    int target = currMax - 1;
-
-                    int currMaxForSingleTeam = 0;
-                    for (GTeam team : game.getTeams()) {
-                        if (team.getPlayers().size() > currMaxForSingleTeam) currMaxForSingleTeam = team.getPlayers().size();
-                    }
-
-                    //If we can even decrease at all
-                    if (target >= currMaxForSingleTeam * game.getTeams().size() && target >= game.getMinPlayers()) {
-                        game.setMaxPlayers(target);
-
-                        for (GTeam team : game.getTeams()) {
-                            team.setMaxPlayers((game.getMaxPlayers() + game.getTeams().size() - 1) / game.getTeams().size());
-                        }
-                    }
+                    PPLCommands.decreaseMaxPlayers();
                 }
             } else if (dispName.contains("Start Game")) {
-
+                GameCommands.startGame(player, false);
+                //Change the "start" item
+                player.openInventory(createMenu());
             } else if (dispName.contains("Stop Game")) {
-
+                GameCommands.endGame(player);
+                //Change the "start" item
+                player.openInventory(createMenu());
             } else if (dispName.contains("General PPL Settings")) {
 
             } else if (dispName.contains("Toggle Whitelist")) {

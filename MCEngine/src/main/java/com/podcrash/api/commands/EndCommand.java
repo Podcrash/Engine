@@ -1,5 +1,6 @@
 package com.podcrash.api.commands;
 
+import com.podcrash.api.commands.helpers.GameCommands;
 import com.podcrash.api.game.Game;
 import com.podcrash.api.game.GameManager;
 import com.podcrash.api.game.GameState;
@@ -21,24 +22,11 @@ public class EndCommand extends BukkitCommand {
 
     @Override
     public boolean execute(CommandSender sender, String label, String[] args) {
-        if (!sender.hasPermission("invicta.host")) {
+        if (!sender.hasPermission("invicta.host") || !(sender instanceof Player)) {
             sender.sendMessage(String.format("%sInvicta> %sYou have insufficient permissions to use that command.", ChatColor.BLUE, ChatColor.GRAY));
-        } else {
-            if (!(sender instanceof Player) || GameManager.getGame() == null)
-                return true;
-            if (GameManager.getGame().getGameState() == GameState.LOBBY) {
-                if (!GameManager.getGame().getTimer().getStatus().equals(GameManager.getGame().getTimer().getDefaultStatus())) {
-                    GameManager.getGame().getTimer().stop(false);
-                    sender.sendMessage(String.format("%sInvicta> %sStopping the countdown.", ChatColor.BLUE, ChatColor.GRAY));
-                    return true;
-                }
-                sender.sendMessage(String.format("%sInvicta> %sThe game has not started yet.", ChatColor.BLUE, ChatColor.GRAY));
-                return true;
-            }
-            Game game = GameManager.getGame();
-            GameManager.endGame(game);
             return true;
         }
+        GameCommands.endGame((Player) sender);
         return true;
     }
 }

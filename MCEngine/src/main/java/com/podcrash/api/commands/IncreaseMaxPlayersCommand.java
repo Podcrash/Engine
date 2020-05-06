@@ -1,5 +1,6 @@
 package com.podcrash.api.commands;
 
+import com.podcrash.api.commands.helpers.PPLCommands;
 import com.podcrash.api.game.GTeam;
 import com.podcrash.api.game.Game;
 import com.podcrash.api.game.GameManager;
@@ -19,15 +20,7 @@ public class IncreaseMaxPlayersCommand extends BukkitCommand {
     @Override
     public boolean execute(CommandSender sender, String label, String[] args) {
         if (!sender.hasPermission("invicta.host")) return true;
-        Game game = GameManager.getGame();
-        int currMax = game.getMaxPlayers() + 1;
-        int possibleMax = game.getTeam(0).getMaxPlayers() * game.getTeams().size();
-        game.setMaxPlayers(currMax);
-        if (currMax > possibleMax) {
-            for (GTeam team : game.getTeams()) {
-                team.setMaxPlayers(team.getMaxPlayers() + 1);
-            }
-        }
+        PPLCommands.increaseMaxPlayers();
         return true;
     }
 }
