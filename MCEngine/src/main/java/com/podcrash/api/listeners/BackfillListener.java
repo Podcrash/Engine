@@ -31,10 +31,9 @@ public class BackfillListener extends ListenerBase {
         super(plugin);
     }
 
-    public static boolean backfillSpectatorIntoGame(Player joiningPlayer, TeamEnum teamEnum) {
+    public static boolean backfillSpectatorIntoGame(Player joiningPlayer) {
         Game game = GameManager.getGame();
-        GTeam team = game.getTeam(teamEnum);
-        if (game.getGameState().equals(GameState.STARTED) && team.getPlayers().size() < team.getMaxPlayers() && GameManager.isSpectating(joiningPlayer)) {
+        if (!game.isFull() && game.getGameState().equals(GameState.STARTED) && GameManager.isSpectating(joiningPlayer)) {
             joiningPlayer.setGameMode(GameMode.SURVIVAL);
             game.addParticipant(joiningPlayer);
 
