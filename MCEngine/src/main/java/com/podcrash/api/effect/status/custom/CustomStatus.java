@@ -4,22 +4,26 @@ import com.podcrash.api.effect.status.Status;
 import com.podcrash.api.effect.status.StatusApplier;
 import com.podcrash.api.time.resources.TimeResource;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 /*
     Base class for
  */
 public abstract class CustomStatus implements TimeResource {
+    protected final boolean instancePlayer;
+
     private final Status status;
     private final StatusApplier applier;
-    private final Player player;
+    private final LivingEntity entity;
+
 
     protected StatusApplier getApplier() {
         return applier;
     }
 
-    protected Player getPlayer() {
-        return player;
+    protected LivingEntity getEntity() {
+        return entity;
     }
 
     public String getName() {
@@ -30,11 +34,12 @@ public abstract class CustomStatus implements TimeResource {
         return status;
     }
 
-    CustomStatus(Player player, Status status) {
+    CustomStatus(LivingEntity entity, Status status) {
         if (status.isVanilla()) throw new IllegalArgumentException("Status cannot be vanilla");
-        this.player = player;
+        this.instancePlayer = entity instanceof Player;
+        this.entity = entity;
         this.status = status;
-        this.applier = StatusApplier.getOrNew(player);
+        this.applier = StatusApplier.getOrNew(entity);
     }
 
     protected abstract void doWhileAffected();
@@ -60,12 +65,12 @@ public abstract class CustomStatus implements TimeResource {
     public void cleanup() {
         removeEffect();
         if (status != Status.INEPTITUDE && status != Status.SHOCK && status != Status.CLOAK)
-            player.sendMessage(String.format("%sCondition> %sYou have been cleared of %s.", ChatColor.BLUE, ChatColor.GRAY, status.getName()));
+            entity.sendMessage(String.format("%sCondition> %sYou have been cleared of %s.", ChatColor.BLUE, ChatColor.GRAY, status.getName()));
     }
 
     @Override
     public String toString(){
-        return String.format("%s{%s:%.2f}", this.getClass().getSimpleName(), player.getName(), applier.getRemainingDuration(status));
+        return String.format("%s{%s:%.2f}", this.getClass().getSimpleName(), entity.getName(), applier.getRemainingDuration(status));
     }
 
 }

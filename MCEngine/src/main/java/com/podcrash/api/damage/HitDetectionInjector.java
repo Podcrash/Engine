@@ -1,5 +1,6 @@
 package com.podcrash.api.damage;
 
+import com.google.common.collect.EvictingQueue;
 import com.packetwrapper.abstractpackets.WrapperPlayClientUseEntity;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -8,10 +9,13 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
 import com.comphenix.protocol.wrappers.EnumWrappers;
+import com.podcrash.api.disguise.Disguise;
+import com.podcrash.api.disguise.Disguiser;
 import com.podcrash.api.effect.status.StatusApplier;
 import com.podcrash.api.plugin.PodcrashSpigot;
 import net.minecraft.server.v1_8_R3.EntityLiving;
 import net.minecraft.server.v1_8_R3.GenericAttributes;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
@@ -22,6 +26,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.HashMap;
+import java.util.UUID;
 
 /**
  * This class is focused on attaching the injectors to **attackers**.
@@ -31,7 +36,7 @@ public final class HitDetectionInjector {
     private static final HashMap<String, HitDetectionInjector> injectors = new HashMap<>();
     public static long delay = 400; //this is in milliseconds to ticks
     private final PacketListener listener;
-    private final HashMap<String, Long> delays = new HashMap<>();
+    private final HashMap<Integer, Long> delays = new HashMap<>();
     private final HashMap<String, Long> deathDelay = new HashMap<>();
     private final Player player;
 
@@ -50,8 +55,12 @@ public final class HitDetectionInjector {
                 Player attacker = event.getPlayer();
                 if (event.getPlayer() != player)
                     return;
-                //if the action is not attack or a living thing, stop
-                if (!(action == EnumWrappers.EntityUseAction.ATTACK && entity instanceof LivingEntity))
+                //if the action is not attack, cancel (allow living entities this time)
+                if (action != EnumWrappers.EntityUseAction.ATTACK)
+                    return;
+                if (entity == null)
+                    entity = findEntity(packet.getTargetID());
+                if (!(entity instanceof LivingEntity))
                     return;
                 LivingEntity victim = (LivingEntity) entity;
                 //if the player is in spectator mode, don't bother
@@ -63,12 +72,12 @@ public final class HitDetectionInjector {
 
                 event.setCancelled(true);
                 //if there is still a delay, cancel
-                if (delays.containsKey(victim.getName())) {
-                    long deltaTime = System.currentTimeMillis() - delays.get(victim.getName());
+                if (delays.containsKey(victim.getEntityId())) {
+                    long deltaTime = System.currentTimeMillis() - delays.get(victim.getEntityId());
                     if ((deltaTime) < delay)
                         return;
                 }
-                delays.put(victim.getName(), System.currentTimeMillis());
+                delays.put(victim.getEntityId(), System.currentTimeMillis());
                 //victim has no death delay (avoids hitting a person while dead
                 //the victim is invis
                 //if the attacker is blocking
@@ -91,12 +100,15 @@ public final class HitDetectionInjector {
                 }
 
                 //Bukkit.broadcastMessage(String.format("Damager: %s Victim: %s", player.getName(), entityPlayer.getName()));
-
             }
         };
         injectors.put(p.getName(), this);
     }
 
+    private Entity findEntity(int targetID) {
+        Disguise possDisguise = Disguiser.getSeenDisguises().get(targetID);
+        return possDisguise.getEntity();
+    }
     /**
      * Inject the custom hit detection to any user
      */

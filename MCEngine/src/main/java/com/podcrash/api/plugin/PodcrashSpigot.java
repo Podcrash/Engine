@@ -18,7 +18,6 @@ import com.podcrash.api.tracker.VectorTracker;
 import com.podcrash.api.util.PlayerCache;
 import com.podcrash.api.world.SpawnWorldSetter;
 import com.podcrash.api.world.WorldManager;
-import javafx.scene.layout.BackgroundFill;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -229,6 +228,9 @@ public class PodcrashSpigot extends PodcrashPlugin {
         new GeneralLobbyListener(this);
         new GenEconListener(this);
         new KickListener(this);
+
+        new SkillMaintainListener(this);
+        new ApplyKitListener(this);
     }
 
 
@@ -341,7 +343,7 @@ public class PodcrashSpigot extends PodcrashPlugin {
 
     public static void debugLog(String message) {
         if(DEBUG)
-            getInstance().getLogger().log(Level.FINE, message);
+            getInstance().getLogger().info(message);
     }
 
     public static void debugErr(String message) {

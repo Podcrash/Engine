@@ -1,5 +1,6 @@
 package com.podcrash.api.damage;
 
+import com.comphenix.protocol.PacketType;
 import com.packetwrapper.abstractpackets.WrapperPlayServerEntityStatus;
 import com.podcrash.api.effect.status.StatusApplier;
 import com.podcrash.api.events.DamageApplyEvent;
@@ -142,7 +143,7 @@ public final class DamageQueue implements Runnable {
                 PlayerInventory inventory = ((Player) entity).getInventory();
                 inventory.clear();
                 inventory.setArmorContents(new ItemStack[]{null, null, null, null});
-            }
+            }else entity.setHealth(0);
             SoundPlayer.sendSound(entity.getLocation(), "game.neutral.die", 1, 75);
             die(entity);
             return true;
@@ -177,8 +178,8 @@ public final class DamageQueue implements Runnable {
         if (game.getGameState() == GameState.LOBBY)
             return true;
         //if the entities involved aren't players, then process the damage
-        if (!(victim instanceof Player) || !(attacker instanceof Player))
-            return false;
+        if (!(victim instanceof Player))
+            return true; //process non players as normal enemies (may need refactor)
         GameDamageEvent event = new GameDamageEvent(game, (Player) victim, (Player) attacker);
         Bukkit.getPluginManager().callEvent(event);
         return !event.isCancelled();
@@ -224,13 +225,12 @@ public final class DamageQueue implements Runnable {
         if (!damageEvent.isDoKnockback())
             return;
         //if rooted don't deal the kb
-        if (entity instanceof Player && StatusApplier.getOrNew((Player) entity).isRooted())
+        if (StatusApplier.getOrNew(entity).isRooted())
             return;
         Cause cause = damageEvent.getCause();
         LivingEntity victim = damageEvent.getVictim();
         LivingEntity attacker = damageEvent.getAttacker();
         double[] modifiers = findVectorModifiers(damageEvent.getVelocityModifiers(), cause, damage);
-        System.out.println(Arrays.toString(modifiers));
         applyKnockback(victim, attacker, modifiers);
     }
 
@@ -244,6 +244,8 @@ public final class DamageQueue implements Runnable {
         String name = getNameFor(victim);
         Deque<Damage> history = damageHistory.get(name);
         if (history.size() == 0)
+            return false;
+        if (!(victim instanceof Player))
             return false;
         addDeath((Player) victim);
         Damage damage = history.getLast();
@@ -336,11 +338,11 @@ public final class DamageQueue implements Runnable {
 
         if (!evaluateGame(victim, attacker))
             return;
-        if (!(attacker instanceof Player) || !(victim instanceof Player))
+        if (!(attacker instanceof Player))
             return;
-        if (hasDeath((Player) attacker) || hasDeath((Player) victim))
+        if (victim instanceof Player && (hasDeath((Player) attacker) || hasDeath((Player) victim)))
             return; //if the attacker/victim is currently dead, don't process the damage at all
-        if (victim instanceof Player && cause == Cause.MELEE && StatusApplier.getOrNew((Player) victim).isCloaked())
+        if (cause == Cause.MELEE && StatusApplier.getOrNew(victim).isCloaked())
             return;
 
         double bonus = 0;

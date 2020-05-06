@@ -4,6 +4,7 @@ import com.podcrash.api.damage.DamageApplier;
 import com.podcrash.api.disguise.Disguise;
 import com.podcrash.api.disguise.Disguiser;
 import com.podcrash.api.effect.status.ThrowableStatusApplier;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -46,6 +47,7 @@ public class GameDamagerConverterListener extends ListenerBase {
             return;
         if (System.currentTimeMillis() < delay.getOrDefault(event.getEntity().getName(), 0L))
             return;
+
         Disguise possDisguise = Disguiser.getSeenDisguises().get(event.getEntity().getEntityId());
         if (handleDisguise(possDisguise, event))
             return;
@@ -63,10 +65,7 @@ public class GameDamagerConverterListener extends ListenerBase {
      */
     private boolean handleDisguise(Disguise possDisguise, EntityDamageByEntityEvent event) {
         if (possDisguise == null) return false;
-        if (!(possDisguise.getEntity() instanceof Player)) {
-            ((LivingEntity) possDisguise.getEntity()).damage(event.getDamage(), event.getDamager());
-            return true;
-        }
+
         Arrow arrow = (Arrow) event.getDamager();
         event.setCancelled(true);
         DamageApplier.damage((LivingEntity) event.getEntity(), (LivingEntity) arrow.getShooter(), event.getDamage(), arrow, true);

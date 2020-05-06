@@ -7,6 +7,9 @@ import com.podcrash.api.time.TimeHandler;
 import com.podcrash.api.plugin.PodcrashSpigot;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -21,8 +24,12 @@ import java.util.function.Consumer;
  * TODO: Rewrite
  */
 public class StatusApplier {
-    private final Player player;
-    private static final Map<String, StatusApplier> appliers = new HashMap<>();
+    private static final Map<UUID, StatusApplier> appliers = new HashMap<>();
+    private final Object invisLock;
+    
+    private final UUID entityUUID;
+    private final UUID worldUUID;
+
     private long cloaked;
     private long marked;
     private long silenced;
@@ -31,31 +38,51 @@ public class StatusApplier {
     private long grounded;
     private long inept;
     private long bleeded;
-
-    private final Object invisLock;
-
-    private StatusApplier(Player p) {
-        this.player = p;
+    
+    private StatusApplier(LivingEntity entity) {
+        this.entityUUID = entity.getUniqueId();
+        this.worldUUID = entity.getWorld().getUID();
         this.invisLock = new Object();
     }
 
-    public static StatusApplier getOrNew(Player player) {
-        if (!appliers.containsKey(player.getName())) {
-            appliers.put(player.getName(), new StatusApplier(player));
-        }
-        return appliers.get(player.getName());
-    }
+
     public static StatusApplier getOrNew(LivingEntity entity) {
-        if (entity instanceof Player) return getOrNew((Player) entity);
-        else throw new IllegalArgumentException("This is current a stub!");
+        if (!appliers.containsKey(entity.getUniqueId())) {
+            appliers.put(entity.getUniqueId(), new StatusApplier(entity));
+        }
+
+        StatusApplier applier = appliers.get(entity.getUniqueId());
+        if (applier.getEntity() == null) {
+            StatusApplier newApplier = new StatusApplier(entity);
+            appliers.put(entity.getUniqueId(), newApplier);
+            return newApplier;
+        } else return applier;
     }
 
-    public static void remove(Player player) {
-        appliers.remove(player.getName());
+    public static void remove(Player entity) {
+        appliers.remove(entity.getUniqueId());
     }
 
+    private LivingEntity getEntity() {
+        //find the player's:
+        Player p = Bukkit.getPlayer(entityUUID);
+        if (p != null)
+            return p;
+        World world = Bukkit.getWorld(worldUUID);
+        if (world == null) return null;
+        for (Chunk chunk : world.getLoadedChunks()) {
+            Entity[] entities = chunk.getEntities();
+            for (Entity entity : entities) {
+                if (entity instanceof LivingEntity && entity.getUniqueId().equals(entityUUID))
+                    return (LivingEntity) entity;
+            }
+        }
+        //check to see if this part happens a lot
+        PodcrashSpigot.getInstance().getLogger().info("NULL! getEntity");
+        return null;
+    }
     /**
-     * Apply a status to a player.
+     * Apply a status to a entity.
      *
      * @param status
      * @param duration
@@ -64,8 +91,11 @@ public class StatusApplier {
      * @param override if true, override the current effect
      */
     public void applyStatus(Status status, float duration, int potency, boolean ambient, boolean override) {
-        if (player == null && status == null) return;
-        StatusApplyEvent statusApplyEvent = new StatusApplyEvent(player, status, duration, potency);
+        LivingEntity entity = getEntity();
+        PodcrashSpigot.debugLog(getEntity().getName() + " gained " + status.getName() + "2");
+        if (entity == null && status == null) return;
+        PodcrashSpigot.debugLog(getEntity().getName() + " gained " + status.getName() + "3");
+        StatusApplyEvent statusApplyEvent = new StatusApplyEvent(entity, status, duration, potency);
         Bukkit.getPluginManager().callEvent(statusApplyEvent);
         if (statusApplyEvent.isCancelled()) return;
         int iduration = (int) (duration * 20f);
@@ -129,10 +159,13 @@ public class StatusApplier {
     }
 
     private void applyVanilla(@Nonnull Status status, int duration, int potency, boolean ambient, boolean override) {
+        LivingEntity entity = getEntity();
+
         final PotionEffect addpotion = new PotionEffect(status.getPotionEffectType(), duration, potency, ambient);
 
         Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
-            if (!player.addPotionEffect(addpotion, override)) {
+            PodcrashSpigot.debugLog(entity + " is recieving " + status.getName());
+            if (!entity.addPotionEffect(addpotion, override)) {
                 if (duration == Integer.MAX_VALUE && status == Status.SPEED)
                     PodcrashSpigot.getInstance().getLogger().info("speed not applied");
             } else if (duration == Integer.MAX_VALUE && status == Status.SPEED)
@@ -148,29 +181,32 @@ public class StatusApplier {
     }
 
     public void removeVanilla(Status status) {
-        if (status == null) return;
+        LivingEntity entity = getEntity();
+        if (entity == null && status == null) return;
         PotionEffect effect = status.getPotionEffectType().createEffect(0, 0);
-        StatusRemoveEvent removeEvent = new StatusRemoveEvent(this.player, status);
+        StatusRemoveEvent removeEvent = new StatusRemoveEvent(entity, status);
         Bukkit.getPluginManager().callEvent(removeEvent);
         if (removeEvent.isCancelled()) return;
         
-        if (player.hasPotionEffect(status.getPotionEffectType())) {
+        if (entity.hasPotionEffect(status.getPotionEffectType())) {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    player.addPotionEffect(effect, true);
+                    entity.addPotionEffect(effect, true);
                 }
             }.runTaskLater(PodcrashSpigot.getInstance(), 1L);
         }
     }
 
     public void removeCustom(Status status) {
-        StatusRemoveEvent removeEvent = new StatusRemoveEvent(this.player, status);
+        LivingEntity entity = getEntity();
+        if (entity == null) return;
+        StatusRemoveEvent removeEvent = new StatusRemoveEvent(entity, status);
         Bukkit.getPluginManager().callEvent(removeEvent);
         if (removeEvent.isCancelled()) return;
         switch (status) {
             case FIRE:
-                this.player.setFireTicks(0);
+                entity.setFireTicks(0);
                 break;
             case CLOAK:
                 removeCloak();
@@ -203,10 +239,12 @@ public class StatusApplier {
     potency is pretty irrelevant to these effects
      */
     private void applyCustom(Status status, int duration, int potency) {
+        LivingEntity entity = getEntity();
+        if (entity == null) return;
         duration = duration * 50; // duration seconds * 1000millis/1 seconds * 1/ 20 ticks
         switch (status) {
             case FIRE:
-                this.player.setFireTicks(duration / 50);
+                entity.setFireTicks(duration / 50);
                 break;
             case CLOAK:
                 applyCloak(duration);
@@ -225,7 +263,8 @@ public class StatusApplier {
                 break;
             case GROUND:
                 applyGround(duration);
-                this.player.setSprinting(false);
+                if (entity instanceof Player)
+                    ((Player) entity).setSprinting(false);
                 break;
             case INEPTITUDE:
                 applyInept(duration);
@@ -237,6 +276,9 @@ public class StatusApplier {
     }
 
     private void applyCloak(final int duration) {
+        LivingEntity entity = getEntity();
+        if (!(entity instanceof Player)) return;
+        Player player = (Player) entity;
         if (!isCloaked()) {
             Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
                 for (Player p : player.getWorld().getPlayers()) {
@@ -245,7 +287,7 @@ public class StatusApplier {
 
             });
             cloaked = System.currentTimeMillis() + duration; //Duplicating code b/c it needs to happen after isCloaked check, but before cloakstatus creation
-            player.sendMessage(String.format("%sCondition> %sYou are now invisible.", ChatColor.BLUE, ChatColor.GRAY));
+            entity.sendMessage(String.format("%sCondition> %sYou are now invisible.", ChatColor.BLUE, ChatColor.GRAY));
             TimeHandler.repeatedTime(1L, 0, new CloakStatus(player));
         } else {
             cloaked = System.currentTimeMillis() + duration;
@@ -253,67 +295,74 @@ public class StatusApplier {
     }
 
     private void applyMarked(int duration, int potency) {
-        player.sendMessage(String.format("%sCondition> %sYou are now marked for %s%d %sseconds!", ChatColor.BLUE, ChatColor.GRAY, ChatColor.GREEN, (duration / 1000), ChatColor.GRAY));
+        LivingEntity entity = getEntity();
+        entity.sendMessage(String.format("%sCondition> %sYou are now marked for %s%d %sseconds!", ChatColor.BLUE, ChatColor.GRAY, ChatColor.GREEN, (duration / 1000), ChatColor.GRAY));
         if (!isMarked()) {
             marked = System.currentTimeMillis() + duration;
-            TimeHandler.repeatedTime(1, 0, new MarkedStatus(player));
+            TimeHandler.repeatedTime(1, 0, new MarkedStatus(entity));
         } else {
             marked = System.currentTimeMillis() + duration;
         }
     }
 
     private void applySilence(int duration) {
-        player.sendMessage(String.format("%sCondition> %sYou are now silenced for %s%d %sseconds!", ChatColor.BLUE, ChatColor.GRAY, ChatColor.GREEN, (duration / 1000), ChatColor.GRAY));
+        LivingEntity entity = getEntity();
+        entity.sendMessage(String.format("%sCondition> %sYou are now silenced for %s%d %sseconds!", ChatColor.BLUE, ChatColor.GRAY, ChatColor.GREEN, (duration / 1000), ChatColor.GRAY));
         if (!isSilenced()) {
             silenced = System.currentTimeMillis() + duration;
-            TimeHandler.repeatedTime(1, 0, new SilenceStatus(player));
+            TimeHandler.repeatedTime(1, 0, new SilenceStatus(entity));
         } else {
             silenced = System.currentTimeMillis() + duration;
         }
     }
 
     private void applyShock(int duration) {
+        LivingEntity entity = getEntity();
         if (!isShocked()) {
             shocked = System.currentTimeMillis() + duration;
-            //player.sendMessage(String.format("%sCondition> %sYou are now shocked for %s%d %sseconds!",ChatColor.BLUE, ChatColor.GRAY, ChatColor.GREEN, (duration / 1000), ChatColor.GRAY));
-            TimeHandler.repeatedTime(1, 0, new ShockStatus(player));
+            //entity.sendMessage(String.format("%sCondition> %sYou are now shocked for %s%d %sseconds!",ChatColor.BLUE, ChatColor.GRAY, ChatColor.GREEN, (duration / 1000), ChatColor.GRAY));
+            TimeHandler.repeatedTime(1, 0, new ShockStatus(entity));
         } else {
             shocked = System.currentTimeMillis() + duration;
         }
     }
 
     private void applyRoot(int duration) {
-        player.sendMessage(String.format("%sCondition> %sYou are now rooted for %s%d %sseconds!", ChatColor.BLUE, ChatColor.GRAY, ChatColor.GREEN, (duration / 1000), ChatColor.GRAY));
+        LivingEntity entity = getEntity();
+        entity.sendMessage(String.format("%sCondition> %sYou are now rooted for %s%d %sseconds!", ChatColor.BLUE, ChatColor.GRAY, ChatColor.GREEN, (duration / 1000), ChatColor.GRAY));
         if (!isRooted()) {
             rooted = System.currentTimeMillis() + duration;
-            TimeHandler.repeatedTime(1, 1, new RootedStatus(player));
+            TimeHandler.repeatedTime(1, 1, new RootedStatus(entity));
         } else {
             rooted = System.currentTimeMillis() + duration;
         }
     }
 
     private void applyGround(int duration) {
+        LivingEntity entity = getEntity();
         if (!isGrounded()) {
             grounded = System.currentTimeMillis() + duration;
-            TimeHandler.repeatedTime(1, 1, new GroundStatus(player));
+            TimeHandler.repeatedTime(1, 1, new GroundStatus(entity));
         } else {
             grounded = System.currentTimeMillis() + duration;
         }
     }
 
     private void applyInept(int duration) {
+        LivingEntity entity = getEntity();
         if (!isInept()) {
             inept = System.currentTimeMillis() + duration;
-            TimeHandler.repeatedTime(1, 1, new IneptStatus(player));
+            TimeHandler.repeatedTime(1, 1, new IneptStatus(entity));
         } else {
             inept = System.currentTimeMillis() + duration;
         }
     }
 
     private void applyBleed(int duration) {
+        LivingEntity entity = getEntity();
         if (!isBleeding()) {
             bleeded = System.currentTimeMillis() + duration;
-            TimeHandler.repeatedTime(1, 1, new BleedStatus(player));
+            TimeHandler.repeatedTime(1, 1, new BleedStatus(entity));
         } else {
             bleeded = System.currentTimeMillis() + duration;
         }
@@ -352,12 +401,16 @@ public class StatusApplier {
     }
 
     public void removeCloak() {
+        LivingEntity e = getEntity();
+        if (!(e instanceof Player))
+            return;
         cloaked = 0;
-        List<Player> players = this.player.getWorld().getPlayers();
-        for (Player player : players) {
+        List<Player> entitys = e.getWorld().getPlayers();
+        for (Player entity : entitys) {
+            Player player = (Player) e;
             synchronized (invisLock) {
-                if (this.player != player && !player.canSee(this.player)) {
-                    player.showPlayer(this.player);
+                if (entity != player && !entity.canSee(player)) {
+                    entity.showPlayer(player);
                 }
             }
         }
@@ -378,7 +431,10 @@ public class StatusApplier {
 
     public void removeRoot() {
         rooted = 0;
-        this.player.setSaturation(20);
+        LivingEntity entity = getEntity();
+        if (!(entity instanceof Player))
+            return;
+        ((Player) getEntity()).setSaturation(20);
     }
 
     public void removeGround() {
@@ -433,14 +489,14 @@ public class StatusApplier {
 
     public List<Status> getEffects() {
         List<Status> statuses = new ArrayList<>();
-        this.player.getActivePotionEffects().forEach((potionEffect) -> {
+        getEntity().getActivePotionEffects().forEach((potionEffect) -> {
             for (Status status : Status.values()) {
                 if (potionEffect.getType().hashCode() == status.getId()) {
                     statuses.add(status);
                 }
             }
         });
-        if (this.player.getFireTicks() > 0) statuses.add(Status.FIRE);
+        if (getEntity().getFireTicks() > 0) statuses.add(Status.FIRE);
         if (isCloaked()) statuses.add(Status.CLOAK);
         if (isMarked()) statuses.add(Status.MARKED);
         if (isShocked()) statuses.add(Status.SHOCK);
@@ -465,7 +521,7 @@ public class StatusApplier {
     }
     private StatusWrapper fromPotionEffect(Status status) {
         PotionEffect e = null;
-        for(PotionEffect effect : player.getActivePotionEffects()) {
+        for(PotionEffect effect : getEntity().getActivePotionEffects()) {
             if (effect.getType().hashCode() == status.getId()) {
                 e = effect;
                 break;
@@ -479,11 +535,11 @@ public class StatusApplier {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         StatusApplier that = (StatusApplier) o;
-        return player.getName().equals(that.player.getName());
+        return getEntity().getName().equals(that.getEntity().getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(player.getName());
+        return Objects.hash(getEntity().getName());
     }
 }
