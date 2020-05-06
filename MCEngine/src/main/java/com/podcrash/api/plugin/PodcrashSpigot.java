@@ -228,7 +228,6 @@ public class PodcrashSpigot extends PodcrashPlugin {
         new GeneralLobbyListener(this);
         new GenEconListener(this);
         new KickListener(this);
-
         new SkillMaintainListener(this);
         new ApplyKitListener(this);
     }

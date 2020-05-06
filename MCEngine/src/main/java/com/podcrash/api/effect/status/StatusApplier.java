@@ -92,9 +92,7 @@ public class StatusApplier {
      */
     public void applyStatus(Status status, float duration, int potency, boolean ambient, boolean override) {
         LivingEntity entity = getEntity();
-        PodcrashSpigot.debugLog(getEntity().getName() + " gained " + status.getName() + "2");
         if (entity == null && status == null) return;
-        PodcrashSpigot.debugLog(getEntity().getName() + " gained " + status.getName() + "3");
         StatusApplyEvent statusApplyEvent = new StatusApplyEvent(entity, status, duration, potency);
         Bukkit.getPluginManager().callEvent(statusApplyEvent);
         if (statusApplyEvent.isCancelled()) return;
@@ -164,12 +162,11 @@ public class StatusApplier {
         final PotionEffect addpotion = new PotionEffect(status.getPotionEffectType(), duration, potency, ambient);
 
         Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
-            PodcrashSpigot.debugLog(entity + " is recieving " + status.getName());
             if (!entity.addPotionEffect(addpotion, override)) {
                 if (duration == Integer.MAX_VALUE && status == Status.SPEED)
-                    PodcrashSpigot.getInstance().getLogger().info("speed not applied");
+                    PodcrashSpigot.debugLog("speed not applied");
             } else if (duration == Integer.MAX_VALUE && status == Status.SPEED)
-                PodcrashSpigot.getInstance().getLogger().info("speed applied");
+                PodcrashSpigot.debugLog("speed applied");
         });
 
     }
