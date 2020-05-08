@@ -82,7 +82,7 @@ public class EconomyHandler {
             pluginManager.callEvent(attempt);
             double cost = attempt.getCost();
 
-            boolean canPay = currency.getGold() > cost;
+            boolean canPay = currency.getGold() >= cost;
 
             if (canPay) {
                 BuySuccessEvent success = new BuySuccessEvent(player, finalItem, cost, currency.getGold());
