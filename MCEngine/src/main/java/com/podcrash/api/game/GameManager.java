@@ -171,14 +171,21 @@ public class GameManager {
     // TODO: This is assuming blue and red team enums, which are subject to change.
     public static void randomTeam(Player player) {
         Game game = currentGame;
-        int red = game.getTeam(0).teamSize();
-        int blue = game.getTeam(1).teamSize();
-        if (blue > red)
-            joinTeam(player, TeamEnum.RED);
-        else if (red > blue)
-            joinTeam(player, TeamEnum.BLUE);
+        //refactor to use multiple teams
+        GTeam oneTeam = game.getTeam(0);
+        GTeam twoTeam = game.getTeam(1);
+        int oneSize = oneTeam.teamSize();
+        int twoSize = twoTeam.teamSize();
+
+        TeamEnum oneEnum = oneTeam.getTeamEnum();
+        TeamEnum twoEnum = twoTeam.getTeamEnum();
+
+        if (twoSize > oneSize)
+            joinTeam(player, oneEnum);
+        else if (oneSize > twoSize)
+            joinTeam(player, twoEnum);
         else //they are equal, good-ol RNG!
-            joinTeam(player, new TeamEnum[]{TeamEnum.RED, TeamEnum.BLUE}[(int) (Math.random() + 0.5D)]);
+            joinTeam(player, new TeamEnum[]{oneEnum, twoEnum}[(int) (Math.random() + 0.5D)]);
 
     }
     public static void joinTeam(Player player, TeamEnum teamEnum) {

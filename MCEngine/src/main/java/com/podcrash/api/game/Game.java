@@ -1112,13 +1112,15 @@ public abstract class Game implements IGame {
         }
     }
 
-    // TODO: Change this to work with more than 2 teams.
     @Override
     public String toString() {
-        return String.format("%s{Game %d}%s[%d/%d]%s:\n %s\n %s\n %s\n \n %s",
+        StringBuilder builder = new StringBuilder("\n");
+        for(GTeam team : teams)
+            builder.append(team.niceLooking());
+        builder.append("\n");
+        return String.format("%s{Game %d}%s[%d/%d]%s:\n %s %s\n \n %s",
                 ChatColor.GREEN, id, ChatColor.WHITE, size(), getMaxPlayers(), ChatColor.GRAY,
-                niceLookingTeam(TeamEnum.RED),
-                niceLookingTeam(TeamEnum.BLUE),
+                builder.toString(),
                 niceLookingUnsorted(),
                 niceLookingSpec());
     }

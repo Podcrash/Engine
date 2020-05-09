@@ -1,8 +1,10 @@
 package com.podcrash.api.commands;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
+import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 
@@ -20,11 +22,17 @@ public class TellCommand extends BukkitCommand {
 
     @Override
     public boolean execute(CommandSender sender, String label, String[] args) {
-        //TODO make this better
         if (sender.hasPermission("invicta.mute")) {
             sender.sendMessage(String.format("%sInvicta> %sNice try, you are still muted.", ChatColor.BLUE, ChatColor.GRAY));
         } else {
-            sender.sendMessage(String.format("%sInvicta> %sThe /tell command is currently disabled.", ChatColor.BLUE, ChatColor.GRAY));
+            String targetName = args[0];
+            Player p = Bukkit.getPlayer(targetName);
+            if (p == null) {
+                sender.sendMessage(String.format("%sInvicta> %s%s is not an actual player!", ChatColor.BLUE, ChatColor.GRAY, targetName));
+                return true;
+            }
+            String restOfMsg = String.join(" ", Arrays.copyOfRange(args, 1, args.length - 1));
+            p.sendMessage(String.format("[%s -> %s] %s", sender.getName(), targetName, restOfMsg));
         }
         return true;
     }

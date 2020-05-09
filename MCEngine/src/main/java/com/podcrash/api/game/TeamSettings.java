@@ -10,6 +10,7 @@ public final class TeamSettings {
         this.min = 1;
         this.max = 5;
 
+        //default
         this.teamColors = new TeamEnum[]{TeamEnum.RED, TeamEnum.BLUE};
     }
 
