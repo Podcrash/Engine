@@ -1,5 +1,6 @@
 package com.podcrash.api.commands;
 
+import com.podcrash.api.commands.helpers.PPLCommands;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -24,18 +25,20 @@ public class WhitelistCommand extends BukkitCommand {
                 Collections.emptyList());
     }
 
-    //by default, mps systems will have no wls enabled
-    private boolean whitelistOn = false;
     @Override
     public boolean execute(CommandSender sender, String label, String[] args) {
         if (!sender.hasPermission("invicta.host")) return true;
 
         if (args.length == 0) {
-            whitelistOn = !whitelistOn;
-            Bukkit.setWhitelist(whitelistOn);
-            sender.sendMessage(ChatColor.GRAY + "Whitelist: " + getStateMsg());
+            PPLCommands.toggleWhitelist();
+            String msg = String.format("%sPPL Menu> %s%s",
+                    ChatColor.BLUE,
+                    ChatColor.GRAY,
+                    PPLCommands.getStateMsg()
+            );
+            sender.sendMessage(msg);
         }else if (args.length == 1) {
-            String arg = args[0];
+            String arg = args[0].toLowerCase();
             Set<String> currentlyWhitelisted = convertToNames(Bukkit.getWhitelistedPlayers());
 
             if (arg.equalsIgnoreCase("list")) {
@@ -48,21 +51,14 @@ public class WhitelistCommand extends BukkitCommand {
                 return true;
             }
             //if it is not "list".
-            if (currentlyWhitelisted.contains(arg)) {
-                Bukkit.getOfflinePlayer(arg).setWhitelisted(false);
-                sender.sendMessage("Un-Whitelisted " + arg);
-
-                Player currentPlayer = Bukkit.getPlayer(arg);
-                if (currentPlayer != null && !currentPlayer.hasPermission("invicta.exempt"))
-                    currentPlayer.kickPlayer("Unwhitelisted!");
-
-            } else {
-                Bukkit.getOfflinePlayer(arg).setWhitelisted(true);
-                sender.sendMessage("Whitelisted " + arg);
-
-            }
-
-            Bukkit.reloadWhitelist();
+            PPLCommands.whitelist(arg, !currentlyWhitelisted.contains(arg));
+            sender.sendMessage(String.format("%sPPL Menu> %s%s %s%s",
+                    ChatColor.BLUE,
+                    ChatColor.GRAY,
+                    (currentlyWhitelisted.contains(arg) ? "Un-Whitelisted:" : "Whitelisted:"),
+                    ChatColor.YELLOW,
+                    arg
+            ));
 
         }
 
@@ -72,11 +68,8 @@ public class WhitelistCommand extends BukkitCommand {
     private Set<String> convertToNames(Set<OfflinePlayer> players) {
         Set<String> names = new LinkedHashSet<>();
         for (OfflinePlayer player : players)
-            names.add(player.getName());
+            names.add(player.getName().toLowerCase());
         return names;
     }
 
-    private String getStateMsg() {
-        return ChatColor.RESET + (whitelistOn ? ChatColor.GOLD + "On" : ChatColor.RED + "Off");
-    }
 }

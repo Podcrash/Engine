@@ -5,6 +5,7 @@ import com.podcrash.api.commands.helpers.PPLCommands;
 import com.podcrash.api.game.GameManager;
 import com.podcrash.api.plugin.PodcrashSpigot;
 import com.podcrash.api.util.ItemStackUtil;
+import net.md_5.bungee.protocol.packet.Chat;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
@@ -65,20 +66,27 @@ public class PPLMenuListener extends ListenerBase {
 
         ItemStack whitelist = ItemStackUtil.createItem(
                 Material.PAPER,
-                String.format("%sToggle Whitelist", ChatColor.AQUA),
-                null
+                String.format("%s%s", ChatColor.AQUA, PPLCommands.getStateMsg()),
+                Arrays.asList(
+                        String.format("%sClick %sto toggle whitelist", ChatColor.YELLOW, ChatColor.GRAY)
+                )
         );
 
         ItemStack setMap = ItemStackUtil.createItem(
                 Material.EMPTY_MAP,
-                String.format("%sChange Map", ChatColor.AQUA),
-                null
+                String.format("%sMap: %s%s", ChatColor.AQUA, ChatColor.GOLD, GameManager.getGame().getMapName()),
+                Arrays.asList(
+                        String.format("%sClick %sto change map", ChatColor.YELLOW, ChatColor.GRAY)
+                )
         );
 
 
         ItemStack setGame = new ItemStack(Material.WOOL, 1, DyeColor.MAGENTA.getData());
         ItemMeta setGameMeta = setGame.getItemMeta();
-        setGameMeta.setDisplayName(String.format("%sChange Game", ChatColor.AQUA));
+        setGameMeta.setDisplayName(String.format("%sGame: %s%s", ChatColor.AQUA, ChatColor.GOLD, GameManager.getGame().getMode()));
+        setGameMeta.setLore(Arrays.asList(
+                String.format("%sClick %sto change game", ChatColor.YELLOW, ChatColor.GRAY)
+        ));
         setGame.setItemMeta(setGameMeta);
 
         ItemStack cohosts = new ItemStack(Material.WOOL, 1, DyeColor.ORANGE.getData());
@@ -125,34 +133,52 @@ public class PPLMenuListener extends ListenerBase {
             if(!(event.getWhoClicked() instanceof Player)) return;
             String dispName = selected.getItemMeta().getDisplayName();
             Player player = (Player) event.getWhoClicked();
+
             if (dispName.contains("Change Max Players")) {
                 if (event.getClick().isLeftClick()) {
                     PPLCommands.increaseMaxPlayers();
                 } else if (event.getClick().isRightClick()) {
                     PPLCommands.decreaseMaxPlayers();
                 }
+
             } else if (dispName.contains("Start Game")) {
                 GameCommands.startGame(player, false);
                 //Change the "start" item
-                player.openInventory(createMenu());
+
             } else if (dispName.contains("Stop Game")) {
                 GameCommands.endGame(player);
                 //Change the "start" item
-                player.openInventory(createMenu());
+
+
             } else if (dispName.contains("General PPL Settings")) {
+                sendNotImplementedMessage(player);
 
-            } else if (dispName.contains("Toggle Whitelist")) {
-
-            } else if (dispName.contains("Change Map")) {
-
-            } else if (dispName.contains("Change Game")) {
+            } else if (dispName.contains("Whitelist")) {
+                PPLCommands.toggleWhitelist();
+            } else if (dispName.contains("Map")) {
+                sendNotImplementedMessage(player);
+            } else if (dispName.contains("Game")) {
+                sendNotImplementedMessage(player);
 
             } else if (dispName.contains("Manage Co-hosts")) {
+                sendNotImplementedMessage(player);
 
             }
 
+            //Update the menu
+            player.openInventory(createMenu());
             event.setCancelled(true);
         }
+    }
+
+    //TODO: Implement the features
+    private void sendNotImplementedMessage(Player player) {
+        String msg = String.format(
+                "%sPPL Menu> %sThis feature has not been implemented yet.",
+                ChatColor.BLUE,
+                ChatColor.YELLOW
+        );
+        player.sendMessage(msg);
     }
 
 
