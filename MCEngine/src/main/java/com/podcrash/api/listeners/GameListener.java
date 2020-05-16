@@ -398,31 +398,36 @@ public class GameListener extends ListenerBase {
     }
 
     /**
+     * Handles item objectives
      * GamePickUpEvent(Game game, Player player, Item item, int remaining)
      */
     @EventHandler
     public void onPickUp(PlayerPickupItemEvent e) {
-        if (!EntityUtil.onGround(e.getItem()) || deadPeople.contains(e.getPlayer()) || DamageApplier.getInvincibleEntities().contains(e.getPlayer())) {
-            e.setCancelled(true);
-            return;
-        }
         Player who = e.getPlayer();
         Game game = GameManager.getGame();
 
-        if (game == null || game.getGameState().equals(GameState.LOBBY)) return;
-        e.setCancelled(true);
+        if (game == null || game.getGameState().equals(GameState.LOBBY))
+            return;
         org.bukkit.entity.Item item = e.getItem();
         ItemObjective itemObj = null;
         List<ItemObjective> objectives = game.getItemObjectives();
-        if (objectives == null) return;
+        if (objectives == null)
+            return;
         for(ItemObjective itemObjective : objectives) {
-            if (itemObjective.getItem().getEntityId() == item.getEntityId())
+            if (itemObjective.getItem().getEntityId() == item.getEntityId()) {
                 itemObj = itemObjective;
+                break;
+            }
         }
         if (itemObj == null)
             return;
-        int remaining = e.getRemaining(); // most likely not too important
+        e.setCancelled(true);
+        if (!EntityUtil.onGround(e.getItem()))
+            return;
+        if (deadPeople.contains(e.getPlayer()) || DamageApplier.getInvincibleEntities().contains(e.getPlayer()))
+            return;
 
+        int remaining = e.getRemaining(); // most likely not too important
         Bukkit.getServer().getPluginManager().callEvent(new GamePickUpEvent(game, who, itemObj, remaining));
     }
 

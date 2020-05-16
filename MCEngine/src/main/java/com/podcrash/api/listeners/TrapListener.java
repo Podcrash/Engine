@@ -1,6 +1,7 @@
 package com.podcrash.api.listeners;
 
-import com.podcrash.api.callback.helpers.TrapSetter;
+import static com.podcrash.api.callback.helpers.TrapSetter.*;
+
 import com.podcrash.api.events.TrapSnareEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Item;
@@ -16,11 +17,13 @@ public class TrapListener extends ListenerBase {
     @EventHandler
     public void itemPickUp(PlayerPickupItemEvent e) {
         Item item = e.getItem();
+        if (!isTrap(item))
+            return;
+        e.setCancelled(true);
         TrapSnareEvent snareEvent = new TrapSnareEvent(e.getItem(), e.getPlayer());
         Bukkit.getPluginManager().callEvent(snareEvent);
         if (!snareEvent.isCancelled()) {
-            e.setCancelled(true);
-            TrapSetter.deleteTrap(item);
+            deleteTrap(item);
             item.remove();
         }
     }

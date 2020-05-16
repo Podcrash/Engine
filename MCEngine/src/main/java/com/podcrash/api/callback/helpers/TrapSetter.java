@@ -35,6 +35,16 @@ public final class TrapSetter {
         ground.then(() -> time.runAsync(1, 0)).runAsync(1, 0);
     }
 
+
+    /**
+     * For whatever reason, the method below is not being used to test whether or not the item is a trap.
+     * @param item - the item that's being tested
+     * @return if the item is a trap
+     */
+    public static boolean isTrap(Item item) {
+        return trapIds.contains(item.getEntityId());
+    }
+
     /**
      * The method is supposed to test if the item is actually a trap spawned from TrapSetter#spawnTrap
      * @param item the supposed trap of the item
