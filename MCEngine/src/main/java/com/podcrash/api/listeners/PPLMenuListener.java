@@ -2,6 +2,9 @@ package com.podcrash.api.listeners;
 
 import com.podcrash.api.commands.helpers.GameCommands;
 import com.podcrash.api.commands.helpers.PPLCommands;
+import com.podcrash.api.db.TableOrganizer;
+import com.podcrash.api.db.tables.DataTableType;
+import com.podcrash.api.db.tables.MapTable;
 import com.podcrash.api.game.GameManager;
 import com.podcrash.api.plugin.PodcrashSpigot;
 import com.podcrash.api.util.ItemStackUtil;
@@ -68,7 +71,7 @@ public class PPLMenuListener extends ListenerBase {
                 Material.PAPER,
                 String.format("%s%s", ChatColor.AQUA, PPLCommands.getStateMsg()),
                 Arrays.asList(
-                        String.format("%sClick %sto toggle whitelist", ChatColor.YELLOW, ChatColor.GRAY)
+                        String.format("%sClick %sto toggle the whitelist", ChatColor.YELLOW, ChatColor.GRAY)
                 )
         );
 
@@ -76,7 +79,7 @@ public class PPLMenuListener extends ListenerBase {
                 Material.EMPTY_MAP,
                 String.format("%sMap: %s%s", ChatColor.AQUA, ChatColor.GOLD, GameManager.getGame().getMapName()),
                 Arrays.asList(
-                        String.format("%sClick %sto change map", ChatColor.YELLOW, ChatColor.GRAY)
+                        String.format("%sClick %sto change the map", ChatColor.YELLOW, ChatColor.GRAY)
                 )
         );
 
@@ -85,7 +88,7 @@ public class PPLMenuListener extends ListenerBase {
         ItemMeta setGameMeta = setGame.getItemMeta();
         setGameMeta.setDisplayName(String.format("%sGame: %s%s", ChatColor.AQUA, ChatColor.GOLD, GameManager.getGame().getMode()));
         setGameMeta.setLore(Arrays.asList(
-                String.format("%sClick %sto change game", ChatColor.YELLOW, ChatColor.GRAY)
+                String.format("%sClick %sto change the game", ChatColor.YELLOW, ChatColor.GRAY)
         ));
         setGame.setItemMeta(setGameMeta);
 
@@ -111,6 +114,35 @@ public class PPLMenuListener extends ListenerBase {
         return inv;
     }
 
+    private Inventory createMapMenu() {
+        Inventory inv = Bukkit.createInventory(null, 5 * 9, "Set Map");
+
+        MapTable table = TableOrganizer.getTable(DataTableType.MAPS);
+        Set<String> validMaps = new HashSet<>(table.getWorlds(GameManager.getGame().getMode()));
+
+        int i = 0;
+        for (String mapName : validMaps) {
+            if (mapName == null) continue;
+            ItemStack map = ItemStackUtil.createItem(
+                    Material.PAPER,
+                    niceLookingMapName(mapName),
+                    null);
+            //Make a 5 wide table of maps
+            int row = i / 5;
+            int col = i % 5;
+            //Translate table down 1, over 2
+            inv.setItem(((row+1) * 9) + (col + 2), map);
+            i++;
+        }
+
+        return inv;
+    }
+
+    private String niceLookingMapName(String s) {
+        String[] splitName = s.split("(?=\\p{Upper})");
+        return ChatColor.YELLOW + String.join(" ", splitName);
+    }
+
     @EventHandler
     public void openMenu(PlayerInteractEvent event) {
 
@@ -127,13 +159,13 @@ public class PPLMenuListener extends ListenerBase {
 
     @EventHandler
     public void onMenuPress(InventoryClickEvent event) {
-        if (event.getInventory().getName().equals("PPL Settings")) {
-            ItemStack selected = event.getCurrentItem();
-            if (selected == null || selected.getItemMeta() == null) return;
-            if(!(event.getWhoClicked() instanceof Player)) return;
-            String dispName = selected.getItemMeta().getDisplayName();
-            Player player = (Player) event.getWhoClicked();
+        ItemStack selected = event.getCurrentItem();
+        if (selected == null || selected.getItemMeta() == null) return;
+        if(!(event.getWhoClicked() instanceof Player)) return;
+        String dispName = selected.getItemMeta().getDisplayName();
+        Player player = (Player) event.getWhoClicked();
 
+        if (event.getInventory().getName().equals("PPL Settings")) {
             if (dispName.contains("Change Max Players")) {
                 if (event.getClick().isLeftClick()) {
                     PPLCommands.increaseMaxPlayers();
@@ -156,7 +188,9 @@ public class PPLMenuListener extends ListenerBase {
             } else if (dispName.contains("Whitelist")) {
                 PPLCommands.toggleWhitelist();
             } else if (dispName.contains("Map")) {
-                sendNotImplementedMessage(player);
+                player.openInventory(createMapMenu());
+                event.setCancelled(true);
+                return;
             } else if (dispName.contains("Game")) {
                 sendNotImplementedMessage(player);
 
@@ -167,6 +201,17 @@ public class PPLMenuListener extends ListenerBase {
 
             //Update the menu
             player.openInventory(createMenu());
+            event.setCancelled(true);
+        } else if (event.getInventory().getName().equals("Set Map")) {
+            GameManager.setGameMap(ChatColor.stripColor(dispName).replace(" ", ""));
+            player.openInventory(createMenu());
+            String msg = String.format(
+                    "%sPPL Menu> %sYou have set the map to %s.",
+                    ChatColor.BLUE,
+                    ChatColor.GRAY,
+                    dispName
+            );
+            player.sendMessage(msg);
             event.setCancelled(true);
         }
     }
