@@ -32,4 +32,14 @@ public class MathUtil {
         int add = (factor - number % factor);
         return number + add;
     }
+
+    public static double average(Iterable<Double> numbers) {
+       double sum = 0;
+       double size = 0;
+       for(double number : numbers) {
+           sum += number;
+           size += 1D;
+       }
+       return sum/size;
+    }
 }
