@@ -1,13 +1,40 @@
 plugins {
     id 'java'
+    id "com.github.johnrengelman.shadow" version "5.2.0"
 }
 
-version 'unspecified'
+version '1.2'
 
 sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+}
+
+shadowJar {
+    mergeServiceFiles()
+
+    dependencies {
+
+        /*
+        include (dependency("org.jooq:jooq:3.12.1"))
+        include (dependency("com.zaxxer:HikariCP:3.3.1"))
+        include (dependency("postgresql:postgresql:9.4.1208-jdbc42-atlassian-hosted"))
+
+        include (dependency("org.redisson:redisson:3.11.3"))
+        include (dependency("io.netty:+:+"))
+        include (dependency("javax.cache:cache-api:1.0.0"))
+        */
+        exclude "spigot.jar"
+        exclude "com.nametagedit:nametagedit:4.4.6"
+        exclude 'com.grinderwolf:slimeworldmanager-api:2.1.1'
+        //exclude(dependency("com.comphenix.protocol:ProtocolLib:4.4.0"))
+
+    }
+
+    relocate("io.netty", "org.redisson.netty")
+    //todo: include everything in the packetwrapper, rather than minimizing
+    //minimize()
 }
 
 dependencies {
@@ -29,4 +56,8 @@ dependencies {
     implementation 'org.mongodb:mongodb-driver-async:3.12.1'
     implementation 'dev.morphia.morphia:core:1.5.8'
     implementation 'org.redisson:redisson:3.11.3'
+}
+
+task spigot(dependsOn: shadowJar) {
+
 }

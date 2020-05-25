@@ -1,0 +1,5 @@
+name: DBEngine
+main: com.podcrash.api.db.DBEngine
+version: 1.0
+author: RainDance
+softdepend: [SlimeWorldManager]

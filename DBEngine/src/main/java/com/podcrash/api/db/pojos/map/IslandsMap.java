@@ -11,6 +11,7 @@ public class IslandsMap extends GameMap {
     private List<Point> redOres;
     private List<Point> chests;
 
+    private List<Point2Point> bridges;
 
     public IslandsMap() {
         super();
@@ -70,16 +71,23 @@ public class IslandsMap extends GameMap {
         this.chests = chests;
     }
 
+    public List<Point2Point> getBridges() {
+        return bridges;
+    }
+
+    public void setBridges(List<Point2Point> bridges) {
+        this.bridges = bridges;
+    }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("IslandsMap{");
         sb.append("resourceSpawns=").append(resourceSpawns);
-        sb.append(", greenOres=").append(greenOres);
-        sb.append(", yellowOres=").append(yellowOres);
-        sb.append(", blueOres=").append(blueOres);
-        sb.append(", redOres=").append(redOres);
-        sb.append(", chests=").append(chests);
+        sb.append(", greenOres=").append(greenOres.size());
+        sb.append(", yellowOres=").append(yellowOres.size());
+        sb.append(", blueOres=").append(blueOres.size());
+        sb.append(", redOres=").append(redOres.size());
+        sb.append(", chests=").append(chests.size());
         sb.append(", spawns=").append(getSpawns());
         sb.append(", name='").append(getName()).append('\'');
         sb.append(", gamemode='").append(getGamemode()).append('\'');
@@ -92,6 +100,7 @@ public class IslandsMap extends GameMap {
         sb.append(", allowMonsters=").append(isAllowMonsters());
         sb.append(", launchPads=").append(getLaunchPads());
         sb.append(", teleportPads=").append(getTeleportPads());
+        sb.append(", teleportPads=").append(getBridges());
         sb.append('}');
         return sb.toString();
     }
