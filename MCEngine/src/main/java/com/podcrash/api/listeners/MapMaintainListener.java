@@ -115,18 +115,28 @@ public class MapMaintainListener extends ListenerBase {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlace(BlockPlaceEvent e){
-        if (evaluate(e.getBlock().getWorld())) {
-            if (!e.getPlayer().hasPermission("invicta.map"))
-                e.setCancelled(true);
-        }
+        if (!evaluate(e.getBlock().getWorld()))
+            return;
+        Game game = GameManager.getGame();
+        if (game == null)
+            return;
+        if (game.getGameState() == GameState.STARTED)
+            return;
+        if (!e.getPlayer().hasPermission("invicta.map"))
+            e.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onBreak(BlockBreakEvent e) {
-        if (evaluate(e.getBlock().getWorld())) {
-            if (!e.getPlayer().hasPermission("invicta.map"))
-                e.setCancelled(true);
-        }
+        if (!evaluate(e.getBlock().getWorld()))
+            return;
+        Game game = GameManager.getGame();
+        if (game == null)
+            return;
+        if (game.getGameState() == GameState.STARTED)
+            return;
+        if (!e.getPlayer().hasPermission("invicta.map"))
+            e.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
