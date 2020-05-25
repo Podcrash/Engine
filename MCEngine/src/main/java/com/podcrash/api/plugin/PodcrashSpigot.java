@@ -217,7 +217,6 @@ public class PodcrashSpigot extends PodcrashPlugin {
         new ActionBlockListener(this);
         new BaseChatListener(this);
         new CmdPreprocessHandler(this);
-        new BackfillListener(this);
         new MapMaintainListener(this);
         new SpigotJoinListener(this);
         new StatusListener(this);
@@ -237,6 +236,7 @@ public class PodcrashSpigot extends PodcrashPlugin {
         new GameListener(this);
         new GameDamagerConverterListener(this);
         new TrapListener(this);
+        new BackfillListener(this);
     }
 
     private void registerCommands() {
