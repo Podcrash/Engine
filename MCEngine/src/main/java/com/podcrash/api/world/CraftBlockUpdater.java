@@ -57,6 +57,17 @@ public class CraftBlockUpdater implements Runnable {
        this.setBlock(x, y, z, material, (byte) 0);
     }
 
+    public void setBlock(int x, int y, int z, int blockID) {
+        minX = Math.min(minX, x);
+        minZ = Math.min(minZ, z);
+        maxX = Math.max(maxX, x);
+        maxZ = Math.max(maxZ, z);
+
+        BlockUtil.setBlockFast(world, x, y, z, blockID);
+        blocksModified++;
+        //deferredBlocks.add(new DeferredBlock(x, y, z));
+    }
+
     public void setBlock(int x, int y, int z, Material material, byte data) {
         minX = Math.min(minX, x);
         minZ = Math.min(minZ, z);

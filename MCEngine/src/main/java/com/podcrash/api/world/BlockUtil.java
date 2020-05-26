@@ -381,11 +381,15 @@ public final class BlockUtil {
      * @param data
      */
     public static void setBlockFast(World world, int x, int y, int z, Material material, byte data) {
+        int combined = material.getId() + (data << 12);
+        setBlockFast(world, x, y, z, combined);
+    }
+
+    public static void setBlockFast(World world, int x, int y, int z, int combined) {
         world.getChunkAtAsync(x >> 4, z >> 4, bukkitChunk -> {
             net.minecraft.server.v1_8_R3.Chunk chunk = ((CraftChunk) bukkitChunk).getHandle();
 
             final BlockPosition bp = new BlockPosition(x, y, z);
-            int combined = material.getId() + (data << 12);
             final IBlockData ibd = net.minecraft.server.v1_8_R3.Block.getByCombinedId(combined);
             chunk.a(bp, ibd);
             chunk.world.notify(bp);
@@ -396,6 +400,12 @@ public final class BlockUtil {
         CraftBlockUpdater updater = CraftBlockUpdater.getMassBlockUpdater(location.getWorld());
         updater.setBlock(location.getBlockX(), location.getBlockY(), location.getBlockZ(), material);
     }
+
+    public static void setBlock(Location location, int blockID) {
+        CraftBlockUpdater updater = CraftBlockUpdater.getMassBlockUpdater(location.getWorld());
+        updater.setBlock(location.getBlockX(), location.getBlockY(), location.getBlockZ(), blockID);
+    }
+
     public static void setBlock(Location location, Material material, byte data) {
         CraftBlockUpdater updater = CraftBlockUpdater.getMassBlockUpdater(location.getWorld());
         updater.setBlock(location.getBlockX(), location.getBlockY(), location.getBlockZ(), material, data);

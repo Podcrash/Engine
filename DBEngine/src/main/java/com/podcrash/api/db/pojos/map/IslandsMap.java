@@ -1,34 +1,33 @@
 package com.podcrash.api.db.pojos.map;
 
+import org.bson.codecs.pojo.annotations.BsonIgnore;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class IslandsMap extends GameMap {
-    private List<Point> resourceSpawns;
     private List<Point> greenOres;
     private List<Point> yellowOres;
     private List<Point> blueOres;
     private List<Point> redOres;
     private List<Point> chests;
+    private List<BridgePoint> bridgeData;
 
-    private List<Point2Point> bridges;
+    private Point middle;
+
+    private String bridgeType;
+
+    @BsonIgnore
+    private List<IDPoint2Point> bridges;
 
     public IslandsMap() {
         super();
-        this.resourceSpawns = new ArrayList<>();
         this.greenOres = new ArrayList<>();
         this.yellowOres = new ArrayList<>();
         this.blueOres = new ArrayList<>();
         this.redOres = new ArrayList<>();
         this.chests = new ArrayList<>();
-    }
-
-    public List<Point> getResourceSpawns() {
-        return resourceSpawns;
-    }
-
-    public void setResourceSpawns(List<Point> resourceSpawns) {
-        this.resourceSpawns = resourceSpawns;
+        this.bridges = new ArrayList<>();
     }
 
     public List<Point> getGreenOres() {
@@ -71,18 +70,43 @@ public class IslandsMap extends GameMap {
         this.chests = chests;
     }
 
-    public List<Point2Point> getBridges() {
+    public Point getMiddle() {
+        return middle;
+    }
+
+    public void setMiddle(Point middle) {
+        this.middle = middle;
+    }
+
+    @BsonIgnore
+    public List<IDPoint2Point> getBridges() {
         return bridges;
     }
 
-    public void setBridges(List<Point2Point> bridges) {
+    @BsonIgnore
+    public void setBridges(List<IDPoint2Point> bridges) {
         this.bridges = bridges;
+    }
+
+    public List<BridgePoint> getBridgeData() {
+        return bridgeData;
+    }
+
+    public void setBridgeData(List<BridgePoint> bridgeData) {
+        this.bridgeData = bridgeData;
+    }
+
+    public String getBridgeType() {
+        return bridgeType;
+    }
+
+    public void setBridgeType(String bridgeType) {
+        this.bridgeType = bridgeType;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("IslandsMap{");
-        sb.append("resourceSpawns=").append(resourceSpawns);
         sb.append(", greenOres=").append(greenOres.size());
         sb.append(", yellowOres=").append(yellowOres.size());
         sb.append(", blueOres=").append(blueOres.size());
@@ -100,7 +124,7 @@ public class IslandsMap extends GameMap {
         sb.append(", allowMonsters=").append(isAllowMonsters());
         sb.append(", launchPads=").append(getLaunchPads());
         sb.append(", teleportPads=").append(getTeleportPads());
-        sb.append(", teleportPads=").append(getBridges());
+        sb.append(", bridgeData=").append(getBridgeData());
         sb.append('}');
         return sb.toString();
     }
