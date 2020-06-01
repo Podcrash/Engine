@@ -267,7 +267,10 @@ public class MapMaintainListener extends ListenerBase {
         packet.setEntityStatus(WrapperPlayServerEntityStatus.Status.ENTITY_HURT);
 
         PacketUtil.syncSend(packet, victim.getWorld().getPlayers());
-        SoundPlayer.sendSound(victim.getLocation(), "game.player.hurt", 1, 63);
+
+        EntityLiving craftLiving = ((CraftLivingEntity) victim).getHandle();
+        String hurtSound = ReflectionUtil.runMethod(craftLiving, craftLiving.getClass().getName(),"bo", String.class);
+        SoundPlayer.sendSound(victim.getLocation(), hurtSound, 1, 75);
 
     }
 

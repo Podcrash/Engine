@@ -177,6 +177,19 @@ public final class BlockUtil {
         return loc;
     }
 
+    /**
+     * Returns the air block above the y coordinate of a specified loc
+     * @param loc
+     * @return
+     */
+    public static Location getHighestAbove(Location loc) {
+        Location location = getHighestUnderneath(loc);
+        while(!isPassable(loc.getBlock())) {
+            location.add(0, 1, 0);
+        }
+        return location;
+    }
+
     public static Location getHighestUnderneath(Location loc, int range) {
         Block block = loc.getBlock();
         int counter = 0;

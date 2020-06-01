@@ -146,8 +146,8 @@ public final class DamageQueue implements Runnable {
         if (nowHealth > entity.getMaxHealth()) //this will never happen, but just in case
             nowHealth = entity.getMaxHealth();
 
+        EntityLiving craftLiving = ((CraftLivingEntity) entity).getHandle();
         if (nowHealth <= 0) {
-            EntityLiving craftLiving = ((CraftLivingEntity) entity).getHandle();
             DropDeathLootEvent e = new DropDeathLootEvent(entity);
             Bukkit.getPluginManager().callEvent(e);
             if (!e.isCancelled()) {
@@ -188,6 +188,10 @@ public final class DamageQueue implements Runnable {
             return true;
         } else {
             entity.setHealth(nowHealth);
+            if (!(entity instanceof Player)) {
+                String hurtSound = ReflectionUtil.runMethod(craftLiving, craftLiving.getClass().getName(),"bo", String.class);
+                SoundPlayer.sendSound(entity.getLocation(), hurtSound, 1, 75);
+            }
         }
 
         return false;
