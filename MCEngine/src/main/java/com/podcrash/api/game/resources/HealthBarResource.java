@@ -5,7 +5,6 @@ import com.nametagedit.plugin.api.data.FakeTeam;
 import com.podcrash.api.game.GTeam;
 import com.podcrash.api.game.Game;
 import com.podcrash.api.hologram.Hologram;
-import com.podcrash.api.util.MathUtil;
 import net.minecraft.server.v1_8_R3.EntityLiving;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -19,19 +18,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class HealthBarResource extends GameResource {
+public class HealthBarResource extends TimeGameResource {
     private final char heart = '\u2764';
     private final Map<String, Hologram> players;
     //health objective
     private final Objective objective;
     public HealthBarResource(int gameID) {
         super(gameID, 1, 0);
-        Scoreboard scoreboard = getGame().getGameScoreboard().getBoard();
+        Scoreboard scoreboard = game.getGameScoreboard().getBoard();
         objective = scoreboard.registerNewObjective("hbar", "dummy");
         objective.setDisplayName(ChatColor.RED.toString() + heart);
         objective.setDisplaySlot(DisplaySlot.BELOW_NAME);
         this.players = new HashMap<>();
-        Game game = getGame();
         List<GTeam> teams = game.getTeams();
         for(GTeam team : teams) {
             for(Player player : team.getBukkitPlayers()) {
@@ -50,6 +48,7 @@ public class HealthBarResource extends GameResource {
 
 
     }
+
 
     public void addPlayerToMap(Player player) {
         players.put(player.getName(), null);
@@ -75,25 +74,6 @@ public class HealthBarResource extends GameResource {
 
             objective.getScore(name).setScore((int) player.getHealth() + absorptionHearts);
         }
-        //map();
-    }
-
-    private void map() {
-        for(Map.Entry<String, Hologram> playerData : players.entrySet()) {
-            Player player = Bukkit.getPlayer(playerData.getKey());
-            if (player == null)
-                continue;
-            process(player, playerData.getValue());
-        }
-
-    }
-    private void process(Player player, Hologram hologram) {
-        double health = player.getHealth();
-        health = MathUtil.round(health, 2);
-        String text = Double.toString(health) + ChatColor.RED + heart;
-        hologram.setLocation(player.getLocation());
-        hologram.editLine(0, text);
-        hologram.update();
     }
 
     @Override

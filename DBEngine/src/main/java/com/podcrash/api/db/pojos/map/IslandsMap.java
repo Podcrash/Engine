@@ -17,7 +17,6 @@ public class IslandsMap extends GameMap {
 
     private String bridgeType;
 
-    @BsonIgnore
     private List<IDPoint2Point> bridges;
 
     public IslandsMap() {
@@ -78,12 +77,10 @@ public class IslandsMap extends GameMap {
         this.middle = middle;
     }
 
-    @BsonIgnore
     public List<IDPoint2Point> getBridges() {
         return bridges;
     }
 
-    @BsonIgnore
     public void setBridges(List<IDPoint2Point> bridges) {
         this.bridges = bridges;
     }

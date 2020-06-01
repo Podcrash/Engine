@@ -1,8 +1,6 @@
 package com.podcrash.api.game;
 
 import com.nametagedit.plugin.NametagEdit;
-import com.nametagedit.plugin.api.NametagAPI;
-import com.nametagedit.plugin.api.data.Nametag;
 import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.db.pojos.Rank;
 import com.podcrash.api.db.pojos.map.BaseMap;
@@ -239,6 +237,8 @@ public abstract class Game implements IGame {
      * @return The Game World.
      */
     public World getGameWorld() {
+        if (gameWorldName == null)
+            return null;
         return Bukkit.getWorld(gameWorldName);
     }
 
@@ -340,7 +340,7 @@ public abstract class Game implements IGame {
         if (resource.getGameID() != this.id)
             throw new IllegalArgumentException("resource does not correspond with its game id" + "gameid: " + id + " resourceid: " + resource.getGameID());
         gameResources.add(resource);
-        resource.run(resource.getTicks(), resource.getDelayTicks());
+        resource.init();
     }
 
     /**
@@ -358,8 +358,13 @@ public abstract class Game implements IGame {
      * @param resource The game resource to unregister.
      */
     public void unregisterGameResource(GameResource resource){
-        resource.unregister();
+        resource.stop();
         gameResources.remove(resource);
+    }
+
+    public void unregisterAllGameResources() {
+        gameResources.forEach(GameResource::stop);
+        gameResources.clear();
     }
 
     /**

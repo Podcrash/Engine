@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GameLobbyScoreboard extends CustomScoreboard{
+public class GameLobbyScoreboard extends CustomScoreboard {
 
     private final Game game;
     private boolean running;

@@ -3,6 +3,7 @@ package com.podcrash.api.listeners;
 import com.podcrash.api.events.game.GameEndEvent;
 import com.podcrash.api.game.*;
 import com.podcrash.api.game.resources.GameResource;
+import com.podcrash.api.game.resources.TimeGameResource;
 import com.podcrash.api.game.resources.HealthBarResource;
 
 import com.podcrash.api.plugin.PodcrashSpigot;

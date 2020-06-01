@@ -6,6 +6,7 @@ import com.podcrash.api.db.tables.MapTable;
 import com.podcrash.api.events.game.GameEndEvent;
 import com.podcrash.api.events.game.GameStartEvent;
 import com.podcrash.api.game.resources.GameResource;
+import com.podcrash.api.game.resources.TimeGameResource;
 import com.podcrash.api.plugin.PodcrashSpigot;
 import org.apache.commons.lang.Validate;
 import org.bukkit.*;
@@ -278,6 +279,7 @@ public class GameManager {
         }
         Location spawnLoc = Bukkit.getWorld(name).getSpawnLocation();
         game.setState(GameState.LOBBY);
+        game.unregisterAllGameResources();
         GameEndEvent gameend = new GameEndEvent(game, spawnLoc);
         //currentGame = null;
         PodcrashSpigot.getInstance().getServer().getPluginManager().callEvent(gameend);

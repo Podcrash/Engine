@@ -16,6 +16,7 @@ import com.podcrash.api.tracker.CoordinateTracker;
 import com.podcrash.api.tracker.Tracker;
 import com.podcrash.api.tracker.VectorTracker;
 import com.podcrash.api.util.PlayerCache;
+import com.podcrash.api.util.ReflectionUtil;
 import com.podcrash.api.world.SpawnWorldSetter;
 import com.podcrash.api.world.WorldManager;
 import org.bukkit.Bukkit;
@@ -115,6 +116,7 @@ public class PodcrashSpigot extends PodcrashPlugin {
     @Override
     public void onEnable() {
         INSTANCE = this;
+        ReflectionUtil.initiate();
         getLogger().info("Starting PodcrashSpigot!");
 
         Future<Void> dbFuture = enableWrap();
@@ -237,6 +239,7 @@ public class PodcrashSpigot extends PodcrashPlugin {
         new TrapListener(this);
         new BackfillListener(this);
         new MapMaintainListener(this);
+        new DeathHandler(this);
     }
 
     private void registerCommands() {

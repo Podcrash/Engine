@@ -62,13 +62,12 @@ public final class DamageApplier {
         double d2 = livingVictim.motZ * velocityModifiers[2];
         a(livingVictim, livingDamager);
 
-        int i = EnchantmentManager.a((EntityLiving) livingDamager);
-
+        double i = EnchantmentManager.a((EntityLiving) livingDamager);
+        if (i == 0) i = 2D/3D;
         if (livingDamager.isSprinting())
-            i++;
+            i += i == 0 ? 1 : 1D/3D;
 
         if (i > 0) {
-            Bukkit.broadcastMessage("i: " + i);
             double angle = Math.toRadians(livingDamager.yaw);
             livingVictim.g((-FastMath.sin(angle) * (i * SpigotConfig.knockbackExtraHorizontal)),
                     SpigotConfig.knockbackExtraVertical,

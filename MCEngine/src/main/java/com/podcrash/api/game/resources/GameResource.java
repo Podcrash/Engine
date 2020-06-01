@@ -2,57 +2,25 @@ package com.podcrash.api.game.resources;
 
 import com.podcrash.api.game.Game;
 import com.podcrash.api.game.GameManager;
-import com.podcrash.api.game.GameState;
-import com.podcrash.api.time.resources.TimeResource;
 import com.podcrash.api.plugin.PodcrashSpigot;
 
-/**
- * This is used as helpers for games that have started.
- */
-public abstract class GameResource implements TimeResource {
-    private Game game;
-    private int gameID;
+public abstract class GameResource {
+    protected final Game game;
+    private final int gameID;
 
-    private int ticks;
-    private int delayTicks;
-
-    @Override //default: feel free to override
-    public boolean cancel() {
-        return (getGame() == null) || getGame().getGameState() == GameState.LOBBY;
-    }
-
-    public GameResource(int gameID, int ticks, int delayTicks){
+    public GameResource(int gameID) {
         this.gameID = gameID;
         this.game = GameManager.getGame();
-        this.ticks = ticks;
-        this.delayTicks = delayTicks;
-    }
-    public GameResource(int gameID) {
-        this(gameID, 1, 0);
     }
 
     public int getGameID() {
         return gameID;
     }
-    public Game getGame(){
-        return game;
-    }
 
-    public int getTicks() {
-        return ticks;
-    }
-    public int getDelayTicks() {
-        return delayTicks;
-    }
+    public abstract void init();
+    public abstract void stop();
 
-    protected final void log(String msg){
+    protected void log(String msg){
         PodcrashSpigot.getInstance().getLogger().info(String.format("%s: %s", this.getClass().getSimpleName(), msg));
-    }
-
-    protected void clear() {
-        this.gameID = -1;
-        this.game = null;
-        this.ticks = -1;
-        this.delayTicks = -1;
     }
 }

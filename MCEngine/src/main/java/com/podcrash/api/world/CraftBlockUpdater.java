@@ -2,9 +2,14 @@ package com.podcrash.api.world;
 
 import com.podcrash.api.time.resources.BlockBreakThenRestore;
 import com.podcrash.api.plugin.PodcrashSpigot;
+import net.minecraft.server.v1_8_R3.Block;
+import net.minecraft.server.v1_8_R3.BlockPosition;
+import net.minecraft.server.v1_8_R3.Blocks;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
@@ -14,6 +19,8 @@ import java.util.*;
  * Inspired by https://github.com/desht/dhutils/blob/master/Lib/src/main/java/me/desht/dhutils/block/CraftMassBlockUpdate.java#L156
  */
 public class CraftBlockUpdater implements Runnable {
+    private static final HashMap<String, CraftBlockUpdater> updaters = new HashMap<>();
+    private final EnumMap<Material, Integer> blockCacheMap = new EnumMap<>(Material.class);
     private BukkitTask thisTask;
     private final int MAX_BLOCKS = 500;
 
@@ -22,7 +29,6 @@ public class CraftBlockUpdater implements Runnable {
     private int maxX = Integer.MIN_VALUE;
     private int maxZ = Integer.MIN_VALUE;
 
-    private static final HashMap<String, CraftBlockUpdater> updaters = new HashMap<>();
     private final List<BlockBreakThenRestore> tempPlace = new ArrayList<>();
     private final ArrayDeque<DeferredBlock> deferredBlocks = new ArrayDeque<>();
     private World world;
@@ -63,9 +69,9 @@ public class CraftBlockUpdater implements Runnable {
         maxX = Math.max(maxX, x);
         maxZ = Math.max(maxZ, z);
 
-        BlockUtil.setBlockFast(world, x, y, z, blockID);
+        //BlockUtil.setBlockFast(world, x, y, z, blockID);
         blocksModified++;
-        //deferredBlocks.add(new DeferredBlock(x, y, z));
+        deferredBlocks.add(new DeferredBlock(x, y, z, blockID));
     }
 
     public void setBlock(int x, int y, int z, Material material, byte data) {
@@ -74,9 +80,19 @@ public class CraftBlockUpdater implements Runnable {
         maxX = Math.max(maxX, x);
         maxZ = Math.max(maxZ, z);
 
-        BlockUtil.setBlockFast(world, x, y, z, material, data);
+        //BlockUtil.setBlockFast(world, x, y, z, material, data);
         blocksModified++;
-        //deferredBlocks.add(new DeferredBlock(x, y, z));
+        int id = getID(material);
+        deferredBlocks.add(new DeferredBlock(x, y, z, id + (data << 12)));
+    }
+
+    private int getID(Material material) {
+        Integer id = blockCacheMap.get(material);
+        if (id == null) {
+            id = CraftMagicNumbers.getId(CraftMagicNumbers.getBlock(material));
+            blockCacheMap.put(material, id);
+        }
+        return id;
     }
 
     public void addRestore(BlockBreakThenRestore restore) {
@@ -94,12 +110,15 @@ public class CraftBlockUpdater implements Runnable {
         //long now = System.nanoTime();
         //int n = 0;
 
-        /*
+
         while(deferredBlocks.peek() != null) {
             DeferredBlock deferredBlock = deferredBlocks.poll();
-
+            BlockUtil.setBlockFast(world, deferredBlock.x, deferredBlock.y, deferredBlock.z, deferredBlock.blockID);
+            CraftWorld craftWorld = (CraftWorld) world;
+            Block block = net.minecraft.server.v1_8_R3.Block.getByCombinedId(deferredBlock.blockID).getBlock();
+            craftWorld.getHandle().applyPhysics(new BlockPosition(deferredBlock.x, deferredBlock.y, deferredBlock.z), block);
         }
-        */
+
         Iterator<BlockBreakThenRestore> iterator = tempPlace.iterator();
         while(iterator.hasNext()){
             BlockBreakThenRestore restore = iterator.next();
@@ -188,12 +207,13 @@ public class CraftBlockUpdater implements Runnable {
         }
     }
     private static final class DeferredBlock {
-        public final int x, y, z;
+        final int x, y, z, blockID;
 
-        public DeferredBlock(int x, int y, int z) {
+        public DeferredBlock(int x, int y, int z, int blockID) {
             this.x = x;
             this.y = y;
             this.z = z;
+            this.blockID = blockID;
         }
 
         @Override
@@ -205,7 +225,8 @@ public class CraftBlockUpdater implements Runnable {
             DeferredBlock that = (DeferredBlock) o;
             return x == that.x &&
                     y == that.y &&
-                    z == that.z;
+                    z == that.z &&
+                    blockID == that.blockID;
         }
     }
 }

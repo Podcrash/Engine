@@ -31,7 +31,8 @@ public class TellCommand extends BukkitCommand {
                 sender.sendMessage(String.format("%sInvicta> %s%s is not an actual player!", ChatColor.BLUE, ChatColor.GRAY, targetName));
                 return true;
             }
-            String restOfMsg = String.join(" ", Arrays.copyOfRange(args, 1, args.length - 1));
+
+            String restOfMsg = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
             p.sendMessage(String.format("[%s -> %s] %s", sender.getName(), targetName, restOfMsg));
         }
         return true;

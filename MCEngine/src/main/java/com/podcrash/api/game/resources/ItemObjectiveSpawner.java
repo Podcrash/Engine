@@ -9,12 +9,12 @@ import java.util.List;
 /**
  * Gems and restocks
  */
-public class ItemObjectiveSpawner extends GameResource {
+public class ItemObjectiveSpawner extends TimeGameResource {
     private long[] itemTimes;
     private final ItemObjective[] itemObjectives;
     public ItemObjectiveSpawner(int gameID) {
         super(gameID, 1, 0);
-        List<ItemObjective> itemObjectives = this.getGame().getItemObjectives();
+        List<ItemObjective> itemObjectives = game.getItemObjectives();
         this.itemObjectives = itemObjectives.toArray(new ItemObjective[0]);
         this.itemTimes = new long[itemObjectives.size()];
         for (ItemObjective itemObjective : this.itemObjectives) {

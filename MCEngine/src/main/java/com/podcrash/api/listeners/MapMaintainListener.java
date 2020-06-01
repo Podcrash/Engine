@@ -10,6 +10,7 @@ import com.podcrash.api.damage.DamageQueue;
 import com.podcrash.api.effect.status.Status;
 import com.podcrash.api.events.DamageApplyEvent;
 import com.podcrash.api.events.DamageEvent;
+import com.podcrash.api.events.DeadEntityEvent;
 import com.podcrash.api.events.StatusRemoveEvent;
 import com.podcrash.api.game.Game;
 import com.podcrash.api.game.GameManager;
@@ -17,10 +18,13 @@ import com.podcrash.api.game.GameState;
 import com.podcrash.api.sound.SoundPlayer;
 import com.podcrash.api.util.PacketUtil;
 import com.podcrash.api.plugin.PodcrashSpigot;
+import com.podcrash.api.util.ReflectionUtil;
+import net.minecraft.server.v1_8_R3.EntityLiving;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -233,8 +237,16 @@ public class MapMaintainListener extends ListenerBase {
         DamageQueue.artificialAddHistory(p, damage, cause);
         //if the player is about to die, cancel it
         //Then call our own death event.
-        if (p instanceof Player && afterHealth <= 0D) {
-            DamageQueue.artificialDie((Player) p);
+        if (afterHealth <= 0) {
+            if (p instanceof Player) {
+                DamageQueue.artificialDie((Player) p);
+            }else {
+                Bukkit.getPluginManager().callEvent(new DeadEntityEvent(p, cause));
+                EntityLiving living = ((CraftLivingEntity) p).getHandle();
+                ReflectionUtil.runMethod(living, living.getClass().getName(), "dropDeathLoot", Void.class, new Class[]{boolean.class, int.class}, true, 1);
+                ReflectionUtil.runMethod(living, living.getClass().getName(),"dropEquipment", Void.class, new Class[] {boolean.class, int.class}, true, 1);
+
+            }
         }
     }
 
