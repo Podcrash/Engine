@@ -240,6 +240,7 @@ public class PodcrashSpigot extends PodcrashPlugin {
         new BackfillListener(this);
         new MapMaintainListener(this);
         new DeathHandler(this);
+        new SpecDisallowListener(this);
     }
 
     private void registerCommands() {

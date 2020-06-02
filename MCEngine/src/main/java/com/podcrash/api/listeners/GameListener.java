@@ -1,6 +1,7 @@
 package com.podcrash.api.listeners;
 
 import com.packetwrapper.abstractpackets.AbstractPacket;
+import com.podcrash.api.callback.sources.AwaitTime;
 import com.podcrash.api.db.pojos.map.BaseMap;
 import com.podcrash.api.db.pojos.map.GameMap;
 import com.podcrash.api.db.pojos.map.Point;
@@ -219,15 +220,21 @@ public class GameListener extends ListenerBase {
         //StatusApplier.getOrNew(victim).applyStatus(Status.INEPTITUDE, 9, 1);
         String name = victim.getName();
         SoundPlayer.sendSound(victim.getLocation(), "game.neutral.die", 0.85F, 64);
-        TimeHandler.delayTime(200L, () -> {
-            //if the player has logged off, from then until now, dont call the event
-            if (Bukkit.getPlayer(name) == null) return;
-            if (game.getGameState() == GameState.STARTED) {
-                GTeam team = game.getTeam(victim);
-                victim.teleport(team.getSpawn(victim));
-                Bukkit.getPluginManager().callEvent(new GameResurrectEvent(game, victim));
-            }
-        });
+        AwaitTime respawnTimer = new AwaitTime(9 * 1000L).then(() ->
+            Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
+                //if the player has logged off, from then until now, dont call the event
+                if (Bukkit.getPlayer(name) == null) return;
+                if (game.getGameState() == GameState.STARTED) {
+                    GTeam team = game.getTeam(victim);
+                    GameResurrectEvent event = new GameResurrectEvent(game, victim);
+                    Bukkit.getPluginManager().callEvent(event);
+                    if (event.isCancelled()) return;
+                    victim.teleport(team.getSpawn(victim));
+                }
+
+            })
+        );
+        respawnTimer.runAsync(10, 0);
     }
 
     public static String editMessage(String msg, Game game, Player victim, LivingEntity killer) {
@@ -267,8 +274,9 @@ public class GameListener extends ListenerBase {
         });
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onResurrect(GameResurrectEvent e) {
+        if (e.isCancelled()) return;
         deadPeople.remove(e.getWho());
         e.getGame().getRespawning().remove(e.getWho().getUniqueId()); //forgot what this does tbh
         e.getWho().sendMessage(e.getMessage());
