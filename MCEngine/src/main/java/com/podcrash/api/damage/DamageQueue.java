@@ -444,6 +444,13 @@ public final class DamageQueue implements Runnable {
         Damage wrapper = new Damage(entity, null, damage, null, cause, null, (DamageSource) null, false);
         damageHistory.get(name).add(wrapper);
     }
+    public static void artificialAddHistory(LivingEntity entity, double damage, DamageSource source) {
+        String name = getNameFor(entity);
+        if (!damageHistory.containsKey(name))
+            damageHistory.put(name, new ArrayDeque<>());
+        Damage wrapper = new Damage(entity, null, damage, null, Cause.CUSTOM, null, source, false);
+        damageHistory.get(name).add(wrapper);
+    }
 
     public static Deque<Damage> getDamages() {
         return damages;

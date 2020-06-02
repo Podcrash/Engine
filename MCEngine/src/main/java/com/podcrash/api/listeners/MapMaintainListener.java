@@ -234,23 +234,7 @@ public class MapMaintainListener extends ListenerBase {
         //Then call our own death event.
         if (afterHealth <= 0) {
             if (p instanceof Player) {
-                DamageQueue.artificialDie((Player) p);
-                DropDeathLootEvent e = new DropDeathLootEvent(p);
-                Bukkit.getPluginManager().callEvent(e);
-                if (e.isCancelled())
-                    return;
-                PlayerInventory inventory = ((Player) p).getInventory();
-                List<ItemStack> drops = new ArrayList<>(Arrays.asList(inventory.getContents()));
-                drops.addAll(Arrays.asList(inventory.getArmorContents()));
-                World world = p.getWorld();
-                Location location = p.getLocation();
-                Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
-                    for (ItemStack stack : drops) {
-                        if (stack == null || stack.getType() == Material.AIR) continue;
-                        world.dropItemNaturally(location, stack);
-                    }
-                });
-
+                fakeDie((Player) p);
             }else {
                 Bukkit.getPluginManager().callEvent(new DeadEntityEvent(p, cause));
                 EntityLiving living = ((CraftLivingEntity) p).getHandle();
@@ -283,6 +267,25 @@ public class MapMaintainListener extends ListenerBase {
         String hurtSound = ReflectionUtil.runMethod(craftLiving, craftLiving.getClass().getName(),"bo", String.class);
         SoundPlayer.sendSound(victim.getLocation(), hurtSound, 1, 75);
 
+    }
+
+    private void fakeDie(Player p) {
+        DropDeathLootEvent e = new DropDeathLootEvent(p);
+        Bukkit.getPluginManager().callEvent(e);
+        if (e.isCancelled())
+            return;
+        PlayerInventory inventory = ((Player) p).getInventory();
+        List<ItemStack> drops = new ArrayList<>(Arrays.asList(inventory.getContents()));
+        drops.addAll(Arrays.asList(inventory.getArmorContents()));
+        World world = p.getWorld();
+        Location location = p.getLocation();
+        Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
+            for (ItemStack stack : drops) {
+                if (stack == null || stack.getType() == Material.AIR) continue;
+                world.dropItemNaturally(location, stack);
+            }
+        });
+        DamageQueue.artificialDie((Player) p);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
