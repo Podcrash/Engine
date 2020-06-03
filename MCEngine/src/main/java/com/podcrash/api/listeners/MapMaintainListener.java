@@ -235,16 +235,11 @@ public class MapMaintainListener extends ListenerBase {
         DamageQueue.artificialAddHistory(p, damage, cause);
         //if the player is about to die, cancel it
         //Then call our own death event.
-        if (afterHealth <= 0) {
-            if (p instanceof Player) {
-                fakeDie((Player) p);
-            }else {
-                Bukkit.getPluginManager().callEvent(new DeadEntityEvent(p, cause));
-                EntityLiving living = ((CraftLivingEntity) p).getHandle();
-                ReflectionUtil.runMethod(living, living.getClass().getName(), "dropDeathLoot", Void.class, new Class[]{boolean.class, int.class}, true, 1);
-                ReflectionUtil.runMethod(living, living.getClass().getName(),"dropEquipment", Void.class, new Class[] {boolean.class, int.class}, true, 1);
-
-            }
+        if (afterHealth <= 0 && !(p instanceof Player)) {
+            Bukkit.getPluginManager().callEvent(new DeadEntityEvent(p, cause));
+            EntityLiving living = ((CraftLivingEntity) p).getHandle();
+            ReflectionUtil.runMethod(living, living.getClass().getName(), "dropDeathLoot", Void.class, new Class[]{boolean.class, int.class}, true, 1);
+            ReflectionUtil.runMethod(living, living.getClass().getName(),"dropEquipment", Void.class, new Class[] {boolean.class, int.class}, true, 1);
         }
     }
 
@@ -258,7 +253,9 @@ public class MapMaintainListener extends ListenerBase {
     private void damage(LivingEntity victim, double damage) {
 
         double health = victim.getHealth() - damage;
-        victim.setHealth((health < 0) ? 1 : health);
+        if (health < 0 && victim instanceof Player)
+            fakeDie((Player) victim);
+        victim.setHealth((health < 0) ? 20 : health);
 
         WrapperPlayServerEntityStatus packet = new WrapperPlayServerEntityStatus();
         packet.setEntityId(victim.getEntityId());
@@ -273,6 +270,7 @@ public class MapMaintainListener extends ListenerBase {
     }
 
     private void fakeDie(Player p) {
+        DamageQueue.artificialDie((Player) p);
         DropDeathLootEvent e = new DropDeathLootEvent(p);
         Bukkit.getPluginManager().callEvent(e);
         if (e.isCancelled())
@@ -288,7 +286,6 @@ public class MapMaintainListener extends ListenerBase {
                 world.dropItemNaturally(location, stack);
             }
         });
-        DamageQueue.artificialDie((Player) p);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
