@@ -21,6 +21,8 @@ import com.podcrash.api.game.*;
 import com.podcrash.api.game.objects.ItemObjective;
 import com.podcrash.api.game.objects.action.ActionBlock;
 import com.podcrash.api.item.ItemManipulationManager;
+import com.podcrash.api.kits.KitPlayer;
+import com.podcrash.api.kits.KitPlayerManager;
 import com.podcrash.api.sound.SoundPlayer;
 import com.podcrash.api.time.TimeHandler;
 import com.podcrash.api.util.EntityUtil;
@@ -156,6 +158,16 @@ public class GameListener extends ListenerBase {
             player.teleport(game.getSpawnLocation());
             player.setGameMode(GameMode.SPECTATOR);
         });
+
+        for(Player p: game.getBukkitPlayers()) {
+            StatusApplier.getOrNew(p).removeStatus(Status.values());
+            KitPlayer player = KitPlayerManager.getInstance().getKitPlayer(p);
+            KitPlayerManager.getInstance().removeKitPlayer(player);
+            KitPlayerManager.getInstance().addKitPlayer(player);
+            player.restockInventory();
+
+        }
+
         BaseMap map = game.getMap();
         if (map == null) return;
         StringBuilder authorBuilder = new StringBuilder();
@@ -230,6 +242,7 @@ public class GameListener extends ListenerBase {
                     Bukkit.getPluginManager().callEvent(event);
                     if (event.isCancelled()) return;
                     victim.teleport(team.getSpawn(victim));
+                    victim.setAllowFlight(false);
                 }
 
             })

@@ -148,8 +148,11 @@ public class MapMaintainListener extends ListenerBase {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onFood(FoodLevelChangeEvent e) {
-        if (isSpawnWorld(e.getEntity().getWorld()))
+        PodcrashSpigot.debugLog("1");
+        if (isSpawnWorld(e.getEntity().getWorld())) {
             e.setFoodLevel(20);
+            PodcrashSpigot.debugLog("2");
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -255,7 +258,7 @@ public class MapMaintainListener extends ListenerBase {
     private void damage(LivingEntity victim, double damage) {
 
         double health = victim.getHealth() - damage;
-        victim.setHealth((health < 0) ? 0 : health);
+        victim.setHealth((health < 0) ? 1 : health);
 
         WrapperPlayServerEntityStatus packet = new WrapperPlayServerEntityStatus();
         packet.setEntityId(victim.getEntityId());

@@ -94,7 +94,6 @@ public final class ReflectionUtil {
         Class<?> clazz;
         try {
             String name = !className.contains(nmsPrefix) ? nmsPrefix + className : className;
-            PodcrashSpigot.debugLog("reflecting on " + name);
             clazz = Class.forName(name);
         } catch(ClassNotFoundException e) {
             e.printStackTrace();

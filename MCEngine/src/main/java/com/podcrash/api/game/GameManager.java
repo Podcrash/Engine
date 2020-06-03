@@ -7,6 +7,7 @@ import com.podcrash.api.events.game.GameEndEvent;
 import com.podcrash.api.events.game.GameStartEvent;
 import com.podcrash.api.game.resources.GameResource;
 import com.podcrash.api.game.resources.TimeGameResource;
+import com.podcrash.api.game.scoreboard.GameLobbyScoreboard;
 import com.podcrash.api.plugin.PodcrashSpigot;
 import org.apache.commons.lang.Validate;
 import org.bukkit.*;
@@ -74,6 +75,9 @@ public class GameManager {
             }
             i++;
         }
+
+        //default lobby board
+        game.setScoreboardInput(new GameLobbyScoreboard(game, game.getGameScoreboard()));
     }
 
     public static void destroyCurrentGame() {
@@ -282,7 +286,9 @@ public class GameManager {
         game.unregisterAllGameResources();
         GameEndEvent gameend = new GameEndEvent(game, spawnLoc);
         //currentGame = null;
+        game.getInput().unregister();
         PodcrashSpigot.getInstance().getServer().getPluginManager().callEvent(gameend);
+
     }
 
     public static Game getGame() {

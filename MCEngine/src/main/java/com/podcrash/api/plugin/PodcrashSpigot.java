@@ -241,6 +241,7 @@ public class PodcrashSpigot extends PodcrashPlugin {
         new MapMaintainListener(this);
         new DeathHandler(this);
         new SpecDisallowListener(this);
+        new GameLobbyListener(this);
     }
 
     private void registerCommands() {
