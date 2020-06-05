@@ -164,9 +164,9 @@ public class StatusApplier {
         Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
             if (!entity.addPotionEffect(addpotion, override)) {
                 if (duration == Integer.MAX_VALUE && status == Status.SPEED)
-                    PodcrashSpigot.getInstance().getLogger().info("speed not applied");
+                    PodcrashSpigot.debugLog("speed not applied");
             } else if (duration == Integer.MAX_VALUE && status == Status.SPEED)
-                PodcrashSpigot.getInstance().getLogger().info("speed applied");
+                PodcrashSpigot.debugLog("speed applied");
         });
 
     }

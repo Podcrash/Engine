@@ -7,7 +7,11 @@ MONGO_PORT=27017
 MONGO_PASSWORD=?
 ```
 
-
+## Running collect.sh:
+Use the:
+- DBEngine-*.*-all.jar
+- MCEngine-*.*.jar
+- PacketWrapper-1.0.jar
 ## Code Conventions:
 Braces: OTBR (including no brace on single line if, but do break the line)
 

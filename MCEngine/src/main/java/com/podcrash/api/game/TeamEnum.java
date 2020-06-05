@@ -42,6 +42,10 @@ public enum TeamEnum {
         this.protocolData = protocolData;
     }
 
+    private static TeamEnum[] details = TeamEnum.values();
+    private static TeamEnum[] details() {
+        return details;
+    }
     /**
      * @return The team name.
      */
@@ -125,7 +129,7 @@ public enum TeamEnum {
      */
     public static TeamEnum getByColor(String teamColor) {
         if (teamColor == null) return NULL;
-        for (TeamEnum teamEnum : TeamEnum.values()) {
+        for (TeamEnum teamEnum : TeamEnum.details()) {
             if (teamEnum.getName().equalsIgnoreCase(teamColor))
                 return teamEnum;
         }
@@ -138,7 +142,7 @@ public enum TeamEnum {
      * @return The TeamEnum.
      */
     public static TeamEnum getByData(int id) {
-        for (TeamEnum teamEnum : TeamEnum.values()) {
+        for (TeamEnum teamEnum : TeamEnum.details()) {
             if (teamEnum.getData() == id)
                 return teamEnum;
         }
@@ -151,7 +155,7 @@ public enum TeamEnum {
      * @return Whether it is valid/exists.
      */
     public static boolean isColorIDValid(int id) {
-        for (TeamEnum teamEnum : TeamEnum.values()) {
+        for (TeamEnum teamEnum : TeamEnum.details()) {
             if (teamEnum.getData() == id)
                 return true;
         }

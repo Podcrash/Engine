@@ -74,6 +74,7 @@ public class SpigotJoinListener extends ListenerBase {
         PodcrashSpigot.getInstance().setupPermissions(player);
 
         setUpHostPermissions(player);
+        if (GameManager.getGame() != null) player.setScoreboard(GameManager.getGame().getGameScoreboard().getBoard());
     }
 
     private void fixDoubleDamage(Player player) {

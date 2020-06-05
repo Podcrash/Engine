@@ -16,9 +16,9 @@ import com.podcrash.api.tracker.CoordinateTracker;
 import com.podcrash.api.tracker.Tracker;
 import com.podcrash.api.tracker.VectorTracker;
 import com.podcrash.api.util.PlayerCache;
+import com.podcrash.api.util.ReflectionUtil;
 import com.podcrash.api.world.SpawnWorldSetter;
 import com.podcrash.api.world.WorldManager;
-import javafx.scene.layout.BackgroundFill;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -116,6 +116,7 @@ public class PodcrashSpigot extends PodcrashPlugin {
     @Override
     public void onEnable() {
         INSTANCE = this;
+        ReflectionUtil.initiate();
         getLogger().info("Starting PodcrashSpigot!");
 
         Future<Void> dbFuture = enableWrap();
@@ -218,8 +219,6 @@ public class PodcrashSpigot extends PodcrashPlugin {
         new ActionBlockListener(this);
         new BaseChatListener(this);
         new CmdPreprocessHandler(this);
-        new BackfillListener(this);
-        new MapMaintainListener(this);
         new SpigotJoinListener(this);
         new StatusListener(this);
         new MobListeners(this);
@@ -229,6 +228,8 @@ public class PodcrashSpigot extends PodcrashPlugin {
         new GeneralLobbyListener(this);
         new GenEconListener(this);
         new KickListener(this);
+        new SkillMaintainListener(this);
+        new ApplyKitListener(this);
     }
 
 
@@ -236,6 +237,11 @@ public class PodcrashSpigot extends PodcrashPlugin {
         new GameListener(this);
         new GameDamagerConverterListener(this);
         new TrapListener(this);
+        new BackfillListener(this);
+        new MapMaintainListener(this);
+        new DeathHandler(this);
+        new SpecDisallowListener(this);
+        new GameLobbyListener(this);
     }
 
     private void registerCommands() {
@@ -342,7 +348,7 @@ public class PodcrashSpigot extends PodcrashPlugin {
 
     public static void debugLog(String message) {
         if(DEBUG)
-            getInstance().getLogger().log(Level.FINE, message);
+            getInstance().getLogger().info(message);
     }
 
     public static void debugErr(String message) {

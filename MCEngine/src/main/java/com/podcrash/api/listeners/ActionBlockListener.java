@@ -83,7 +83,7 @@ public final class ActionBlockListener extends ListenerBase {
                     WrapperPlayServerWorldParticles endEffect = ParticleGenerator.createParticle(
                             player.getEyeLocation().toVector(), EnumWrappers.Particle.EXPLOSION_NORMAL, 5, 0, 0, 0);
 
-                    PacketUtil.syncSend(new AbstractPacket[] {startEffect, endEffect}, GameManager.getGame().getBukkitPlayers());
+                    PacketUtil.asyncSend(new AbstractPacket[] {startEffect, endEffect}, GameManager.getGame().getBukkitPlayers());
 
                     SoundPlayer.sendSound(player.getLocation(), "mob.endermen.portal", 1f, 63);
                     SoundPlayer.sendSound(player.getLocation(), "mob.endermen.portal", 1f, 63);

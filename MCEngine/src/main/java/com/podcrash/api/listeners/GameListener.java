@@ -1,6 +1,7 @@
 package com.podcrash.api.listeners;
 
 import com.packetwrapper.abstractpackets.AbstractPacket;
+import com.podcrash.api.callback.sources.AwaitTime;
 import com.podcrash.api.db.pojos.map.BaseMap;
 import com.podcrash.api.db.pojos.map.GameMap;
 import com.podcrash.api.db.pojos.map.Point;
@@ -20,6 +21,8 @@ import com.podcrash.api.game.*;
 import com.podcrash.api.game.objects.ItemObjective;
 import com.podcrash.api.game.objects.action.ActionBlock;
 import com.podcrash.api.item.ItemManipulationManager;
+import com.podcrash.api.kits.KitPlayer;
+import com.podcrash.api.kits.KitPlayerManager;
 import com.podcrash.api.sound.SoundPlayer;
 import com.podcrash.api.time.TimeHandler;
 import com.podcrash.api.util.EntityUtil;
@@ -155,6 +158,16 @@ public class GameListener extends ListenerBase {
             player.teleport(game.getSpawnLocation());
             player.setGameMode(GameMode.SPECTATOR);
         });
+
+        for(Player p: game.getBukkitPlayers()) {
+            StatusApplier.getOrNew(p).removeStatus(Status.values());
+            KitPlayer player = KitPlayerManager.getInstance().getKitPlayer(p);
+            KitPlayerManager.getInstance().removeKitPlayer(player);
+            KitPlayerManager.getInstance().addKitPlayer(player);
+            player.restockInventory();
+
+        }
+
         BaseMap map = game.getMap();
         if (map == null) return;
         StringBuilder authorBuilder = new StringBuilder();
@@ -219,15 +232,22 @@ public class GameListener extends ListenerBase {
         //StatusApplier.getOrNew(victim).applyStatus(Status.INEPTITUDE, 9, 1);
         String name = victim.getName();
         SoundPlayer.sendSound(victim.getLocation(), "game.neutral.die", 0.85F, 64);
-        TimeHandler.delayTime(200L, () -> {
-            //if the player has logged off, from then until now, dont call the event
-            if (Bukkit.getPlayer(name) == null) return;
-            if (game.getGameState() == GameState.STARTED) {
-                GTeam team = game.getTeam(victim);
-                victim.teleport(team.getSpawn(victim));
-                Bukkit.getPluginManager().callEvent(new GameResurrectEvent(game, victim));
-            }
-        });
+        AwaitTime respawnTimer = new AwaitTime(9 * 1000L).then(() ->
+            Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
+                //if the player has logged off, from then until now, dont call the event
+                if (Bukkit.getPlayer(name) == null) return;
+                if (game.getGameState() == GameState.STARTED) {
+                    GTeam team = game.getTeam(victim);
+                    GameResurrectEvent event = new GameResurrectEvent(game, victim);
+                    Bukkit.getPluginManager().callEvent(event);
+                    if (event.isCancelled()) return;
+                    victim.teleport(team.getSpawn(victim));
+                    victim.setAllowFlight(false);
+                }
+
+            })
+        );
+        respawnTimer.runAsync(10, 0);
     }
 
     public static String editMessage(String msg, Game game, Player victim, LivingEntity killer) {
@@ -267,8 +287,9 @@ public class GameListener extends ListenerBase {
         });
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onResurrect(GameResurrectEvent e) {
+        if (e.isCancelled()) return;
         deadPeople.remove(e.getWho());
         e.getGame().getRespawning().remove(e.getWho().getUniqueId()); //forgot what this does tbh
         e.getWho().sendMessage(e.getMessage());
@@ -398,31 +419,36 @@ public class GameListener extends ListenerBase {
     }
 
     /**
+     * Handles item objectives
      * GamePickUpEvent(Game game, Player player, Item item, int remaining)
      */
     @EventHandler
     public void onPickUp(PlayerPickupItemEvent e) {
-        if (!EntityUtil.onGround(e.getItem()) || deadPeople.contains(e.getPlayer()) || DamageApplier.getInvincibleEntities().contains(e.getPlayer())) {
-            e.setCancelled(true);
-            return;
-        }
         Player who = e.getPlayer();
         Game game = GameManager.getGame();
 
-        if (game == null || game.getGameState().equals(GameState.LOBBY)) return;
-        e.setCancelled(true);
+        if (game == null || game.getGameState().equals(GameState.LOBBY))
+            return;
         org.bukkit.entity.Item item = e.getItem();
         ItemObjective itemObj = null;
         List<ItemObjective> objectives = game.getItemObjectives();
-        if (objectives == null) return;
+        if (objectives == null)
+            return;
         for(ItemObjective itemObjective : objectives) {
-            if (itemObjective.getItem().getEntityId() == item.getEntityId())
+            if (itemObjective.getItem().getEntityId() == item.getEntityId()) {
                 itemObj = itemObjective;
+                break;
+            }
         }
         if (itemObj == null)
             return;
-        int remaining = e.getRemaining(); // most likely not too important
+        e.setCancelled(true);
+        if (!EntityUtil.onGround(e.getItem()))
+            return;
+        if (deadPeople.contains(e.getPlayer()) || DamageApplier.getInvincibleEntities().contains(e.getPlayer()))
+            return;
 
+        int remaining = e.getRemaining(); // most likely not too important
         Bukkit.getServer().getPluginManager().callEvent(new GamePickUpEvent(game, who, itemObj, remaining));
     }
 

@@ -1,8 +1,6 @@
 package com.podcrash.api.game;
 
 import com.nametagedit.plugin.NametagEdit;
-import com.nametagedit.plugin.api.NametagAPI;
-import com.nametagedit.plugin.api.data.Nametag;
 import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.db.pojos.Rank;
 import com.podcrash.api.db.pojos.map.BaseMap;
@@ -14,6 +12,7 @@ import com.podcrash.api.game.lobby.GameLobbyTimer;
 import com.podcrash.api.game.resources.GameResource;
 import com.podcrash.api.game.scoreboard.GameLobbyScoreboard;
 import com.podcrash.api.game.scoreboard.GameScoreboard;
+import com.podcrash.api.scoreboard.ScoreboardInput;
 import com.podcrash.api.ui.TeamSelectGUI;
 import com.podcrash.api.util.ChatUtil;
 import com.podcrash.api.util.ItemStackUtil;
@@ -68,7 +67,6 @@ public abstract class Game implements IGame {
     private final Set<UUID> spectators;                       // Spectating players only.
     private final Set<UUID> respawning;                       // Respawning players.
 
-    private final GameLobbyScoreboard lobbyBoard;
     private final GameLobbyTimer lobbyTimer;
     private final Map<String, Double> playerRewards = new HashMap<>();
 
@@ -76,7 +74,9 @@ public abstract class Game implements IGame {
 
     private final Set<Player> isLobbyPVPing;
 
-    protected GameScoreboard board;
+    private GameScoreboard board;
+    private ScoreboardInput input;
+
     /**
      * Constructor for the game.
      * @param id The ID of the game.
@@ -93,14 +93,23 @@ public abstract class Game implements IGame {
         this.gameResources = new ArrayList<>();
 
         //Lobby setup
-        this.lobbyBoard = new GameLobbyScoreboard(this);
         this.lobbyTimer = new GameLobbyTimer(this);
-        this.lobbyBoard.run();
 
         this.participants = new HashSet<>();
         this.spectators = new HashSet<>();
         this.respawning = new HashSet<>();
         this.isLobbyPVPing = new HashSet<>();
+        this.board = new GameScoreboard(15,  id, type) {
+            @Override
+            public void update() {
+
+            }
+
+            @Override
+            public void startScoreboardTimer() {
+
+            }
+        };
 
         makeTeams();
         //todo:  you shouldn't pass an arraylist, look at makeTeams instead
@@ -124,6 +133,20 @@ public abstract class Game implements IGame {
 
     public GameScoreboard getGameScoreboard() {
         return board;
+    }
+    protected void setGameScoreboard(GameScoreboard board) {
+        this.board = board;
+    }
+
+    public ScoreboardInput getInput() {
+        return input;
+    }
+
+    public void setScoreboardInput(ScoreboardInput input) {
+        if (this.input != null)
+            this.input.unregister();
+        this.input = input;
+        this.input.run(5);
     }
 
     public Location spectatorSpawn() {
@@ -239,6 +262,8 @@ public abstract class Game implements IGame {
      * @return The Game World.
      */
     public World getGameWorld() {
+        if (gameWorldName == null)
+            return null;
         return Bukkit.getWorld(gameWorldName);
     }
 
@@ -340,7 +365,7 @@ public abstract class Game implements IGame {
         if (resource.getGameID() != this.id)
             throw new IllegalArgumentException("resource does not correspond with its game id" + "gameid: " + id + " resourceid: " + resource.getGameID());
         gameResources.add(resource);
-        resource.run(resource.getTicks(), resource.getDelayTicks());
+        resource.init();
     }
 
     /**
@@ -358,8 +383,13 @@ public abstract class Game implements IGame {
      * @param resource The game resource to unregister.
      */
     public void unregisterGameResource(GameResource resource){
-        resource.unregister();
+        resource.stop();
         gameResources.remove(resource);
+    }
+
+    public void unregisterAllGameResources() {
+        gameResources.forEach(GameResource::stop);
+        gameResources.clear();
     }
 
     /**
@@ -498,6 +528,7 @@ public abstract class Game implements IGame {
         Scoreboard colorBoard = getGameScoreboard().getBoard();
         for (GTeam team : teams) {
             TeamEnum gTeam = team.getTeamEnum();
+            /*
             String teamString = getTeamString(gTeam);
             if (colorBoard.getTeam(teamString) != null)
                 colorBoard.getTeam(teamString).unregister();
@@ -507,6 +538,8 @@ public abstract class Game implements IGame {
             newTeam.setCanSeeFriendlyInvisibles(true);
             newTeam.setAllowFriendlyFire(true);
             newTeam.setNameTagVisibility(NameTagVisibility.ALWAYS);
+
+             */
 
         }
     }
@@ -571,9 +604,9 @@ public abstract class Game implements IGame {
             return false;
 
         Scoreboard scoreboard =  getGameScoreboard().getBoard();
-        Team bukkitTeam = scoreboard.getTeam(getTeamString(teamEnum));
+        //Team bukkitTeam = scoreboard.getTeam(getTeamString(teamEnum));
         player.setScoreboard(scoreboard);
-        bukkitTeam.addEntry(player.getName());
+        //bukkitTeam.addEntry(player.getName());
         team.addToTeam(player);
 
         playerRewards.put(player.getName(), 0.0);
@@ -589,8 +622,8 @@ public abstract class Game implements IGame {
         String prefix = rank == null ? "" : rank.getColor() + rank.getName() + " ";
 
         NametagEdit.getApi().setPrefix(player, prefix + color);
-
-        NametagEdit.getApi().getNametag(player);
+        //String teamName = NametagEdit.getApi().getFakeTeam(player).getName();
+        //player.getScoreboard().registerNewTeam(teamName).setPrefix(color);
         /*
         if (rank != null) {
             player.setPlayerListName(String.format("%s %s%s",
@@ -1097,9 +1130,6 @@ public abstract class Game implements IGame {
             GTeam gteam = getTeam(player);
             if (gteam != null) {
                 gteam.removeFromTeam(player.getUniqueId());
-                Team team = getGameScoreboard().getBoard().getTeam(id + gteam.getTeamEnum().getName() + "Team");
-                if (team != null)
-                    team.removeEntry(name);
             }
             player.sendMessage(
                     String.format(
@@ -1112,13 +1142,15 @@ public abstract class Game implements IGame {
         }
     }
 
-    // TODO: Change this to work with more than 2 teams.
     @Override
     public String toString() {
-        return String.format("%s{Game %d}%s[%d/%d]%s:\n %s\n %s\n %s\n \n %s",
+        StringBuilder builder = new StringBuilder("\n");
+        for(GTeam team : teams)
+            builder.append(team.niceLooking());
+        builder.append("\n");
+        return String.format("%s{Game %d}%s[%d/%d]%s:\n %s %s\n \n %s",
                 ChatColor.GREEN, id, ChatColor.WHITE, size(), getMaxPlayers(), ChatColor.GRAY,
-                niceLookingTeam(TeamEnum.RED),
-                niceLookingTeam(TeamEnum.BLUE),
+                builder.toString(),
                 niceLookingUnsorted(),
                 niceLookingSpec());
     }

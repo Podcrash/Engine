@@ -5,6 +5,7 @@ import com.podcrash.api.time.resources.BlockBreakThenRestore;
 import net.jafama.FastMath;
 import net.minecraft.server.v1_8_R3.BlockPosition;
 import net.minecraft.server.v1_8_R3.IBlockData;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -174,6 +175,19 @@ public final class BlockUtil {
         }
 
         return loc;
+    }
+
+    /**
+     * Returns the air block above the y coordinate of a specified loc
+     * @param loc
+     * @return
+     */
+    public static Location getHighestAbove(Location loc) {
+        Location location = getHighestUnderneath(loc);
+        while(!isPassable(loc.getBlock())) {
+            location.add(0, 1, 0);
+        }
+        return location;
     }
 
     public static Location getHighestUnderneath(Location loc, int range) {
@@ -381,11 +395,15 @@ public final class BlockUtil {
      * @param data
      */
     public static void setBlockFast(World world, int x, int y, int z, Material material, byte data) {
+        int combined = material.getId() + (data << 12);
+        setBlockFast(world, x, y, z, combined);
+    }
+
+    public static void setBlockFast(World world, int x, int y, int z, int combined) {
         world.getChunkAtAsync(x >> 4, z >> 4, bukkitChunk -> {
             net.minecraft.server.v1_8_R3.Chunk chunk = ((CraftChunk) bukkitChunk).getHandle();
 
             final BlockPosition bp = new BlockPosition(x, y, z);
-            int combined = material.getId() + (data << 12);
             final IBlockData ibd = net.minecraft.server.v1_8_R3.Block.getByCombinedId(combined);
             chunk.a(bp, ibd);
             chunk.world.notify(bp);
@@ -396,6 +414,12 @@ public final class BlockUtil {
         CraftBlockUpdater updater = CraftBlockUpdater.getMassBlockUpdater(location.getWorld());
         updater.setBlock(location.getBlockX(), location.getBlockY(), location.getBlockZ(), material);
     }
+
+    public static void setBlock(Location location, int blockID) {
+        CraftBlockUpdater updater = CraftBlockUpdater.getMassBlockUpdater(location.getWorld());
+        updater.setBlock(location.getBlockX(), location.getBlockY(), location.getBlockZ(), blockID);
+    }
+
     public static void setBlock(Location location, Material material, byte data) {
         CraftBlockUpdater updater = CraftBlockUpdater.getMassBlockUpdater(location.getWorld());
         updater.setBlock(location.getBlockX(), location.getBlockY(), location.getBlockZ(), material, data);

@@ -9,67 +9,71 @@ import java.util.List;
 
 public final class PacketUtil {
     public static void syncSend(AbstractPacket packet, List<Player> players) {
-        Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> players.forEach(packet::sendPacket));
+        int size = players.size();
+        for (int i = 0; i < size; i++) {
+            Player player = players.get(i);
+            packet.sendPacket(player);
+        }
     }
 
     public static void syncSend(AbstractPacket packet, Player... players) {
-        Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
-            for (Player player : players) {
-                packet.sendPacket(player);
-            }
-        });
+        for (Player player : players) {
+            packet.sendPacket(player);
+        }
     }
 
     public static void syncSend(List<AbstractPacket> packets, List<Player> players) {
-        Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
-            for (AbstractPacket packet : packets) {
-                if (packet == null)
-                    continue;
-                for (Player player : players) {
-                    packet.sendPacket(player);
-                }
+        for (AbstractPacket packet : packets) {
+            if (packet == null)
+                continue;
+            int size = players.size();
+            for (int i = 0; i < size; i++) {
+                Player player = players.get(i);
+                packet.sendPacket(player);
             }
-        });
+        }
     }
 
     public static void syncSend(AbstractPacket[] packets, List<Player> players) {
-        Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
-            for (AbstractPacket packet : packets) {
-                if (packet == null)
-                    continue;
-                for (Player player : players) {
-                    packet.sendPacket(player);
-                }
+        for (AbstractPacket packet : packets) {
+            if (packet == null)
+                continue;
+            int size = players.size();
+            for (int i = 0; i < size; i++) {
+                Player player = players.get(i);
+                packet.sendPacket(player);
             }
-        });
+        }
     }
 
     public static void syncSend(AbstractPacket[] packets, Player... players) {
-        Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
-            for (AbstractPacket packet : packets) {
-                if (packet == null)
-                    continue;
-                for (Player player : players) {
-                    packet.sendPacket(player);
-                }
+        for (AbstractPacket packet : packets) {
+            if (packet == null)
+                continue;
+            for (Player player : players) {
+                packet.sendPacket(player);
             }
-        });
+        }
     }
 
     public static void syncSend(List<AbstractPacket> packets, Player... players) {
-        Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
-            for (AbstractPacket packet : packets) {
-                if (packet == null)
-                    continue;
-                for (Player player : players) {
-                    packet.sendPacket(player);
-                }
+        for (AbstractPacket packet : packets) {
+            if (packet == null)
+                continue;
+            for (Player player : players) {
+                packet.sendPacket(player);
             }
-        });
+        }
     }
 
     public static void asyncSend(AbstractPacket packet, List<Player> players) {
-        Bukkit.getScheduler().runTaskAsynchronously(PodcrashSpigot.getInstance(), () -> players.forEach(packet::sendPacket));
+        Bukkit.getScheduler().runTaskAsynchronously(PodcrashSpigot.getInstance(), () -> {
+            int size = players.size();
+            for (int i = 0; i < size; i++) {
+                Player player = players.get(i);
+                packet.sendPacket(player);
+            }
+        });
     }
 
     public static void asyncSend(AbstractPacket packet, Player... players) {
@@ -85,7 +89,9 @@ public final class PacketUtil {
             for (AbstractPacket packet : packets) {
                 if (packet == null)
                     continue;
-                for (Player player : players) {
+                int size = players.size();
+                for (int i = 0; i < size; i++) {
+                    Player player = players.get(i);
                     packet.sendPacket(player);
                 }
             }
@@ -97,7 +103,9 @@ public final class PacketUtil {
             for (AbstractPacket packet : packets) {
                 if (packet == null)
                     continue;
-                for (Player player : players) {
+                int size = players.size();
+                for (int i = 0; i < size; i++) {
+                    Player player = players.get(i);
                     packet.sendPacket(player);
                 }
             }

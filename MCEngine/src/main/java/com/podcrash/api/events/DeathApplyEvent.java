@@ -100,7 +100,11 @@ public class DeathApplyEvent extends Event implements Cancellable {
 
         //TODO: This needs refactor and testing
         if (attacker == null) {
-            builder.append(getCause().getDisplayName()).append(".");
+            if (getSources().size() != 0) {
+                DamageSource source = getSources().get(0);
+                builder.append(source.getPrefix() + source.getName());
+            }else builder.append(getCause().getDisplayName());
+            builder.append(".");
         } else {
             String attackerName;
             if (attacker instanceof Player) {

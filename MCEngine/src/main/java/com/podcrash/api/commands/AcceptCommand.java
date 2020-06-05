@@ -21,21 +21,9 @@ public class AcceptCommand extends BukkitCommand {
     @Override
     public boolean execute(CommandSender sender, String label, String[] args) {
         if (args.length == 1 && sender instanceof Player) {
-            if (BackfillListener.replaceOfflineWithSpectator((Player) sender, args[0])) {
-                //sender.sendMessage("sucess");
-            }
+            BackfillListener.replaceOfflineWithSpectator((Player) sender, args[0]);
         } else if(args.length == 0 && sender instanceof Player) {
-            Game game = GameManager.getGame();
-            for (GTeam team : game.getTeams()) {
-                if (team.getPlayers().size() < team.getMaxPlayers()) {
-                    if (BackfillListener.backfillSpectatorIntoGame((Player) sender, team.getTeamEnum())) {
-
-                    } else
-
-                    break;
-                }
-            }
-
+            BackfillListener.backfillSpectatorIntoGame((Player) sender);
         }
         return true;
     }

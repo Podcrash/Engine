@@ -4,7 +4,7 @@ import com.podcrash.api.game.scoreboard.GameScoreboard;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-public class ScoreboardRepeater extends GameResource {
+public class ScoreboardRepeater extends TimeGameResource {
     private GameScoreboard scoreboard;
     private ScoreboardRepeater(int gameID, int ticks, int delayTicks) {
         super(gameID, ticks, delayTicks);
@@ -14,7 +14,7 @@ public class ScoreboardRepeater extends GameResource {
         //every 10 ticks, I'm not sure if a scoreboard render is going to lag the client but it doesn't
         //need to be refreshed every 1/20th of a second
         this(gameID, 5, 0);
-        this.scoreboard = getGame().getGameScoreboard();
+        this.scoreboard = game.getGameScoreboard();
     }
 
     /**
@@ -22,7 +22,7 @@ public class ScoreboardRepeater extends GameResource {
      */
     private void update() {
         this.scoreboard.update();
-        for (Player player : getGame().getBukkitPlayers()){
+        for (Player player : game.getBukkitPlayers()){
             player.setScoreboard(scoreboard.getBoard());
         }
     }
@@ -37,7 +37,7 @@ public class ScoreboardRepeater extends GameResource {
      */
     @Override
     public void cleanup() {
-        for (Player player : getGame().getBukkitPlayers()){
+        for (Player player : game.getBukkitPlayers()){
             //clear scoreboard
             player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
         }

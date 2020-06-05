@@ -1,0 +1,5 @@
+name: PacketWrapper
+main: com.packetwrapper.abstractpackets.plugin.PacketWrapper
+version: 1.0
+author: iforgottheprotocollibdude
+softdepend: [Protocollib]

@@ -2,4 +2,4 @@ name: PodcrashAPI
 main: com.podcrash.api.plugin.PodcrashSpigot
 version: 1.0
 author: RainDance
-softdepend: [SlimeWorldManager, ProtocolLib]
+softdepend: [DBEngine, PacketWrapper, NameTagEdit]

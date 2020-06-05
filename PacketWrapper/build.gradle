@@ -26,3 +26,7 @@ dependencies {
     implementation 'com.grinderwolf:slimeworldmanager-api:2.1.1'
     //implementation 'com.comphenix.protocol:ProtocolLib:4.4.0'
 }
+
+task spigot(dependsOn: jar) {
+
+}

@@ -39,6 +39,8 @@ public abstract class KitPlayer {
     public KitPlayer(Player player) {
         this.player = player;
         this.skills = new HashSet<>();
+        final ItemStack air = new ItemStack(Material.AIR);
+        this.defaultHotbar = new ItemStack[] { air.clone(), air.clone(), air.clone(), air.clone(), air.clone(), air.clone(), air.clone(), air.clone(), air.clone() };
     }
 
     public abstract String getName();

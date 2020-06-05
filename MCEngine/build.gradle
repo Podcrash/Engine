@@ -3,46 +3,20 @@ plugins {
     id 'java-library'
     id 'idea'
     id 'eclipse'
-    id 'nu.studer.jooq' version '3.0.3'
-    id "com.github.johnrengelman.shadow" version "5.2.0"
 }
 
 version '1.1'
 
 sourceCompatibility = 1.8
 
-shadowJar {
-    mergeServiceFiles()
-
-    dependencies {
-
-        /*
-        include (dependency("org.jooq:jooq:3.12.1"))
-        include (dependency("com.zaxxer:HikariCP:3.3.1"))
-        include (dependency("postgresql:postgresql:9.4.1208-jdbc42-atlassian-hosted"))
-
-        include (dependency("org.redisson:redisson:3.11.3"))
-        include (dependency("io.netty:+:+"))
-        include (dependency("javax.cache:cache-api:1.0.0"))
-        */
-        exclude "spigot.jar"
-        exclude "com.nametagedit:nametagedit:4.4.6"
-        //exclude(dependency("com.comphenix.protocol:ProtocolLib:4.4.0"))
-
-    }
-
-    relocate("io.netty", "org.redisson.netty")
-    //todo: include everything in the packetwrapper, rather than minimizing
-    //minimize()
-}
 
 dependencies {
     compileOnly fileTree("../../libs")
 
-    implementation project(path: ":Engine:DBEngine")
-    implementation project(path: ":Engine:PacketWrapper")
-    implementation 'com.google.code.gson:gson:2.8.6'
-    implementation "com.nametagedit:nametagedit:4.4.6"
+    api project(path: ":Engine:DBEngine")
+    api project(path: ":Engine:PacketWrapper")
+    api 'com.grinderwolf:slimeworldmanager-api:2.1.1'
+    api "com.nametagedit:nametagedit:4.4.6"
 
     testImplementation 'org.bukkit:bukkit:1.8.8-R0.1-SNAPSHOT'
     testImplementation 'org.slf4j:slf4j-simple:1.7.21'
@@ -52,19 +26,18 @@ dependencies {
 
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.5.1"
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.1'
-    implementation 'com.grinderwolf:slimeworldmanager-api:2.1.1'
     //implementation 'com.comphenix.protocol:ProtocolLib:4.4.0'
 }
 
 test {
-    test.dependsOn(shadowJar)
+    test.dependsOn(jar)
     useJUnitPlatform()
     systemProperty "lobby.code", "dom1234132"
 
     testLogging.showStandardStreams true
 }
 
-task spigot(dependsOn: shadowJar) {
+task spigot(dependsOn: jar) {
 
 }
 

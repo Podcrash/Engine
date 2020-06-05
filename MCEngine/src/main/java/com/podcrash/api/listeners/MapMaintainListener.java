@@ -8,19 +8,21 @@ import com.podcrash.api.damage.Cause;
 import com.podcrash.api.damage.DamageApplier;
 import com.podcrash.api.damage.DamageQueue;
 import com.podcrash.api.effect.status.Status;
-import com.podcrash.api.events.DamageApplyEvent;
-import com.podcrash.api.events.DamageEvent;
-import com.podcrash.api.events.StatusRemoveEvent;
+import com.podcrash.api.events.*;
 import com.podcrash.api.game.Game;
 import com.podcrash.api.game.GameManager;
 import com.podcrash.api.game.GameState;
 import com.podcrash.api.sound.SoundPlayer;
 import com.podcrash.api.util.PacketUtil;
 import com.podcrash.api.plugin.PodcrashSpigot;
+import com.podcrash.api.util.ReflectionUtil;
+import net.minecraft.server.v1_8_R3.EntityLiving;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -40,12 +42,11 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Prevent dumb things from happening
@@ -115,32 +116,43 @@ public class MapMaintainListener extends ListenerBase {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlace(BlockPlaceEvent e){
-        if (evaluate(e.getBlock().getWorld())) {
-            if (!e.getPlayer().hasPermission("invicta.map"))
-                e.setCancelled(true);
-        }
+        if (!evaluate(e.getBlock().getWorld()))
+            return;
+        Game game = GameManager.getGame();
+        if (game == null)
+            return;
+        if (game.getGameState() == GameState.STARTED)
+            return;
+        if (!e.getPlayer().hasPermission("invicta.map"))
+            e.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onBreak(BlockBreakEvent e) {
-        if (evaluate(e.getBlock().getWorld())) {
-            if (!e.getPlayer().hasPermission("invicta.map"))
-                e.setCancelled(true);
-        }
+        if (!evaluate(e.getBlock().getWorld()))
+            return;
+        Game game = GameManager.getGame();
+        if (game == null)
+            return;
+        if (game.getGameState() == GameState.STARTED)
+            return;
+        if (!e.getPlayer().hasPermission("invicta.map"))
+            e.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onDrop(PlayerDropItemEvent e) {
-        if (evaluate(e.getPlayer().getWorld()))
+        if (isSpawnWorld(e.getPlayer().getWorld()))
             e.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onFood(FoodLevelChangeEvent e) {
-        if (isSpawnWorld(e.getEntity().getWorld()))
+        PodcrashSpigot.debugLog("1");
+        if (isSpawnWorld(e.getEntity().getWorld())) {
             e.setFoodLevel(20);
-        else
-            e.setCancelled(true);
+            PodcrashSpigot.debugLog("2");
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -223,8 +235,11 @@ public class MapMaintainListener extends ListenerBase {
         DamageQueue.artificialAddHistory(p, damage, cause);
         //if the player is about to die, cancel it
         //Then call our own death event.
-        if (p instanceof Player && afterHealth <= 0D) {
-            DamageQueue.artificialDie((Player) p);
+        if (afterHealth <= 0 && !(p instanceof Player)) {
+            Bukkit.getPluginManager().callEvent(new DeadEntityEvent(p, cause));
+            EntityLiving living = ((CraftLivingEntity) p).getHandle();
+            ReflectionUtil.runMethod(living, living.getClass().getName(), "dropDeathLoot", Void.class, new Class[]{boolean.class, int.class}, true, 1);
+            ReflectionUtil.runMethod(living, living.getClass().getName(),"dropEquipment", Void.class, new Class[] {boolean.class, int.class}, true, 1);
         }
     }
 
@@ -238,15 +253,39 @@ public class MapMaintainListener extends ListenerBase {
     private void damage(LivingEntity victim, double damage) {
 
         double health = victim.getHealth() - damage;
-        victim.setHealth((health < 0) ? 0 : health);
+        if (health < 0 && victim instanceof Player)
+            fakeDie((Player) victim);
+        victim.setHealth((health < 0) ? 20 : health);
 
         WrapperPlayServerEntityStatus packet = new WrapperPlayServerEntityStatus();
         packet.setEntityId(victim.getEntityId());
         packet.setEntityStatus(WrapperPlayServerEntityStatus.Status.ENTITY_HURT);
 
         PacketUtil.syncSend(packet, victim.getWorld().getPlayers());
-        SoundPlayer.sendSound(victim.getLocation(), "game.player.hurt", 1, 63);
 
+        EntityLiving craftLiving = ((CraftLivingEntity) victim).getHandle();
+        String hurtSound = ReflectionUtil.runMethod(craftLiving, craftLiving.getClass().getName(),"bo", String.class);
+        SoundPlayer.sendSound(victim.getLocation(), hurtSound, 1, 75);
+
+    }
+
+    private void fakeDie(Player p) {
+        DamageQueue.artificialDie((Player) p);
+        DropDeathLootEvent e = new DropDeathLootEvent(p);
+        Bukkit.getPluginManager().callEvent(e);
+        if (e.isCancelled())
+            return;
+        PlayerInventory inventory = ((Player) p).getInventory();
+        List<ItemStack> drops = new ArrayList<>(Arrays.asList(inventory.getContents()));
+        drops.addAll(Arrays.asList(inventory.getArmorContents()));
+        World world = p.getWorld();
+        Location location = p.getLocation();
+        Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
+            for (ItemStack stack : drops) {
+                if (stack == null || stack.getType() == Material.AIR) continue;
+                world.dropItemNaturally(location, stack);
+            }
+        });
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -279,16 +318,6 @@ public class MapMaintainListener extends ListenerBase {
                 event.setCancelled(true);
         //if (event.getVictim() instanceof Player) && isSpawnWorld(event.getVictim().getWorld()))
             //event.setCancelled(true);
-    }
-
-
-
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void preventCraft(InventoryClickEvent event) {
-        if (event.getWhoClicked().getWorld().getName().equals("world")) return;
-        Inventory clicked = event.getClickedInventory();
-        if (clicked != null && clicked.getType() == InventoryType.CRAFTING)
-            event.setCancelled(true);
     }
 
     /**

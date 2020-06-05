@@ -22,7 +22,7 @@ import java.util.Random;
 public final class CapturePoint extends WinObjective {
     private static final ObjectiveType otype = ObjectiveType.CAPTURE_POINT;
     private final Random random = new Random();
-    private String color;
+    private TeamEnum color;
     private final String name;
     /**
      * 0 = white
@@ -47,7 +47,7 @@ public final class CapturePoint extends WinObjective {
     public CapturePoint(String name, Vector vector){
         super(vector);
         this.name = name;
-        this.color = "white";
+        this.color = TeamEnum.WHITE;
         this.blocks = new byte[][] {
                 {0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0},
@@ -75,7 +75,7 @@ public final class CapturePoint extends WinObjective {
 
     @Override
     public void spawnFirework() {
-        this.fireworkEffect = FireworkEffect.builder().withColor(TeamEnum.getByColor(color).getColor().getColor()).with(FireworkEffect.Type.BALL_LARGE).build();
+        this.fireworkEffect = FireworkEffect.builder().withColor(color.getColor().getColor()).with(FireworkEffect.Type.BALL_LARGE).build();
         super.spawnFirework();
     }
 
@@ -86,7 +86,7 @@ public final class CapturePoint extends WinObjective {
         return name;
     }
     public String getColor() {
-        return color;
+        return color.getName();
     }
     public static ObjectiveType getOtype() {
         return otype;
@@ -144,10 +144,10 @@ public final class CapturePoint extends WinObjective {
         return isFull;
     }
     public boolean isCaptured(){
-        return this.color.equalsIgnoreCase(TeamEnum.RED.getName()) || this.color.equalsIgnoreCase(TeamEnum.BLUE.getName());
+        return !this.color.equals(TeamEnum.WHITE);
     }
     public TeamEnum getTeamColor(){
-        return TeamEnum.getByColor(color);
+        return color;
     }
 
     /**
@@ -157,7 +157,7 @@ public final class CapturePoint extends WinObjective {
     public void setTeamColor(String color){
         TeamEnum team = TeamEnum.getByColor(color);
         if (team != null) {
-            this.color = color;
+            this.color = team;
             Location[] corners = getCornerWools();
             for (Location corner : corners) {//TODO: FIREWORK?
                 BlockUtil.replaceBlock(corner, Material.WOOL, team.getData(), false);
@@ -227,8 +227,8 @@ public final class CapturePoint extends WinObjective {
     public TeamEnum capture(String color){// yeah we need enums
         TeamEnum team = TeamEnum.getByColor(color);
         if (team == null)
-            throw new IllegalArgumentException("color cannot be " + color + ". Allowed: red, blue, white");
-        if (this.color.equalsIgnoreCase(color)) {
+            throw new IllegalArgumentException("color cannot be " + color + ".");
+        if (this.color.equals(team)) {
             //Two cases:
             // (a) Red on a full "red capture" <= do nothing
             if (!isFull) {

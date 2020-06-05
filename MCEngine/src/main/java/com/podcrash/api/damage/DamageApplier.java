@@ -3,6 +3,7 @@ package com.podcrash.api.damage;
 import com.packetwrapper.abstractpackets.WrapperPlayServerEntityVelocity;
 import com.podcrash.api.util.PacketUtil;
 import net.jafama.FastMath;
+import net.minecraft.server.v1_8_R3.EnchantmentManager;
 import net.minecraft.server.v1_8_R3.Entity;
 import net.minecraft.server.v1_8_R3.EntityLiving;
 import org.bukkit.Bukkit;
@@ -56,22 +57,25 @@ public final class DamageApplier {
     public static void nativeApplyKnockback(LivingEntity epvictim, LivingEntity epdamager, double[] velocityModifiers) {
         Entity livingVictim = ((CraftEntity) epvictim).getHandle();
         Entity livingDamager = ((CraftEntity) epdamager).getHandle();
-        double d0 = livingVictim.motX;
-        double d1 = livingVictim.motY;
-        double d2 = livingVictim.motZ;
+        double d0 = livingVictim.motX * velocityModifiers[0];
+        double d1 = livingVictim.motY * velocityModifiers[1];
+        double d2 = livingVictim.motZ * velocityModifiers[2];
         a(livingVictim, livingDamager);
 
-        double angle = Math.toRadians(livingDamager.yaw);
-        livingVictim.g((-FastMath.sin(angle) * SpigotConfig.knockbackExtraHorizontal),
-                SpigotConfig.knockbackExtraVertical,
-                (FastMath.cos(angle) * SpigotConfig.knockbackExtraHorizontal));
+        double i = EnchantmentManager.a((EntityLiving) livingDamager);
+        if (i == 0) i = 2D/3D;
+        if (livingDamager.isSprinting())
+            i += i == 0 ? 1 : 1D/3D;
 
-        livingVictim.motX *= velocityModifiers[0];
-        livingVictim.motY *= velocityModifiers[1];
-        livingVictim.motZ *= velocityModifiers[2];
-
-        livingDamager.motX *= 0.6D;
-        livingDamager.motZ *= 0.6D;
+        if (i > 0) {
+            double angle = Math.toRadians(livingDamager.yaw);
+            livingVictim.g((-FastMath.sin(angle) * (i * SpigotConfig.knockbackExtraHorizontal)),
+                    SpigotConfig.knockbackExtraVertical,
+                    (FastMath.cos(angle) * (i * SpigotConfig.knockbackExtraHorizontal)));
+            livingDamager.motX *= 0.6D;
+            livingDamager.motZ *= 0.6D;
+            livingDamager.setSprinting(false);
+        }
 
         sendVectorEvent(livingVictim, d0, d1, d2);
     }

@@ -5,6 +5,7 @@ import com.packetwrapper.abstractpackets.WrapperPlayServerEntityStatus;
 import com.podcrash.api.effect.status.StatusApplier;
 import com.podcrash.api.events.DamageApplyEvent;
 import com.podcrash.api.events.DeathApplyEvent;
+import com.podcrash.api.events.DropDeathLootEvent;
 import com.podcrash.api.events.SoundApplyEvent;
 import com.podcrash.api.events.game.GameDamageEvent;
 import com.podcrash.api.game.Game;
@@ -13,9 +14,14 @@ import com.podcrash.api.game.GameState;
 import com.podcrash.api.sound.SoundPlayer;
 import com.podcrash.api.util.PacketUtil;
 import com.podcrash.api.plugin.PodcrashSpigot;
+import com.podcrash.api.util.ReflectionUtil;
 import net.minecraft.server.v1_8_R3.EntityLiving;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -24,6 +30,8 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
 public final class DamageQueue implements Runnable {
@@ -138,17 +146,52 @@ public final class DamageQueue implements Runnable {
         if (nowHealth > entity.getMaxHealth()) //this will never happen, but just in case
             nowHealth = entity.getMaxHealth();
 
+        EntityLiving craftLiving = ((CraftLivingEntity) entity).getHandle();
         if (nowHealth <= 0) {
-            if (entity instanceof Player) {
-                PlayerInventory inventory = ((Player) entity).getInventory();
-                inventory.clear();
-                inventory.setArmorContents(new ItemStack[]{null, null, null, null});
-            }else entity.setHealth(0);
-            SoundPlayer.sendSound(entity.getLocation(), "game.neutral.die", 1, 75);
+            DropDeathLootEvent e = new DropDeathLootEvent(entity);
+            Bukkit.getPluginManager().callEvent(e);
+            if (!e.isCancelled()) {
+                PodcrashSpigot.debugLog("Dropping loot!");
+                Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
+                    ReflectionUtil.runMethod(craftLiving, craftLiving.getClass().getName(), "dropDeathLoot", Void.class, new Class[]{boolean.class, int.class}, true, 1);
+                    ReflectionUtil.runMethod(craftLiving, craftLiving.getClass().getName(),"dropEquipment", Void.class, new Class[] {boolean.class, int.class}, true, 1);
+
+
+                });
+                if (entity instanceof Player) {
+                    PlayerInventory inventory = ((Player) entity).getInventory();
+                    List<ItemStack> drops = new ArrayList<>(Arrays.asList(inventory.getContents()));
+                    drops.addAll(Arrays.asList(inventory.getArmorContents()));
+                    World world = entity.getWorld();
+                    Location location = entity.getLocation();
+                    Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
+                        for (ItemStack stack : drops) {
+                            if (stack == null || stack.getType() == Material.AIR) continue;
+                            world.dropItemNaturally(location, stack);
+                        }
+                    });
+                }
+            }else {
+                PodcrashSpigot.debugLog("Not dropping loot!");
+                if (entity instanceof Player) {
+                    PlayerInventory inventory = ((Player) entity).getInventory();
+                    inventory.clear();
+                    inventory.setArmorContents(new ItemStack[]{null, null, null, null});
+                }
+            }
+            if (!(entity instanceof Player))
+                entity.setHealth(0);
+
+            String deathSound = ReflectionUtil.runMethod(craftLiving, craftLiving.getClass().getName(),"bp", String.class);
+            SoundPlayer.sendSound(entity.getLocation(), deathSound, 1, 75);
             die(entity);
             return true;
         } else {
             entity.setHealth(nowHealth);
+            if (!(entity instanceof Player)) {
+                String hurtSound = ReflectionUtil.runMethod(craftLiving, craftLiving.getClass().getName(),"bo", String.class);
+                SoundPlayer.sendSound(entity.getLocation(), hurtSound, 1, 75);
+            }
         }
 
         return false;
@@ -399,6 +442,13 @@ public final class DamageQueue implements Runnable {
         if (!damageHistory.containsKey(name))
             damageHistory.put(name, new ArrayDeque<>());
         Damage wrapper = new Damage(entity, null, damage, null, cause, null, (DamageSource) null, false);
+        damageHistory.get(name).add(wrapper);
+    }
+    public static void artificialAddHistory(LivingEntity entity, double damage, DamageSource source) {
+        String name = getNameFor(entity);
+        if (!damageHistory.containsKey(name))
+            damageHistory.put(name, new ArrayDeque<>());
+        Damage wrapper = new Damage(entity, null, damage, null, Cause.CUSTOM, null, source, false);
         damageHistory.get(name).add(wrapper);
     }
 

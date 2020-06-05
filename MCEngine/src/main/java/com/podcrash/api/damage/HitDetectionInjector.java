@@ -53,7 +53,9 @@ public final class HitDetectionInjector {
                 EnumWrappers.EntityUseAction action = packet.getType();
                 Entity entity = packet.getTarget(player.getWorld());
                 Player attacker = event.getPlayer();
-                if (event.getPlayer() != player)
+                if (attacker != player)
+                    return;
+                if (attacker.isBlocking())
                     return;
                 //if the action is not attack, cancel (allow living entities this time)
                 if (action != EnumWrappers.EntityUseAction.ATTACK)

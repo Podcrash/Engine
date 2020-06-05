@@ -3,6 +3,7 @@ package com.podcrash.api.listeners;
 import com.podcrash.api.events.game.GameEndEvent;
 import com.podcrash.api.game.*;
 import com.podcrash.api.game.resources.GameResource;
+import com.podcrash.api.game.resources.TimeGameResource;
 import com.podcrash.api.game.resources.HealthBarResource;
 
 import com.podcrash.api.plugin.PodcrashSpigot;
@@ -31,23 +32,27 @@ public class BackfillListener extends ListenerBase {
         super(plugin);
     }
 
-    public static boolean backfillSpectatorIntoGame(Player joiningPlayer, TeamEnum teamEnum) {
+    public static boolean backfillSpectatorIntoGame(Player joiningPlayer) {
         Game game = GameManager.getGame();
-        GTeam team = game.getTeam(teamEnum);
-        if (game.getGameState().equals(GameState.STARTED) && team.getPlayers().size() < team.getMaxPlayers() && GameManager.isSpectating(joiningPlayer)) {
+        if (!game.isFull() && game.getGameState().equals(GameState.STARTED) && GameManager.isSpectating(joiningPlayer)) {
             joiningPlayer.setGameMode(GameMode.SURVIVAL);
             game.addParticipant(joiningPlayer);
 
             //TODO below is literally just the GameManager.randomTeam code, but uses game.joinTeam instead of gameManager.joinTeam - make it better idk
-            int red = game.getTeam(0).teamSize();
-            int blue = game.getTeam(1).teamSize();
-            if(blue > red)
-                game.joinTeam(joiningPlayer, TeamEnum.RED, true);
-            else if(red > blue)
-                game.joinTeam(joiningPlayer, TeamEnum.BLUE, true);
-            else //they are equal, good-ol RNG!
-                game.joinTeam(joiningPlayer, new TeamEnum[]{TeamEnum.RED, TeamEnum.BLUE}[(int) (Math.random() + 0.5D)], true);
+            GTeam oneTeam = game.getTeam(0);
+            GTeam twoTeam = game.getTeam(1);
+            int oneSize = oneTeam.teamSize();
+            int twoSize = twoTeam.teamSize();
 
+            TeamEnum oneEnum = oneTeam.getTeamEnum();
+            TeamEnum twoEnum = twoTeam.getTeamEnum();
+
+            if (twoSize > oneSize)
+                game.joinTeam(joiningPlayer, oneEnum, true);
+            else if (oneSize > twoSize)
+                game.joinTeam(joiningPlayer, twoEnum, true);
+            else //they are equal, good-ol RNG!
+                game.joinTeam(joiningPlayer, new TeamEnum[]{oneEnum, twoEnum}[(int) (Math.random() + 0.5D)], true);
             joiningPlayer.teleport(game.getTeam(joiningPlayer).getSpawn(joiningPlayer));
             for (GameResource resource : game.getGameResources()) {
                 if (resource instanceof HealthBarResource)

@@ -43,6 +43,10 @@ public class BoundingBox {
         NORMALS = null;
     }
 
+    public BoundingBox(Coordinate min, Coordinate max) {
+        this.min = min;
+        this.max = max;
+    }
     public BoundingBox(Vector min, Vector max) {
         this.max = Coordinate.fromVector(max);
         this.min = Coordinate.fromVector(min);

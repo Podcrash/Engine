@@ -6,6 +6,8 @@ import com.podcrash.api.db.tables.MapTable;
 import com.podcrash.api.events.game.GameEndEvent;
 import com.podcrash.api.events.game.GameStartEvent;
 import com.podcrash.api.game.resources.GameResource;
+import com.podcrash.api.game.resources.TimeGameResource;
+import com.podcrash.api.game.scoreboard.GameLobbyScoreboard;
 import com.podcrash.api.plugin.PodcrashSpigot;
 import org.apache.commons.lang.Validate;
 import org.bukkit.*;
@@ -73,6 +75,9 @@ public class GameManager {
             }
             i++;
         }
+
+        //default lobby board
+        game.setScoreboardInput(new GameLobbyScoreboard(game, game.getGameScoreboard()));
     }
 
     public static void destroyCurrentGame() {
@@ -171,14 +176,21 @@ public class GameManager {
     // TODO: This is assuming blue and red team enums, which are subject to change.
     public static void randomTeam(Player player) {
         Game game = currentGame;
-        int red = game.getTeam(0).teamSize();
-        int blue = game.getTeam(1).teamSize();
-        if (blue > red)
-            joinTeam(player, TeamEnum.RED);
-        else if (red > blue)
-            joinTeam(player, TeamEnum.BLUE);
+        //refactor to use multiple teams
+        GTeam oneTeam = game.getTeam(0);
+        GTeam twoTeam = game.getTeam(1);
+        int oneSize = oneTeam.teamSize();
+        int twoSize = twoTeam.teamSize();
+
+        TeamEnum oneEnum = oneTeam.getTeamEnum();
+        TeamEnum twoEnum = twoTeam.getTeamEnum();
+
+        if (twoSize > oneSize)
+            joinTeam(player, oneEnum);
+        else if (oneSize > twoSize)
+            joinTeam(player, twoEnum);
         else //they are equal, good-ol RNG!
-            joinTeam(player, new TeamEnum[]{TeamEnum.RED, TeamEnum.BLUE}[(int) (Math.random() + 0.5D)]);
+            joinTeam(player, new TeamEnum[]{oneEnum, twoEnum}[(int) (Math.random() + 0.5D)]);
 
     }
     public static void joinTeam(Player player, TeamEnum teamEnum) {
@@ -271,9 +283,12 @@ public class GameManager {
         }
         Location spawnLoc = Bukkit.getWorld(name).getSpawnLocation();
         game.setState(GameState.LOBBY);
+        game.unregisterAllGameResources();
         GameEndEvent gameend = new GameEndEvent(game, spawnLoc);
         //currentGame = null;
+        game.getInput().unregister();
         PodcrashSpigot.getInstance().getServer().getPluginManager().callEvent(gameend);
+
     }
 
     public static Game getGame() {
