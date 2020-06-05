@@ -3,6 +3,7 @@ package com.podcrash.api.commands;
 import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.PlayerTable;
+import com.podcrash.api.listeners.FriendsMenuListener;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -37,6 +38,7 @@ public class FriendCommand extends BukkitCommand {
 
         if(strings.length == 0) {
             showFriendList(sender, table);
+            sender.openInventory(FriendsMenuListener.createFriendsMenu());
         } else if (strings.length == 1) {
             addFriendToPlayer(sender, strings[0], table);
         } else if (strings.length == 2){
