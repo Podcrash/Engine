@@ -89,6 +89,10 @@ public class PlayerTable extends MongoBaseTable {
         return getPlayerDocumentAsync(uuid, "friends").thenApplyAsync(InvictaPlayer::getFriends);
     }
 
+    public CompletableFuture<Boolean> hasFriendAsync(UUID target, UUID sender) {
+        return getPlayerDocumentAsync(sender, "friends").thenApplyAsync((playerDocument) -> playerDocument.hasFriend(target));
+    }
+
     public void addFriend(UUID target, UUID sender) {
         CompletableFuture<UpdateResult> future = new CompletableFuture<>();
         getCollection("players").updateOne(Filters.eq("uuid", sender), Updates.addToSet("friends", target), (res, t) -> {

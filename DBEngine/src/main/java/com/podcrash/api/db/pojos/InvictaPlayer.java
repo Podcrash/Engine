@@ -25,9 +25,9 @@ public final class InvictaPlayer {
     public InvictaPlayer() {
     }
 
-    public Set<UUID> getFriends() {
-        return friends;
-    }
+    public Set<UUID> getFriends() { return friends; }
+
+    public boolean hasFriend(UUID target) {return friends.contains(target);}
 
     public void setFriends(Set<UUID> friends) {this.friends = friends;}
 
