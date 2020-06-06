@@ -17,7 +17,6 @@ import java.util.Set;
 import java.util.UUID;
 
 /** TODO send request instead of directly adding
- *  TODO gui alternative at some point?
  *  TODO use updateresult instead of contains(name) to save up on queries
  */
 
@@ -38,7 +37,6 @@ public class FriendCommand extends BukkitCommand {
 
         if(strings.length == 0) {
             showFriendList(sender, table);
-            sender.openInventory(FriendsMenuListener.createFriendsMenu());
         } else if (strings.length == 1) {
             addFriendToPlayer(sender, strings[0], table);
         } else if (strings.length == 2){
@@ -46,6 +44,9 @@ public class FriendCommand extends BukkitCommand {
                 case "remove": {
                     removeFriendFromPlayer(sender, strings[1], table);
                     break;
+                }
+                case "accept" : {
+                    // If you have a request pending from strings[1], then accept it and add them to list of friends
                 }
                 default: sender.sendMessage(String.format("%s%s%s is not a valid argument", ChatColor.RED, ChatColor.ITALIC, strings[0]));
             }
@@ -57,7 +58,10 @@ public class FriendCommand extends BukkitCommand {
 
     private void showFriendList(Player recipient, PlayerTable table) {
         table.getFriendsAsync(recipient.getUniqueId()).thenApply((friends) -> {
-            if(friends != null && friends.size() > 0) recipient.sendMessage(getNiceFriendList(friends));
+            if(friends != null && friends.size() > 0) {
+                recipient.sendMessage(getNiceFriendList(friends));
+                recipient.openInventory(FriendsMenuListener.createFriendsMenu(getNamesFromUUIDs(friends)));
+            }
             else recipient.sendMessage(ChatColor.RED + "No friends added.");
             return true;
         });
@@ -99,18 +103,23 @@ public class FriendCommand extends BukkitCommand {
     }
 
     private String getNiceFriendList(Set<UUID> uuids) {
-        Set<OfflinePlayer> friends = new HashSet<>();
-        for(UUID uuid : uuids) {
-            friends.add(Bukkit.getOfflinePlayer(uuid));
-        }
+        Set<String> friendNames = getNamesFromUUIDs(uuids);
 
         StringBuilder builder = new StringBuilder();
         builder.append("[ ");
-        for(OfflinePlayer player : friends) {
-            builder.append(player.getName()).append(" ");
+        for(String name : friendNames) {
+            builder.append(name).append(" ");
         }
         builder.append("]");
 
         return builder.toString();
+    }
+
+    private Set<String> getNamesFromUUIDs(Set<UUID> uuids) {
+        Set<String> result = new HashSet<>();
+        for(UUID uuid : uuids) {
+            result.add(Bukkit.getOfflinePlayer(uuid).getName());
+        }
+        return result;
     }
 }
