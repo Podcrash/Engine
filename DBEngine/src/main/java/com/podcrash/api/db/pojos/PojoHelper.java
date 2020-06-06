@@ -45,7 +45,6 @@ public final class PojoHelper {
         player.setCurrency(currency);
         player.setExtraPerms(new HashSet<>());
         player.setRanks(new HashSet<>());
-        player.setFriends(new HashSet<>());
         player.setUuid(uuid);
         player.setDiscordID(-1);
         player.setGameData(new HashMap<>());
@@ -54,6 +53,13 @@ public final class PojoHelper {
         return player;
     }
 
+    public static FriendLink createFriendLink(UUID playerOne, UUID playerTwo, boolean pending) {
+        FriendLink result = new FriendLink();
+        result.setPending(pending);
+        result.setPlayerOne(playerOne);
+        result.setPlayerTwo(playerTwo);
+        return result;
+    }
 
     public static Vector convertPoint2Vector(Point point) {
         return new Vector(point.getX(), point.getY(), point.getZ());

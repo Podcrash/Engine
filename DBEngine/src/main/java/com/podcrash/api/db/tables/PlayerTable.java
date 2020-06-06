@@ -84,30 +84,4 @@ public class PlayerTable extends MongoBaseTable {
     public CompletableFuture<Currency> getCurrency(UUID uuid) {
         return getPlayerDocumentAsync(uuid, "currency").thenApplyAsync(InvictaPlayer::getCurrency);
     }
-
-    public CompletableFuture<Set<UUID>> getFriendsAsync(UUID uuid) {
-        return getPlayerDocumentAsync(uuid, "friends").thenApplyAsync(InvictaPlayer::getFriends);
-    }
-
-    public CompletableFuture<Boolean> hasFriendAsync(UUID target, UUID sender) {
-        return getPlayerDocumentAsync(sender, "friends").thenApplyAsync((playerDocument) -> playerDocument.hasFriend(target));
-    }
-
-    public void addFriend(UUID target, UUID sender) {
-        CompletableFuture<UpdateResult> future = new CompletableFuture<>();
-        getCollection("players").updateOne(Filters.eq("uuid", sender), Updates.addToSet("friends", target), (res, t) -> {
-            DBUtils.handleThrowables(t);
-            future.complete(res);
-        });
-        futureGuaranteeGet(future);
-    }
-
-    public void removeFriend(UUID target, UUID sender) {
-        CompletableFuture<UpdateResult> future = new CompletableFuture<>();
-        getCollection("players").updateOne(Filters.eq("uuid", sender), Updates.pull("friends", target), (res, t) -> {
-            DBUtils.handleThrowables(t);
-            future.complete(res);
-        });
-        futureGuaranteeGet(future);
-    }
 }

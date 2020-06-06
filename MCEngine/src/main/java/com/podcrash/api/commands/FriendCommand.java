@@ -2,6 +2,7 @@ package com.podcrash.api.commands;
 
 import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.db.tables.DataTableType;
+import com.podcrash.api.db.tables.FriendsTable;
 import com.podcrash.api.db.tables.PlayerTable;
 import com.podcrash.api.listeners.FriendsMenuListener;
 import org.bukkit.Bukkit;
@@ -17,6 +18,7 @@ import java.util.Set;
 import java.util.UUID;
 
 /** TODO send request instead of directly adding
+ * TODO OPTIMIZE FRIENDSTABLE WITH INDEXING
  *  TODO use updateresult instead of contains(name) to save up on queries
  */
 
@@ -33,7 +35,7 @@ public class FriendCommand extends BukkitCommand {
         if (!(commandSender instanceof Player)) return false;
 
         Player sender = (Player) commandSender;
-        PlayerTable table = TableOrganizer.getTable(DataTableType.PLAYERS);
+        FriendsTable table = TableOrganizer.getTable(DataTableType.FRIENDS);
 
         if(strings.length == 0) {
             showFriendList(sender, table);
@@ -56,10 +58,9 @@ public class FriendCommand extends BukkitCommand {
         return true;
     }
 
-    private void showFriendList(Player recipient, PlayerTable table) {
-        table.getFriendsAsync(recipient.getUniqueId()).thenApply((friends) -> {
+    private void showFriendList(Player recipient, FriendsTable table) {
+        table.getFriendLinksAsync(recipient.getUniqueId(), true).thenApply((friends) -> {
             if(friends != null && friends.size() > 0) {
-                recipient.sendMessage(getNiceFriendList(friends));
                 recipient.openInventory(FriendsMenuListener.createFriendsMenu(getNamesFromUUIDs(friends)));
             }
             else recipient.sendMessage(ChatColor.RED + "No friends added.");
@@ -67,13 +68,13 @@ public class FriendCommand extends BukkitCommand {
         });
     }
 
-    private void removeFriendFromPlayer(Player sender, String targetIGN, PlayerTable table) {
+    private void removeFriendFromPlayer(Player sender, String targetIGN, FriendsTable table) {
         OfflinePlayer target = Bukkit.getOfflinePlayer(targetIGN);
         if(target == null || target.getName().equals(sender.getName())) return;
 
-        table.hasFriendAsync(target.getUniqueId(), sender.getUniqueId()).thenApply((hasFriend) -> {
+        table.hasFriendLinkAsync(target.getUniqueId(), sender.getUniqueId()).thenApply((hasFriend) -> {
             if (hasFriend) {
-                table.removeFriend(target.getUniqueId(), sender.getUniqueId());
+                table.removeFriendLink(target.getUniqueId(), sender.getUniqueId());
                 sender.sendMessage(String.format("%sFriends> %s%s %sis no longer your friend!",
                         ChatColor.BLUE, ChatColor.YELLOW, target.getName(), ChatColor.GRAY));
             } else {
@@ -85,34 +86,21 @@ public class FriendCommand extends BukkitCommand {
 
     }
 
-    private void addFriendToPlayer(Player sender, String targetIGN, PlayerTable table) {
+    private void addFriendToPlayer(Player sender, String targetIGN, FriendsTable table) {
         OfflinePlayer target = Bukkit.getOfflinePlayer(targetIGN);
         if(target == null || target.getName().equals(sender.getName())) return;
 
-        table.hasFriendAsync(target.getUniqueId(), sender.getUniqueId()).thenApply((hasFriend) -> {
+        table.hasFriendLinkAsync(target.getUniqueId(), sender.getUniqueId()).thenApply((hasFriend) -> {
             if (hasFriend) {
                 sender.sendMessage(String.format("%sFriends> %sYou are already friends with %s%s%s!",
                         ChatColor.BLUE, ChatColor.GRAY, ChatColor.YELLOW, target.getName(), ChatColor.GRAY));
             } else {
-                table.addFriend(target.getUniqueId(), sender.getUniqueId());
+                table.addFriendLink(target.getUniqueId(), sender.getUniqueId(), true);
                 sender.sendMessage(String.format("%sFriends> %s%s %sis now your friend!",
                         ChatColor.BLUE, ChatColor.YELLOW, target.getName(), ChatColor.GRAY));
             }
             return true;
         });
-    }
-
-    private String getNiceFriendList(Set<UUID> uuids) {
-        Set<String> friendNames = getNamesFromUUIDs(uuids);
-
-        StringBuilder builder = new StringBuilder();
-        builder.append("[ ");
-        for(String name : friendNames) {
-            builder.append(name).append(" ");
-        }
-        builder.append("]");
-
-        return builder.toString();
     }
 
     private Set<String> getNamesFromUUIDs(Set<UUID> uuids) {

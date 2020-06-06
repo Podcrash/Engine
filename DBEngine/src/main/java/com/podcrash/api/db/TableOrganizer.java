@@ -50,6 +50,7 @@ public final class TableOrganizer {
                 new RanksTable(),
                 new MapTable(),
                 new EconomyTable(),
+                new FriendsTable(),
                 loader
         };
         process(tables);

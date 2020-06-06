@@ -9,7 +9,8 @@ public enum DataTableType {
     PERMISSIONS(RanksTable.class),
     MAPS(MapTable.class),
     WORLDS(WorldLoader.class),
-    ECONOMY(EconomyTable.class)
+    ECONOMY(EconomyTable.class),
+    FRIENDS(FriendsTable.class)
     ;
 
     private Class<? extends ITable> table;
