@@ -6,7 +6,6 @@ public enum ItemType {
     SHOVEL("SPADE"),
     BOW("BOW"),
     PICKAXE("PICKAXE"),
-    TNT("TNT"),
     NULL(null);
     private String name;
 
