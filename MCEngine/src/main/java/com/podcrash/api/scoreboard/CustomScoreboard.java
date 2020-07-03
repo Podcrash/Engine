@@ -86,6 +86,10 @@ public class CustomScoreboard implements IScoreboard {
         for (int i = 0; i < size && i < lines.size(); i++) {
             setLine(size - i, lines.get(i));
         }
+
+        for (int i = lines.size(); i < size; i++) {
+            setLine(size - i, "");
+        }
     }
 
     public void destroyScoreboard() {

@@ -45,9 +45,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @see GameManager
@@ -196,6 +194,11 @@ public class GameListener extends ListenerBase {
             SoundPlayer.sendSound(player, "fireworks.launch", 1F, 63);
         }
         WorldManager.getInstance().unloadWorld(e.getGame().getGameWorld().getName());
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void remakeGame(GameEndEvent e) {
+        GameManager.createCurrentGame();
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

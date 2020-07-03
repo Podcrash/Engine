@@ -2,6 +2,7 @@ package com.podcrash.api.listeners;
 
 import com.podcrash.api.game.Game;
 import com.podcrash.api.game.GameManager;
+import com.podcrash.api.game.GameState;
 import com.podcrash.api.game.TeamEnum;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -22,6 +23,7 @@ public class GameLobbyListener extends ListenerBase {
     @EventHandler
     public void clickBeacon(PlayerInteractEvent event) {
         ItemStack itemStack = event.getPlayer().getItemInHand();
+        if (GameManager.getGame() == null || GameManager.getGame().getGameState() != GameState.LOBBY) return;
         if(itemStack.getType() == Material.WOOL && GameManager.hasPlayer(event.getPlayer())) {
             if(itemStack.getData() instanceof Wool) {
                 event.setCancelled(true);

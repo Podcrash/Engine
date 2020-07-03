@@ -1,6 +1,5 @@
 package com.podcrash.api.damage;
 
-import com.comphenix.protocol.PacketType;
 import com.packetwrapper.abstractpackets.WrapperPlayServerEntityStatus;
 import com.podcrash.api.effect.status.StatusApplier;
 import com.podcrash.api.events.DamageApplyEvent;
@@ -12,6 +11,7 @@ import com.podcrash.api.game.Game;
 import com.podcrash.api.game.GameManager;
 import com.podcrash.api.game.GameState;
 import com.podcrash.api.sound.SoundPlayer;
+import com.podcrash.api.sound.SoundWrapper;
 import com.podcrash.api.util.PacketUtil;
 import com.podcrash.api.plugin.PodcrashSpigot;
 import com.podcrash.api.util.ReflectionUtil;
@@ -30,8 +30,6 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 
 public final class DamageQueue implements Runnable {
@@ -153,8 +151,8 @@ public final class DamageQueue implements Runnable {
             if (!e.isCancelled()) {
                 PodcrashSpigot.debugLog("Dropping loot!");
                 Bukkit.getScheduler().runTask(PodcrashSpigot.getInstance(), () -> {
-                    ReflectionUtil.runMethod(craftLiving, craftLiving.getClass().getName(), "dropDeathLoot", Void.class, new Class[]{boolean.class, int.class}, true, 1);
-                    ReflectionUtil.runMethod(craftLiving, craftLiving.getClass().getName(),"dropEquipment", Void.class, new Class[] {boolean.class, int.class}, true, 1);
+                    ReflectionUtil.runNMSMethod(craftLiving, craftLiving.getClass().getName(), "dropDeathLoot", Void.class, new Class[]{boolean.class, int.class}, true, 1);
+                    ReflectionUtil.runNMSMethod(craftLiving, craftLiving.getClass().getName(),"dropEquipment", Void.class, new Class[] {boolean.class, int.class}, true, 1);
 
 
                 });
@@ -182,14 +180,14 @@ public final class DamageQueue implements Runnable {
             if (!(entity instanceof Player))
                 entity.setHealth(0);
 
-            String deathSound = ReflectionUtil.runMethod(craftLiving, craftLiving.getClass().getName(),"bp", String.class);
+            String deathSound = ReflectionUtil.runNMSMethod(craftLiving, craftLiving.getClass().getName(),"bp", String.class);
             SoundPlayer.sendSound(entity.getLocation(), deathSound, 1, 75);
             die(entity);
             return true;
         } else {
             entity.setHealth(nowHealth);
             if (!(entity instanceof Player)) {
-                String hurtSound = ReflectionUtil.runMethod(craftLiving, craftLiving.getClass().getName(),"bo", String.class);
+                String hurtSound = ReflectionUtil.runNMSMethod(craftLiving, craftLiving.getClass().getName(),"bo", String.class);
                 SoundPlayer.sendSound(entity.getLocation(), hurtSound, 1, 75);
             }
         }
@@ -325,9 +323,15 @@ public final class DamageQueue implements Runnable {
 
         Bukkit.getPluginManager().callEvent(sound);
         //By default, the sound is null, but if we want to make another sound, do so.
-        if (sound.isCancelled() || sound.getSound() == null || !sound.getSound().isValid())
+        if (sound.isCancelled())
             return;
-        SoundPlayer.sendSound(victim.getLocation(), sound.getSound());
+        SoundWrapper soundWrapper = sound.getSound();
+        if (soundWrapper == null || !sound.getSound().isValid()) {
+            EntityLiving craftLiving = ((CraftLivingEntity) victim).getHandle();
+            String hurtSound = ReflectionUtil.runNMSMethod(craftLiving, craftLiving.getClass().getName(),"bo", String.class);
+            soundWrapper = new SoundWrapper(hurtSound, 1, 75);
+        }
+        SoundPlayer.sendSound(victim.getLocation(), soundWrapper);
     }
 
     private double[] findVectorModifiers(double[] velocity, Cause cause, double damage) {

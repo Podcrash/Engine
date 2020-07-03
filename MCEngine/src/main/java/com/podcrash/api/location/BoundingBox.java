@@ -71,6 +71,10 @@ public class BoundingBox {
         max = new Coordinate(bb.d,bb.e,bb.f);
     }
 
+    public AxisAlignedBB getNMSBox() {
+        return new AxisAlignedBB(min.getX(), min.getY(), min.getZ(), max.getX(), max.getY(), max.getZ());
+    }
+
     public Coordinate midPoint(){
         return max.add(min).multiply(0.5);
     }

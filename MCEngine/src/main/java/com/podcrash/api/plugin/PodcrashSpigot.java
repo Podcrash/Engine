@@ -1,5 +1,8 @@
 package com.podcrash.api.plugin;
 
+import com.google.common.reflect.ClassPath;
+import com.podcrash.api.annotations.GameData;
+import com.podcrash.api.annotations.GamePlugin;
 import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.db.pojos.Rank;
 import com.podcrash.api.db.redis.Communicator;
@@ -10,6 +13,9 @@ import com.podcrash.api.commands.*;
 import com.podcrash.api.damage.DamageQueue;
 import com.podcrash.api.economy.EconomyHandler;
 import com.podcrash.api.effect.particle.ParticleRunnable;
+import com.podcrash.api.game.Game;
+import com.podcrash.api.game.GameContainer;
+import com.podcrash.api.game.GameManager;
 import com.podcrash.api.kits.KitPlayerManager;
 import com.podcrash.api.listeners.*;
 import com.podcrash.api.tracker.CoordinateTracker;
@@ -27,9 +33,14 @@ import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.permissions.PermissionAttachment;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.reflections.Reflections;
 import org.spigotmc.SpigotConfig;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Field;
 import java.util.*;
@@ -83,6 +94,25 @@ public class PodcrashSpigot extends PodcrashPlugin {
         configurators.put(identifier, new Configurator(this, identifier));
     }
 
+    public void extractGameClasses() throws IOException, ClassNotFoundException {
+        for (Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
+            if (!plugin.getClass().isAnnotationPresent(GamePlugin.class)) continue;
+            //me.raindance.champions + .game
+            //me.flaymed.islands + .game
+            String packageName = plugin.getClass().getPackage().getName() + ".game";
+            ClassPath cp = ClassPath.from(plugin.getClass().getClassLoader());
+            Set<ClassPath.ClassInfo> infos = cp.getTopLevelClasses(packageName);
+            for (ClassPath.ClassInfo info : infos) {
+                debugLog(info.getName());
+                Class<?> gameClass = Class.forName(info.getName());
+                GameData data = gameClass.getAnnotation(GameData.class);
+                if (data == null)
+                    continue;
+                GameContainer container = new GameContainer((Class<? extends Game>) gameClass, (JavaPlugin) plugin);
+                GameManager.addGameClass(data, container);
+            }
+        }
+    }
     /**
      * This method is used to start setting up the game servers
      */
@@ -91,12 +121,7 @@ public class PodcrashSpigot extends PodcrashPlugin {
         setKnockback();
         registerGameListeners();
 
-        DamageQueue.active = true;
-        BukkitTask task = Bukkit.getScheduler().runTaskTimerAsynchronously(this, new DamageQueue(), 0, 0);
-        dQInt = task.getTaskId();
         trackers = new ArrayList<>();
-        addTracker(coordinateTracker = new CoordinateTracker(this));
-        addTracker(vectorTracker = new VectorTracker(this));
 
 
     }
@@ -115,6 +140,7 @@ public class PodcrashSpigot extends PodcrashPlugin {
     }
     @Override
     public void onEnable() {
+        long startTime = System.currentTimeMillis();
         INSTANCE = this;
         ReflectionUtil.initiate();
         getLogger().info("Starting PodcrashSpigot!");
@@ -150,10 +176,28 @@ public class PodcrashSpigot extends PodcrashPlugin {
         ParticleRunnable.start();
         PlayerCache.packetUpdater();
 
+        DamageQueue.active = true;
+        BukkitTask task = Bukkit.getScheduler().runTaskTimerAsynchronously(this, new DamageQueue(), 0, 0);
+        dQInt = task.getTaskId();
 
         Communicator.readyGameLobby();
-        if (Communicator.isGameLobby())
+        if (Communicator.isGameLobby()) {
+            try {
+                extractGameClasses();
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
             gameStart();
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    GameManager.createRandomGame();
+                }
+            }.runTask(this);
+        }
+
+
+        PodcrashSpigot.debugLog("ENGINE ENDTIME: " + (System.currentTimeMillis() - startTime));
     }
 
     @Override
@@ -215,6 +259,7 @@ public class PodcrashSpigot extends PodcrashPlugin {
         debugLog("Extra Horizontal: " + SpigotConfig.knockbackExtraHorizontal);
         debugLog("Extra Vertical: " + SpigotConfig.knockbackExtraVertical);
     }
+
     private void registerListeners() {
         new ActionBlockListener(this);
         new BaseChatListener(this);
@@ -267,6 +312,7 @@ public class PodcrashSpigot extends PodcrashPlugin {
         registerCommand(new IncreaseMaxPlayersCommand());
         registerCommand(new DecreaseMaxPlayersCommand());
         registerCommand(new WhitelistCommand());
+        registerCommand(new GameCommand());
     }
 
     public Configurator getConfigurator(String identifier) {

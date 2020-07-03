@@ -58,7 +58,7 @@ public class SpigotJoinListener extends ListenerBase {
         PodcrashSpigot spigot = PodcrashSpigot.getInstance();
         Logger log = spigot.getLogger();
         Player player = event.getPlayer();
-        log.info("34ewrf");
+        if (GameManager.getGame() != null) player.setScoreboard(GameManager.getGame().getGameScoreboard().getBoard());
         if(Communicator.isGameLobby()) { // this check might not be needed anymore
             new HitDetectionInjector(player).injectHitDetection();
         }
@@ -74,7 +74,6 @@ public class SpigotJoinListener extends ListenerBase {
         PodcrashSpigot.getInstance().setupPermissions(player);
 
         setUpHostPermissions(player);
-        if (GameManager.getGame() != null) player.setScoreboard(GameManager.getGame().getGameScoreboard().getBoard());
     }
 
     private void fixDoubleDamage(Player player) {

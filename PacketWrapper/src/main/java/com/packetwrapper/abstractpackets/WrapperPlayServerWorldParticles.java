@@ -25,6 +25,8 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
+import java.util.Arrays;
+
 public class WrapperPlayServerWorldParticles extends AbstractPacket implements ILocationPacket {
     public static final PacketType TYPE = PacketType.Play.Server.WORLD_PARTICLES;
 
@@ -261,5 +263,23 @@ public class WrapperPlayServerWorldParticles extends AbstractPacket implements I
      */
     public void setData(int[] value) {
         handle.getIntegerArrays().write(0, value);
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("WrapperPlayServerWorldParticles{");
+        sb.append("particleType=").append(getParticleType());
+        sb.append(", x=").append(getX());
+        sb.append(", y=").append(getY());
+        sb.append(", z=").append(getZ());
+        sb.append(", offsetX=").append(getOffsetX());
+        sb.append(", offsetY=").append(getOffsetY());
+        sb.append(", offsetZ=").append(getOffsetZ());
+        sb.append(", particleData=").append(getParticleData());
+        sb.append(", numberOfParticles=").append(getNumberOfParticles());
+        sb.append(", longDistance=").append(getLongDistance());
+        sb.append(", data=").append(Arrays.toString(getData()));
+        sb.append('}');
+        return sb.toString();
     }
 }

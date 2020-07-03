@@ -60,6 +60,7 @@ public class GameDamagerConverterListener extends ListenerBase {
         arrowDamageMap.remove(arrow.getEntityId());
     }
 
+
     /**
      * Pass arrows to the original user
      */

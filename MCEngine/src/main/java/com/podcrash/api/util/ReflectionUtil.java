@@ -1,9 +1,9 @@
 package com.podcrash.api.util;
 
-import com.podcrash.api.plugin.PodcrashSpigot;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -36,7 +36,7 @@ public final class ReflectionUtil {
      * @param <V>
      * @return
      */
-    public static <T, V> V runMethod(T object, String className, String methodName, Class<V> outputClass) {
+    public static <T, V> V runNMSMethod(T object, String className, String methodName, Class<V> outputClass) {
         Class<?> clazz = null;
         try {
             String name = !className.contains(nmsPrefix) ? nmsPrefix + className : className;
@@ -63,13 +63,12 @@ public final class ReflectionUtil {
                 e.printStackTrace();
                 return null;
             }
-            return runMethod(object, superClass.getName(), methodName, outputClass);
+            return runNMSMethod(object, superClass.getName(), methodName, outputClass);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
         return null;
     }
-
     /*
     public static class MethodReflector<T> {
         private final Method method;
@@ -88,9 +87,9 @@ public final class ReflectionUtil {
     }
 
  */
-    public static <T, V> V runMethod(T object, String className, String methodName, Class<V> outputClass, Class[] paramClasses, Object... parameters) {
+    public static <T, V> V runNMSMethod(T object, String className, String methodName, Class<V> outputClass, Class[] paramClasses, Object... parameters) {
         if (parameters.length == 0)
-            return runMethod(object, className, methodName, outputClass);
+            return runNMSMethod(object, className, methodName, outputClass);
         Class<?> clazz;
         try {
             String name = !className.contains(nmsPrefix) ? nmsPrefix + className : className;
@@ -116,10 +115,30 @@ public final class ReflectionUtil {
                 e.printStackTrace();
                 return null;
             }
-            return runMethod(object, superClass.getName(), methodName, outputClass, paramClasses, parameters);
+            return runNMSMethod(object, superClass.getName(), methodName, outputClass, paramClasses, parameters);
         } catch (IllegalArgumentException| InvocationTargetException| IllegalAccessException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static <T> T constructor(Class<T> clazz) {
+        try {
+            Constructor<T> constructor = clazz.getConstructor();
+            return constructor.newInstance();
+        }catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static <T> T constructor(Class<T> clazz, Class<?>[] paramTypes, Object... objects) {
+        try {
+            Constructor<T> constructor = clazz.getConstructor(paramTypes);
+            return constructor.newInstance(objects);
+        }catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

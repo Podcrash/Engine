@@ -66,12 +66,10 @@ public class KitPlayerManager {
         //cp.skillsRead();
     }
     public void removeKitPlayer(KitPlayer cplayer) {
-        PodcrashSpigot.debugLog(cplayer + "");
         if (cplayer == null ||
                 !kitPlayer.containsKey(cplayer.getPlayer().getName())) return;
         Set<Skill> skills = cplayer.getSkills();
         Iterator<Skill> skillIterator = skills.iterator();
-        PodcrashSpigot.debugLog(String.format("%s Unregistering.", cplayer.getPlayer().getName()));
         while (skillIterator.hasNext()) {
             final Skill skill = skillIterator.next();
             HandlerList.unregisterAll(skill);

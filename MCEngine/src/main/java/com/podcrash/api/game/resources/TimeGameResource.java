@@ -9,7 +9,6 @@ import com.podcrash.api.time.resources.TimeResource;
  * This is used as helpers for games that have started.
  */
 public abstract class TimeGameResource extends GameResource implements TimeResource {
-
     private int ticks;
     private int delayTicks;
 

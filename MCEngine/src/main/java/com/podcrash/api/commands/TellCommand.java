@@ -33,7 +33,9 @@ public class TellCommand extends BukkitCommand {
             }
 
             String restOfMsg = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
-            p.sendMessage(String.format("[%s -> %s] %s", sender.getName(), targetName, restOfMsg));
+            String msg = String.format("[%s -> %s] %s", sender.getName(), targetName, restOfMsg);
+            p.sendMessage(msg);
+            sender.sendMessage(msg);
         }
         return true;
     }

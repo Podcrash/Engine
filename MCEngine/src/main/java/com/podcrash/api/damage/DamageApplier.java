@@ -63,9 +63,9 @@ public final class DamageApplier {
         a(livingVictim, livingDamager);
 
         double i = EnchantmentManager.a((EntityLiving) livingDamager);
-        if (i == 0) i = 2D/3D;
+        if (i == 0) i = 1D/2D;
         if (livingDamager.isSprinting())
-            i += i == 0 ? 1 : 1D/3D;
+            i += i == 0 ? 1 : 1D/2D;
 
         if (i > 0) {
             double angle = Math.toRadians(livingDamager.yaw);

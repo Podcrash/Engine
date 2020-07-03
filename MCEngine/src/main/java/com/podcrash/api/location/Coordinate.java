@@ -23,6 +23,8 @@ public class Coordinate {
     private final double pitch;
     private final boolean ground;
 
+    private final long timestamp;
+
     public static Coordinate fromLocation(Location location) {
         return new Coordinate(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
     }
@@ -51,6 +53,8 @@ public class Coordinate {
         this.yaw = yaw;
         this.pitch = pitch;
         this.ground = onGround;
+
+        this.timestamp = System.currentTimeMillis();
     }
     public Coordinate(double x, double y, double z, double yaw, double pitch) {
         this(x, y, z, yaw, pitch, false);
@@ -228,6 +232,7 @@ public class Coordinate {
                 ", z=" + z +
                 ", yaw=" + yaw +
                 ", pitch=" + pitch +
+                ", ground=" + ground +
                 '}' +
                 '\n';
     }

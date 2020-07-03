@@ -13,6 +13,8 @@ sourceCompatibility = 1.8
 dependencies {
     compileOnly fileTree("../../libs")
 
+    api "org.reflections:reflections:0.9.11"
+
     api project(path: ":Engine:DBEngine")
     api project(path: ":Engine:PacketWrapper")
     api 'com.grinderwolf:slimeworldmanager-api:2.1.1'

@@ -146,7 +146,7 @@ public abstract class Game implements IGame {
         if (this.input != null)
             this.input.unregister();
         this.input = input;
-        this.input.run(5);
+        this.input.runAsync(5, 0);
     }
 
     public Location spectatorSpawn() {

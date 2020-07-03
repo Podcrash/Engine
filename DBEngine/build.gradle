@@ -40,6 +40,7 @@ shadowJar {
 dependencies {
     compileOnly fileTree("../../libs")
 
+    implementation "org.reflections:reflections:0.9.11"
     implementation 'com.google.code.gson:gson:2.8.6'
 
     implementation 'org.bukkit:bukkit:1.8.8-R0.1-SNAPSHOT'
@@ -57,6 +58,15 @@ dependencies {
     implementation 'dev.morphia.morphia:core:1.5.8'
     implementation 'org.redisson:redisson:3.11.3'
 }
+
+test {
+    test.dependsOn(shadowJar)
+    useJUnitPlatform()
+    systemProperty "lobby.code", "dom1234132"
+
+    testLogging.showStandardStreams true
+}
+
 
 task spigot(dependsOn: shadowJar) {
 

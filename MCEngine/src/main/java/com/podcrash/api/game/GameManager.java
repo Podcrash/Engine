@@ -1,19 +1,27 @@
 package com.podcrash.api.game;
 
+import com.podcrash.api.annotations.GameData;
 import com.podcrash.api.db.TableOrganizer;
 import com.podcrash.api.db.tables.DataTableType;
 import com.podcrash.api.db.tables.MapTable;
+import com.podcrash.api.effect.status.Status;
+import com.podcrash.api.effect.status.StatusApplier;
 import com.podcrash.api.events.game.GameEndEvent;
 import com.podcrash.api.events.game.GameStartEvent;
 import com.podcrash.api.game.resources.GameResource;
 import com.podcrash.api.game.resources.TimeGameResource;
 import com.podcrash.api.game.scoreboard.GameLobbyScoreboard;
+import com.podcrash.api.kits.KitPlayerManager;
 import com.podcrash.api.plugin.PodcrashSpigot;
+import com.podcrash.api.util.ReflectionUtil;
 import org.apache.commons.lang.Validate;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.Scoreboard;
+import org.reflections.Reflections;
 
 import java.util.*;
 
@@ -21,7 +29,9 @@ import java.util.*;
  * Singleton - Handles games
  */
 public class GameManager {
+    private static final Map<String, GameContainer> gameContainers = new LinkedHashMap<>();
     private static int gameID = 0;
+    private static String currentGameName;
     private static Game currentGame;
 
     /*
@@ -48,6 +58,81 @@ public class GameManager {
         return gameID;
     }
 
+    public static void addGameClass(GameData data, GameContainer container) {
+        gameContainers.put(data.name().toLowerCase(), container);
+    }
+
+    public static Set<String> getPossibleGames() {
+        return gameContainers.keySet();
+    }
+    public static void createCurrentGame() {
+        createGame(currentGameName);
+    }
+    public static void createRandomGame() {
+        Random random = new Random();
+        Set<String> keys = gameContainers.keySet();
+        int randomIndex = random.nextInt(keys.size());
+        createGame(new ArrayList<>(keys).get(randomIndex));
+    }
+
+    public static void createGame(String gameName) {
+        //perhaps a gamecreateevent?
+        if (gameContainers.get(gameName) == null)
+            throw new IllegalStateException(gameName + "MUST BE a key in the gameContainers map");
+
+        GameContainer container = gameContainers.get(gameName);
+        Game game = ReflectionUtil.constructor(container.getGameClass(), new Class[]{int.class, String.class}, gameID, Long.toString(System.currentTimeMillis()));
+        Validate.notNull(game);
+        Validate.isTrue(game.getId() == gameID);
+        Game copy = destroyCurrentGame();
+        container.registerListeners();
+        if (copy != null)
+            game.setGameSettings(copy.getGameSettings());
+
+        currentGameName = gameName;
+        gameID++;
+        currentGame = game;
+
+        PodcrashSpigot spigot = PodcrashSpigot.getInstance();
+        boolean hasPPLOwner = spigot.hasPPLOwner();
+        Set<UUID> specUUIDs = game.getSpectators();
+
+        for(Player player : Bukkit.getOnlinePlayers()) {
+            boolean contains = specUUIDs.contains(player.getUniqueId());
+            if(hasPPLOwner && contains) {
+                game.addSpectator(player);
+            } else GameManager.addPlayer(player);
+            player.getInventory().setArmorContents(new ItemStack[]{null, null, null, null});
+            StatusApplier.getOrNew(player).removeStatus(Status.values());
+            KitPlayerManager.getInstance().removeKitPlayer(player);
+        }
+
+
+        game.createScoreboard();
+
+        MapTable table = TableOrganizer.getTable(DataTableType.MAPS);
+        Set<String> validMaps = new HashSet<>(table.getWorlds(game.getMode()));
+
+        int size = validMaps.size();
+        if (size == 0) return;
+        int item = new Random().nextInt(size);
+        int i = 0;
+        for(String map : validMaps) {
+            if (i == item) {
+                if (map == null) {
+                    item = new Random().nextInt(size);
+                } else {
+                    setGameMap(map);
+                    break;
+                }
+            }
+            i++;
+        }
+
+        //default lobby board
+        game.setScoreboardInput(new GameLobbyScoreboard(game, game.getGameScoreboard()));
+    }
+    @Deprecated
     public static void createGame(Game game) {
         if (currentGame != null)
             throw new RuntimeException("Making more than 1 game is ill-advised");
@@ -80,12 +165,17 @@ public class GameManager {
         game.setScoreboardInput(new GameLobbyScoreboard(game, game.getGameScoreboard()));
     }
 
-    public static void destroyCurrentGame() {
+    public static Game destroyCurrentGame() {
+        Game copy = currentGame;
         if (currentGame == null)
-            return;
+            return null;
         if (currentGame.getGameWorld() != null)
             Bukkit.unloadWorld(currentGame.getGameWorld(), false);
         currentGame = null;
+        if (currentGameName != null) {
+            HandlerList.unregisterAll(gameContainers.get(currentGameName).getPlugin());
+        }
+        return copy;
     }
     public static void setGameMap(String worldName) {
         currentGame.setGameWorld(worldName);

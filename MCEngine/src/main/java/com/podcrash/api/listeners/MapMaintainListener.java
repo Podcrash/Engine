@@ -33,15 +33,12 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.*;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.painting.PaintingBreakEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -148,10 +145,8 @@ public class MapMaintainListener extends ListenerBase {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onFood(FoodLevelChangeEvent e) {
-        PodcrashSpigot.debugLog("1");
         if (isSpawnWorld(e.getEntity().getWorld())) {
             e.setFoodLevel(20);
-            PodcrashSpigot.debugLog("2");
         }
     }
 
@@ -238,8 +233,8 @@ public class MapMaintainListener extends ListenerBase {
         if (afterHealth <= 0 && !(p instanceof Player)) {
             Bukkit.getPluginManager().callEvent(new DeadEntityEvent(p, cause));
             EntityLiving living = ((CraftLivingEntity) p).getHandle();
-            ReflectionUtil.runMethod(living, living.getClass().getName(), "dropDeathLoot", Void.class, new Class[]{boolean.class, int.class}, true, 1);
-            ReflectionUtil.runMethod(living, living.getClass().getName(),"dropEquipment", Void.class, new Class[] {boolean.class, int.class}, true, 1);
+            ReflectionUtil.runNMSMethod(living, living.getClass().getName(), "dropDeathLoot", Void.class, new Class[]{boolean.class, int.class}, true, 1);
+            ReflectionUtil.runNMSMethod(living, living.getClass().getName(),"dropEquipment", Void.class, new Class[] {boolean.class, int.class}, true, 1);
         }
     }
 
@@ -255,6 +250,7 @@ public class MapMaintainListener extends ListenerBase {
         double health = victim.getHealth() - damage;
         if (health < 0 && victim instanceof Player)
             fakeDie((Player) victim);
+        if (health > victim.getMaxHealth()) health = victim.getMaxHealth();
         victim.setHealth((health < 0) ? 20 : health);
 
         WrapperPlayServerEntityStatus packet = new WrapperPlayServerEntityStatus();
@@ -264,13 +260,13 @@ public class MapMaintainListener extends ListenerBase {
         PacketUtil.syncSend(packet, victim.getWorld().getPlayers());
 
         EntityLiving craftLiving = ((CraftLivingEntity) victim).getHandle();
-        String hurtSound = ReflectionUtil.runMethod(craftLiving, craftLiving.getClass().getName(),"bo", String.class);
+        String hurtSound = ReflectionUtil.runNMSMethod(craftLiving, craftLiving.getClass().getName(),"bo", String.class);
         SoundPlayer.sendSound(victim.getLocation(), hurtSound, 1, 75);
 
     }
 
     private void fakeDie(Player p) {
-        DamageQueue.artificialDie((Player) p);
+        DamageQueue.artificialDie(p);
         DropDeathLootEvent e = new DropDeathLootEvent(p);
         Bukkit.getPluginManager().callEvent(e);
         if (e.isCancelled())
